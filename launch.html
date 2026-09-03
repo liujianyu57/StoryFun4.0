@@ -103,12 +103,20 @@
     .fee-cell { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
     .fee-cell .k { font-size: 11px; color: var(--text-3); }
     .fee-cell .v { font-size: 15px; font-weight: 700; margin-top: 3px; }
-    .adv-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 0 4px; border: none; background: none; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
-    .adv-toggle:hover { color: var(--text); }
-    .adv-body { display: none; padding-top: 4px; }
-    .adv-body.open { display: block; }
-    .adv-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; }
-    .adv-row .lbl { font-size: 13px; }
+    .adv-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0 4px; }
+    .adv-toggle {
+      display: flex; align-items: center; justify-content: space-between; width: 100%;
+      padding: 10px 0; border: none; background: none;
+      font-size: 13px; font-weight: 700; color: var(--text);
+      cursor: pointer;
+    }
+    .adv-toggle:hover { opacity: .75; }
+    .adv-toggle svg { transition: transform .18s; color: var(--text-3); }
+    .adv-body { padding-top: 2px; }
+    .adv-toggle.closed + .adv-body { display: none; }
+    .adv-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--border-light, #F0F1F3); }
+    .adv-row:first-child { border-top: none; }
+    .adv-row .lbl { font-size: 13px; font-weight: 500; }
     .adv-row .lbl small { display: block; font-size: 11px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
     .adv-row .ctrl { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
     .tax-val { font-size: 12px; font-weight: 700; width: 28px; text-align: right; }
@@ -283,9 +291,10 @@
                 <div class="fee-cell"><div class="k">交易费</div><div class="v num">1%</div></div>
                 <div class="fee-cell"><div class="k">创作者税</div><div class="v num" id="feeCreator">0%</div></div>
               </div>
+              <hr class="adv-divider" />
               <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
                 <span>高级设置</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                <svg id="advArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
               </button>
               <div class="adv-body" id="advBody">
                 <div class="adv-row">
@@ -550,8 +559,11 @@
 
     // ---- 高级 ----
     function toggleAdv() {
+      var btn = document.getElementById('advToggle');
       var body = document.getElementById('advBody');
-      body.classList.toggle('open');
+      btn.classList.toggle('closed');
+      var arrow = document.getElementById('advArrow');
+      if (arrow) arrow.style.transform = btn.classList.contains('closed') ? 'rotate(-90deg)' : '';
     }
     function onTax() {
       var v = document.getElementById('taxRange').value;
