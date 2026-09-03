@@ -409,7 +409,10 @@
       document.getElementById('cdTags').innerHTML =
         '<span class="tag">' + (coin.sourceType === 'ai' ? 'AI 叙事' : '短剧作品') + '</span>' +
         (coin.isNew ? '<span class="tag tag-gold">NEW</span>' : '') +
-        (coin.graduated ? '<span class="tag tag-up">已毕业</span>' : '<span class="tag">curve</span>');
+        (coin.graduated ? '<span class="tag tag-up">已毕业</span>' : '<span class="tag">curve</span>') +
+        (coin.creatorTaxPct ? '<span class="tag">Creator tax ' + coin.creatorTaxPct + '%</span>' : '') +
+        (coin.shareToHolders ? '<span class="tag tag-gold">费共享</span>' : '') +
+        (coin.social && (coin.social.x || coin.social.tg) ? '<span class="tag" style="cursor:pointer" onclick="openSocial()">↗ 社区</span>' : '');
       // 叙事文案
       document.getElementById('storyDesc').textContent = coin.tagline || '这个币还没有简介';
       var src = '';
@@ -423,6 +426,14 @@
     function goSource() {
       if (coin.video) playStory();
       else Launch.toast('叙事预览暂不可用', 'warn');
+    }
+    function openSocial() {
+      if (!coin.social) return;
+      var s = coin.social;
+      var parts = [];
+      if (s.x) parts.push('x.com/' + s.x);
+      if (s.tg) parts.push('t.me/' + s.tg);
+      Launch.toast(parts.length ? ('社区: ' + parts.join(' · ')) : '该币暂未设置社区链接', parts.length ? 'ok' : 'warn');
     }
     function copyText(t) {
       if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {});

@@ -37,6 +37,7 @@
     tx: []                     // 我的交易历史
   };
   var STORE_KEY = 'storyfun_launch_v1';
+  var SCHEMA_VERSION = 2;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -78,6 +79,10 @@
       poolUsd: pool0,                      // curve/池 收集金额
       change24h: o.change24h,
       isNew: o.isNew || false,
+      // 创建页扩展字段
+      social: o.social || null,          // {x, tg}
+      creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
+      shareToHolders: !!o.shareToHolders,  // 是否将 creator 费分给持有者
       // 演示静态 K 线（svg 折线用 0..1 归一化）
       spark: o.spark || [0.3, 0.4, 0.35, 0.5, 0.6, 0.55, 0.7, 0.8, 0.9]
     };
@@ -109,7 +114,9 @@
       id: 'c_feng', name: '凤骨琉璃', symbol: 'FENGGU', tagline: '琉璃易碎，凤骨不折。',
       creator: '林晚棠', creatorAddr: '0x7A2b…fD81', cover: IMG.feng, video: VID.feng, sourceType: 'work', sourceTitle: '短剧《凤骨琉璃》',
       priceUsd: 0.0009, holders: 2841, volumeUsd: 124000, launchedAt: D(52), graduated: false, progress: 0.94,
-      poolUsd: 12650, change24h: 0.42, spark: [0.2, 0.35, 0.3, 0.45, 0.6, 0.72, 0.8, 0.94]
+      poolUsd: 12650, change24h: 0.42, spark: [0.2, 0.35, 0.3, 0.45, 0.6, 0.72, 0.8, 0.94],
+      social: { x: 'lintang_fenggu', tg: 'fenggu_official' },
+      creatorTaxPct: 2,
     }),
     seedCoin({
       id: 'c_cheng', name: '丞相府今日开饭', symbol: 'XIANG', tagline: '天下粮仓，开饭为敬。',
@@ -127,7 +134,10 @@
       id: 'c_mooncat', name: '月球打碟猫', symbol: 'MOONCAT', tagline: '一只穿西装的猫，在月球打碟。',
       creator: 'Astra', creatorAddr: '0xE45b…77c9', cover: IMG.zero, video: VID.fight, sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.000042, holders: 318, volumeUsd: 12000, launchedAt: D(3), graduated: false, progress: 0.12,
-      poolUsd: 890, change24h: 2.31, isNew: true, spark: [0.4, 0.6, 0.5, 0.8, 0.7, 1]
+      poolUsd: 890, change24h: 2.31, isNew: true, spark: [0.4, 0.6, 0.5, 0.8, 0.7, 1],
+      social: { x: 'mooncat_eth', tg: '' },
+      creatorTaxPct: 1,
+      shareToHolders: true,
     }),
     seedCoin({
       id: 'c_candle', name: '烛火与王冠', symbol: 'CANDLE', tagline: '在权力的烛光里，谁先燃尽。',
@@ -139,7 +149,9 @@
       id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。',
       creator: 'Noah', creatorAddr: '0x57C9…f1a3', cover: IMG.survivor, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.00018, holders: 2304, volumeUsd: 88000, launchedAt: D(40), graduated: true, gradAt: D(21),
-      poolUsd: 15400, change24h: -0.24, spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5]
+      poolUsd: 15400, change24h: -0.24, spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5],
+      social: { x: 'noah_survive', tg: 'noah_bunker' },
+      creatorTaxPct: 3,
     }),
     seedCoin({
       id: 'c_zero', name: '零点计划', symbol: 'ZERO', tagline: '世界重置前的最后一分钟。',
@@ -178,11 +190,17 @@
     return null;
   }
   var persisted = load();
-  if (persisted) { USER = persisted.user; SEED = persisted.coins; }
+  // 版本一致才恢复 coins（避免旧缓存种子缺新字段）；user 始终恢复
+  if (persisted) {
+    USER = persisted.user;
+    if (persisted.v === SCHEMA_VERSION && Array.isArray(persisted.coins) && persisted.coins.length) {
+      SEED = persisted.coins;
+    }
+  }
 
   function persist() {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ user: USER, coins: SEED }));
+      localStorage.setItem(STORE_KEY, JSON.stringify({ v: SCHEMA_VERSION, user: USER, coins: SEED }));
     } catch (e) {}
   }
   // 登录态联动：auth.js 若已登录，保持同一 userId（演示简化，不强制）
@@ -361,7 +379,15 @@
   }
   function addFee(coin, feeUsd) {
     if (USER.created.indexOf(coin.id) !== -1) {
-      USER.claimable[coin.id] = (USER.claimable[coin.id] || 0) + feeUsd * K.creatorShare;
+      // 创作者税（创建页设置的额外比例）归创作者；若开启共享则进入持有者分红池
+      var taxShare = coin.creatorTaxPct ? (feeUsd * 0.01 * coin.creatorTaxPct) : 0;
+      var baseShare = feeUsd * K.creatorShare;
+      if (coin.shareToHolders) {
+        // 共享模式：基础分成与税均进入持有者分红（原型从简：计入 claimable，由"持有者"身份领取演示）
+        USER.claimable[coin.id] = (USER.claimable[coin.id] || 0) + baseShare * 0.5 + taxShare;
+      } else {
+        USER.claimable[coin.id] = (USER.claimable[coin.id] || 0) + baseShare + taxShare;
+      }
     }
     // 协议侧（buyback）— 演示不展开
   }
@@ -461,7 +487,10 @@
       sourceType: data.sourceType || 'ai', sourceTitle: data.sourceTitle || '',
       priceUsd: data.priceUsd || 0.0001, holders: 1, volumeUsd: 0,
       launchedAt: Date.now(), graduated: false, progress: 0.001, poolUsd: 0,
-      change24h: 0, isNew: true, spark: [0.05]
+      change24h: 0, isNew: true, spark: [0.05],
+      social: data.social || null,
+      creatorTaxPct: data.creatorTaxPct || 0,
+      shareToHolders: !!data.shareToHolders
     });
     // 发行费
     USER.eth -= usdToEth(K.launchFeeUsd + (data.sourceType === 'ai' ? K.genFeeUsd : 0));
