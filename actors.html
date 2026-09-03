@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story.fun | IP 市场</title>
+  <style>
+    :root { --bg: #f7fbff; --surface: #ffffff; --accent: #000000; --accent-soft: rgba(0, 0, 0, 0.16); --text: #1a232f; --text-muted: #657586; --border: #e6eff7; --shadow: 0 20px 45px rgba(27, 45, 71, 0.08); font-family: "Segoe UI", Roboto, "PingFang SC", "Helvetica Neue", Arial, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+    .app-shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+
+    /* ═══ Auth ═══ */
+    .auth-container { display: flex; align-items: center; }
+    .auth-login-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+    .auth-login-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .auth-login-icon { font-size: 1rem; }
+    .auth-user-menu { position: relative; }
+    .auth-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 2px solid var(--accent-soft); transition: border-color 0.2s; position: relative; flex-shrink: 0; }
+    .auth-avatar:hover { border-color: var(--accent); }
+    .auth-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .auth-avatar-dot { display: none; }
+    .auth-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 40px rgba(27,45,71,0.15); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.25s ease; z-index: 100; overflow: hidden; }
+    .auth-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .auth-dropdown-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
+    .auth-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .auth-dropdown-name { font-weight: 600; font-size: 0.92rem; color: var(--text); }
+    .auth-dropdown-wallet { font-size: 0.78rem; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
+    .auth-dropdown-divider { height: 1px; background: var(--border); margin: 0; }
+    .auth-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: var(--text); text-decoration: none; font-size: 0.9rem; transition: background 0.15s; cursor: pointer; }
+    .auth-dropdown-item:hover { background: rgba(0,0,0,0.03); }
+    .auth-dropdown-item span { font-size: 1.1rem; }
+    .auth-dropdown-logout { color: #f45b69; }
+    .auth-dropdown-logout:hover { background: rgba(244,91,105,0.06); }
+    .auth-modal-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .auth-modal-overlay.active { opacity: 1; visibility: visible; }
+    .auth-modal { background: var(--surface); border-radius: 28px; width: 100%; max-width: 420px; box-shadow: 0 40px 80px rgba(27,45,71,0.2); overflow: hidden; transform: scale(0.95) translateY(10px); transition: transform 0.3s ease; }
+    .auth-modal-overlay.active .auth-modal { transform: scale(1) translateY(0); }
+    .auth-modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.04); cursor: pointer; display: grid; place-items: center; font-size: 1.1rem; color: var(--text-muted); transition: all 0.2s; z-index: 1; }
+    .auth-modal-close:hover { background: rgba(0,0,0,0.08); color: var(--text); }
+    .auth-modal-header { text-align: center; padding: 36px 28px 20px; position: relative; }
+    .auth-modal-logo { width: 56px; height: 56px; border-radius: 50%; background: #000000; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 1.3rem; margin: 0 auto 16px; box-shadow: 0 4px 16px rgba(0, 0, 0,0.3); }
+    .auth-modal-header h2 { margin: 0 0 6px; font-size: 1.4rem; }
+    .auth-modal-header p { margin: 0; color: var(--text-muted); font-size: 0.92rem; }
+    .auth-modal-body { padding: 8px 28px 32px; display: flex; flex-direction: column; gap: 12px; }
+    .auth-social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius:999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .auth-social-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .auth-social-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 0.85rem; margin: 4px 0; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .auth-wallet-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius:999px; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .auth-wallet-btn:hover { background: rgba(0, 0, 0,0.2); }
+    .auth-modal-tos { text-align: center; color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; margin: 4px 0 0; }
+    .auth-modal-tos a { color: var(--accent); text-decoration: none; }
+    .auth-modal-tos a:hover { text-decoration: underline; }
+    .auth-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 10000; background: rgba(26,35,47,0.95); backdrop-filter: blur(8px); color: #fff; padding: 14px 24px; border-radius: 14px; font-size: 0.92rem; box-shadow: 0 12px 40px rgba(27,45,71,0.25); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease; opacity: 0; pointer-events: none; max-width: 400px; text-align: center; font-weight: 500; }
+    .auth-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .button, .button-secondary { border: none; cursor: pointer; border-radius: 999px; padding: 12px 20px; font-size: 0.95rem; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
+    .button { background: var(--accent); color: #fff; font-weight: 600; }
+    .button-secondary { background: rgba(15, 22, 42, 0.05); color: var(--text); }
+
+
+    .banner-1 { background: linear-gradient(135deg, #e0f7ff 0%, #ffffff 100%); }
+    .banner-2 { background: linear-gradient(135deg, #ffe4e7 0%, #fff9fb 100%); }
+    .banner-3 { background: linear-gradient(135deg, #edeaff 0%, #f9f8ff 100%); }
+
+    /* ═══ Page Header ═══ */
+    .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 28px; margin-bottom: 28px; }
+    .page-header-left { display: flex; flex-direction: column; gap: 4px; }
+    .page-header-left h1 { margin: 0; font-size: 2rem; letter-spacing: -0.02em; line-height: 1.15; }
+    .page-header-left p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+    .page-header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 999px; border: none; background: var(--accent); color: #fff; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0,0.3); }
+
+    /* ═══ Search ═══ */
+    .search-wrapper { position: relative; margin-bottom: 24px; }
+    .search-input { width: 100%; padding: 12px 16px; border-radius: 999px; border: 1px solid var(--border); font-size: 1rem; }
+    .search-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 40px rgba(27,45,71,0.12); z-index: 50; overflow: hidden; display: none; }
+    .search-dropdown.show { display: block; }
+    .search-dropdown-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; transition: background 0.15s ease; text-decoration: none; color: var(--text); }
+    .search-dropdown-item:hover { background: var(--accent-soft); }
+    .search-dropdown-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .search-dropdown-item .sdi-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .search-dropdown-item .sdi-name { font-weight: 600; font-size: 0.9rem; }
+    .search-dropdown-item .sdi-sub { font-size: 0.78rem; color: var(--text-muted); }
+    .search-dropdown-item .sdi-collection { margin-left: auto; padding: 3px 10px; border-radius: 999px; background: rgba(0, 0, 0,.12); color: var(--accent); font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+    .search-dropdown-empty { padding: 20px 16px; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+
+    /* ═══ Sort bar ═══ */
+    .sort-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .sort-tag { padding: 8px 16px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; font-size: 0.9rem; cursor: pointer; transition: all 0.25s ease; user-select: none; }
+    .sort-tag:hover { background: rgba(0, 0, 0,0.2); }
+    .sort-tag.active { background: var(--accent); color: white; }
+    .sort-tag .s-arrow { display: inline-block; margin-left: 2px; opacity: 0.35; transition: opacity 0.2s ease; }
+    .sort-tag .s-arrow.active { opacity: 1; }
+
+    /* ═══ Price Tooltip ═══ */
+    .price-tooltip-overlay { position: fixed; inset: 0; z-index: 10000; display: none; align-items: center; justify-content: center; background: rgba(15,23,42,0.25); }
+    .price-tooltip-overlay.active { display: flex; }
+    .price-tooltip-box { background: #fff; border-radius: 20px; max-width: 560px; width: 94%; padding: 28px 24px 22px; box-shadow: 0 20px 60px rgba(15,23,42,0.15); text-align: center; }
+    .price-tooltip-box h3 { margin: 0 0 4px; font-size: 1.1rem; color: var(--text); }
+    .price-tooltip-box .price-tip-sub { margin: 0 0 10px; color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
+    .price-tooltip-box .button-secondary { padding: 8px 24px; font-size: 0.88rem; }
+    .price-curve-wrap { position: relative; margin: 0 auto 12px; width: 100%; max-width: 500px; }
+    .price-curve-wrap canvas { display: block; width: 100%; height: auto; border-radius: 12px; background: #fafdff; border: 1px solid var(--border); }
+    .price-curve-info { display: flex; justify-content: space-between; padding: 6px 8px 0; font-size: 0.72rem; color: var(--text-muted); }
+    .price-curve-legend { display: flex; justify-content: center; gap: 18px; margin: -2px 0 10px; font-size: 0.72rem; color: var(--text-muted); }
+    .price-curve-legend span { display: flex; align-items: center; gap: 4px; }
+    .price-curve-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+    .price-curve-legend .dot.current { background: var(--accent); }
+    .price-curve-legend .dot.curve { background: #e65100; }
+    .price-curve-formula { font-size: 0.78rem; color: var(--text-muted); background: var(--bg); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; line-height: 1.5; }
+    .price-curve-formula code { font-family: inherit; font-weight: 600; color: var(--accent); }
+
+    /* ═══ Stat Tooltip ═══ */
+    .stat-tooltip-overlay { position: fixed; inset: 0; z-index: 999; display: none; align-items: center; justify-content: center; background: rgba(15,23,42,0.25); }
+    .stat-tooltip-overlay.active { display: flex; }
+    .stat-tooltip-box { background: #fff; border-radius: 20px; max-width: 360px; width: 90%; padding: 28px 24px 22px; box-shadow: 0 20px 60px rgba(15,23,42,0.15); text-align: center; }
+    .stat-tooltip-box h3 { margin: 0 0 8px; font-size: 1.1rem; color: var(--text); }
+    .stat-tooltip-box p { margin: 0 0 18px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+    .stat-tooltip-box .button-secondary { padding: 8px 24px; font-size: 0.88rem; }
+
+    /* ═══ Desktop Header ═══ */
+    .desktop-header{position:fixed;top:0;left:0;right:0;justify-content:flex-end;z-index:151;height:56px;padding:0 20px;display:none;align-items:center;gap:12px;background:#fff;border-bottom:1px solid rgba(0,0,0,0.06)}
+    .desktop-header .dh-search{position:absolute;left:50%;transform:translateX(-50%);width:520px;min-width:0;display:flex;align-items:center;gap:8px;padding:4px 14px;border-radius:999px;background:rgba(0,0,0,0.04);border:1px solid transparent;transition:all .2s}
+    .desktop-header .dh-search:focus-within{border-color:#000000;box-shadow:0 0 0 3px rgba(0, 0, 0,.12)}
+    .desktop-header .dh-search svg{width:16px;height:16px;flex-shrink:0;color:rgba(0,0,0,0.35)}
+    .desktop-header .dh-search input{flex:1;border:none;outline:none;background:none;font-size:13px;color:#13202e;font-family:inherit}
+    .desktop-header .dh-search input::placeholder{color:rgba(0,0,0,0.35)}.dh-search-dropdown{display:none;position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.1);border:1px solid rgba(0,0,0,.06);padding:16px;z-index:200;max-height:360px;overflow-y:auto}.dh-search-dropdown.show{display:block}.dh-search-dropdown .sd-section{margin-bottom:14px}.dh-search-dropdown .sd-section:last-child{margin-bottom:0}.dh-search-dropdown .sd-section-title{font-size:12px;font-weight:600;color:#5e6f83;margin-bottom:8px}.dh-search-dropdown .sd-tags{display:flex;flex-wrap:wrap;gap:6px}.dh-search-dropdown .sd-tag{padding:4px 12px;border-radius:999px;background:rgba(0,0,0,.04);font-size:12px;color:#13202e;cursor:pointer;transition:all .15s;border:none;font-family:inherit}.dh-search-dropdown .sd-tag:hover{background:rgba(0, 0, 0,.1);color:#000000}.dh-search-dropdown .sd-list{display:flex;flex-direction:column;gap:2px}.dh-search-dropdown .sd-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;font-size:13px;color:#13202e;cursor:pointer;transition:background .1s}.dh-search-dropdown .sd-item:hover{background:rgba(0,0,0,.03)}.dh-search-dropdown .sd-item .sd-del{color:#5e6f83;font-size:11px;padding:2px 6px;border-radius:4px;cursor:pointer;border:none;background:none}.dh-search-dropdown .sd-item .sd-del:hover{color:#f45b69}.desktop-header .dh-search-btn{padding:3px 12px;height:auto;border-radius:999px;border:none;background:rgba(0,0,0,.06);color:rgba(0,0,0,.5);border:1px solid transparent;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;margin-right:-4px}.desktop-header .dh-search-btn:hover{background:#000000;color:#fff;border-color:#000000}
+    .desktop-header .dh-icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:none;color:rgba(0,0,0,0.55);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;position:relative;flex-shrink:0}
+    .desktop-header .dh-icon-btn:hover{background:rgba(0,0,0,0.06);color:#13202e}
+    .desktop-header .dh-icon-btn svg{width:20px;height:20px}
+    .desktop-header .dh-notify-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff2d55;border:1.5px solid #fff}
+    .desktop-header .dh-publish-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 16px;border-radius:999px;border:none;background:#000000;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0}
+    .desktop-header .dh-publish-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0, 0, 0,.3)}
+    .desktop-header .dh-publish-btn svg{width:16px;height:16px}
+    .desktop-header .auth-container{display:flex;align-items:center}
+    .desktop-header .auth-login-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:999px;border:1px solid rgba(0,0,0,0.15);background:#fff;color:#13202e;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit}
+    .desktop-header .auth-login-btn:hover{border-color:#000000;color:#000000;background:rgba(0, 0, 0,0.08)}
+    @media(min-width:769px){.desktop-header{left:160px;right:0;display:flex}body{padding-top:56px}#debugSwitchBtn{display:none}}
+    @media(max-width:768px){.desktop-header{display:none}}
+    /* 购买激励：移动端独占一行（桌面端与标题同排靠右） */
+    @media (max-width: 768px) {
+      #signGiftBar { width: 100%; margin-left: 0; }
+      /* 移动端卡片精简：去剩余、名字/编号居中 */
+      #actorGrid .ac-meta-foot { display:none !important; }
+      #actorGrid .ac-card-body h3 { text-align:center; }
+      #actorGrid .ac-collection-tag { left:50% !important; right:auto !important; transform:translateX(-50%); bottom:8px; }
+    }
+
+    /* ═══ 平板响应式 ═══ */
+    @media (min-width: 600px) and (max-width: 960px) {
+      .app-shell { padding: 16px; }
+      .page-header { display: none; }
+      .page-header-left h1 { font-size: 1.5rem; }
+      .page-header-left p { font-size: 0.85rem; }
+      .page-header-actions { width: 100%; }
+      .btn-primary { width: 100%; justify-content: center; padding: 12px 20px; }
+      .search-wrapper { margin-bottom: 16px; cursor: pointer; }
+      .search-input { font-size: 16px; padding: 12px 16px 12px 38px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.04); cursor: pointer; caret-color: transparent; color: var(--text-muted); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; pointer-events: auto; }
+      .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 0, 0,.1); outline: none; }
+      .search-dropdown { display: none !important; }
+      .sort-container { gap: 6px; margin-bottom: 16px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .sort-container::-webkit-scrollbar { display: none; }
+      .sort-tag { font-size: 0.8rem; padding: 6px 12px; white-space: nowrap; flex-shrink: 0; }
+      .price-tooltip-box { padding: 20px 16px 16px; max-width: 100%; border-radius: 20px; }
+      .stat-tooltip-box { padding: 20px 16px 16px; border-radius: 20px; }
+      .auth-modal { border-radius: 24px 24px 0 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-top: auto; max-width: 100%; }
+      .auth-modal-overlay { align-items: flex-end; }
+      .auth-modal-header { padding: 28px 20px 16px; }
+      .auth-modal-body { padding: 8px 20px 24px; }
+      .auth-toast { top: 12px; max-width: 90%; font-size: 0.82rem; padding: 10px 18px; border-radius: 14px; }
+    }
+
+    /* ═══ 手机响应式 ═══ */
+    @media (max-width: 599px) {
+      .app-shell { padding: 12px 10px; padding-top: 24px; }
+      .page-header { display: none; }
+      .page-header-left h1 { font-size: 1.35rem; }
+      .page-header-left p { font-size: 0.85rem; }
+      .page-header-actions { width: 100%; }
+      .btn-primary { width: 100%; justify-content: center; padding: 12px 20px; }
+      .search-wrapper { margin-bottom: 10px; cursor: pointer; }
+      .search-input { font-size: 16px; padding: 10px 14px 10px 34px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,.04); cursor: pointer; caret-color: transparent; color: var(--text-muted); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; pointer-events: auto; }
+      .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 0, 0,.1); outline: none; }
+      .search-dropdown { display: none !important; }
+      .sort-container { gap: 4px; margin-bottom: 10px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .sort-container::-webkit-scrollbar { display: none; }
+      .sort-tag { font-size: 0.72rem; padding: 5px 10px; white-space: nowrap; flex-shrink: 0; }
+      .price-tooltip-box { padding: 20px 14px 14px; max-width: 100%; border-radius: 20px; }
+      .stat-tooltip-box { padding: 20px 14px 14px; border-radius: 20px; }
+      .auth-modal { border-radius: 20px 20px 0 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-top: auto; max-width: 100%; }
+      .auth-modal-overlay { align-items: flex-end; }
+      .auth-modal-header { padding: 24px 18px 14px; }
+      .auth-modal-body { padding: 6px 18px 22px; }
+      .auth-toast { top: 12px; max-width: 90%; font-size: 0.8rem; padding: 10px 18px; border-radius: 14px; }
+    }
+
+    /* ═══ IP Guide Button ═══ */
+    .ip-guide-btn {
+      margin-left: auto;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      padding: 0;
+      line-height: 1;
+      font-family: inherit;
+      position: relative;
+    }
+    .ip-guide-btn::after {
+      content: 'IP 卡 是什么？';
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      white-space: nowrap;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(27,45,71,0.08);
+    }
+    .ip-guide-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .ip-guide-btn:hover::after { opacity: 1; }
+
+    /* ═══ IP Guide Modal ═══ */
+    .ip-guide-box {
+      background: #fff;
+      border-radius: 24px;
+      max-width: 560px;
+      width: 94%;
+      padding: 28px 24px 24px;
+      box-shadow: 0 20px 60px rgba(15,23,42,0.15);
+      text-align: center;
+    }
+    .ip-guide-box h3 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .ip-guide-box .ip-guide-sub {
+      margin: 0 0 22px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+    .ip-guide-page { display: none; }
+    .ip-guide-page.active { display: block; }
+    /* ── Page 1: Select ── */
+    .ipg1-cards {
+      display: flex;
+      gap: 14px;
+    }
+    .ipg1-card {
+      flex: 1;
+      min-width: 0;
+      border-radius: 16px;
+      padding: 28px 20px 24px;
+      text-align: center;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .ipg1-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
+    .ipg1-card:nth-child(1) { background: linear-gradient(135deg, rgba(0, 0, 0,0.05), rgba(0, 0, 0,0.01)); border-color: rgba(0, 0, 0,0.2); }
+    .ipg1-card:nth-child(1):hover { border-color: var(--accent); }
+    .ipg1-card:nth-child(2) { background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(99,102,241,0.01)); border-color: rgba(99,102,241,0.2); }
+    .ipg1-card:nth-child(2):hover { border-color: #6366f1; }
+    .ipg1-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .ipg1-card:nth-child(1) .ipg1-icon { background: rgba(0, 0, 0,0.12); color: var(--accent); }
+    .ipg1-card:nth-child(2) .ipg1-icon { background: rgba(99,102,241,0.12); color: #6366f1; }
+    .ipg1-role {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .ipg1-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .ipg1-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.04);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+    }
+    .ipg1-card:nth-child(1):hover .ipg1-arrow { background: var(--accent-soft); color: var(--accent); }
+    .ipg1-card:nth-child(2):hover .ipg1-arrow { background: rgba(99,102,241,0.12); color: #6366f1; }
+    /* ── Page 2: Detail ── */
+    .ipg2-back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 8px;
+      padding: 0;
+      line-height: 1;
+      font-family: inherit;
+    }
+    .ipg2-back:hover { background: rgba(0,0,0,0.05); color: var(--text); }
+    .ipg2-header {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .ipg2-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .ipg2-sections { text-align: left; margin-bottom: 18px; }
+    .ipg2-sec { margin-bottom: 14px; }
+    .ipg2-sec:last-child { margin-bottom: 0; }
+    .ipg2-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .ipg2-label svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .ipg2-list { list-style: none; margin: 0; padding: 0; }
+    .ipg2-list li {
+      font-size: 0.76rem;
+      line-height: 1.6;
+      color: var(--text);
+      padding-left: 13px;
+      position: relative;
+      margin-bottom: 2px;
+    }
+    .ipg2-list li:last-child { margin-bottom: 0; }
+    .ipg2-list li::before { content: '•'; position: absolute; left: 0; color: var(--text-muted); font-weight: 700; }
+    @media (max-width: 599px) {
+      .ip-guide-box { padding: 22px 16px 20px; border-radius: 20px; }
+      .ipg1-cards { flex-direction: column; gap: 10px; }
+      .ipg1-card { padding: 20px 16px 18px; }
+      .ipg1-icon { width: 40px; height: 40px; border-radius: 12px; margin-bottom: 10px; }
+      .ip-guide-box h3 { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Desktop Header -->
+  <div class="desktop-header" id="desktopHeader">
+    <div class="dh-search" id="dhSearch">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="dhSearchInput" placeholder="搜索..." autocomplete="off"><button class="dh-search-btn" id="dhSearchBtn">搜索</button>
+      <div class="dh-search-dropdown" id="dhSearchDropdown">
+        <div class="sd-section" id="sdHotSection">
+          <div class="sd-section-title">🔥 热门搜索</div>
+          <div class="sd-tags" id="sdHotTags"></div>
+        </div>
+        <div class="sd-section" id="sdRecentSection" style="display:none">
+          <div class="sd-section-title">🕐 最近搜索</div>
+          <div class="sd-list" id="sdRecentList"></div>
+        </div>
+      </div>
+    </div>
+    <button class="dh-icon-btn" onclick="location.href='notifications.html'" title="通知">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="dh-notify-dot"></span>
+    </button>
+    <button class="dh-publish-btn" onclick="location.href='publish.html'">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/></svg>发布
+    </button>
+    <div class="auth-container" id="authContainer"></div>
+  </div>
+
+  <div class="app-shell">
+    <!-- Page Title + 购买激励（桌面端同行靠右，移动端换行独占） -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <h1 style="margin:0;font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;color:var(--text);">IP 市场</h1>
+      <button class="ip-guide-btn" id="ipGuideBtn" title="IP 市场是什么？" style="margin-left:0;">?</button>
+      <div id="signGiftBar" style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,rgba(255,215,0,.1),rgba(245,158,11,.08));border:1px solid rgba(245,158,11,.25);margin-left:auto;font-size:0.78rem;">
+        <span>🐾</span>
+        <span style="font-weight:700;color:var(--text);"><span id="signCount">0</span>/5 购买得</span>
+        <button onclick="openShopSafe('sub')" style="border:none;background:none;padding:0;font-size:0.78rem;font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;flex-shrink:0;">Story Claw</button>
+        <button id="signGiftBadge" onclick="dismissSignBar()" style="display:none;flex-shrink:0;font-weight:700;color:#fff;background:var(--accent);padding:2px 8px;border-radius:999px;font-size:0.68rem;border:none;cursor:pointer;">已领取</button>
+      </div>
+    </div>
+    <!-- Sort -->
+    <div class="sort-container" id="sortContainer">
+      <span class="sort-tag active" data-sort="power-desc">积分↓</span>
+      <span class="sort-tag" data-sort="price" data-dir="desc">价格<span class="s-arrow up">↑</span><span class="s-arrow down active">↓</span></span>
+    </div>
+
+    <!-- Actor Cards Grid -->
+    <div class="actor-card-scope">
+      <div class="ac-grid ac-grid-4" id="actorGrid"></div>
+    </div>
+
+    <!-- Price Tooltip Modal -->
+    <div class="price-tooltip-overlay" id="priceTooltip">
+      <div class="price-tooltip-box">
+        <div id="priceTooltipCurve">
+          <h3>曲线价格</h3>
+          <p class="price-tip-sub">价格按联合曲线公式随已售数自动上涨，早期购买更优惠</p>
+          <p style="font-size:0.72rem; color:var(--text-muted); line-height:1.5; margin:-4px 0 8px; padding:6px 8px; background:rgba(244,67,54,0.06); border-radius:8px;">初始价格不代表平台估值，曲线上涨不代表二级价格上涨，平台不承诺收益。</p>
+          <div class="price-curve-formula">
+            公式：<code>价格 = 初始价格 × 5<sup>(已售数 ÷ 发行总量)</sup></code>
+          </div>
+          <div class="price-curve-wrap">
+            <canvas id="priceCurveCanvas" width="500" height="270"></canvas>
+          </div>
+          <div class="price-curve-legend">
+            <span><span class="dot curve"></span> 价格曲线</span>
+            <span><span class="dot current"></span> 当前位置</span>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:8px 0 10px;">
+            <div style="background:var(--bg); border-radius:8px; padding:7px 4px; text-align:center;">
+              <div style="color:var(--text-muted); font-size:0.68rem;">初始价格</div>
+              <div style="color:var(--text); font-size:0.85rem; font-weight:600;" id="curveInitTooltip">—</div>
+            </div>
+            <div style="background:var(--bg); border-radius:8px; padding:7px 4px; text-align:center;">
+              <div style="color:var(--text-muted); font-size:0.68rem;">当前价格</div>
+              <div style="color:var(--text); font-size:0.85rem; font-weight:600;" id="curveCurrTooltip">—</div>
+            </div>
+            <div style="background:var(--bg); border-radius:8px; padding:7px 4px; text-align:center;">
+              <div style="color:var(--text-muted); font-size:0.68rem;">尾价</div>
+              <div style="color:var(--text); font-size:0.85rem; font-weight:600;" id="curveEndPriceTooltip">—</div>
+            </div>
+            <div style="background:var(--bg); border-radius:8px; padding:7px 4px; text-align:center;">
+              <div style="color:var(--text-muted); font-size:0.68rem;">总发行量</div>
+              <div style="color:var(--text); font-size:0.85rem; font-weight:600;" id="curveTotalSupply">—</div>
+            </div>
+            <div style="background:var(--bg); border-radius:8px; padding:7px 4px; text-align:center;">
+              <div style="color:var(--text-muted); font-size:0.68rem;">已购买</div>
+              <div style="color:var(--text); font-size:0.85rem; font-weight:600;" id="curveMintedSupply">—</div>
+            </div>
+            <div style="background:var(--bg); border-radius:8px; padding:7px 4px; text-align:center;">
+              <div style="color:var(--text-muted); font-size:0.68rem;">剩余</div>
+              <div style="color:var(--text); font-size:0.85rem; font-weight:600;" id="curveRemainSupply">—</div>
+            </div>
+          </div>
+        </div>
+        <div id="priceTooltipFixed" style="display:none;">
+          <h3>固定价格</h3>
+          <p class="price-tip-sub" style="margin-bottom:16px;">该 IP 卡 采用固定价格模式，每张 IP 卡都以统一价格购买，销量变化不影响价格。</p>
+          <div style="background:var(--bg); border-radius:12px; padding:16px; margin-bottom:12px; text-align:left; font-size:0.85rem; line-height:1.7; color:var(--text-muted);">
+            • 发行者设定固定价格后，所有购买均按此价格结算<br/>
+            • 不会因已售数增加而价格上涨<br/>
+            • 适合希望锁定成本的买家
+          </div>
+        </div>
+        <button class="button-secondary" id="priceTooltipClose">知道了</button>
+      </div>
+    </div>
+
+    <!-- IP Power Modal -->
+    <div class="stat-tooltip-overlay" id="ipPowerModal" style="z-index:10000;">
+      <div class="stat-tooltip-box" style="max-width:420px;padding:24px 20px 20px;position:relative;">
+        <button style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;font-size:1.1rem;color:var(--text-muted);transition:all 0.2s;z-index:1;" onclick="closeIPPowerModal()">✕</button>
+        <h3 id="ipPowerModalTitle" style="font-size:1.15rem;margin:0 0 4px;">积分详情</h3>
+        <div id="ipPowerModalHint" style="margin:4px 0 18px;">—</div>
+        <div id="ipPowerModalName" style="display:none;text-align:center;margin:0 0 18px;color:var(--accent);font-size:0.82rem;font-weight:600;background:var(--accent-soft);border-radius:8px;padding:6px 12px;">—</div>
+        <div id="ipPowerModalBreakdown" style="display:flex;flex-direction:column;gap:0;margin-bottom:18px;text-align:left;"></div>
+      </div>
+    </div>
+
+    <!-- Price Coefficient Tooltip -->
+    <div class="stat-tooltip-overlay" id="priceCoeffTooltip" style="z-index:10001;">
+      <div class="stat-tooltip-box" style="text-align:left;padding:28px 24px 22px;">
+        <h3 style="text-align:center;margin-bottom:18px;">价格系数</h3>
+        <div style="background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">P0 ≤ 100 USDC</div>
+          <div style="font-size:0.92rem;font-weight:600;color:var(--text);font-family:SF Mono,monospace;letter-spacing:-0.01em;">系数 = P0 ÷ 100</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">线性增长</div>
+        </div>
+        <div style="background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">P0 > 100 USDC</div>
+          <div style="font-size:0.82rem;font-weight:600;color:var(--text);font-family:SF Mono,monospace;letter-spacing:-0.01em;line-height:1.6;">系数 = 1.6 × (P0/100)<sup>1.3</sup> / [(P0/100)<sup>1.3</sup> + 0.6]</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">增速渐缓，上限 1.6</div>
+        </div>
+        <button class="button-secondary price-coeff-tooltip-close" style="width:100%;margin-top:8px;">知道了</button>
+      </div>
+    </div>
+
+    <!-- Upgrade Tooltip -->
+    <div class="stat-tooltip-overlay" id="upgradeTooltip" style="z-index:10002;">
+      <div class="stat-tooltip-box" style="max-width:420px;padding:24px 20px 20px;text-align:left;position:relative;">
+        <button style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,0.04);cursor:pointer;display:grid;place-items:center;font-size:1.1rem;color:var(--text-muted);transition:all 0.2s;z-index:1;" onclick="closeUpgradeTooltip()">✕</button>
+        <h3 style="text-align:center;margin:0 0 4px;font-size:1.15rem;">积分升级规则</h3>
+        <div id="upgradeModalCurrent" style="margin:0 0 16px;">—</div>
+        <div id="upgradeTable" style="display:flex;flex-direction:column;gap:0;margin-bottom:16px;"></div>
+      </div>
+    </div>
+
+    <!-- Stat Tooltip -->
+    <div class="stat-tooltip-overlay" id="statTooltip">
+      <div class="stat-tooltip-box">
+        <h3 id="statTooltipTitle">完播</h3>
+        <p id="statTooltipDesc">该 IP 卡 参演的所有短剧的完播次数之和</p>
+        <button class="button-secondary" id="statTooltipClose">知道了</button>
+      </div>
+    </div>
+
+
+    <!-- IP Guide Modal -->
+    <div class="stat-tooltip-overlay" id="ipGuideModal" style="z-index:10003;">
+      <div class="ip-guide-box">
+        <!-- Page 1: Select -->
+        <div class="ip-guide-page active" id="ipgPage1">
+          <h3>IP 卡 是什么？</h3>
+          <p class="ip-guide-sub">两种参与方式，选择适合你的 IP 卡</p>
+          <div class="ipg1-cards">
+            <div class="ipg1-card" onclick="ipgGoDetail('player')">
+              <div class="ipg1-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="8"/><line x1="19.5" y1="5.5" x2="19.5" y2="10.5"/></svg></div>
+              <div class="ipg1-role">普通玩家</div>
+              <div class="ipg1-desc">购买 IP 卡，坐享积分</div>
+              <span class="ipg1-arrow">→</span>
+            </div>
+            <div class="ipg1-card" onclick="ipgGoDetail('creator')">
+              <div class="ipg1-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M18 7l-6 4v8"/></svg></div>
+              <div class="ipg1-role">短剧创作者</div>
+              <div class="ipg1-desc">创作短剧，经营IP 卡</div>
+              <span class="ipg1-arrow">→</span>
+            </div>
+          </div>
+        </div>
+        <!-- Page 2: Player Detail -->
+        <div class="ip-guide-page" id="ipgPagePlayer">
+          <button class="ipg2-back" onclick="ipgGoBack()">←</button>
+          <div class="ipg2-header">🎮 普通玩家</div>
+          <div class="ipg2-subtitle">购买 IP 卡，坐享积分</div>
+          <div class="ipg2-sections">
+            <div class="ipg2-sec">
+              <div class="ipg2-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 适合</div>
+              <ul class="ipg2-list"><li>不想创作，想低门槛参与赚 STORY 的玩家。</li></ul>
+            </div>
+            <div class="ipg2-sec">
+              <div class="ipg2-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><line x1="8" y1="8" x2="10" y2="8"/><line x1="8" y1="12" x2="10" y2="12"/><line x1="8" y1="16" x2="10" y2="16"/></svg> 怎么做</div>
+              <ul class="ipg2-list"><li>购买积分高的 IP 卡。</li><li>在IP收益页面安排激活。</li></ul>
+            </div>
+            <div class="ipg2-sec">
+              <div class="ipg2-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 能赚什么</div>
+              <ul class="ipg2-list"><li>在IP收益页面安排激活，赚取积分。</li><li>IP 卡的潜在价值，可用于交易市场转售。</li></ul>
+            </div>
+          </div>
+          <button class="button-secondary" id="ipGuideClose" style="padding: 9px 28px; font-size: 0.88rem;">知道了</button>
+        </div>
+        <!-- Page 2: Creator Detail -->
+        <div class="ip-guide-page" id="ipgPageCreator">
+          <button class="ipg2-back" onclick="ipgGoBack()">←</button>
+          <div class="ipg2-header">🎬 短剧创作者</div>
+          <div class="ipg2-subtitle">创作短剧，经营IP 卡</div>
+          <div class="ipg2-sections">
+            <div class="ipg2-sec">
+              <div class="ipg2-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 适合</div>
+              <ul class="ipg2-list"><li>有创作能力，想靠作品和IP 卡 赚钱的人</li></ul>
+            </div>
+            <div class="ipg2-sec">
+              <div class="ipg2-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><line x1="8" y1="8" x2="10" y2="8"/><line x1="8" y1="12" x2="10" y2="12"/><line x1="8" y1="16" x2="10" y2="16"/></svg> 怎么做</div>
+              <ul class="ipg2-list"><li>发行 IP 卡，IP 卡被购买可获得分成。</li><li>发布短剧到 Story.fun，绑定 IP 卡 关联数据。</li><li>持续产出爆款短剧，提升完播和热度，提升 IP 的积分。</li><li>推荐使用 DreamOS 一键创作 AI 短剧。</li></ul>
+            </div>
+            <div class="ipg2-sec">
+              <div class="ipg2-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 能赚什么</div>
+              <ul class="ipg2-list"><li>IP 卡购买的 40% 分成。</li><li>购买自己的 IP 卡后，同样可以在IP收益页面赚取积分。</li><li>IP 卡的潜在价值，可用于交易市场转售。</li></ul>
+            </div>
+          </div>
+          <button class="button-secondary" id="ipGuideClose2" style="padding: 9px 28px; font-size: 0.88rem;">知道了</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom-nav-placeholder"></div>
+
+  <script src="auth.js"></script>
+  <script src="items.js"></script>
+  <script src="sign-modal.js"></script>
+  <script src="actor-card.js"></script>
+  <script src="load-sidebar.js"></script>
+  <script src="load-desktop-header.js?v=3"></script>
+  <script src="load-bottom-nav.js"></script>
+  <script>
+    // ============================================================
+    //  Actor Data
+    // ============================================================
+    var ACTORS_DATA = [
+      {
+        id: '1', name: 'Luna', description: '未来偶像型AI 角色，科技感造型，适合对话与剧情分润场景。',
+        issuanceType: 'official', pricing: 'curve', collection: '79546887397104419298548',
+        total: 5000, minted: 5000, holders: 4900,
+        price: '10 USDC', initPrice: 30, creator: 'storyfun_labs',
+        views: '2.6万', heat: 3.3, bannerClass: 'banner-1'
+      },
+      {
+        id: '2', name: '苏婉清', description: '温婉端庄，琴棋书画样样精通，举止间尽显大家闺秀风范。',
+        issuanceType: 'official', pricing: 'fixed', collection: '19976251796193883376612',
+        total: 10000, minted: 1000, holders: 820,
+        price: '10 USDC', initPrice: 80, creator: 'wanqing_studio',
+        views: '24.1万', heat: 2.5, bannerClass: 'banner-2'
+      },
+      {
+        id: '3', name: '李云飞', description: '身手矫健的侠客，性格豪爽仗义，自幼习武练就一身好本领。',
+        issuanceType: 'partner', pricing: 'curve', collection: '50640641399033357858267',
+        total: 8000, minted: 500, holders: 450,
+        price: '8 USDC', initPrice: 45, creator: 'feige_labs',
+        views: '24.7万', heat: 4.8, bannerClass: 'banner-3'
+      },
+      {
+        id: '4', name: '林梦瑶', description: '聪慧机敏，擅长推理分析，拥有敏锐的洞察力。',
+        issuanceType: 'partner', pricing: 'curve', collection: '56931849701144251962855',
+        total: 10000, minted: 1000, holders: 700,
+        price: '10 USDC', initPrice: 120, creator: 'mengyao_art',
+        views: '27.7万', heat: 7.2, bannerClass: ''
+      },
+      {
+        id: '5', name: '赵无极', description: '深不可测的武林高手，亦正亦邪，武功深不可测，行事风格独特。',
+        issuanceType: 'certified', pricing: 'fixed', collection: '79367455369627552976646',
+        total: 6000, minted: 500, holders: 280,
+        price: '15 USDC', initPrice: 200, creator: 'wuji_art',
+        views: '5.5万', heat: 3.2, bannerClass: ''
+      },
+      {
+        id: '6', name: '上官婉儿', description: '才情横溢，精通诗词歌赋，智慧与美貌并重。',
+        issuanceType: 'community', pricing: 'fixed', collection: '72820654143523710718313',
+        total: 12000, minted: 2000, holders: 1400,
+        price: '12 USDC', initPrice: 30, creator: 'palace_studio',
+        views: '24.1万', heat: 4.9, bannerClass: ''
+      }
+    ];
+
+    // ============================================================
+    //  Render Cards
+    // ============================================================
+    document.getElementById('actorGrid').innerHTML = ACTORS_DATA.map(function(d) {
+      // banner-4/5/6 custom backgrounds
+      if (!d.bannerClass && d.id === '4') d.bannerClass = 'background:linear-gradient(135deg, #e6e0ff, #ffffff);';
+      else if (!d.bannerClass && d.id === '5') d.bannerClass = 'background:linear-gradient(135deg, #ffe4e0, #fffaf8);';
+      else if (!d.bannerClass && d.id === '6') d.bannerClass = 'background:linear-gradient(135deg, #f5e6ff, #fffaff);';
+      return renderActorCard(d);
+    }).join('');
+
+    // ============================================================
+    //  Init Sorting (via actor-card.js API)
+    // ============================================================
+    initActorSorting({ sortContainerId: 'sortContainer', gridSelector: '#actorGrid', defaultSort: 'power-desc' });
+
+    // ============================================================
+    //  Wire Up Card Interactions
+    // ============================================================
+    var curveInitTooltip = document.getElementById('curveInitTooltip');
+    var curveCurrTooltip = document.getElementById('curveCurrTooltip');
+    var curveEndPriceTooltip = document.getElementById('curveEndPriceTooltip');
+    var curveTotalSupply = document.getElementById('curveTotalSupply');
+    var curveMintedSupply = document.getElementById('curveMintedSupply');
+    var curveRemainSupply = document.getElementById('curveRemainSupply');
+    var curveCanvas = document.getElementById('priceCurveCanvas');
+    var BASE = 5;
+
+    function drawBondingCurve(initialPrice, totalSupply, minted) {
+      var canvas = curveCanvas, ctx = canvas.getContext('2d');
+      var w = canvas.width, h = canvas.height;
+      var pad = { top: 16, right: 20, bottom: 42, left: 40 };
+      var plotW = w - pad.left - pad.right, plotH = h - pad.top - pad.bottom;
+      ctx.clearRect(0, 0, w, h);
+      var maxPrice = initialPrice * BASE;
+      ctx.strokeStyle = '#eef4ff'; ctx.lineWidth = 0.5;
+      for (var i = 0; i <= 5; i++) {
+        var y = pad.top + (plotH / 5) * i;
+        ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+        var ratio = 1 - i / 5;
+        var priceVal = initialPrice * Math.pow(BASE, ratio);
+        ctx.fillStyle = '#aab7c9'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right';
+        ctx.fillText(priceVal < 1 ? priceVal.toFixed(2) : Math.round(priceVal).toString(), pad.left - 4, y + 3);
+      }
+      ctx.fillStyle = '#aab7c9'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+      for (var j = 0; j <= 4; j++) {
+        var x = pad.left + (plotW / 4) * j;
+        ctx.fillText(Math.round((j / 4) * totalSupply), x, h - 8);
+      }
+      ctx.fillStyle = '#8b9bb0'; ctx.font = '9px sans-serif';
+      ctx.fillText('已售数', pad.left + plotW / 2, h - 20);
+      ctx.save(); ctx.translate(10, pad.top + plotH / 2); ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = '#8b9bb0'; ctx.font = '8px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('购买价 (USDC)', 0, 0); ctx.restore();
+      ctx.beginPath(); ctx.strokeStyle = '#e65100'; ctx.lineWidth = 2.5;
+      for (var k = 0; k <= plotW; k++) {
+        var pct = k / plotW;
+        var price = initialPrice * Math.pow(BASE, pct);
+        var cx = pad.left + k;
+        var yNorm = (price - initialPrice) / (maxPrice - initialPrice);
+        var cy = pad.top + plotH - yNorm * plotH;
+        if (k === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+      }
+      ctx.stroke();
+      var currentPct = totalSupply > 0 ? Math.min(minted / totalSupply, 1) : 0;
+      var curX = pad.left + currentPct * plotW;
+      var currentPrice = initialPrice * Math.pow(BASE, currentPct);
+      var curYNorm = (currentPrice - initialPrice) / (maxPrice - initialPrice);
+      var curY = pad.top + plotH - curYNorm * plotH;
+      ctx.beginPath(); ctx.arc(curX, curY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#000000'; ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(0, 0, 0,0.4)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad.left, curY); ctx.lineTo(curX, curY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(curX, pad.top + plotH); ctx.lineTo(curX, curY); ctx.stroke();
+      ctx.setLineDash([]);
+      var endPrice = initialPrice * BASE;
+      curveInitTooltip.textContent = initialPrice.toFixed(2) + ' USDC';
+      curveCurrTooltip.textContent = currentPrice.toFixed(2) + ' USDC';
+      curveEndPriceTooltip.textContent = endPrice.toFixed(2) + ' USDC';
+      curveTotalSupply.textContent = totalSupply.toLocaleString();
+      curveMintedSupply.textContent = minted.toLocaleString();
+      curveRemainSupply.textContent = (totalSupply - minted).toLocaleString();
+    }
+
+    function updateCardCounts(card) {
+      try {
+        var avail = (parseInt(card.dataset.available) || 0) - 1;
+        if (avail <= 0) {
+          card.dataset.available = '0';
+          card.dataset.minted = card.dataset.total;
+          // Re-render card as soldout
+          var data = findActorData(card.dataset.actor);
+          if (data) { data.available = 0; data.minted = parseInt(data.total); card.outerHTML = renderActorCard(data); }
+        } else {
+          card.dataset.available = avail;
+          card.dataset.minted = (parseInt(card.dataset.minted) || 0) + 1;
+          var actionArea = card.querySelector('.ac-action-area');
+          var metaFoot = card.querySelector('.ac-meta-foot');
+          if (actionArea) {
+            var btn = actionArea.querySelector('.ac-mint-btn');
+            if (btn) { btn.dataset.available = avail; btn.dataset.minted = card.dataset.minted; }
+          }
+          if (metaFoot) {
+            var parts = metaFoot.textContent.split(' · ');
+            if (parts.length > 0) { parts[0] = '剩余 ' + avail.toLocaleString(); metaFoot.textContent = parts.join(' · '); }
+          }
+        }
+      } catch (e) {}
+    }
+
+    function findActorData(name) {
+      for (var i = 0; i < ACTORS_DATA.length; i++) {
+        if (ACTORS_DATA[i].name === name) return ACTORS_DATA[i];
+      }
+      return null;
+    }
+
+    // ---- 购买激励（demo：累计购买 5 张角色卡送 Claw 周卡，生命周期 1 次）----
+    function getSignCount() {
+      var n = parseInt(localStorage.getItem('sf2_sign_count') || '0', 10);
+      return isNaN(n) ? 0 : n;
+    }
+    function getSignGifted() {
+      return localStorage.getItem('sf2_sign_gift') === '1';
+    }
+    function renderSignProgress() {
+      var n = getSignCount();
+      var gifted = getSignGifted();
+      document.getElementById('signCount').textContent = n;
+      document.getElementById('signGiftBadge').style.display = gifted ? 'inline-block' : 'none';
+    }
+    // 点击「已领取」收起横条并重置购买进度（demo 重置：刷新后回到 0/5，可重复演示）
+    function dismissSignBar() {
+      localStorage.removeItem('sf2_sign_count');
+      localStorage.removeItem('sf2_sign_gift');
+      var bar = document.getElementById('signGiftBar');
+      if (bar) bar.style.display = 'none';
+    }
+    function addSignCount() {
+      var n = getSignCount() + 1;
+      localStorage.setItem('sf2_sign_count', String(n));
+      if (n >= 5 && !getSignGifted()) {
+        localStorage.setItem('sf2_sign_gift', '1');
+        ItemStore.activateClaw('week');
+        renderSignProgress();
+        showToast('🎉 购买 5 张达成，Story Claw 周卡已生效（7 天）');
+      } else {
+        renderSignProgress();
+      }
+    }
+    function showToast(msg) {
+      var t = document.getElementById('sfToast');
+      if (!t) {
+        t = document.createElement('div'); t.id = 'sfToast';
+        t.style.cssText = 'position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:99999;background:rgba(0,0,0,.85);color:#fff;padding:10px 18px;border-radius:999px;font-size:.85rem;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg; t.style.opacity = '1';
+      clearTimeout(t._t); t._t = setTimeout(function () { t.style.opacity = '0'; }, 2200);
+    }
+    if (document.getElementById('signCount')) renderSignProgress();
+
+    // ============================================================
+    //  Price Tooltip
+    // ============================================================
+    var priceTooltip = document.getElementById('priceTooltip');
+    var priceTooltipClose = document.getElementById('priceTooltipClose');
+    var priceTooltipCurve = document.getElementById('priceTooltipCurve');
+    var priceTooltipFixed = document.getElementById('priceTooltipFixed');
+
+    function openPriceTooltipForData(data) {
+      var pricing = data.pricing || 'curve';
+      priceTooltipCurve.style.display = pricing === 'curve' ? '' : 'none';
+      priceTooltipFixed.style.display = pricing === 'fixed' ? '' : 'none';
+      if (pricing === 'curve') {
+        var total = parseInt(data.total) || 10000;
+        var minted = parseInt(data.minted) || 0;
+        var currentPrice = parseFloat((data.price || '10').replace(/[^0-9.]/g, '')) || 10;
+        var ratio = total > 0 ? minted / total : 0;
+        var initialPrice = currentPrice / Math.pow(BASE, ratio);
+        drawBondingCurve(initialPrice, total, minted);
+      }
+    }
+
+    window._acOpenPriceTooltip = function(event, id, name, pricing, initPrice, total, minted) {
+      event.stopPropagation();
+      var data = findActorData(name) || { pricing: pricing, initPrice: initPrice, total: total, minted: minted, price: '10 USDC' };
+      openPriceTooltipForData(data);
+      priceTooltip.classList.add('active');
+    };
+
+    priceTooltipClose.addEventListener('click', function() { priceTooltip.classList.remove('active'); });
+    priceTooltip.addEventListener('click', function(e) { if (e.target === priceTooltip) priceTooltip.classList.remove('active'); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && priceTooltip.classList.contains('active')) priceTooltip.classList.remove('active'); });
+
+    // ============================================================
+    //  Stat Tooltip
+    // ============================================================
+    var statTooltip = document.getElementById('statTooltip');
+    var statTooltipTitle = document.getElementById('statTooltipTitle');
+    var statTooltipDesc = document.getElementById('statTooltipDesc');
+    var statTooltipClose = document.getElementById('statTooltipClose');
+
+    document.getElementById('actorGrid').addEventListener('click', function(e) {
+      var statItem = e.target.closest('.ac-stat-item');
+      if (statItem) {
+        e.stopPropagation();
+        var stat = statItem.dataset.stat;
+        if (stat === 'ip-power') {
+          var card = statItem.closest('.ac-card');
+          if (card) { openIPPowerModalForCard(card); }
+        }
+      }
+    });
+
+    function closeStatTooltip() { statTooltip.classList.remove('active'); }
+    statTooltipClose.addEventListener('click', closeStatTooltip);
+    statTooltip.addEventListener('click', function(e) { if (e.target === statTooltip) closeStatTooltip(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && statTooltip.classList.contains('active')) closeStatTooltip(); });
+
+    // ============================================================
+    //  IP Power Modal
+    // ============================================================
+    var ipPowerModal = document.getElementById('ipPowerModal');
+
+    function openIPPowerModalForCard(card) {
+      var name = card.dataset.actor || '';
+      var initPrice = parseFloat(card.dataset.initPrice) || 0;
+      var heat = parseFloat(card.dataset.heat) || 0;
+      var priceCoeff = computePriceCoefficient(initPrice);
+      var ipPower = priceCoeff * heat;
+      document.getElementById('ipPowerModalTitle').textContent = name + ' · 积分';
+      document.getElementById('ipPowerModalHint').innerHTML =
+        '<div style="background:var(--accent-soft);border-radius:14px;padding:16px 12px 12px;text-align:center;line-height:1.7;">' +
+          '<div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;">购买即可获得 Lv.1 IP 卡</div>' +
+          '<div style="font-size:0.85rem;color:var(--text);font-weight:500;margin-bottom:6px;">Lv.1 积分 = 价格系数 × 热度系数</div>' +
+        '</div>';
+      document.getElementById('ipPowerModalBreakdown').innerHTML =
+        '<div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:8px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="font-weight:600;font-size:0.84rem;color:var(--text);">价格系数</span>' +
+            '<span style="font-weight:700;font-size:0.92rem;color:var(--accent);">× ' + priceCoeff.toFixed(4) + '</span>' +
+          '</div>' +
+          '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;line-height:1.7;padding:8px 10px;background:rgba(0,0,0,0.03);border-radius:8px;">' +
+            '根据发行 IP 时的初始价格 P0 计算：<br>' +
+            '如果 P0 ≤ 100 USDC，价格系数 = P0 ÷ 100<br>' +
+            '如果 P0 > 100 USDC，价格系数 = 1.6 × (P0 / 100)<sup>1.3</sup> / [(P0 / 100)<sup>1.3</sup> + 0.6]' +
+          '</div>' +
+        '</div>' +
+        '<div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:8px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="font-weight:600;font-size:0.84rem;color:var(--text);">热度系数</span>' +
+            '<span style="font-weight:700;font-size:0.92rem;color:var(--accent);">× ' + heat.toFixed(1) + '</span>' +
+          '</div>' +
+          '<div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;line-height:1.4;">IP 卡 近 30 天热度乘子，取决于短剧完播、点赞、收藏等互动表现</div>' +
+        '</div>';
+      ipPowerModal.classList.add('active');
+    }
+
+    function closeIPPowerModal() { ipPowerModal.classList.remove('active'); }
+    ipPowerModal.addEventListener('click', function(e) { if (e.target === ipPowerModal) closeIPPowerModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && ipPowerModal.classList.contains('active')) closeIPPowerModal(); });
+
+    // ============================================================
+    //  Upgrade Tooltip
+    // ============================================================
+    var upgradeTooltip = document.getElementById('upgradeTooltip');
+    var upgradeModalCurrent = document.getElementById('upgradeModalCurrent');
+    var upgradeTable = document.getElementById('upgradeTable');
+
+    function openUpgradeModalForCard(card) {
+      var viewsStr = card.dataset.views || '0';
+      var viewsNum = parseChineseNum(viewsStr);
+      var maxLevel = 1;
+      for (var i = UPGRADE_TABLE.length - 1; i >= 0; i--) {
+        if (viewsNum >= UPGRADE_TABLE[i].threshold) { maxLevel = UPGRADE_TABLE[i].level; break; }
+      }
+      upgradeModalCurrent.innerHTML =
+        '<div style="background:var(--accent-soft);border-radius:14px;padding:16px 12px 12px;text-align:center;line-height:1.7;">' +
+          '<div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;">该IP参演短剧的当前完播数可支持 IP 卡升级至</div>' +
+          '<div style="font-size:1.6rem;font-weight:800;color:var(--accent);letter-spacing:-0.02em;">Lv.' + maxLevel + '</div>' +
+        '</div>';
+      upgradeTable.innerHTML = UPGRADE_TABLE.map(function(r) {
+        var isActive = r.level === maxLevel;
+        var bg = isActive ? 'var(--accent-soft)' : 'transparent';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;background:' + bg + ';margin-bottom:2px;">' +
+          '<span style="font-weight:600;font-size:0.85rem;color:var(--text);">Lv.' + r.level + '</span>' +
+          '<span style="font-size:0.78rem;color:var(--text-muted);">' + formatThreshold(r.threshold) + ' 完播</span>' +
+          '<span style="font-weight:600;font-size:0.85rem;color:var(--accent);">积分 ×' + r.multiplier.toFixed(1) + '</span>' +
+        '</div>';
+      }).join('');
+      upgradeTooltip.classList.add('active');
+    }
+
+    function closeUpgradeTooltip() { upgradeTooltip.classList.remove('active'); }
+    upgradeTooltip.addEventListener('click', function(e) { if (e.target === upgradeTooltip) closeUpgradeTooltip(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && upgradeTooltip.classList.contains('active')) closeUpgradeTooltip(); });
+
+    // ============================================================
+    //  Price Coefficient Tooltip
+    // ============================================================
+    var priceCoeffTooltip = document.getElementById('priceCoeffTooltip');
+    var mintCoeffHelp = document.getElementById('mintCoeffHelp');
+    if (mintCoeffHelp && priceCoeffTooltip) {
+      mintCoeffHelp.addEventListener('click', function(e) { e.stopPropagation(); priceCoeffTooltip.classList.add('active'); });
+    }
+    var priceCoeffTooltipClose = document.querySelector('#priceCoeffTooltip .price-coeff-tooltip-close');
+    if (priceCoeffTooltipClose && priceCoeffTooltip) {
+      priceCoeffTooltipClose.addEventListener('click', function() { priceCoeffTooltip.classList.remove('active'); });
+      priceCoeffTooltip.addEventListener('click', function(e) { if (e.target === priceCoeffTooltip) priceCoeffTooltip.classList.remove('active'); });
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && priceCoeffTooltip.classList.contains('active')) priceCoeffTooltip.classList.remove('active'); });
+    }
+
+    // ============================================================
+    //  Card Click → actor-profile.html
+    // ============================================================
+    document.getElementById('actorGrid').addEventListener('click', function(e) {
+      if (e.target.closest('.ac-price-help') || e.target.closest('.ac-mint-btn') || e.target.closest('.ac-trade-btn') || e.target.closest('.ac-stat-item')) return;
+      var card = e.target.closest('.ac-card');
+      if (!card) return;
+      var name = card.dataset.actor || '';
+      var id = card.dataset.id || '1';
+      var avatarSrc = card.querySelector('.ac-avatar img') ? card.querySelector('.ac-avatar img').src : '';
+      var desc = '';
+      for (var i = 0; i < ACTORS_DATA.length; i++) { if (ACTORS_DATA[i].name === name) { desc = ACTORS_DATA[i].description; break; } }
+      var params = new URLSearchParams({ id: id, name: name, avatar: avatarSrc, description: desc || '', price: card.dataset.price || '', minted: card.dataset.minted || '', available: card.dataset.available || '' });
+      window.location.href = 'actor-profile.html?' + params.toString();
+    });
+
+    // ============================================================
+    //  Mint Button Clicks
+    // ============================================================
+    document.getElementById('actorGrid').addEventListener('click', function(e) {
+      var mintBtn = e.target.closest('.ac-mint-btn');
+      if (mintBtn) {
+        e.stopPropagation();
+        var card = mintBtn.closest('.ac-card');
+        var name = card.dataset.actor || '';
+        var avatarEl = card.querySelector('.ac-avatar img');
+        var avatarSrc = avatarEl ? avatarEl.src : 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80';
+        var initPrice = parseFloat(card.dataset.initPrice) || 0;
+        SignModal.open({
+          name: name,
+          title: '确认购买 · Lv.1 IP 卡',
+          image: avatarSrc,
+          tag: 'IP 卡' + (card.dataset.collection ? ' · ' + card.dataset.collection : ''),
+          price: card.dataset.price || '10 USDC',
+          pricing: card.dataset.pricing || 'curve',
+          coeff: initPrice > 0 ? computePriceCoefficient(initPrice).toFixed(4) : null,
+          total: parseInt(card.dataset.total) || 10000,
+          minted: parseInt(card.dataset.minted) || 0,
+          onConfirm: function(done) {
+            setTimeout(function() {
+              var cards = document.querySelectorAll('#actorGrid .ac-card');
+              var targetCard = null;
+              cards.forEach(function(c) { var aImg = c.querySelector('.ac-avatar img'); if (aImg && aImg.src === avatarSrc) targetCard = c; });
+              if (targetCard) updateCardCounts(targetCard);
+              addSignCount();
+              done();
+            }, 1200);
+          },
+          success: {
+            text: '已获得 Lv.1 IP 卡「<strong>' + name + '</strong>」，快去安排激活吧。',
+            primary: { label: '查看我的 IP 卡', href: 'studio.html' },
+            secondary: { label: '继续浏览' }
+          }
+        });
+      }
+    });
+
+    // ============================================================
+    //  Trade Button Clicks
+    // ============================================================
+    document.getElementById('actorGrid').addEventListener('click', function(e) {
+      var tradeBtn = e.target.closest('.ac-trade-btn');
+      if (tradeBtn) {
+        e.stopPropagation();
+        var name = tradeBtn.dataset.actor || 'Luna';
+        window.open('https://market.story.fun/trade/' + name.toLowerCase(), '_blank');
+      }
+    });
+
+    // ============================================================
+    //  IP Guide Modal
+    // ============================================================
+    var ipGuideModal = document.getElementById('ipGuideModal');
+    var ipGuideBtn = document.getElementById('ipGuideBtn');
+    ipGuideBtn.addEventListener('click', function() {
+      ipGuideModal.classList.add('active');
+      ipgGoBack();
+    });
+    ipGuideModal.addEventListener('click', function(e) { if (e.target === ipGuideModal) ipGuideModal.classList.remove('active'); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && ipGuideModal.classList.contains('active')) ipGuideModal.classList.remove('active'); });
+
+    function ipgGoDetail(type) {
+      var pages = document.querySelectorAll('#ipGuideModal .ip-guide-page');
+      for (var i = 0; i < pages.length; i++) { pages[i].classList.remove('active'); }
+      document.getElementById(type === 'player' ? 'ipgPagePlayer' : 'ipgPageCreator').classList.add('active');
+    }
+
+    function ipgGoBack() {
+      var pages = document.querySelectorAll('#ipGuideModal .ip-guide-page');
+      for (var i = 0; i < pages.length; i++) { pages[i].classList.remove('active'); }
+      document.getElementById('ipgPage1').classList.add('active');
+    }
+
+    function ipgCloseModal() { ipGuideModal.classList.remove('active'); }
+    document.getElementById('ipGuideClose').addEventListener('click', ipgCloseModal);
+    document.getElementById('ipGuideClose2').addEventListener('click', ipgCloseModal);
+
+    // ============================================================
+    //  Init Auth
+    // ============================================================
+    setTimeout(function() { if (typeof initAuth === 'function') initAuth(); }, 100);
+  </script>
+
+  <!-- Desktop Header Search -->
+  <script src="search.js"></script>
+<button id="debugSwitchBtn" onclick="location.href='actors_ios.html'" style="position:fixed;bottom:100px;right:16px;z-index:9999;padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:0.8rem;cursor:pointer;font-family:inherit;">切换到iOS</button>
+</body>
+</html>

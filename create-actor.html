@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story.fun | 发行 IP</title>
+  <style>
+    :root {
+      --bg: #f6f6f6;
+      --surface: #ffffff;
+      --accent: #000000;
+      --accent-soft: rgba(0, 0, 0, 0.10);
+      --accent-glow: rgba(0, 0, 0, 0.20);
+      --text: #1c2024;
+      --text-muted: #60646c;
+      --text-hint: #8b8d98;
+      --border: #f0f0f3;
+      --border-dark: #d9d9e0;
+      --shadow-sm: 0 4px 12px rgba(27, 45, 71, 0.04);
+      --shadow-md: 0 12px 28px rgba(27, 45, 71, 0.05);
+      --radius: 24px;
+      --radius-lg: 32px;
+      --danger: #f45b69;
+      font-family: "SF Pro", "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); scroll-behavior: smooth; }
+    .app-shell { max-width: 1440px; margin: 0 auto; padding: 96px 160px; }
+
+    /* ===== Auth Styles ===== */
+    .auth-container { display: flex; align-items: center; }
+    .auth-login-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border-dark); background: var(--surface); color: var(--text); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
+    .auth-login-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .auth-login-icon { font-size: 1rem; }
+    .auth-user-menu { position: relative; }
+    .auth-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; cursor: pointer; border: 2px solid var(--accent-soft); transition: border-color 0.2s; position: relative; flex-shrink: 0; }
+    .auth-avatar:hover { border-color: var(--accent); }
+    .auth-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .auth-avatar-dot { display: none; }
+    .auth-dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: var(--surface); border: 1px solid var(--border-dark); border-radius: 16px; box-shadow: 0 12px 40px rgba(27,45,71,0.15); opacity: 0; visibility: hidden; transform: translateY(-8px); transition: all 0.25s ease; z-index: 100; overflow: hidden; }
+    .auth-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .auth-dropdown-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
+    .auth-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .auth-dropdown-name { font-weight: 600; font-size: 0.92rem; color: var(--text); }
+    .auth-dropdown-wallet { font-size: 0.78rem; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
+    .auth-dropdown-divider { height: 1px; background: var(--border); margin: 0; }
+    .auth-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: var(--text); text-decoration: none; font-size: 0.9rem; transition: background 0.15s; cursor: pointer; }
+    .auth-dropdown-item:hover { background: rgba(0,0,0,0.03); }
+    .auth-dropdown-item span { font-size: 1.1rem; }
+    .auth-dropdown-logout { color: #f45b69; }
+    .auth-dropdown-logout:hover { background: rgba(244,91,105,0.06); }
+    /* Login Modal */
+    .auth-modal-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .auth-modal-overlay.active { opacity: 1; visibility: visible; }
+    .auth-modal { background: var(--surface); border-radius: 28px; width: 100%; max-width: 420px; box-shadow: 0 40px 80px rgba(27,45,71,0.2); overflow: hidden; transform: scale(0.95) translateY(10px); transition: transform 0.3s ease; }
+    .auth-modal-overlay.active .auth-modal { transform: scale(1) translateY(0); }
+    .auth-modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.04); cursor: pointer; display: grid; place-items: center; font-size: 1.1rem; color: var(--text-muted); transition: all 0.2s; z-index: 1; }
+    .auth-modal-close:hover { background: rgba(0,0,0,0.08); color: var(--text); }
+    .auth-modal-header { text-align: center; padding: 36px 28px 20px; position: relative; }
+    .auth-modal-logo { width: 56px; height: 56px; border-radius: 50%; background: #000000; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 1.3rem; margin: 0 auto 16px; box-shadow: 0 4px 16px rgba(0, 0, 0,0.3); }
+    .auth-modal-header h2 { margin: 0 0 6px; font-size: 1.4rem; }
+    .auth-modal-header p { margin: 0; color: var(--text-muted); font-size: 0.92rem; }
+    .auth-modal-body { padding: 8px 28px 32px; display: flex; flex-direction: column; gap: 12px; }
+    .auth-social-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius:999px; border: 1px solid var(--border-dark); background: var(--surface); color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .auth-social-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .auth-social-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 0.85rem; margin: 4px 0; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-dark); }
+    .auth-wallet-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius:999px; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+    .auth-wallet-btn:hover { background: rgba(0,0,0,0.2); }
+    .auth-modal-tos { text-align: center; color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; margin: 4px 0 0; }
+    .auth-modal-tos a { color: var(--accent); text-decoration: none; }
+    .auth-modal-tos a:hover { text-decoration: underline; }
+    .auth-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 10000; background: rgba(26,35,47,0.95); backdrop-filter: blur(8px); color: #fff; padding: 14px 24px; border-radius: 14px; font-size: 0.92rem; box-shadow: 0 12px 40px rgba(27,45,71,0.25); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease; opacity: 0; pointer-events: none; max-width: 400px; text-align: center; font-weight: 500; }
+    .auth-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    /* ===== End Auth Styles ===== */
+
+    /* ===== Success Modal ===== */
+    .success-modal-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .success-modal-overlay.active { opacity: 1; visibility: visible; }
+    .success-modal { background: var(--surface); border-radius: 28px; width: 100%; max-width: 420px; box-shadow: 0 40px 80px rgba(27,45,71,0.2); overflow: hidden; transform: scale(0.95) translateY(10px); transition: transform 0.3s ease; text-align: center; padding: 48px 32px 36px; }
+    .success-modal-overlay.active .success-modal { transform: scale(1) translateY(0); }
+    .success-modal-icon { width: 72px; height: 72px; border-radius: 50%; background: #000000; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; color: #fff; box-shadow: 0 4px 20px rgba(0, 0, 0,0.35); }
+    .success-modal h2 { font-size: 1.5rem; font-weight: 800; margin: 0 0 18px; color: var(--text); letter-spacing: -0.02em; }
+    .success-modal p { font-size: 0.92rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    .success-modal .success-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
+    .success-modal .success-actor-name { font-weight: 700; color: var(--accent); }
+    .success-modal .success-ip-id { font-family: "SF Mono", Menlo, monospace; font-size: 0.8rem; color: var(--text-hint); margin-bottom: 8px; word-break: break-all; letter-spacing: 0.02em; }
+    .success-modal .success-tip { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    .success-modal .success-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .success-modal .success-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; border-radius:999px; border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s ease; }
+    .success-modal .success-btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+    .success-modal .success-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; border-radius:999px; border: 1px solid var(--border-dark); background: var(--surface); color: var(--text-muted); font-size: 0.92rem; cursor: pointer; transition: all 0.2s ease; }
+    .success-modal .success-btn-outline:hover { border-color: var(--accent); color: var(--text); }
+    /* ===== End Success Modal ===== */
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 36px;
+      letter-spacing: -0.4%;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .form-panel {
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+    }
+
+    /* ---- Basic info section ---- */
+    .basic-info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ---- IP 卡预览（大卡，对齐 actor-card.js 视觉） ---- */
+    .ipc-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .ipc-card {
+      position: relative;
+      width: 300px;
+      height: 220px;
+      border-radius: 24px;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg);
+      box-shadow: 0 2px 12px rgba(27,45,71,0.06);
+      transition: box-shadow 0.3s ease;
+      flex-shrink: 0;
+    }
+    .ipc-card:hover { box-shadow: 0 16px 40px rgba(27,45,71,0.12); }
+    .ipc-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .ipc-card:hover img { transform: scale(1.04); }
+    .ipc-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 62%, rgba(0,0,0,0.08) 100%);
+      pointer-events: none;
+    }
+    /* 高级笔编辑按钮（右下角） */
+    .ipc-edit-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 2;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(15,23,42,0.72);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: all 0.25s ease;
+    }
+    .ipc-edit-btn svg { width: 18px; height: 18px; }
+    .ipc-card:hover .ipc-edit-btn {
+      background: rgba(0,0,0,0.85);
+      transform: scale(1.06);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .ipc-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+    .ipc-hint {
+      font-size: 12px;
+      color: var(--text-hint);
+      margin-top: -4px;
+    }
+
+    /* ---- Basic info fields ---- */
+    .fields-column {
+      flex: 1.3;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-width: 280px;
+    }
+
+    /* ---- Form fields ---- */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--text);
+    }
+    .form-group label .hint {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 22px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-group input::placeholder,
+    .form-group select::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-hint);
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .form-group textarea {
+      min-height: 128px;
+      resize: vertical;
+    }
+    .form-group .char-count {
+      text-align: right;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+
+    /* ---- Select / dropdown wrapper ---- */
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper select {
+      appearance: none;
+      padding-right: 44px;
+      width: 100%;
+      background: var(--surface);
+    }
+    .select-wrapper .chevron {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      width: 24px;
+      height: 24px;
+      color: var(--text-hint);
+    }
+
+    .hint-text {
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: 0.33%;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ---- IP 卡发行参数 section ---- */
+    .nft-section-divider {
+      border: none;
+      border-top: 1px solid var(--border-dark);
+      margin: 0;
+    }
+    .nft-section-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 24px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .nft-section-desc {
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── 定价模式切换 ── */
+    .pricing-mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 3px;
+      border: 1px solid var(--border-dark);
+      width: fit-content;
+      margin-bottom: 20px;
+    }
+    .pricing-mode-toggle .pm-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .pricing-mode-toggle .pm-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(27,45,71,0.08);
+    }
+    .pricing-mode-toggle .pm-btn:hover:not(.active) {
+      color: var(--text);
+    }
+    .pricing-mode-field {
+      display: none;
+    }
+    .pricing-mode-field.visible {
+      display: block;
+    }
+
+    .params-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+
+    /* ---- Footer ---- */
+    .form-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      padding-top: 24px;
+    }
+    .button-primary, .button-outline {
+      border: none;
+      cursor: pointer;
+      border-radius:999px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+    .button-primary {
+      background: var(--text);
+      color: var(--surface);
+      padding: 12px 32px;
+      border: 1px solid var(--text);
+    }
+    .button-primary:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+    .button-primary:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .button-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--text);
+      padding: 12px 32px;
+    }
+    .button-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    @media (max-width: 1200px) {
+      .app-shell { padding: 80px 80px; }
+    }
+    @media (max-width: 900px) {
+      .app-shell { padding: 60px 32px; }
+      .params-row { grid-template-columns: 1fr; }
+    }
+    /* 桌面端隐藏移动端导航栏 + 底部按钮栏 */
+    .step-nav-bar, .close-dropdown, .bottom-submit-bar { display: none; }
+
+    @media (max-width: 680px) {
+      /* ── Apple 设计：背景色 ── */
+      body { background: #F2F2F7; padding-bottom: 0; }
+
+      /* ── 隐藏桌面版元素 ── */
+      .page-title { display: none; }
+      .page-subtitle { display: none; }
+      .form-footer { display: none; }
+      .dev-toggle-fixed { display: none; }
+
+      /* ── 全局紧凑 ── */
+      .app-shell { padding: 0; }
+
+      /* ── 顶部导航栏 ── */
+      .step-nav-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 48px;
+        padding: 0 16px;
+        margin-top: 40px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255,255,255,0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 0.33px solid rgba(0,0,0,0.10);
+      }
+
+      /* ── 关闭下拉菜单 ── */
+      .close-dropdown {
+        display: none;
+        position: absolute;
+        top: 44px;
+        left: 8px;
+        background: #FFFFFF;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+        overflow: hidden;
+        z-index: 200;
+        min-width: 130px;
+        flex-direction: column;
+      }
+
+      .close-dropdown.active { display: flex; }
+
+      .close-dropdown-item {
+        display: block;
+        width: 100%;
+        padding: 13px 20px;
+        border: none;
+        background: none;
+        font-family: inherit;
+        font-size: 0.92rem;
+        font-weight: 500;
+        color: #1C1C1E;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.12s;
+        -webkit-tap-highlight-color: transparent;
+        white-space: nowrap;
+      }
+
+      .close-dropdown-item:active { background: rgba(0,0,0,0.04); }
+      .close-dropdown-item:first-child { color: #FF3B30; }
+
+      .step-nav-left {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 8px;
+        border: none;
+        background: none;
+        color: var(--accent);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        white-space: nowrap;
+      }
+
+      .step-nav-left:active { background: rgba(0,0,0,0.05); }
+      .step-nav-left svg { flex-shrink: 0; }
+
+      .step-nav-right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 7px 18px;
+        border: 1.5px solid var(--accent);
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 20px;
+        transition: opacity 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        white-space: nowrap;
+      }
+
+      .step-nav-right { display: none; }
+
+      .step-nav-title {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1C1C1E;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+
+      /* ── 表单面板 ── */
+      .form-panel {
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        margin-top: 0;
+        background: transparent;
+        padding: 20px 20px 80px;
+        gap: 32px;
+      }
+
+      /* ── IP 卡预览大卡：移动端自适应 ── */
+      .ipc-card { width: 100%; max-width: 300px; height: auto; aspect-ratio: 300 / 220; }
+      .ipc-preview { margin: 0 auto; }
+
+      /* ── 表单字段：Apple 风格输入框 ── */
+      .form-row { grid-template-columns: 1fr; gap: 16px; margin-bottom: 0; }
+      .form-group label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6C6C70;
+        padding-left: 4px;
+      }
+      .form-group input[type="text"],
+      .form-group input[type="number"],
+      .form-group select,
+      .form-group textarea {
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-size: 0.95rem;
+        border: none;
+        background: #fff;
+        color: #000;
+        box-shadow: 0 0 0 1px rgba(0,0,0,0.04);
+        transition: box-shadow 0.2s ease;
+      }
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border-color: transparent;
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.25);
+      }
+      .form-group textarea { min-height: 80px; }
+
+      /* ── 定价模式切换 ── */
+      .pricing-mode-toggle { margin: 0 auto 20px; }
+
+      /* ── 发行参数区域 ── */
+      .nft-section-title { font-size: 1rem; }
+      .nft-section-desc { font-size: 0.82rem; color: #8E8E93; }
+      .hint-text { font-size: 0.75rem; color: #AEAEB2; }
+
+      /* ── 底部发行按钮 ── */
+      .bottom-submit-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0));
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(255,255,255,0.94);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 0.33px solid rgba(0,0,0,0.10);
+      }
+
+      .bottom-submit-bar .button-full {
+        width: 100%;
+        height: 50px;
+        border-radius:999px;
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: -0.01em;
+        transition: opacity 0.15s;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .bottom-submit-bar .button-full:active { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Mobile Navigation Bar -->
+    <div class="step-nav-bar" id="stepNavBar">
+      <button class="step-nav-left" id="closeBtn" onclick="history.back()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span class="step-nav-title">发行IP</span>
+    </div>
+
+    <h1 class="page-title">发行 IP</h1>
+    <p style="font-size:13px;color:var(--text-muted);margin:-2px 0 24px;line-height:1.6;">每个账号仅可发行 <strong style="color:var(--text);">1 个 IP</strong>，发行后不可修改</p>
+
+    <div class="form-panel">
+
+      <!-- ═══ IP 卡预览（大卡，默认账号头像/可自定义） ═══ -->
+      <div class="ipc-preview">
+        <div class="ipc-card" onclick="document.getElementById('ipAvatarInput').click()" title="点击更换 IP 卡形象">
+          <img id="ipAvatarImg" src="" alt="IP 卡形象" />
+          <span class="ipc-edit-btn" title="更换形象">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+          </span>
+        </div>
+        <div class="ipc-label">IP 卡预览</div>
+        <div class="ipc-hint">点击卡片可自定义 IP 形象，发行后无法修改</div>
+        <input type="file" id="ipAvatarInput" accept="image/*" style="display:none;" onchange="handleIpAvatarFile(event)" />
+      </div>
+
+      <!-- ═══ Basic info: IP name + bio ═══ -->
+      <div class="basic-info-section">
+        <div class="form-row full">
+          <div class="form-group">
+            <label>IP 名称</label>
+            <input type="text" placeholder="请输入 IP 名称" maxlength="20" id="actorName" />
+            <span class="char-count" id="nameCount">0/20</span>
+          </div>
+        </div>
+        <div class="form-row full">
+          <div class="form-group">
+            <label>IP 简介</label>
+            <textarea placeholder="请输入 IP 简介" id="actorBio"></textarea>
+            <span class="char-count" id="bioCount">0/500</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- IP 卡发行参数 -->
+      <hr class="nft-section-divider" />
+
+      <div>
+        <h3 class="nft-section-title">IP 卡发行参数</h3>
+        <p class="nft-section-desc">设定 IP 卡的发行参数，发行后不可修改。</p>
+
+        <!-- 发行总量（两种模式共享） -->
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label>发行总量</label>
+          <input type="number" placeholder="100 - 5000" min="100" max="5000" step="100" id="nftSupply" />
+        </div>
+
+        <!-- 定价模式切换 -->
+        <div class="pricing-mode-toggle" id="pricingModeToggle">
+          <button class="pm-btn active" data-mode="fixed">固定价格</button>
+          <button class="pm-btn" data-mode="curve">曲线价格</button>
+        </div>
+
+        <!-- 固定价格模式 — 仅价格输入框 -->
+        <div class="pricing-mode-field visible" id="pricingFixedField">
+          <div class="form-group">
+            <label>固定价格（USDC）</label>
+            <input type="number" placeholder="10 - 1000" step="0.1" min="0" id="nftPriceFixed" oninput="updatePriceCoefficient('fixed')" />
+            <span class="hint-text">每张 IP 卡都以固定不变的价格购买，不会随销量变化。</span>
+          </div>
+        </div>
+
+        <!-- 曲线价格模式 — 仅价格输入框 -->
+        <div class="pricing-mode-field" id="pricingCurveField">
+          <div class="form-group">
+            <label>初始价格（USDC）</label>
+            <input type="number" placeholder="10 - 1000" step="0.1" min="0" id="nftPriceCurve" oninput="updatePriceCoefficient('curve')" />
+            <span class="hint-text">初始价格为联合曲线起始价，每售出 1 张 IP 卡，价格按公式 <code>P = P₀ × 5^(已售数/发行总量)</code> 自动上涨，早期购买更优惠。</span>
+          </div>
+        </div>
+
+        <!-- 价格系数实时显示 -->
+        <div id="priceCoeffRow" style="display:none;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--accent-soft);border-radius:12px;margin-top:6px;margin-bottom:16px;">
+          <span style="font-size:0.82rem;font-weight:600;color:var(--text-muted);">价格系数</span>
+          <span style="font-size:1rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;" id="priceCoeffValue">—</span>
+          <button class="price-coeff-help" id="priceCoeffHelp" type="button" onclick="event.stopPropagation();togglePriceCoeffTooltip()" style="width:18px;height:18px;border-radius:50%;border:1.2px solid var(--accent);background:transparent;color:var(--accent);font-size:0.55rem;font-weight:700;cursor:pointer;display:grid;place-items:center;transition:all 0.2s ease;flex-shrink:0;line-height:1;padding:0;" onmouseenter="this.style.background='var(--accent)';this.style.color='#fff'" onmouseleave="this.style.background='transparent';this.style.color='var(--accent)'">?</button>
+        </div>
+
+
+      </div>
+
+      <!-- ═══ Fee Information ═══ -->
+
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--accent-soft); border-radius: 12px; border: 1px solid var(--accent-glow);">
+        <span style="font-size: 14px; font-weight: 500; color: var(--text);">手续费</span>
+        <span style="font-size: 14px; font-weight: 700; color: var(--accent);">1 USDC</span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="form-footer">
+      <button class="button-outline" onclick="location.href='narrator.html'">取消</button>
+      <button class="button-primary" id="submitBtn" onclick="handleSubmit()">发行</button>
+    </div>
+
+    <!-- 底部发行按钮 (移动端) -->
+    <div class="bottom-submit-bar">
+      <button class="button-full" onclick="handleSubmit()">发行</button>
+    </div>
+
+  </div>
+
+  <!-- 价格系数说明 tooltip -->
+  <div id="priceCoeffTooltip" style="display:none;position:fixed;z-index:10000;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(15,23,42,0.18);padding:20px 22px 18px;max-width:380px;font-size:0.85rem;line-height:1.7;color:var(--text-muted);text-align:left;">
+    <div style="font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:8px;">💰 价格系数说明</div>
+    <div style="margin-bottom:8px;">
+      <strong>P0 ≤ 100 USDC：</strong><br>
+      价格系数 = P0 ÷ 100（线性增长）
+    </div>
+    <div style="margin-bottom:8px;">
+      <strong>P0 > 100 USDC：</strong><br>
+      价格系数 = 1.6 × (P0/100)^1.3 / [(P0/100)^1.3 + 0.6]<br>
+      <span style="font-size:0.78rem;color:var(--text-hint);">增速渐缓，上限 1.6</span>
+    </div>
+    <button onclick="togglePriceCoeffTooltip()" style="margin-top:6px;padding:6px 16px;border-radius:999px;border:1px solid var(--border-dark);background:var(--surface);cursor:pointer;font-size:0.8rem;color:var(--text-muted);">关闭</button>
+  </div>
+
+  <!-- 发行成功引导弹窗 -->
+  <div class="success-modal-overlay" id="successModalOverlay">
+    <div class="success-modal">
+      <button class="auth-modal-close" onclick="closeSuccessModal()" style="position:absolute;top:16px;right:16px;">&times;</button>
+      <div class="success-modal-icon">🎉</div>
+      <h2>发行成功！</h2>
+      <p class="success-title">IP 卡合集「<span class="success-actor-name" id="successActorName">—</span>」</p>
+      <p class="success-ip-id">IP <span id="successIpId">—</span></p>
+      <p class="success-tip">发行者同样需购买 IP 卡方可持有</p>
+      <div class="success-buttons">
+        <button class="success-btn-primary" id="successGoSignBtn">查看 IP 合集</button>
+        <button class="success-btn-outline" onclick="closeSuccessModal()">稍后再说</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="load-sidebar.js"></script>
+<script src="load-desktop-header.js?v=3"></script>
+  <script src="auth.js"></script>
+
+  <script>
+  // ══════════════════════════════════════════════
+  //  IP 发行 — 默认带出账号信息（账号 = 创作者 = IP）
+  // ══════════════════════════════════════════════
+  function getAccountInfo() {
+    var u = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : {};
+    return {
+      name: u.name || u.username || '我的 IP',
+      bio: u.bio || '',
+      avatar: u.avatar || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80'
+    };
+  }
+
+  function fillAccountDefaults() {
+    var info = getAccountInfo();
+    var nameInput = document.getElementById('actorName');
+    var bioInput = document.getElementById('actorBio');
+    var avatarImg = document.getElementById('ipAvatarImg');
+
+    // 默认带出用户名与简介（可修改）
+    if (nameInput && !nameInput.value.trim()) {
+      nameInput.value = info.name;
+      var nameCount = document.getElementById('nameCount');
+      if (nameCount) nameCount.textContent = info.name.length + '/20';
+    }
+    if (bioInput && !bioInput.value.trim()) {
+      bioInput.value = info.bio;
+      var bioCount = document.getElementById('bioCount');
+      if (bioCount) bioCount.textContent = info.bio.length + '/500';
+    }
+    if (avatarImg && !avatarImg.getAttribute('src')) {
+      avatarImg.src = info.avatar;
+    }
+  }
+
+  // ═══ IP 形象自定义：本地选择图片并预览 ═══
+  var _customAvatarDataUrl = null; // 自定义形象（base64），优先于账号头像
+
+  function handleIpAvatarFile(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!file.type || file.type.indexOf('image/') !== 0) {
+      showToast('请选择图片文件');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('图片不能超过 5MB');
+      e.target.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      _customAvatarDataUrl = ev.target.result;
+      var avatarImg = document.getElementById('ipAvatarImg');
+      if (avatarImg) avatarImg.src = _customAvatarDataUrl;
+      showToast('✅ IP 形象已更新');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // ── Char counters ──
+    var nameInput = document.getElementById('actorName');
+    var bioInput = document.getElementById('actorBio');
+
+    if (nameInput) {
+      nameInput.addEventListener('input', function() {
+        document.getElementById('nameCount').textContent = this.value.length + '/20';
+      });
+    }
+    if (bioInput) {
+      bioInput.addEventListener('input', function() {
+        document.getElementById('bioCount').textContent = this.value.length + '/500';
+      });
+    }
+
+    // ── 默认带出账号信息 ──
+    fillAccountDefaults();
+    document.addEventListener('auth-ready', fillAccountDefaults);
+
+    // ── Pricing Mode Toggle ──
+    var pricingToggle = document.getElementById('pricingModeToggle');
+
+    if (pricingToggle) {
+      pricingToggle.addEventListener('click', function(e) {
+        var btn = e.target.closest('.pm-btn');
+        if (!btn) return;
+        var mode = btn.dataset.mode;
+        if (mode === _pricingMode) return;
+        _pricingMode = mode;
+        // Update toggle active state
+        pricingToggle.querySelectorAll('.pm-btn').forEach(function(b) {
+          b.classList.toggle('active', b.dataset.mode === mode);
+        });
+        // Show/hide fields
+        document.getElementById('pricingFixedField').classList.toggle('visible', mode === 'fixed');
+        document.getElementById('pricingCurveField').classList.toggle('visible', mode === 'curve');
+      });
+    }
+
+    // ── Close button dropdown ──
+    var closeBtn = document.getElementById('closeBtn');
+    var closeDropdown = document.getElementById('closeDropdown');
+    var closeDontSave = document.getElementById('closeDontSave');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeDropdown.classList.toggle('active');
+      });
+    }
+
+    if (closeDontSave) {
+      closeDontSave.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeDropdown.classList.remove('active');
+        history.back();
+      });
+    }
+
+    // Click outside to close dropdown
+    document.addEventListener('click', function(e) {
+      if (closeDropdown && closeDropdown.classList.contains('active')) {
+        if (!closeDropdown.contains(e.target) && e.target !== closeBtn && !closeBtn.contains(e.target)) {
+          closeDropdown.classList.remove('active');
+        }
+      }
+    });
+  });
+
+  // ── Pricing Mode (global) ──
+  var _pricingMode = 'fixed'; // 'fixed' or 'curve'
+
+  // ═══ 价格系数计算 ═══
+  function computePriceCoefficient(P0) {
+    if (P0 == null || P0 <= 0) return 0;
+    var x = P0 / 100;
+    if (P0 <= 100) return x;
+    var powX = Math.pow(x, 1.3);
+    return 1.6 * powX / (powX + 0.6);
+  }
+
+  function updatePriceCoefficient(mode) {
+    var input = mode === 'fixed' ? document.getElementById('nftPriceFixed') : document.getElementById('nftPriceCurve');
+    var val = parseFloat(input.value);
+    var row = document.getElementById('priceCoeffRow');
+    var coeffEl = document.getElementById('priceCoeffValue');
+    if (isNaN(val) || val <= 0) {
+      row.style.display = 'none';
+    } else {
+      row.style.display = 'flex';
+      coeffEl.textContent = computePriceCoefficient(val).toFixed(4);
+    }
+  }
+
+  function togglePriceCoeffTooltip() {
+    var tt = document.getElementById('priceCoeffTooltip');
+    var btn = document.getElementById('priceCoeffHelp');
+    if (tt.style.display === 'none' || !tt.style.display) {
+      var rect = btn.getBoundingClientRect();
+      tt.style.display = 'block';
+      tt.style.left = Math.min(rect.left, window.innerWidth - 400) + 'px';
+      tt.style.top = (rect.bottom + 8) + 'px';
+    } else {
+      tt.style.display = 'none';
+    }
+  }
+
+  // 点击外部关闭 tooltip
+  document.addEventListener('click', function(e) {
+    var tt = document.getElementById('priceCoeffTooltip');
+    if (tt && tt.style.display === 'block') {
+      if (!e.target.closest('#priceCoeffTooltip') && !e.target.closest('#priceCoeffHelp')) {
+        tt.style.display = 'none';
+      }
+    }
+  });
+
+  // ── Submit ──
+
+  function handleSubmit() {
+    var name = document.getElementById('actorName').value.trim();
+    var bio = document.getElementById('actorBio').value.trim();
+
+    // Read price & supply based on pricing mode
+    var pricingMode = _pricingMode || 'fixed';
+    var nftPrice;
+    var nftSupply = parseInt(document.getElementById('nftSupply').value) || 1000;
+    if (pricingMode === 'fixed') {
+      nftPrice = document.getElementById('nftPriceFixed').value;
+    } else {
+      nftPrice = document.getElementById('nftPriceCurve').value;
+    }
+
+
+    if (!name) { showToast('请输入 IP 名称'); return; }
+    if (!nftPrice) { showToast('请输入价格'); return; }
+
+    // IP 形象：优先自定义图片，否则用账号头像（账号 = 创作者 = IP）
+    var info = getAccountInfo();
+    var avatar = _customAvatarDataUrl || info.avatar;
+
+    var actorData = {
+      name: name,
+      desc: bio || '暂无介绍',
+      avatar: avatar,
+      gender: '—',
+      totalSupply: nftSupply,
+      minted: 0,          // 发行者不自动持有，需购买 IP 卡
+      available: nftSupply,
+      holders: 0,
+      price: nftPrice + ' USDC',
+      initPrice: parseFloat(nftPrice) || 0,
+      reserved: 0,
+      contract: '—',
+      standard: 'Solana SPL',
+      views: '0',
+      heat: '0',
+      creator: currentUser && currentUser.username ? currentUser.username : (currentUser && currentUser.name ? currentUser.name : '—'),
+      collection: '—',
+      childActors: [],
+      isCreatorIP: true,  // 新模型标记：账号 = 创作者 = IP
+      ipId: generateIpId() // 23 位数字 IP 编号（链上 ID 语义）
+    };
+
+
+    console.log('IP Data:', actorData);
+
+    // Save to localStorage so actor-profile.html can read it
+    try {
+      // Save as pending (for immediate navigation)
+      localStorage.setItem('storyfun_pending_actor', JSON.stringify(actorData));
+      // Also save to created actors map (for actor-profile.html fallback)
+      var createdActors = {};
+      try {
+        createdActors = JSON.parse(localStorage.getItem('storyfun_created_actors')) || {};
+      } catch(e) {}
+      createdActors[name] = actorData;
+      localStorage.setItem('storyfun_created_actors', JSON.stringify(createdActors));
+    } catch(e) {}
+
+    // Show success modal with guidance
+    showSuccessModal(actorData);
+  }
+
+  // ── Success Modal ──
+
+  // 生成 23 位随机数字 IP 编号（首位非 0，避免前导零丢失）
+  function generateIpId() {
+    var digits = [];
+    digits.push(String(Math.floor(Math.random() * 9) + 1));
+    for (var i = 1; i < 23; i++) {
+      digits.push(String(Math.floor(Math.random() * 10)));
+    }
+    return digits.join('');
+  }
+
+  function showSuccessModal(actorData) {
+    var overlay = document.getElementById('successModalOverlay');
+    var nameEl = document.getElementById('successActorName');
+    var ipIdEl = document.getElementById('successIpId');
+    var goSignBtn = document.getElementById('successGoSignBtn');
+
+    // Fill IP name
+    if (nameEl) {
+      nameEl.textContent = actorData.name;
+    }
+
+    // Fill IP id（23 位数字编号）
+    if (ipIdEl && actorData.ipId) {
+      ipIdEl.textContent = actorData.ipId;
+    }
+
+    // Bind "查看 IP 合集" button — navigate to actor-profile（按名称读取刚发行的 IP）
+    if (goSignBtn) {
+      var goSignHandler = function() {
+        closeSuccessModal();
+        location.href = 'actor-profile.html?name=' + encodeURIComponent(actorData.name);
+      };
+      goSignBtn.onclick = goSignHandler;
+    }
+
+    // Show overlay
+    overlay.classList.add('active');
+  }
+
+  function closeSuccessModal() {
+    var overlay = document.getElementById('successModalOverlay');
+    overlay.classList.remove('active');
+  }
+
+  // Click overlay background to close
+  document.addEventListener('click', function(e) {
+    var overlay = document.getElementById('successModalOverlay');
+    if (overlay && overlay.classList.contains('active')) {
+      if (e.target === overlay) {
+        closeSuccessModal();
+      }
+    }
+  });
+
+  // ── Toast ──
+  var _toastTimer;
+
+  function showToast(msg) {
+    var t = document.querySelector('.auth-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'auth-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(function() {
+      t.classList.remove('show');
+    }, 2500);
+  }
+  </script>
+
+</body>
+</html>

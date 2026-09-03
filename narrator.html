@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story.fun | 创作</title>
+  <style>
+    :root { --bg: #f7fbff; --surface: #ffffff; --accent: #000000; --accent-soft: rgba(0, 0, 0, 0.16); --text: #1a232f; --text-muted: #657586; --border: #e6eff7; --shadow: 0 20px 45px rgba(27, 45, 71, 0.08); font-family: "Segoe UI", Roboto, "PingFang SC", "Helvetica Neue", Arial, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+    .app-shell { max-width: 1440px; margin: 0 auto; padding: 24px; }
+    .page-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 28px; margin-bottom: 28px; }
+    .page-header-left { display: flex; flex-direction: column; gap: 4px; }
+    .page-header-left h1 { margin: 0; font-size: 2rem; letter-spacing: -0.02em; line-height: 1.15; }
+    .page-header-left p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+    .page-header-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 999px; border: none; background: var(--accent); color: #fff; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0,0.3); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none; }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .button, .button-secondary { border: none; cursor: pointer; border-radius: 999px; padding: 12px 20px; font-size: 0.95rem; transition: all 0.2s ease; text-decoration: none; }
+    .button { background: var(--accent); color: #fff; font-weight: 600; }
+    .button-secondary { background: rgba(15, 22, 42, 0.05); color: var(--text); }
+    .button:hover, .button-secondary:hover { transform: translateY(-1px); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+    .filter-pill { border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); padding: 10px 16px; border-radius: 999px; cursor: pointer; font-size: 0.92rem; }
+    .filter-pill.active { background: var(--accent); color: #fff; border-color: transparent; }
+    .card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+
+    .card-list-item {
+      overflow: hidden; border-radius: 24px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 8px 25px rgba(27, 45, 71, 0.06); display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); will-change: transform;
+    }
+    .card-list-item:hover { transform: translateY(-4px); box-shadow: 0 20px 45px rgba(27, 45, 71, 0.12); border-color: rgba(0, 0, 0, 0.20); }
+    .card-header { position: relative; overflow: hidden; aspect-ratio: 16 / 9; background: #eaf4ee; }
+    .card-header img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .card-list-item:hover .card-header img { transform: scale(1.06); }
+    .card-header::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(26, 35, 47, 0.06) 100%); pointer-events: none; }
+    .card-header .badge-row { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; z-index: 2; }
+    .card-header .minted-badge { position: absolute; bottom: 14px; left: 14px; z-index: 2; padding: 5px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; color: #fff; background: linear-gradient(135deg, #000000, #00c797); backdrop-filter: blur(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.10); display: inline-flex; align-items: center; gap: 4px; }
+
+    /* ===== Card Menu (右上角三点菜单) ===== */
+    .card-menu { position: absolute; top: 12px; right: 12px; z-index: 10; }
+    .card-menu-btn { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,0.30); color: #fff; font-size: 1.2rem; cursor: pointer; display: grid; place-items: center; transition: all 0.2s ease; backdrop-filter: blur(4px); line-height: 1; padding: 0; }
+    .card-menu-btn:hover { background: rgba(0,0,0,0.50); transform: scale(1.08); }
+    .card-menu-dropdown { position: absolute; top: calc(100% + 4px); right: 0; min-width: 150px; background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.06); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.95); transition: all 0.2s ease; transform-origin: top right; }
+    .card-menu-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+    .card-menu-dropdown .menu-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; color: var(--text); cursor: pointer; transition: background 0.15s ease; white-space: nowrap; }
+    .card-menu-dropdown .menu-item:hover { background: rgba(0,0,0,0.04); }
+    .card-menu-dropdown .menu-item.danger { color: #f45b69; }
+    .card-menu-dropdown .menu-item.danger:hover { background: rgba(244,91,105,0.08); }
+    .card-menu-dropdown .menu-item .menu-icon { font-size: 1rem; flex-shrink: 0; }
+    .status-badge { padding: 6px 14px 6px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; color: #fff; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.02em; backdrop-filter: blur(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+    .status-badge:hover { transform: scale(1.06); }
+    .status-pending { background: linear-gradient(135deg, #ff9f2c, #f59e0b); }
+    .status-approved { background: linear-gradient(135deg, #000000, #00c797); }
+    .status-rejected { background: linear-gradient(135deg, #f45b69, #e74c5a); }
+    .status-delisted { background: linear-gradient(135deg, #8e8e93, #6b6b70); }
+    .status-badge .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.7); flex-shrink: 0; animation: statusPulse 2s ease-in-out infinite; }
+    .status-approved .status-dot, .status-rejected .status-dot { animation: none; }
+    @keyframes statusPulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
+    .status-badge .hint-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.25); font-size: 0.6rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
+    .status-badge .hint-icon:hover { background: rgba(255,255,255,0.45); }
+
+    .toast-notification { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 9999; background: rgba(26, 35, 47, 0.95); backdrop-filter: blur(8px); color: #fff; padding: 16px 24px; border-radius: 16px; font-size: 0.92rem; line-height: 1.6; box-shadow: 0 12px 40px rgba(27, 45, 71, 0.25); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; pointer-events: none; max-width: 420px; text-align: center; font-weight: 500; }
+    .toast-notification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast-notification .toast-icon { display: inline-block; margin-right: 8px; font-size: 1.1rem; }
+
+    .card-body { padding: 20px 22px 18px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    .card-body h3 { margin: 0; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
+    .card-body .card-sub { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.82rem; margin-top: -4px; }
+    .card-body .card-sub .sub-divider { width: 3px; height: 3px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+    .props-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .props-pill { border-radius: 999px; background: #f4faf6; color: var(--accent); padding: 6px 12px; font-size: 0.82rem; font-weight: 600; border: 1px solid rgba(0, 0, 0, 0.12); display: inline-flex; align-items: center; gap: 4px; }
+    .card-actors { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .card-actors-label { font-size: 0.7rem; color: var(--text-muted); flex-shrink: 0; letter-spacing: 0.03em; }
+    .card-actors-list { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .card-actor-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 2px solid var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.08); flex-shrink: 0; position: relative; cursor: default; transition: transform 0.2s; }
+    .card-actor-avatar:hover { transform: scale(1.15); z-index: 2; }
+    .card-actor-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-actor-avatar .actor-tooltip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%) scale(0.8); background: rgba(26,35,47,0.92); color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: all 0.2s ease; }
+    .card-actor-avatar:hover .actor-tooltip { opacity: 1; transform: translateX(-50%) scale(1); }
+    .card-action { padding: 16px 22px 18px; border-top: 1px solid var(--border); background: #fafcff; display: flex; gap: 10px; }
+    .card-action .button { flex: 1; padding: 11px 16px; font-size: 0.88rem; border-radius:999px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .card-action .button .btn-icon { font-size: 0.95rem; }
+    .card-action .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .card-action .button-danger { background: transparent; color: #f45b69; border: 1px solid rgba(244, 91, 105, 0.25); font-weight: 600; }
+    .card-action .button-danger:hover { background: rgba(244, 91, 105, 0.06); transform: translateY(-1px); }
+
+    .modal-overlay { display: none; position: fixed; z-index: 1000; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 24px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 32px; box-shadow: 0 40px 80px rgba(27,45,71,0.18); width: 100%; max-width: 720px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; animation: modalIn 0.25s ease; }
+    @keyframes modalIn { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 28px 16px; border-bottom: 1px solid var(--border); }
+    .modal-header h3 { margin: 0; font-size: 1.35rem; }
+    .modal-header h2 { margin: 0; font-size: 1.45rem; }
+    .modal-close { width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(0,0,0,0.04); cursor: pointer; display: grid; place-items: center; font-size: 1.2rem; color: var(--text-muted); transition: all 0.2s; flex-shrink: 0; }
+    .modal-close:hover { background: rgba(0,0,0,0.08); color: var(--text); }
+    .modal-body { padding: 20px 28px 28px; overflow-y: auto; flex: 1; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 28px; border-top: 1px solid var(--border); background: #fafcff; }
+    .modal-footer .button { padding: 10px 24px; }
+
+    .modal-backdrop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(15, 23, 42, 0.35); z-index: 1000; }
+    .modal-backdrop.active { display: flex; }
+    .modal-dialog { width: min(720px, 100%); background: #fff; border-radius: 28px; box-shadow: 0 35px 80px rgba(15, 23, 42, 0.2); overflow: hidden; }
+    .modal-subtitle { padding: 0 24px 18px; color: var(--text-muted); font-size: 0.96rem; }
+    .modal-body .modal-preview { border-radius: 24px; overflow: hidden; background: #f5f7ff; position: relative; }
+    .modal-body .modal-preview img { width: 100%; height: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+    .modal-preview .preview-tag { position: absolute; left: 16px; bottom: 16px; padding: 10px 14px; border-radius:999px; background: rgba(255, 255, 255, 0.92); color: var(--text); font-weight: 600; font-size: 0.95rem; backdrop-filter: blur(12px); }
+    .modal-info { display: grid; gap: 12px; }
+    .modal-field { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-radius: 18px; background: #f8fbff; border: 1px solid #eef4ff; }
+    .modal-field span { color: var(--text-muted); font-size: 0.95rem; }
+    .modal-field strong { color: var(--text); font-weight: 600; }
+    .modal-total { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-radius: 20px; background: rgba(76, 222, 204, 0.12); border: 1px solid rgba(76, 222, 204, 0.18); margin-top: 4px; }
+    .modal-total strong { font-size: 1.4rem; color: #0c7f71; }
+    .modal-actions { display: flex; flex-wrap: wrap; gap: 14px; padding: 18px 24px 24px; }
+    .modal-actions .button, .modal-actions .button-secondary { flex: 1; min-width: 0; }
+    .modal-mint-preview { display:flex;align-items:center;gap:18px;margin-bottom:20px; }
+    .modal-mint-preview img { width:72px;height:72px;border-radius:14px;object-fit:cover;background:#eaf4ff;flex-shrink:0; }
+    .modal-mint-preview h4 { margin:0;font-size:1.1rem; }
+
+    .mintable-list { display: flex; flex-direction: column; gap: 12px; }
+    .mintable-item { display: flex; align-items: center; gap: 16px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 18px; cursor: pointer; transition: all 0.2s ease; }
+    .mintable-item:hover { border-color: var(--accent); background: rgba(0, 0, 0,0.03); }
+    .mintable-item.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px rgba(0, 0, 0,0.20); }
+    .mintable-item .mint-thumb { width: 64px; height: 64px; border-radius: 14px; overflow: hidden; flex-shrink: 0; background: #eaf4ff; }
+    .mintable-item .mint-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .mintable-item .mint-info { flex: 1; min-width: 0; }
+    .mintable-item .mint-info h4 { margin: 0 0 4px; font-size: 1.05rem; }
+    .mintable-item .mint-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+    .mintable-item .mint-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; transition: all 0.2s; flex-shrink: 0; }
+    .mintable-item.selected .mint-check { background: var(--accent); border-color: var(--accent); color: #fff; font-size: 0.8rem; }
+
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state p { font-size: 1rem; line-height: 1.7; }
+
+    .nft-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+    .nft-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 8px 25px rgba(27, 45, 71, 0.06); overflow: hidden; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); will-change: transform;
+    }
+    .nft-card:hover { transform: translateY(-4px); box-shadow: 0 20px 45px rgba(27, 45, 71, 0.12); border-color: rgba(0, 0, 0, 0.20); }
+    .nft-card .nft-cover-wrap { position: relative; overflow: hidden; aspect-ratio: 16 / 9; background: #eaf4ee; }
+    .nft-card .nft-cover { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .nft-card:hover .nft-cover { transform: scale(1.06); }
+    .nft-card .nft-cover-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(26, 35, 47, 0.06) 100%); pointer-events: none; }
+    .nft-card .nft-id-badge { position: absolute; top: 12px; left: 12px; background: rgba(26, 35, 47, 0.75); backdrop-filter: blur(6px); color: #fff; padding: 5px 11px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; z-index: 2; }
+    .nft-card .nft-body { padding: 18px 20px 14px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .nft-card .nft-body h4 { margin: 0; font-size: 1.05rem; font-weight: 700; line-height: 1.3; }
+    .nft-card .nft-body .nft-sub { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.8rem; margin-top: -4px; }
+    .nft-card .nft-body .nft-sub .sub-divider { width: 3px; height: 3px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .narrator-tabs { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; padding: 18px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); }
+    .narrator-tab { border: none; background: transparent; color: var(--text); cursor: pointer; padding: 10px 18px; border-radius: 999px; font-size: 0.95rem; font-weight: 600; transition: background 0.2s ease; }
+    .narrator-tab.active { background: var(--accent-soft); color: var(--accent); }
+
+    /* ===== Video Card Styles ===== */
+    .video-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+    .video-card { border-radius: 24px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 8px 25px rgba(27, 45, 71, 0.06); display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); will-change: transform; }
+    .video-card:hover { transform: translateY(-4px); box-shadow: 0 20px 45px rgba(27, 45, 71, 0.12); border-color: rgba(0, 0, 0, 0.20); }
+    .vc-cover-wrap { position: relative; overflow: hidden; aspect-ratio: 2 / 3; background: #eaf4ee; }
+    .vc-cover { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .video-card:hover .vc-cover { transform: scale(1.06); }
+    .vc-cover-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 60%, rgba(26, 35, 47, 0.12) 100%); pointer-events: none; }
+    .vc-completion { position: absolute; bottom: 10px; left: 12px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.72rem; font-weight: 500; z-index: 2; }
+    .vc-completion svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.9; stroke: #fff; }
+    .vc-duration { position: absolute; bottom: 10px; right: 12px; padding: 4px 8px; border-radius: 5px; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.72rem; font-weight: 500; z-index: 2; }
+    .vc-cover-wrap .badge-row { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 8px; z-index: 2; }
+    .vc-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .vc-body h4 { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.3; }
+    .vc-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.4em; }
+    @media (max-width: 1280px) { .video-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 1080px) { .video-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 680px) { .video-grid { grid-template-columns: 1fr; gap: 16px; } }
+
+    .actor-drama-list { display: flex; flex-direction: column; gap: 12px; }
+    .actor-drama-item { display: flex; align-items: center; gap: 16px; padding: 16px 18px; border: 1px solid var(--border); border-radius: 18px; transition: all 0.2s ease; }
+    .actor-drama-item:hover { border-color: var(--accent); background: rgba(0, 0, 0,0.03); }
+    .actor-drama-item .drama-thumb { width: 56px; height: 56px; border-radius: 12px; overflow: hidden; flex-shrink: 0; background: #eaf4ff; }
+    .actor-drama-item .drama-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .actor-drama-item .drama-info { flex: 1; min-width: 0; }
+    .actor-drama-item .drama-info h4 { margin: 0 0 3px; font-size: 1rem; }
+    .actor-drama-item .drama-info .drama-role { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
+    .actor-drama-item .drama-royalty { text-align: right; flex-shrink: 0; }
+    .actor-drama-item .drama-royalty .royalty-pct { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .actor-drama-item .drama-royalty .royalty-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    @media (max-width: 1280px) { .card-grid, .nft-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 1080px) { .card-grid, .nft-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 680px) {
+      .card-grid, .nft-grid { grid-template-columns: 1fr; gap: 16px; }
+      .card-body { padding: 16px 18px 14px; }
+      .card-action { padding: 12px 18px 14px; flex-direction: column; }
+      .card-action .button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <section>
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>创作</h1>
+          <p>短剧的发布、审核与铸造。</p>
+        </div>
+        <div class="page-header-actions">
+          <a class="btn-secondary" href="studio.html">创作短剧</a>
+          <a class="btn-primary" href="publish.html">发布新短剧</a>
+        </div>
+      </div>
+      
+      <div class="narrator-tabs">
+        <button class="narrator-tab active" data-tab="tab1" onclick="switchTab('tab1', this)">短剧管理</button>
+        <button class="narrator-tab" data-tab="tab3" onclick="switchTab('tab3', this)">视频管理</button>
+        <button class="narrator-tab" data-tab="tab2" onclick="switchTab('tab2', this)">短剧 IP 卡</button>
+      </div>
+
+      <div class="filter-row" id="filterRow">
+        <button class="filter-pill active" onclick="filterCards('all',this)">全部</button>
+        <button class="filter-pill" onclick="filterCards('approved',this)">已通过</button>
+        <button class="filter-pill" onclick="filterCards('pending',this)">审核中</button>
+        <button class="filter-pill" onclick="filterCards('rejected',this)">未通过</button>
+        <button class="filter-pill" onclick="filterCards('delisted',this)">已下架</button>
+      </div>
+
+      <div class="filter-row" id="videoFilterRow" style="display:none;">
+        <button class="filter-pill active" onclick="filterVideoCards('all',this)">全部</button>
+        <button class="filter-pill" onclick="filterVideoCards('approved',this)">已发布</button>
+        <button class="filter-pill" onclick="filterVideoCards('pending',this)">审核中</button>
+        <button class="filter-pill" onclick="filterVideoCards('rejected',this)">未通过</button>
+        <button class="filter-pill" onclick="filterVideoCards('delisted',this)">已下架</button>
+      </div>
+
+      <!-- Tab 1 -->
+      <div class="tab-content active" id="tab1">
+        <div class="card-grid" id="dramaGrid">
+          <article class="card-list-item" data-status="pending">
+            <div class="card-header">
+              <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80" alt="长安如梦" />
+              <div class="badge-row">
+                <span class="status-badge status-pending">
+                  <span class="status-dot"></span> 审核中
+                </span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDelete('长安如梦')"><span class="menu-icon">🗑️</span> 删除短剧</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h3>长安如梦</h3>
+              <div class="card-sub"><span>30 集 ｜ 一曲长歌诉尽长安繁华梦，宫廷权谋与爱恨纠葛</span></div>
+              <div class="props-row"><span class="props-pill">古装</span><span class="props-pill">爱情</span></div>
+              <div class="card-actors">
+                <span class="card-actors-label">参演IP 卡</span>
+                <div class="card-actors-list">
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="苏婉清" /><span class="actor-tooltip">苏婉清</span></div>
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80" alt="赵无极" /><span class="actor-tooltip">赵无极</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-action" data-status="pending">
+              <button class="button" disabled><span class="btn-icon">⏳</span> 等待审核</button>
+            </div>
+          </article>
+
+          <article class="card-list-item" data-status="approved">
+            <div class="card-header">
+              <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80" alt="江南烟雨" />
+              <div class="badge-row">
+                <span class="status-badge status-approved">
+                  <span class="status-dot"></span> 已通过
+                </span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDelete('江南烟雨')"><span class="menu-icon">🗑️</span> 删除短剧</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h3>江南烟雨</h3>
+              <div class="card-sub"><span>24 集 ｜ 烟雨江南中一段凄美爱情故事，茶楼酒肆间的人间百态</span></div>
+              <div class="props-row"><span class="props-pill">古装</span><span class="props-pill">剧情</span></div>
+              <div class="card-actors">
+                <span class="card-actors-label">参演IP 卡</span>
+                <div class="card-actors-list">
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="苏婉清" /><span class="actor-tooltip">苏婉清</span></div>
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="林梦瑶" /><span class="actor-tooltip">林梦瑶</span></div>
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="上官婉儿" /><span class="actor-tooltip">上官婉儿</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-action" data-status="approved">
+              <button class="button" style="flex:0.7;"><span class="btn-icon">🔨</span> 铸造短剧 IP 卡</button>
+              <button class="button" style="flex:0.3;background:transparent;color:var(--accent);border:1px solid rgba(0, 0, 0,0.25);font-weight:600;" onclick="openEditDramaModal(this)"><span class="btn-icon">✏️</span> 编辑</button>
+            </div>
+          </article>
+
+          <article class="card-list-item" data-status="approved">
+            <div class="card-header">
+              <img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80" alt="星际迷航" />
+              <div class="badge-row">
+                <span class="status-badge status-approved">
+                  <span class="status-dot"></span> 已通过
+                </span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDelete('星际迷航')"><span class="menu-icon">🗑️</span> 删除短剧</div>
+                </div>
+              </div>
+              <span class="minted-badge">✅ 已铸造</span>
+            </div>
+            <div class="card-body">
+              <h3>星际迷航</h3>
+              <div class="card-sub"><span>16 集 ｜ 浩瀚星空中的人类冒险传奇，探索未知的星际文明</span></div>
+              <div class="props-row"><span class="props-pill">科幻</span><span class="props-pill">冒险</span></div>
+            </div>
+            <div class="card-action" data-status="approved">
+              <button class="button" style="flex:1;background:transparent;color:var(--accent);border:1px solid rgba(0, 0, 0,0.25);font-weight:600;" onclick="openEditDramaModal(this)"><span class="btn-icon">✏️</span> 编辑</button>
+            </div>
+          </article>
+
+          <article class="card-list-item" data-status="rejected">
+            <div class="card-header">
+              <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80" alt="迷雾之城" />
+              <div class="badge-row">
+                <span class="status-badge status-rejected" onclick="event.stopPropagation();showStatusReason('rejected','迷雾之城','包含敏感词汇')" style="cursor:pointer;">
+                  <span class="status-dot"></span> 未通过
+                </span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDelete('迷雾之城')"><span class="menu-icon">🗑️</span> 删除短剧</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h3>迷雾之城</h3>
+              <div class="card-sub"><span>12 集 ｜ 迷雾笼罩的城市中隐藏着惊天秘密，真相扑朔迷离</span></div>
+              <div class="props-row"><span class="props-pill">悬疑</span><span class="props-pill">推理</span></div>
+              <div class="card-actors">
+                <span class="card-actors-label">参演IP 卡</span>
+                <div class="card-actors-list">
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="苏婉清" /><span class="actor-tooltip">苏婉清</span></div>
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="李云飞" /><span class="actor-tooltip">李云飞</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-action">
+              <button class="button" style="flex:1;background:transparent;color:var(--accent);border:1px solid rgba(0, 0, 0,0.25);font-weight:600;" onclick="openEditDramaModal(this)"><span class="btn-icon">✏️</span> 编辑</button>
+            </div>
+          </article>
+
+          <article class="card-list-item" data-status="delisted">
+            <div class="card-header">
+              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=900&q=80" alt="雪山传说" />
+              <div class="badge-row">
+                <span class="status-badge status-delisted" onclick="event.stopPropagation();showStatusReason('delisted','雪山传说','版权投诉')" style="cursor:pointer;">
+                  <span class="status-dot"></span> 已下架
+                </span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDelete('雪山传说')"><span class="menu-icon">🗑️</span> 删除短剧</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <h3>雪山传说</h3>
+              <div class="card-sub"><span>8 集 ｜ 雪域高原上流传千年的神秘传说，探险者追寻真相之路</span></div>
+              <div class="props-row"><span class="props-pill">冒险</span><span class="props-pill">悬疑</span></div>
+              <div class="card-actors">
+                <span class="card-actors-label">参演IP 卡</span>
+                <div class="card-actors-list">
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="上官婉儿" /><span class="actor-tooltip">上官婉儿</span></div>
+                  <div class="card-actor-avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="李云飞" /><span class="actor-tooltip">李云飞</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-action">
+              <button class="button" style="flex:1;background:transparent;color:var(--text-muted);border:1px solid rgba(101,117,134,0.25);font-weight:600;" disabled><span class="btn-icon">🚫</span> 已下架</button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Tab 2 -->
+      <div class="tab-content" id="tab2">
+        <div class="nft-grid">
+          <div class="nft-card">
+
+            <div class="nft-cover-wrap">
+              <img class="nft-cover" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80" alt="星际迷航 IP 卡" />
+              <span class="nft-id-badge">#IP-002</span>
+            </div>
+            <div class="nft-body">
+              <h4>星际迷航</h4>
+              <div class="nft-sub"><span>16 集 ｜ 浩瀚星空中的人类冒险传奇</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: 视频管理 -->
+      <div class="tab-content" id="tab3">
+        <div class="video-grid" id="videoGrid">
+          <article class="video-card" data-status="approved">
+            <div class="vc-cover-wrap">
+              <img class="vc-cover" src="image/chengxiangfu_cover.jpg" alt="打斗精彩片段" />
+              <span class="vc-completion"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8s2.5-5.5 7-5.5 7 5.5 7 5.5-2.5 5.5-7 5.5-7-5.5-7-5.5z"/><circle cx="8" cy="8" r="2"/></svg>3.2万</span>
+              <span class="vc-duration">02:15</span>
+              <div class="badge-row">
+                <span class="status-badge status-approved"><span class="status-dot"></span> 已发布</span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item" onclick="event.stopPropagation();openEditVideo('打斗精彩片段','image/chengxiangfu_cover.jpg','精彩打斗场面合集，拳拳到肉的视觉盛宴','EVA','approved')"><span class="menu-icon">✏️</span> 编辑</div>
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDeleteVideo('打斗精彩片段')"><span class="menu-icon">🗑️</span> 删除视频</div>
+                </div>
+              </div>
+            </div>
+            <div class="vc-body">
+              <h4>打斗精彩片段</h4>
+              <div class="vc-desc">精彩打斗场面合集，拳拳到肉的视觉盛宴</div>
+            </div>
+          </article>
+
+          <article class="video-card" data-status="pending">
+            <div class="vc-cover-wrap">
+              <img class="vc-cover" src="image/xiejia_cover.jpg" alt="丞相府花絮" />
+              <span class="vc-duration">05:30</span>
+              <div class="badge-row">
+                <span class="status-badge status-pending"><span class="status-dot"></span> 审核中</span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item" onclick="event.stopPropagation();openEditVideo('丞相府花絮','image/xiejia_cover.jpg','丞相府拍摄幕后花絮，揭秘剧中趣味瞬间','LENS','pending')"><span class="menu-icon">✏️</span> 编辑</div>
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDeleteVideo('丞相府花絮')"><span class="menu-icon">🗑️</span> 删除视频</div>
+                </div>
+              </div>
+            </div>
+            <div class="vc-body">
+              <h4>丞相府花絮</h4>
+              <div class="vc-desc">丞相府拍摄幕后花絮，揭秘剧中趣味瞬间</div>
+            </div>
+          </article>
+
+          <article class="video-card" data-status="approved">
+            <div class="vc-cover-wrap">
+              <img class="vc-cover" src="image/fenggu_cover.jpg" alt="凤骨琉璃·预告" />
+              <span class="vc-completion"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8s2.5-5.5 7-5.5 7 5.5 7 5.5-2.5 5.5-7 5.5-7-5.5-7-5.5z"/><circle cx="8" cy="8" r="2"/></svg>8.1万</span>
+              <span class="vc-duration">01:45</span>
+              <div class="badge-row">
+                <span class="status-badge status-approved"><span class="status-dot"></span> 已发布</span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item" onclick="event.stopPropagation();openEditVideo('凤骨琉璃·预告','image/fenggu_cover.jpg','凤骨琉璃正式预告片，苏婉清初入宫廷惊艳亮相','JACK','approved')"><span class="menu-icon">✏️</span> 编辑</div>
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDeleteVideo('凤骨琉璃·预告')"><span class="menu-icon">🗑️</span> 删除视频</div>
+                </div>
+              </div>
+            </div>
+            <div class="vc-body">
+              <h4>凤骨琉璃·预告</h4>
+              <div class="vc-desc">凤骨琉璃正式预告片，苏婉清初入宫廷惊艳亮相</div>
+            </div>
+          </article>
+
+          <article class="video-card" data-status="rejected">
+            <div class="vc-cover-wrap">
+              <img class="vc-cover" src="image/cover-zero-night.jpg" alt="卸甲·删减片段" />
+              <span class="vc-duration">03:20</span>
+              <div class="badge-row">
+                <span class="status-badge status-rejected" onclick="event.stopPropagation();showStatusReason('rejected','卸甲·删减片段','包含违规内容')" style="cursor:pointer;"><span class="status-dot"></span> 未通过</span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item" onclick="event.stopPropagation();openEditVideo('卸甲·删减片段','image/cover-zero-night.jpg','《我卸甲后天下大乱了》未播出片段，包含违规内容未通过审核','EVA','rejected')"><span class="menu-icon">✏️</span> 编辑</div>
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDeleteVideo('卸甲·删减片段')"><span class="menu-icon">🗑️</span> 删除视频</div>
+                </div>
+              </div>
+            </div>
+            <div class="vc-body">
+              <h4>卸甲·删减片段</h4>
+              <div class="vc-desc">《我卸甲后天下大乱了》未播出片段，包含违规内容未通过审核</div>
+            </div>
+          </article>
+
+          <article class="video-card" data-status="delisted">
+            <div class="vc-cover-wrap">
+              <img class="vc-cover" src="image/cover-allin.jpg" alt="零夜·旧版" />
+              <span class="vc-duration">04:10</span>
+              <div class="badge-row">
+                <span class="status-badge status-delisted" onclick="event.stopPropagation();showStatusReason('delisted','零夜·旧版','版权原因已下架')" style="cursor:pointer;"><span class="status-dot"></span> 已下架</span>
+              </div>
+              <div class="card-menu">
+                <button class="card-menu-btn" onclick="event.stopPropagation();toggleCardMenu(this)">⋯</button>
+                <div class="card-menu-dropdown">
+                  <div class="menu-item" onclick="event.stopPropagation();openEditVideo('零夜·旧版','image/cover-allin.jpg','零夜序章旧版视频，因版权原因已下架','CYPHER','delisted')"><span class="menu-icon">✏️</span> 编辑</div>
+                  <div class="menu-item danger" onclick="event.stopPropagation();confirmDeleteVideo('零夜·旧版')"><span class="menu-icon">🗑️</span> 删除视频</div>
+                </div>
+              </div>
+            </div>
+            <div class="vc-body">
+              <h4>零夜·旧版</h4>
+              <div class="vc-desc">零夜序章旧版视频，因版权原因已下架</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mint Modal -->
+    <div class="modal-overlay" id="mintModal">
+      <div class="modal" style="max-width:480px;">
+        <div class="modal-header">
+          <h3>🔨 铸造短剧 IP 卡</h3>
+          <button class="modal-close" onclick="closeMintModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-mint-preview">
+            <img id="mintDramaCover" src="" alt="" />
+            <h4 id="mintDramaTitle">—</h4>
+          </div>
+          <p style="color:var(--text-muted);line-height:1.7;">确认铸造该短剧为链上 IP 卡，铸造后该短剧将可参与 STORY 奖池瓜分。</p>
+          <!-- Fee Display -->
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-radius:14px;background:rgba(0, 0, 0,0.06);border:1px solid rgba(0, 0, 0,0.12);margin-top:16px;">
+            <span style="color:var(--text-muted);font-size:0.92rem;">手续费</span>
+            <strong style="font-size:1.15rem;color:var(--accent);">10 USDC</strong>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="button-secondary" onclick="closeMintModal()">取消</button>
+          <button class="button" id="mintConfirmBtn" onclick="confirmMint()">确认铸造</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actor Mint Modal -->
+    <div class="modal-backdrop" id="actorMintModal" aria-hidden="true">
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="actorMintTitle">
+        <div class="modal-header">
+          <div>
+            <h2 id="actorMintTitle">确认 Mint IP 卡</h2>
+            <div class="modal-subtitle" id="actorMintSubtitle">苏婉清 · 10 USDC · 数量1</div>
+          </div>
+          <button class="modal-close" type="button" id="actorMintClose" aria-label="关闭弹窗">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-preview">
+            <img id="actorMintImage" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" alt="角色预览" />
+            <div class="preview-tag" id="actorMintTag">AI 角色</div>
+          </div>
+          <div class="modal-info">
+            <div class="modal-field"><span>支付钱包</span><strong id="actorMintWallet">0x1234....fods</strong></div>
+            <div class="modal-field"><span>Mint 合约</span><strong id="actorMintContract">IPCard.mint()</strong></div>
+            <div class="modal-field"><span>可Mint 余额</span><strong id="actorMintBalance">9,000</strong></div>
+            <div class="modal-total"><span>预计支付</span><strong id="actorMintEstimate">10.0 USDC</strong></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="button-secondary" type="button" id="actorMintCancel">取消</button>
+          <button class="button" type="button" id="actorMintConfirm">确认支付并 Mint</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bind Actor Modal -->
+
+    <div class="modal-overlay" id="bindActorModal">
+      <div class="modal" style="max-width: 640px;">
+        <div class="modal-header">
+          <h3>🎬 绑定 IP 卡到短剧</h3>
+          <button class="modal-close" onclick="closeBindActorModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="color:var(--text-muted);line-height:1.7;margin-bottom:20px;">选择短剧中的一个角色，再选择您持有的IP 卡 进行绑定。</p>
+          <div id="bindDramaPreview" style="display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:18px;border:1px solid var(--border);background:#fafcff;margin-bottom:24px;">
+            <img id="bindDramaCover" src="" alt="" style="width:60px;height:60px;border-radius:12px;object-fit:cover;background:#eaf4ff;flex-shrink:0;" />
+            <div style="flex:1;min-width:0;">
+              <h4 id="bindDramaName" style="margin:0 0 3px;font-size:1.05rem;">—</h4>
+              <p id="bindDramaNftId" style="margin:0;color:var(--text-muted);font-size:0.85rem;">—</p>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <p style="margin:0 0 2px;font-size:0.78rem;color:var(--text-muted);">可分润总额</p>
+              <p id="bindDramaTotalRoyalty" style="margin:0;font-size:1.15rem;font-weight:700;color:var(--accent);">70%</p>
+            </div>
+          </div>
+          <div style="margin-bottom:20px;">
+            <h4 style="margin:0 0 10px;font-size:0.95rem;">1 选择短剧角色</h4>
+            <div id="bindRoleList" class="mintable-list"></div>
+          </div>
+          <div style="margin-bottom:20px;">
+            <h4 style="margin:0 0 10px;font-size:0.95rem;">2 选择IP 卡</h4>
+            <div id="bindActorList" class="mintable-list"></div>
+            <div class="empty-state" id="bindActorEmpty" style="display:none;padding:24px;">
+              <div class="empty-icon">🎭</div>
+              <p style="font-size:0.95rem;">暂无可绑定的IP 卡<br />请先在「IP 卡」中铸造IP 卡</p>
+            </div>
+          </div>
+          <div style="margin-bottom:16px;">
+            <h4 style="margin:0 0 10px;font-size:0.95rem;">3 设置IP 卡分润比例</h4>
+            <div style="display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:16px;border:1px solid var(--border);background:#fafcff;">
+              <div style="flex:1;">
+                <p style="margin:0 0 4px;font-size:0.82rem;color:var(--text-muted);">该 IP 卡占用短剧 IP 卡总收入的</p>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+                  <input type="range" id="bindRoyaltySlider" min="1" max="70" value="10" style="flex:1;accent-color:var(--accent);height:6px;cursor:pointer;" oninput="updateBindRoyaltyDisplay()" />
+                  <span id="bindRoyaltyValue" style="font-size:1.3rem;font-weight:700;color:var(--accent);min-width:60px;text-align:right;">10%</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:12px;">
+              <div style="flex:1;padding:10px 14px;border-radius:12px;background:rgba(0, 0, 0,0.05);border:1px solid rgba(0, 0, 0,0.10);text-align:center;">
+                <p style="margin:0 0 2px;font-size:0.78rem;color:var(--text-muted);">短剧 IP 卡分润</p>
+                <p id="bindDramaRemaining" style="margin:0;font-size:1.1rem;font-weight:700;color:var(--accent);">60%</p>
+              </div>
+              <div style="flex:1;padding:10px 14px;border-radius:12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.10);text-align:center;">
+                <p style="margin:0 0 2px;font-size:0.78rem;color:var(--text-muted);">IP 卡分润</p>
+                <p id="bindActorRoyalty" style="margin:0;font-size:1.1rem;font-weight:700;color:#f59e0b;">10%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="button-secondary" onclick="closeBindActorModal()">取消</button>
+          <button class="button" id="bindActorConfirmBtn" onclick="confirmBindActor()" disabled>确认绑定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actor Drama Modal -->
+    <div class="modal-overlay" id="actorDramaModal">
+      <div class="modal" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3>🎬 参演短剧</h3>
+          <button class="modal-close" onclick="closeActorDramaModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="actorDramaPreview" style="display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:18px;border:1px solid var(--border);background:#fafcff;margin-bottom:20px;">
+            <img id="actorDramaAvatar" src="" alt="" style="width:56px;height:56px;border-radius:50%;object-fit:cover;background:#eaf4ff;flex-shrink:0;" />
+            <div>
+              <h4 id="actorDramaName" style="margin:0 0 3px;font-size:1.1rem;">—</h4>
+              <p id="actorDramaNftId" style="margin:0;color:var(--text-muted);font-size:0.85rem;">IP 卡</p>
+            </div>
+          </div>
+          <div class="actor-drama-list" id="actorDramaList"></div>
+          <div class="empty-state" id="actorDramaEmpty" style="display:none;">
+            <div class="empty-icon">🎭</div>
+            <p>该 IP 卡暂未参演任何短剧</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="button-secondary" onclick="closeActorDramaModal()">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Reason Modal -->
+    <div class="modal-overlay" id="statusReasonModal">
+      <div class="modal" style="max-width: 440px;">
+        <div class="modal-header">
+          <h3 id="statusReasonTitle">状态说明</h3>
+          <button class="modal-close" onclick="closeStatusReasonModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 24px 28px;">
+          <div style="padding:18px 20px;border-radius:16px;background:#f8fbff;border:1px solid #eef4ff;line-height:1.7;">
+            <p id="statusReasonText" style="margin:0;color:var(--text-muted);font-size:0.95rem;line-height:1.7;"></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="button-secondary" onclick="closeStatusReasonModal()">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-notification" id="toastNotification">
+      <span class="toast-icon">💡</span>
+      <span id="toastMessage"></span>
+    </div>
+
+  <script>
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById('toastNotification');
+      const msgEl = document.getElementById('toastMessage');
+      if (!toast || !msgEl) return;
+      msgEl.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    let currentMintDrama = null;
+    let currentMintCard = null; // 当前铸造的卡片 DOM 引用
+    const mintModal = document.getElementById('mintModal');
+    const confirmBtn = document.getElementById('mintConfirmBtn');
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.narrator-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      const filterRow = document.getElementById('filterRow');
+      const videoFilterRow = document.getElementById('videoFilterRow');
+      if (tabId === 'tab1') {
+        filterRow.style.display = 'flex';
+        videoFilterRow.style.display = 'none';
+      } else if (tabId === 'tab3') {
+        filterRow.style.display = 'none';
+        videoFilterRow.style.display = 'flex';
+      } else {
+        filterRow.style.display = 'none';
+        videoFilterRow.style.display = 'none';
+      }
+    }
+
+    function filterCards(filter, btn) {
+      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#dramaGrid .card-list-item').forEach(card => {
+        const status = card.dataset.status;
+        card.style.display = (filter === 'all' || status === filter) ? '' : 'none';
+      });
+    }
+
+    function openMintModal(drama) {
+      if (!drama) return;
+      currentMintDrama = drama;
+      document.getElementById('mintDramaCover').src = drama.cover;
+      document.getElementById('mintDramaCover').alt = drama.title;
+      document.getElementById('mintDramaTitle').textContent = drama.title;
+      mintModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMintModal() {
+      mintModal.classList.remove('open');
+      document.body.style.overflow = '';
+      currentMintDrama = null;
+    }
+
+    function confirmMint() {
+      if (!currentMintDrama) return;
+      confirmBtn.textContent = '铸造中...';
+      confirmBtn.disabled = true;
+      setTimeout(() => {
+        alert('✅ 铸造成功！');
+        closeMintModal();
+
+        // 铸造成功后：添加「已铸造」徽章 + 仅隐藏铸造按钮，保留编辑按钮
+        if (currentMintCard) {
+          const header = currentMintCard.querySelector('.card-header');
+          if (header && !header.querySelector('.minted-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'minted-badge';
+            badge.textContent = '✅ 已铸造';
+            header.appendChild(badge);
+          }
+          // 只隐藏「铸造短剧 IP 卡」按钮，同时让编辑按钮撑满
+          const mintBtn = currentMintCard.querySelector('.card-action .button:first-child');
+          if (mintBtn) {
+            mintBtn.style.display = 'none';
+            const editBtn = currentMintCard.querySelector('.card-action .button:last-child');
+            if (editBtn) editBtn.style.flex = '1';
+          }
+        }
+
+        // 并在「短剧 IP 卡」页签中添加对应的 IP 卡卡片
+        if (currentMintCard) {
+          const title = currentMintCard.querySelector('.card-body h3').textContent.trim();
+          const cover = currentMintCard.querySelector('.card-header img').src;
+          const sub = currentMintCard.querySelector('.card-sub span')?.textContent || title;
+          // 生成新 IP 卡 ID
+          const existingIds = document.querySelectorAll('#tab2 .nft-id-badge');
+          const maxNum = Array.from(existingIds).reduce((max, el) => {
+            const m = el.textContent.match(/\d+/);
+            return m ? Math.max(max, parseInt(m[0])) : max;
+          }, 0);
+          const newId = '#IP-' + String(maxNum + 1).padStart(3, '0');
+
+          const nftCard = document.createElement('div');
+          nftCard.className = 'nft-card';
+          nftCard.innerHTML = `
+
+            <div class="nft-cover-wrap">
+              <img class="nft-cover" src="${cover}" alt="${title} IP 卡" />
+              <span class="nft-id-badge">${newId}</span>
+            </div>
+            <div class="nft-body">
+              <h4>${title}</h4>
+              <div class="nft-sub"><span>${sub}</span></div>
+            </div>
+          `;
+          document.querySelector('#tab2 .nft-grid').appendChild(nftCard);
+
+          // 更新持有数量
+          const countEl = document.querySelector('h4[style*="font-size: 1.8rem"]');
+          if (countEl) {
+            const nftCount = document.querySelectorAll('#tab2 .nft-card').length;
+            countEl.textContent = nftCount;
+          }
+          
+          currentMintCard = null;
+        }
+
+        confirmBtn.textContent = '确认铸造';
+        confirmBtn.disabled = false;
+      }, 1500);
+    }
+
+    mintModal.addEventListener('click', function(e) { if (e.target === this) closeMintModal(); });
+
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.card-list-item .card-action .button');
+      if (btn && btn.textContent.trim().includes('铸造短剧 IP 卡')) {
+        e.preventDefault();
+        const card = btn.closest('.card-list-item');
+        if (card && card.dataset.status === 'approved') {
+          const title = card.querySelector('.card-body h3').textContent.trim();
+          const cover = card.querySelector('.card-header img').src;
+          currentMintCard = card; // 保存卡片引用
+          openMintModal({ title, cover });
+        } else if (card && card.dataset.status === 'rejected') {
+          alert('❌ 该短剧未通过审核，无法铸造。');
+        }
+      }
+    });
+
+    let currentActor = null;
+
+    const actorMintModal = document.getElementById('actorMintModal');
+
+    function openActorMintModal(name, avatar, totalSupply, openMint, mintPrice, reserved) {
+      currentActor = { name, avatar, totalSupply, openMint, mintPrice, reserved };
+      document.getElementById('actorMintSubtitle').textContent = `${name} · ${mintPrice} USDC · 数量${reserved}`;
+      document.getElementById('actorMintImage').src = avatar;
+      document.getElementById('actorMintImage').alt = name;
+      document.getElementById('actorMintTag').textContent = 'AI 角色';
+      document.getElementById('actorMintWallet').textContent = '0x1234....fods';
+      document.getElementById('actorMintContract').textContent = 'IPCard.mint()';
+      document.getElementById('actorMintBalance').textContent = openMint.toLocaleString();
+      document.getElementById('actorMintEstimate').textContent = (mintPrice * reserved).toFixed(1) + ' USDC';
+      actorMintModal.classList.add('active');
+      actorMintModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeActorMintModal() {
+      actorMintModal.classList.remove('active');
+      actorMintModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      currentActor = null;
+    }
+
+    function confirmActorMint() {
+      if (!currentActor) return;
+      const btn = document.getElementById('actorMintConfirm');
+      const origText = btn.textContent;
+      btn.textContent = '处理中...';
+      btn.disabled = true;
+      setTimeout(() => {
+        alert(`✅ 「${currentActor.name}」IP 卡 铸造成功！`);
+        closeActorMintModal();
+        btn.textContent = origText;
+        btn.disabled = false;
+      }, 1500);
+    }
+
+    document.getElementById('actorMintClose').addEventListener('click', closeActorMintModal);
+    document.getElementById('actorMintCancel').addEventListener('click', closeActorMintModal);
+    document.getElementById('actorMintConfirm').addEventListener('click', confirmActorMint);
+    actorMintModal.addEventListener('click', function(e) { if (e.target === this) closeActorMintModal(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && actorMintModal.classList.contains('active')) closeActorMintModal(); });
+
+    let currentBindDrama = null;
+    let selectedBindRole = null;
+    let selectedBindActor = null;
+    const bindActorModal = document.getElementById('bindActorModal');
+
+    const dramaRoles = {
+      '星际迷航': [
+        { id: 'role-1', name: '舰长·杰克', gender: '♂ 男性', desc: '星舰指挥官' },
+        { id: 'role-2', name: '科学官·艾琳', gender: '♀ 女性', desc: '首席科学官' },
+        { id: 'role-3', name: '工程师·赵刚', gender: '♂ 男性', desc: '引擎总工程师' },
+        { id: 'role-4', name: '医疗官·苏珊', gender: '♀ 女性', desc: '舰载医生' },
+        { id: 'role-5', name: '通讯官·王磊', gender: '♂ 男性', desc: '通讯与战术分析' },
+        { id: 'role-6', name: '领航员·小林', gender: '♀ 女性', desc: '导航与星际航线规划' },
+      ],
+      '长安如梦': [
+        { id: 'role-c-1', name: '太子·李承钰', gender: '♂ 男性', desc: '东宫太子' },
+        { id: 'role-c-2', name: '才女·沈清荷', gender: '♀ 女性', desc: '名门闺秀' },
+      ],
+      '江南烟雨': [
+        { id: 'role-j-1', name: '书生·顾言', gender: '♂ 男性', desc: '赴京赶考的书生' },
+        { id: 'role-j-2', name: '茶女·陆小曼', gender: '♀ 女性', desc: '茶楼女主人' },
+        { id: 'role-j-3', name: '知府·周明远', gender: '♂ 男性', desc: '清正廉明' },
+        { id: 'role-j-4', name: '画师·白露', gender: '♀ 女性', desc: '流浪画师' },
+      ],
+      '迷雾之城': [
+        { id: 'role-m-1', name: '侦探·陈默', gender: '♂ 男性', desc: '私家侦探' },
+        { id: 'role-m-2', name: '记者·林薇', gender: '♀ 女性', desc: '调查记者' },
+      ],
+    };
+
+    const bindableActors = [
+      { id: 'actor-001', name: '苏婉清', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80', gender: '♀ 女性', totalSupply: 10000, myHolding: 10 },
+      { id: 'actor-002', name: '李云飞', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80', gender: '♂ 男性', totalSupply: 8000, myHolding: 5 },
+      { id: 'actor-003', name: '林梦瑶', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80', gender: '♀ 女性', totalSupply: 10000, myHolding: 20 },
+      { id: 'actor-004', name: '赵无极', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=900&q=80', gender: '♂ 男性', totalSupply: 6000, myHolding: 3 },
+    ];
+
+    function openBindActorModal(nftCard) {
+      const cover = nftCard.querySelector('.nft-cover').src;
+      const name = nftCard.querySelector('.nft-body h4').textContent;
+      const nftId = nftCard.querySelector('.nft-id-badge').textContent;
+      currentBindDrama = { cover, name, nftId, card: nftCard };
+      selectedBindRole = null;
+      selectedBindActor = null;
+      document.getElementById('bindDramaCover').src = cover;
+      document.getElementById('bindDramaCover').alt = name;
+      document.getElementById('bindDramaName').textContent = name;
+      document.getElementById('bindDramaNftId').textContent = nftId;
+
+
+      const roles = dramaRoles[name] || [];
+      const roleList = document.getElementById('bindRoleList');
+      roleList.innerHTML = roles.length === 0
+        ? '<div class="empty-state" style="display:block;padding:24px;"><div class="empty-icon">📋</div><p>该短剧暂无角色数据</p></div>'
+        : roles.map(r => `<div class="mintable-item" data-role-id="${r.id}" onclick="selectBindRole('${r.id}')"><div class="mint-info"><h4>${r.name}</h4><p>${r.gender} · ${r.desc}</p></div><div class="mint-check"></div></div>`).join('');
+
+      renderBindableActors();
+      document.getElementById('bindRoyaltySlider').value = 10;
+      updateBindRoyaltyDisplay();
+      document.getElementById('bindActorConfirmBtn').disabled = true;
+      bindActorModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeBindActorModal() {
+      bindActorModal.classList.remove('open');
+      document.body.style.overflow = '';
+      currentBindDrama = null;
+      selectedBindRole = null;
+      selectedBindActor = null;
+    }
+
+    function renderBindableActors() {
+      const list = document.getElementById('bindActorList');
+      const empty = document.getElementById('bindActorEmpty');
+      if (bindableActors.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        list.innerHTML = bindableActors.map(a => `<div class="mintable-item" data-actor-id="${a.id}" onclick="selectBindActor('${a.id}')"><div class="mint-thumb"><img src="${a.avatar}" alt="${a.name}" /></div><div class="mint-info"><h4>${a.name}</h4><p>${a.gender} · 发行总量 ${a.totalSupply.toLocaleString()} · 我持有 ${a.myHolding} 个</p></div><div class="mint-check"></div></div>`).join('');
+      }
+    }
+
+    function selectBindRole(roleId) {
+      selectedBindRole = roleId;
+      document.querySelectorAll('#bindRoleList .mintable-item').forEach(el => {
+        const id = el.dataset.roleId;
+        el.classList.toggle('selected', id === roleId);
+        el.querySelector('.mint-check').textContent = id === roleId ? '✓' : '';
+      });
+      updateBindConfirmBtn();
+    }
+
+    function selectBindActor(actorId) {
+      selectedBindActor = actorId;
+      document.querySelectorAll('#bindActorList .mintable-item').forEach(el => {
+        const id = el.dataset.actorId;
+        el.classList.toggle('selected', id === actorId);
+        el.querySelector('.mint-check').textContent = id === actorId ? '✓' : '';
+      });
+      updateBindConfirmBtn();
+    }
+
+    function updateBindRoyaltyDisplay() {
+      const val = parseInt(document.getElementById('bindRoyaltySlider').value);
+      document.getElementById('bindRoyaltyValue').textContent = val + '%';
+      document.getElementById('bindDramaRemaining').textContent = (70 - val) + '%';
+      document.getElementById('bindActorRoyalty').textContent = val + '%';
+    }
+
+    function updateBindConfirmBtn() {
+      document.getElementById('bindActorConfirmBtn').disabled = !(selectedBindRole && selectedBindActor);
+    }
+
+    function confirmBindActor() {
+      if (!selectedBindRole || !selectedBindActor || !currentBindDrama) return;
+      const role = (dramaRoles[currentBindDrama.name] || []).find(r => r.id === selectedBindRole);
+      const roleName = role ? role.name : '未知角色';
+      const actor = bindableActors.find(a => a.id === selectedBindActor);
+      const actorName = actor ? actor.name : '未知角色';
+      const royaltyVal = parseInt(document.getElementById('bindRoyaltySlider').value);
+
+      const btn = document.getElementById('bindActorConfirmBtn');
+      btn.textContent = '绑定中...';
+      btn.disabled = true;
+      setTimeout(() => {
+        alert(`✅ 绑定成功！\n\n- 短剧：${currentBindDrama.name}\n- 角色：${roleName}\n- IP 卡：${actorName}\n- IP 卡分润：${royaltyVal}%`);
+        closeBindActorModal();
+        btn.textContent = '确认绑定';
+        btn.disabled = false;
+      }, 1000);
+    }
+
+    bindActorModal.addEventListener('click', function(e) { if (e.target === this) closeBindActorModal(); });
+
+    function handleBindActorClick(btn) {
+      const card = btn.closest('.nft-card');
+      if (card) openBindActorModal(card);
+    }
+
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.nft-body .button');
+      if (btn && btn.textContent.trim() === '绑定 IP 卡') { e.preventDefault(); handleBindActorClick(btn); }
+    });
+
+    // === 右上角菜单切换 ===
+    function toggleCardMenu(btn) {
+      const dropdown = btn.parentElement.querySelector('.card-menu-dropdown');
+      if (!dropdown) return;
+      const isOpen = dropdown.classList.contains('show');
+      // 关闭所有菜单
+      document.querySelectorAll('.card-menu-dropdown.show').forEach(d => d.classList.remove('show'));
+      // 如果当前菜单是关闭的，打开它
+      if (!isOpen) dropdown.classList.add('show');
+    }
+
+    // 点击页面其他地方关闭菜单
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.card-menu')) {
+        document.querySelectorAll('.card-menu-dropdown.show').forEach(d => d.classList.remove('show'));
+      }
+    });
+
+    function confirmDelete(title) {
+      if (confirm(`确定要删除「${title}」吗？删除后将不可恢复。`)) {
+        const cards = document.querySelectorAll('#dramaGrid .card-list-item');
+        for (const card of cards) {
+          const h3 = card.querySelector('.card-body h3');
+          if (h3 && h3.textContent.trim() === title) {
+            card.style.transition = 'all 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => card.remove(), 300);
+            break;
+          }
+        }
+      }
+    }
+
+    function filterVideoCards(filter, btn) {
+      document.querySelectorAll('#videoFilterRow .filter-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('#videoGrid .video-card').forEach(card => {
+        const status = card.dataset.status;
+        card.style.display = (filter === 'all' || status === filter) ? '' : 'none';
+      });
+    }
+
+    function openEditVideo(title, cover, desc, author, status) {
+      location.href = 'edit-video.html?title=' + encodeURIComponent(title) +
+        '&cover=' + encodeURIComponent(cover) +
+        '&desc=' + encodeURIComponent(desc) +
+        '&author=' + encodeURIComponent(author) +
+        '&status=' + encodeURIComponent(status);
+    }
+
+    function confirmDeleteVideo(title) {
+      if (confirm(`确定要删除「${title}」吗？删除后将不可恢复。`)) {
+        const cards = document.querySelectorAll('#videoGrid .video-card');
+        for (const card of cards) {
+          const h4 = card.querySelector('.vc-body h4');
+          if (h4 && h4.textContent.trim() === title) {
+            card.style.transition = 'all 0.3s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => card.remove(), 300);
+            break;
+          }
+        }
+      }
+    }
+
+    const actorDramaData = {
+
+      '苏婉清': [
+        { drama: '江南烟雨', role: '茶女·陆小曼', royalty: '8%', cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80' },
+        { drama: '长安如梦', role: '才女·沈清荷', royalty: '6%', cover: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80' },
+        { drama: '迷雾之城', role: '记者·林薇', royalty: '5%', cover: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80' },
+      ],
+      '李云飞': [
+        { drama: '星际迷航', role: '工程师·赵刚', royalty: '7%', cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80' },
+        { drama: '迷雾之城', role: '侦探·陈默', royalty: '5%', cover: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80' },
+      ],
+      '林梦瑶': [
+        { drama: '江南烟雨', role: '画师·白露', royalty: '6%', cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80' },
+        { drama: '星际迷航', role: '科学官·艾琳', royalty: '8%', cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80' },
+      ],
+      '赵无极': [
+        { drama: '长安如梦', role: '太子·李承钰', royalty: '10%', cover: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80' },
+      ],
+      '上官婉儿': [
+        { drama: '江南烟雨', role: '知府·周明远', royalty: '4%', cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80' },
+      ],
+    };
+
+    const actorAvatarMap = {
+      '苏婉清': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80',
+      '李云飞': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80',
+      '林梦瑶': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80',
+      '赵无极': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=900&q=80',
+      '上官婉儿': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=900&q=80',
+    };
+
+    const actorDramaModal = document.getElementById('actorDramaModal');
+
+    function openActorDramaModal(actorName) {
+      const dramas = actorDramaData[actorName] || [];
+      const avatar = actorAvatarMap[actorName] || '';
+      document.getElementById('actorDramaAvatar').src = avatar;
+      document.getElementById('actorDramaAvatar').alt = actorName;
+      document.getElementById('actorDramaName').textContent = actorName;
+      document.getElementById('actorDramaNftId').textContent = 'IP 卡 · 参演 ' + dramas.length + ' 部短剧';
+
+      const list = document.getElementById('actorDramaList');
+      const empty = document.getElementById('actorDramaEmpty');
+      if (dramas.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+      } else {
+        empty.style.display = 'none';
+        list.innerHTML = dramas.map(d => `<div class="actor-drama-item"><div class="drama-thumb"><img src="${d.cover}" alt="${d.drama}" /></div><div class="drama-info"><h4>${d.drama}</h4><p class="drama-role">饰演角色：${d.role}</p></div><div class="drama-royalty"><div class="royalty-pct">${d.royalty}</div><div class="royalty-label">分润比例</div></div></div>`).join('');
+      }
+      actorDramaModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeActorDramaModal() {
+      actorDramaModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    actorDramaModal.addEventListener('click', function(e) { if (e.target === this) closeActorDramaModal(); });
+
+    function openEditDramaModal(btn) {
+      const card = btn.closest('.card-list-item');
+      if (!card) return;
+      const title = card.querySelector('.card-body h3').textContent.trim();
+      window.location.href = 'edit-drama.html?title=' + encodeURIComponent(title);
+    }
+
+    // === 状态原因弹窗 ===
+    const statusReasonModal = document.getElementById('statusReasonModal');
+
+    function showStatusReason(type, title, reason) {
+      const text = document.getElementById('statusReasonText');
+      const titleEl = document.getElementById('statusReasonTitle');
+
+      if (type === 'rejected') {
+        titleEl.textContent = '⚠️ 未通过';
+      } else if (type === 'delisted') {
+        titleEl.textContent = '🚫 已下架';
+      }
+      text.textContent = reason;
+      statusReasonModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeStatusReasonModal() {
+      statusReasonModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    statusReasonModal.addEventListener('click', function(e) { if (e.target === this) closeStatusReasonModal(); });
+
+    // === 统一 Escape 键关闭所有弹窗 ===
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape') return;
+      const overlays = [
+        { el: document.getElementById('mintModal'), close: closeMintModal },
+        { el: document.getElementById('bindActorModal'), close: closeBindActorModal },
+        { el: document.getElementById('actorDramaModal'), close: closeActorDramaModal },
+        { el: document.getElementById('statusReasonModal'), close: closeStatusReasonModal },
+      ];
+      for (const { el, close } of overlays) {
+        if (el && el.classList.contains('open')) {
+          e.preventDefault();
+          close();
+          break;
+        }
+      }
+    });
+
+  </script>
+
+  <div id="bottom-nav-placeholder"></div>
+  <script src="load-sidebar.js"></script>
+<script src="load-desktop-header.js?v=3"></script>
+  <script src="auth.js"></script>
+  <script src="load-bottom-nav.js"></script>
+</body>
+</html>
