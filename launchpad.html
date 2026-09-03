@@ -20,6 +20,8 @@
     .market-data-link:hover { border-color: var(--border-strong); color: var(--text); }
 
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .toolbar-sort { display: inline-flex; align-items: center; gap: 8px; }
+    .sort-label { font-size: 12px; color: var(--text-3); }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -104,6 +106,14 @@
         <button data-f="all" class="on">全部</button>
         <button data-f="curve">未毕业</button>
         <button data-f="grad">已毕业</button>
+      </div>
+      <div class="toolbar-sort">
+        <span class="sort-label">排序</span>
+        <div class="pill-seg" id="sortSeg">
+          <button data-s="marketcap" class="on">市值</button>
+          <button data-s="new">最新</button>
+          <button data-s="change">24h</button>
+        </div>
       </div>
       <div class="toolbar-right">
         <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
@@ -239,6 +249,14 @@
       });
       document.getElementById('coinSearch').addEventListener('input', function (e) {
         state.q = e.target.value.trim();
+        render();
+      });
+      document.getElementById('sortSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-s]');
+        if (!b) return;
+        document.querySelectorAll('#sortSeg button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        state.sort = b.getAttribute('data-s');
         render();
       });
     };
