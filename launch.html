@@ -99,10 +99,13 @@
     .inline-warn.warn { background: #FFFBEB; color: #92400E; }
 
     /* 费用 / 高级 */
-    .fee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .fee-cell { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
-    .fee-cell .k { font-size: 11px; color: var(--text-3); }
-    .fee-cell .v { font-size: 15px; font-weight: 700; margin-top: 3px; }
+    .fee-list { display: flex; flex-direction: column; }
+    .fee-line { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px; font-size: 13px; color: var(--text-2); border-bottom: 1px solid var(--border-light, #F0F1F3); }
+    .fee-line:last-child { border-bottom: none; }
+    .fee-line b { color: var(--text); font-weight: 600; }
+    .fee-line b.ok { color: #0E9F6E; }
+    .fee-line.total { border-top: 1px solid var(--border); margin-top: 4px; padding-top: 12px; font-weight: 700; color: var(--text); font-size: 14px; }
+    .fee-line.total b { font-weight: 800; }
     .adv-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0 4px; }
     .adv-toggle {
       display: flex; align-items: center; justify-content: space-between; width: 100%;
@@ -159,7 +162,7 @@
       .sum-card { position: static; }
     }
     @media (max-width: 620px) {
-      .source-cards, .f-row, .fee-grid { grid-template-columns: 1fr; }
+      .source-cards, .f-row { grid-template-columns: 1fr; }
       .ai-prompt-wrap { flex-direction: column; }
     }
   </style>
@@ -275,6 +278,25 @@
                 </div>
               </div>
 
+              <!-- 配对资产 + 开发者预买 -->
+              <div class="f-row">
+                <div class="field">
+                  <div class="field-label">配对资产</div>
+                  <div class="input" style="display:flex;align-items:center;gap:8px;cursor:default">
+                    <span style="width:22px;height:22px;border-radius:50%;background:var(--text);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800">Ξ</span>
+                    ETH <span style="color:var(--text-3);font-weight:400">(WETH)</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="field-label">开发者预买 <span style="font-weight:400;color:var(--text-3)">选填</span></div>
+                  <div style="position:relative">
+                    <input class="input num" id="pDevBuy" type="number" min="0" step="0.01" value="0" placeholder="0.00" />
+                    <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600">ETH</span>
+                  </div>
+                  <div class="f-note">发射时预买 · 0 为不预挖，保持公平发射</div>
+                </div>
+              </div>
+
               <!-- 高级设置（币配置的一部分，随参数） -->
               <hr class="adv-divider" />
               <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
@@ -283,14 +305,14 @@
               </button>
               <div class="adv-body" id="advBody">
                 <div class="adv-row">
-                  <span class="lbl">创作者税<small>每笔交易费中归你的部分</small></span>
+                  <span class="lbl">创作者税<small>总交易费 1%，其中最多 10% 归你</small></span>
                   <span class="ctrl">
                     <span class="tax-val num" id="taxVal">0%</span>
-                    <input type="range" id="taxRange" min="0" max="5" step="1" value="0" oninput="onTax()" />
+                    <input type="range" id="taxRange" min="0" max="10" step="1" value="0" oninput="onTax()" />
                   </span>
                 </div>
                 <div class="adv-row">
-                  <span class="lbl">费共享给持有者<small>按持有比例分配给持币者领取</small></span>
+                  <span class="lbl">费共享给持有者<small>将创作者收益按持仓比例分给持币者</small></span>
                   <span class="ctrl">
                     <label class="switch"><input type="checkbox" id="shareToHolders" /><i></i></label>
                   </span>
@@ -298,6 +320,10 @@
                 <div class="adv-row">
                   <span class="lbl" style="flex:1">创作者钱包<small>留空使用当前钱包</small></span>
                   <span class="wallet-static" id="walletAddr">0x7A2b…3fD8</span>
+                </div>
+                <div class="adv-row" style="flex-direction:column;align-items:stretch">
+                  <span class="lbl">狙击税豁免钱包<small>发射首 3 秒买入收取 99% 狙击税，3 秒后衰减至 0 · 白名单钱包免收</small></span>
+                  <input class="input num" id="pSnipe" maxlength="400" placeholder="0x…, 0x…（逗号分隔）" />
                 </div>
               </div>
               <div class="inline-warn danger" id="paramErr"></div>
@@ -308,14 +334,19 @@
           <section class="sec-card">
             <div class="sec-head">
               <span class="sec-num">3</span>
-              <div><div class="sec-title">费用</div><div class="sec-sub">费率随参数自动计算</div></div>
+              <div><div class="sec-title">发行与费用</div><div class="sec-sub">发射规则与费率一览</div></div>
             </div>
             <div class="sec-body">
-              <div class="fee-grid">
-                <div class="fee-cell"><div class="k">发行费</div><div class="v num">0.0005 ETH</div></div>
-                <div class="fee-cell"><div class="k">生成费</div><div class="v num" id="feeGen">0.02 ETH</div></div>
-                <div class="fee-cell"><div class="k">交易费</div><div class="v num">1%</div></div>
-                <div class="fee-cell"><div class="k">创作者税</div><div class="v num" id="feeCreator">0%</div></div>
+              <div class="fee-list">
+                <div class="fee-line"><span>发射费</span><b class="num">0.0005 ETH</b></div>
+                <div class="fee-line"><span>生成费</span><b class="num" id="feeGen">0.02 ETH</b></div>
+                <div class="fee-line"><span>配对资产</span><b>ETH (WETH)</b></div>
+                <div class="fee-line"><span>交易费</span><b class="num">1.00%</b></div>
+                <div class="fee-line"><span>创作者税</span><b class="num" id="feeCreator">0%</b></div>
+                <div class="fee-line"><span>发射保护</span><b>首 3s 99% 狙击税 → 0</b></div>
+                <div class="fee-line"><span>毕业阈值</span><b class="num">4.2 ETH</b></div>
+                <div class="fee-line"><span>流动性</span><b class="ok">毕业即永久锁定</b></div>
+                <div class="fee-line total"><span>费用合计</span><b class="num" id="feeTotal">0.0205 ETH</b></div>
               </div>
             </div>
           </section>
@@ -339,10 +370,12 @@
                 </div>
               </div>
               <div class="sum-rows">
-                <div class="sum-row"><span>配对</span><b>ETH</b></div>
-                <div class="sum-row"><span>毕业</span><b class="ok">curve → 池</b></div>
-                <div class="sum-row"><span>流动性</span><b class="ok">永久锁定</b></div>
-                <div class="sum-row"><span>费用合计</span><b class="num" id="feeTotal">0.0205 ETH</b></div>
+                <div class="sum-row"><span>Launch fee</span><b class="num">0.0005 ETH</b></div>
+                <div class="sum-row"><span>Paired with</span><b>ETH (WETH)</b></div>
+                <div class="sum-row"><span>Trade fee</span><b class="num">1.00%</b></div>
+                <div class="sum-row"><span>Launch window</span><b>首 3s 99% → 0</b></div>
+                <div class="sum-row"><span>Graduation</span><b class="ok">4.2 ETH → 池</b></div>
+                <div class="sum-row"><span>Liquidity</span><b class="ok">永久锁定</b></div>
               </div>
               <div class="sum-tip">创建即部署：命名、符号、简介不可再改。费用以 ETH 结算。</div>
             </div>
@@ -626,7 +659,9 @@
           sourceTitle:isAi?'AI 叙事 · 15s':(pickedWork?pickedWork.title:''),
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
           creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
-          shareToHolders:document.getElementById('shareToHolders').checked
+          shareToHolders:document.getElementById('shareToHolders').checked,
+          devBuyEth:parseFloat(document.getElementById('pDevBuy').value)||0,
+          snipeExempts:(document.getElementById('pSnipe').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean)
         });
         if (isAi) {
           try {

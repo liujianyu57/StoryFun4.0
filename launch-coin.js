@@ -83,6 +83,8 @@
       social: o.social || null,          // {x, tg}
       creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
       shareToHolders: !!o.shareToHolders,  // 是否将 creator 费分给持有者
+      devBuyEth: o.devBuyEth || 0,       // 开发者预买（ETH）
+      snipeExempts: o.snipeExempts || [],  // 狙击税豁免钱包列表
       // 演示静态 K 线（svg 折线用 0..1 归一化）
       spark: o.spark || [0.3, 0.4, 0.35, 0.5, 0.6, 0.55, 0.7, 0.8, 0.9]
     };
@@ -490,7 +492,9 @@
       change24h: 0, isNew: true, spark: [0.05],
       social: data.social || null,
       creatorTaxPct: data.creatorTaxPct || 0,
-      shareToHolders: !!data.shareToHolders
+      shareToHolders: !!data.shareToHolders,
+      devBuyEth: data.devBuyEth || 0,
+      snipeExempts: data.snipeExempts || []
     });
     // 发行费
     USER.eth -= usdToEth(K.launchFeeUsd + (data.sourceType === 'ai' ? K.genFeeUsd : 0));
