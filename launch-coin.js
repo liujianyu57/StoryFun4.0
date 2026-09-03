@@ -37,7 +37,7 @@
     tx: []                     // 我的交易历史
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 5;
+  var SCHEMA_VERSION = 6;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -49,7 +49,7 @@
     var graduated = !!o.graduated;
     var gradT = o.gradThresholdUsd || K.gradThresholdUsd;
     var pool0 = o.poolUsd || 0;
-    var prog0 = graduated ? 1 : clamp(pool0 / gradT, 0.05, 0.99);
+    var prog0 = graduated ? 1 : clamp(pool0 / gradT, 0.01, 0.99); // 下限 1%（与详情页/模拟引擎一致，避免模拟买入时进度“倒退”）
     // 固定初始价：由种子价倒推（毕业币的 p0 视为毕业价基准，买卖在其附近波动）
     var p0 = graduated ? o.priceUsd : (o.priceUsd / (1 + K.curveK * prog0));
     var price = graduated ? o.priceUsd : (p0 * (1 + K.curveK * prog0));
@@ -620,6 +620,99 @@
   }
 
   // ============================================================
+  //  模拟活跃引擎（演示氛围）
+  //  calm 不启动；live/hot 以固定间隔模拟随机成交，
+  //  仅改内存 coin 字段 —— 不落盘、不产生手续费/交易记录/不触发真毕业
+  // ============================================================
+  var SIM_KEY = 'sf_sim_live';
+  var SIM_MS = { calm: 0, live: 2400, hot: 900 };
+  var sim = { level: 'calm', timer: null, subs: [], focus: null };
+  (function initSim() {
+    try {
+      var v = localStorage.getItem(SIM_KEY);
+      if (v === 'live' || v === 'hot') sim.level = v;
+    } catch (e) {}
+  })();
+  function simLevel() { return sim.level; }
+  function simStart() {
+    if (sim.timer || sim.level === 'calm' || !sim.subs.length) return;
+    sim.timer = setInterval(simTick, SIM_MS[sim.level]);
+  }
+  function simStop() { if (sim.timer) { clearInterval(sim.timer); sim.timer = null; } }
+  function simSubscribe(fn) {
+    sim.subs.push(fn);
+    simStart();
+  }
+  function simFocus(id) { sim.focus = id || null; }
+  function setSimLevel(lv) {
+    if (!SIM_MS[lv]) lv = 'calm';
+    sim.level = lv;
+    try { localStorage.setItem(SIM_KEY, lv); } catch (e) {}
+    if (lv === 'calm') { simStop(); return; }
+    simStop(); simStart();
+  }
+  function simTick() {
+    var n = (sim.level === 'hot' && Math.random() < 0.6) ? 2 : 1;
+    for (var i = 0; i < n; i++) simOne();
+  }
+  function simOne() {
+    var coin;
+    // 焦点币优先（详情页希望当前币活跃时用）
+    if (sim.focus && Math.random() < 0.6) {
+      var fc = coinById(sim.focus);
+      if (fc) coin = fc;
+    }
+    if (!coin) {
+      var live = SEED.filter(function (c) { return !c.graduated; });
+      var pool = (live.length && Math.random() < 0.7) ? live : SEED;
+      coin = pool[Math.floor(Math.random() * pool.length)];
+    }
+    if (!coin) return;
+    // 池额接近封顶的币让位给其他币（避免顶格/伪毕业观感）
+    if (!coin.graduated) {
+      var thr0 = coin.gradThresholdUsd || K.gradThresholdUsd;
+      if ((coin.poolUsd || 0) >= thr0 * 0.985) {
+        var live2 = SEED.filter(function (c) { return !c.graduated && c !== coin && (c.poolUsd || 0) < ((c.gradThresholdUsd || K.gradThresholdUsd) * 0.985); });
+        var alt = live2.length ? live2 : SEED.filter(function (c) { return c !== coin; });
+        if (alt.length) coin = alt[Math.floor(Math.random() * alt.length)];
+      }
+    }
+    simTrade(coin);
+  }
+  function simTrade(coin) {
+    var thr = coin.gradThresholdUsd || K.gradThresholdUsd;
+    var usd = (20 + Math.random() * 180) * (sim.level === 'hot' ? 2 : 1);
+    if (coin.graduated) {
+      // 池内自由波动：价格微调
+      var w = (Math.random() - 0.42) * 0.02;
+      coin.priceUsd = Math.max(coin.priceUsd * (1 + w), 1e-10);
+      coin.marketCap = coin.priceUsd * coin.supply;
+      coin.volumeUsd = (coin.volumeUsd || 0) + usd;
+    } else {
+      var newPool = Math.min((coin.poolUsd || 0) + usd, thr * 0.99);
+      coin.poolUsd = newPool;
+      coin.progress = progressOf(coin);
+      coin.priceUsd = priceAt(coin);
+      coin.marketCap = coin.priceUsd * coin.supply;
+      coin.volumeUsd = (coin.volumeUsd || 0) + usd;
+      if (Math.random() < 0.35) coin.holders = (coin.holders || 1) + 1;
+    }
+    coin.lastBuyAt = Date.now();
+    coin.buyerAddr = walletFrom('sim:' + Math.floor(Math.random() * 9000 + 1000));
+    for (var i = 0; i < sim.subs.length; i++) {
+      try { sim.subs[i](coin); } catch (e) {}
+    }
+  }
+
+  // 切后台暂停、回前台恢复（避免不可见时空转）
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) simStop();
+      else if (sim.level !== 'calm' && sim.subs.length) simStart();
+    });
+  }
+
+  // ============================================================
   //  暴露 API
   // ============================================================
   window.Launch = {
@@ -649,6 +742,11 @@
     analytics: analytics,
     fmtDay: fmtDay,
     persist: persist,
+    // 模拟活跃引擎
+    simLevel: simLevel,
+    setSimLevel: setSimLevel,
+    simSubscribe: simSubscribe,
+    simFocus: simFocus,
     // debug
     debug: { setEth: setEth, forceGraduate: forceGraduate, forceUngraduate: forceUngraduate, resetAll: resetAll }
   };

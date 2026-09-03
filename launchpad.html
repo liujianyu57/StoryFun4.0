@@ -9,6 +9,7 @@
     /* ===== 页面特有：市场 ===== */
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+    .sim-label { font-size: 12px; color: var(--text-3); font-weight: 600; }
 
     /* 阶段大字下划线页签：字 + 滑动粗线，无容器无填充（顶部呼吸带承托） */
     .stage-tabs {
@@ -112,6 +113,13 @@
     }
     .toolbar-create:hover { opacity: .9; }
 
+    /* 模拟成交后的卡片高亮 */
+    .sim-flash { animation: simFlash 1s ease; }
+    @keyframes simFlash {
+      0% { box-shadow: 0 0 0 2px rgba(10,11,13,.28); background: rgba(10,11,13,.05); }
+      100% { box-shadow: 0 0 0 0 rgba(10,11,13,0); background: var(--surface); }
+    }
+
     @media (max-width: 900px) {
       .search-input { width: 100%; margin-top: 4px; }
       .toolbar-right { width: 100%; margin-left: 0; }
@@ -160,6 +168,13 @@
         <button data-t="all" class="on">全部</button>
         <button data-t="24h">24h</button>
         <button data-t="7d">7d</button>
+      </div>
+      <span class="toolbar-sep"></span>
+      <span class="sim-label">模拟</span>
+      <div class="pill-seg" id="simSeg" title="演示：模拟买卖活跃度（平静=关闭）">
+        <button data-sim="calm" class="on">平静</button>
+        <button data-sim="live">活跃</button>
+        <button data-sim="hot">热闹</button>
       </div>
       <div class="toolbar-right">
         <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
@@ -368,6 +383,46 @@
       requestAnimationFrame(function () {
         var btn = document.querySelector('.stage-tab.on');
         moveUnderline(btn);
+      });
+      // 模拟活跃开关
+      var simSeg = document.getElementById('simSeg');
+      var syncSimSeg = function (lv) {
+        simSeg.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-sim') === lv); });
+      };
+      syncSimSeg(Launch.simLevel());
+      simSeg.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-sim]');
+        if (!b) return;
+        var lv = b.getAttribute('data-sim');
+        Launch.setSimLevel(lv);
+        syncSimSeg(lv);
+        Launch.toast(lv === 'calm' ? '模拟已关闭' : '模拟活跃：' + (lv === 'live' ? '低频' : '高频'), 'ok');
+      });
+      // 模拟成交 → 定向刷新该卡片并按排序归位（GMGN 式跳动，不整页重建）
+      Launch.simSubscribe(function (c) {
+        var grid = document.getElementById('coinGrid');
+        if (!grid) return;
+        var list = filtered();
+        tabCounts();
+        var visible = list.some(function (x) { return x.id === c.id; });
+        var old = grid.querySelector('.coin-card[data-id="' + c.id + '"]');
+        if (visible && old) {
+          var tmp = document.createElement('div');
+          tmp.innerHTML = ponsCard(c);
+          var fresh = tmp.firstChild;
+          fresh.classList.add('sim-flash');
+          old.replaceWith(fresh);
+        } else if (visible) {
+          render(); // 原来被过滤、模拟后进入视野（少见）
+        } else {
+          return;  // 成交币不在当前筛选视野，无需动 DOM
+        }
+        // 按 filtered 排序把现有卡片归位（appendChild 移动节点，不重建）
+        var nodes = {};
+        grid.querySelectorAll('.coin-card').forEach(function (n) { nodes[n.getAttribute('data-id')] = n; });
+        var frag = document.createDocumentFragment();
+        list.forEach(function (x) { if (nodes[x.id]) frag.appendChild(nodes[x.id]); });
+        grid.appendChild(frag);
       });
       document.getElementById('coinSearch').addEventListener('input', function (e) {
         state.q = e.target.value.trim();

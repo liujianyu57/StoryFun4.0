@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="launch.css" />
   <style>
     /* ===== 交易详情 ===== */
+    /* 模拟成交数字微闪 */
+    .sim-num { transition: color .25s; }
+    .sim-num.flash { color: var(--accent); }
     .cd-top { padding: 20px 0 4px; }
     .cd-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); margin-bottom: 14px; }
     .cd-back:hover { color: var(--text); }
@@ -202,10 +205,10 @@
       </div>
 
       <div class="cd-stats">
-        <div><div class="cd-price-main num" id="cdPrice">—</div><div class="k">价格</div></div>
-        <div class="cd-stat"><div class="v num" id="cdMcap">—</div><div class="k">市值</div></div>
-        <div class="cd-stat"><div class="v num" id="cdVol">—</div><div class="k">24h 成交</div></div>
-        <div class="cd-stat"><div class="v num" id="cdHolders">—</div><div class="k">持有者</div></div>
+        <div><div class="cd-price-main num sim-num" id="cdPrice">—</div><div class="k">价格</div></div>
+        <div class="cd-stat"><div class="v num sim-num" id="cdMcap">—</div><div class="k">市值</div></div>
+        <div class="cd-stat"><div class="v num sim-num" id="cdVol">—</div><div class="k">24h 成交</div></div>
+        <div class="cd-stat"><div class="v num sim-num" id="cdHolders">—</div><div class="k">持有者</div></div>
         <div class="cd-stat"><div class="v num" id="cdChg">—</div><div class="k">24h</div></div>
       </div>
 
@@ -351,6 +354,47 @@
     var chartSeries = [];
     var myTrades = [];
 
+    // 模拟成交落点：仅当成交币 = 当前币时联动刷新（数字/毕业条/图表尾部）
+    var simChartSeed = null;
+    function simChartInit() {
+      simChartSeed = (coin.id || 'x').split('').reduce(function (a, ch) { return a + ch.charCodeAt(0); }, 0) % 7919;
+    }
+    function simChartTail() {
+      // 伪随机小步进：让 K 线尾端随模拟成交连续延伸
+      simChartSeed = (simChartSeed * 9301 + 49297) % 233280;
+      var r = simChartSeed / 233280;               // 0..1
+      var last = chartSeries[chartSeries.length - 1];
+      var step = (last || 0.5) + (r - 0.46) * 0.05; // 轻微上行偏向
+      chartSeries.push(Math.max(0.05, Math.min(1, step)));
+      if (chartSeries.length > 90) chartSeries.shift();
+    }
+    function flashPrice() {
+      var el = document.getElementById('cdPrice');
+      if (!el) return;
+      el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+      setTimeout(function () { el.classList.remove('flash'); }, 500);
+    }
+    function onSimTick(c) {
+      if (!coin || !c || c.id !== coin.id) return;
+      simChartTail();
+      renderHead();   // 内部会 refreshSwap
+      renderGrad();
+      renderChart();
+      flashPrice();
+      // 偶发将模拟成交写入记录流（顶部插入一条）
+      if (Math.random() < 0.45) {
+        txHistory.unshift({
+          side: Math.random() < 0.8 ? 'buy' : 'sell',
+          who: c.buyerAddr || '0x…',
+          amount: +(0.05 + Math.random() * 2).toFixed(4),
+          price: c.priceUsd,
+          at: Date.now()
+        });
+        if (txHistory.length > 30) txHistory.pop();
+        if (txTab === 'all') renderTx();
+      }
+    }
+
     function initCoin() {
       var q = new URLSearchParams(window.location.search).get('id');
       coin = Launch.coinById(q) || Launch.coins[0];
@@ -359,6 +403,9 @@
       // 图表数据按币生成确定性序列
       var seedVal = coin.id.split('').reduce(function (a, c) { return a + c.charCodeAt(0); }, 0);
       chartSeries = buildSeries(seedVal);
+      simChartInit();
+      // 初始成交流（静态种子），模拟成交在其上追加
+      txHistory = fakeTrades();
       document.getElementById('cdAvatar').innerHTML =
         '<img src="' + esc(coin.cover) + '" alt="">' +
         (coin.video ? '<div class="play"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>' : '');
@@ -801,6 +848,9 @@
       // 预置聊天
       for (var i = 0; i < 6; i++) chats.push(randChat());
       initCoin();
+      // 模拟活跃联动（档位在本地存储，与市场页共享；当前币优先被模拟）
+      Launch.simFocus(coin.id);
+      Launch.simSubscribe(onSimTick);
     };
   </script>
 </body>
