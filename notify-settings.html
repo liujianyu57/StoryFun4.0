@@ -114,44 +114,6 @@
           </label>
         </div>
 
-        <!-- 收益通知 -->
-        <div class="settings-row settings-row-sub" data-parent="master">
-          <div>
-            <div class="settings-row-label">收益通知</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="nsRevenue" data-path="revenue" data-group="revenue">
-            <span class="track"><span class="thumb"></span></span>
-          </label>
-        </div>
-        <div class="settings-row settings-row-sub" data-parent="revenue" style="padding-left:34px">
-          <div>
-            <div class="settings-row-label">IP 购买</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" data-path="revenue.ip">
-            <span class="track"><span class="thumb"></span></span>
-          </label>
-        </div>
-        <div class="settings-row settings-row-sub" data-parent="revenue" style="padding-left:34px">
-          <div>
-            <div class="settings-row-label">IP 卡管理</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" data-path="revenue.manage">
-            <span class="track"><span class="thumb"></span></span>
-          </label>
-        </div>
-        <div class="settings-row settings-row-sub" data-parent="revenue" style="padding-left:34px">
-          <div>
-            <div class="settings-row-label">激活收益</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" data-path="revenue.show">
-            <span class="track"><span class="thumb"></span></span>
-          </label>
-        </div>
-
         <!-- 互动通知 -->
         <div class="settings-row settings-row-sub" data-parent="master">
           <div>
@@ -268,10 +230,9 @@
       });
     }
 
-    // 组开关处理（单独绑定，避免闭包问题）
+    // 组开关处理（单独注册监听，避免闭包问题）
     function bindGroupSwitches() {
       var groupDefs = {
-        revenue: ['ip', 'manage', 'show'],
         social: ['like', 'save', 'comment', 'follow']
       };
       document.querySelectorAll('.settings-card input[data-group]').forEach(function (input) {
@@ -283,7 +244,7 @@
             window.StoryFunNotify.setNotifySetting(group + '.' + k, on);
           });
           renderSwitches();
-          showToast(on ? '已开启' + (group === 'revenue' ? '收益' : '互动') + '通知' : '已关闭' + (group === 'revenue' ? '收益' : '互动') + '通知');
+          showToast(on ? '已开启互动通知' : '已关闭互动通知');
         });
       });
     }

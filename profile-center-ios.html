@@ -79,15 +79,6 @@
     .work-card .episode { background: var(--border-light); color: var(--text-muted); }
     .work-card h3 { margin: 0 0 12px; font-size: 1.4rem; line-height: 1.25; color: var(--text); }
     .work-card p { margin: 12px 0 0; color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
-    .work-card .card-actors { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--border); }
-    .work-card .card-actors-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; white-space: nowrap; }
-    .work-card .card-actors-list { display: flex; gap: 8px; flex-wrap: wrap; }
-    .work-card .card-actor-item { display: flex; align-items: center; gap: 5px; cursor: pointer; transition: transform 0.2s ease; }
-    .work-card .card-actor-item:hover { transform: translateY(-2px); }
-    .work-card .card-actor-avatar { width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--border); flex-shrink: 0; transition: border-color 0.2s ease; }
-    .work-card .card-actor-item:hover .card-actor-avatar { border-color: var(--accent); }
-    .work-card .card-actor-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .work-card .card-actor-name { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
     .work-card .card-foot { padding: 16px 22px 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 14px; }
     .work-card .info-row { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-muted); font-size: 0.95rem; }
     .work-card .card-rating { display: inline-flex; align-items: center; gap: 3px; color: #ffc107; font-weight: 600; }
@@ -128,40 +119,6 @@
 
     .edit-avatar-preview { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; margin: 0 auto 16px; border: 3px solid var(--border); }
     .edit-avatar-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-    /* ===== IAP Points Package Buttons ===== */
-    .iap-pkg-btn {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; border-radius:999px; border: 1.5px solid var(--border);
-      background: var(--surface); cursor: pointer; transition: all 0.2s;
-      font-family: inherit; text-align: left; width: 100%;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .iap-pkg-btn:active { transform: scale(0.98); background: var(--bg); }
-    .iap-pkg-left { display: flex; align-items: center; gap: 2px; }
-    .iap-pkg-points { font-size: 16px; font-weight: 700; color: var(--text); }
-    .iap-pkg-right { display: flex; align-items: center; }
-    .iap-pkg-price { font-size: 18px; font-weight: 700; color: var(--accent); }
-
-    /* Bottom Sheet Overlay */
-    .sheet-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-    .sheet-overlay.active { opacity: 1; visibility: visible; }
-    .sheet-panel { position: fixed; bottom: 0; left: 0; right: 0; z-index: 10000; background: var(--surface); border-radius: 24px 24px 0 0; padding: 8px 16px calc(24px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); max-height: 80vh; overflow-y: auto; }
-    .sheet-panel.open { transform: translateY(0); }
-    .sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 8px auto 16px; }
-    .sheet-title { font-size: 1.1rem; font-weight: 700; text-align: center; margin-bottom: 16px; color: var(--text); }
-
-    /* Points History */
-    .ph-item { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 0; border-bottom: 0.5px solid var(--border-light); }
-    .ph-item:last-child { border-bottom: none; }
-    .ph-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .ph-action { font-size: 14px; font-weight: 600; color: var(--text); }
-    .ph-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 8px; }
-    .ph-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-    .ph-amount { font-size: 16px; font-weight: 700; }
-    .ph-amount.plus { color: var(--accent); }
-    .ph-amount.minus { color: #f45b69; }
-    .ph-price { font-size: 11px; color: var(--text-sub); }
 
     /* ===== Desktop Drawer ===== */
     .profile-menu-btn {
@@ -239,27 +196,6 @@
       .mobile-profile-info .mp-id { font-size: 13px; color: var(--text-sub); margin-top: 2px; }
       .mobile-profile-info .mp-bio { font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-      /* ── Mobile Wallet Address ── */
-      .mp-wallet {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 8px;
-        padding: 6px 10px;
-        background: var(--bg);
-        border-radius: 8px;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-        user-select: none;
-        width: fit-content;
-      }
-      .mp-wallet .mp-wallet-address {
-        font-size: 12px;
-        font-family: 'SF Mono', 'Menlo', 'Monaco', monospace;
-        color: var(--text-muted);
-      }
-      .mp-wallet svg { color: var(--text-muted); flex-shrink: 0; }
-
       /* ── Edit Icon on Avatar ── */
       .avatar-edit-icon {
         position: absolute;
@@ -291,63 +227,6 @@
       .mobile-stats .ms-item:last-child { border-right: none; }
       .mobile-stats .ms-item .ms-num { font-size: 18px; font-weight: 700; color: var(--text); }
       .mobile-stats .ms-item .ms-label { font-size: 12px; color: var(--text-sub); }
-
-      /* ── Issued IP Section ── */
-      .issued-ip-section { display: flex; flex-direction: column; gap: 12px; }
-      .issued-ip-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-      .issued-ip-title { font-size: 1.05rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
-      .issued-ip-list { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-      .issued-ip-list::-webkit-scrollbar { display: none; }
-      /* ═══ 发行的 IP 横排卡（头像左 + 信息右） ═══ */
-      .issued-ip-list .issued-ip-hrow {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-shrink: 0;
-        width: 300px;
-        padding: 10px;
-        border-radius: 16px;
-        background: #fff;
-        border: 1px solid var(--border-light, rgba(0,0,0,0.06));
-        box-shadow: 0 2px 10px rgba(27,45,71,0.05);
-      }
-      .issued-ip-avatar {
-        position: relative;
-        width: 88px;
-        height: 88px;
-        border-radius: 12px;
-        overflow: hidden;
-        flex-shrink: 0;
-        cursor: pointer;
-        background: linear-gradient(135deg,#e0f7ff 0%,#ffffff 100%);
-      }
-      .issued-ip-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .issued-ip-avatar .ip-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; color: var(--text-muted); }
-      .issued-ip-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-      .issued-ip-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-      .issued-ip-hname { margin: 0; font-size: 0.92rem; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .issued-ip-power { font-size: 0.8rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
-      .issued-ip-power small { font-size: 0.6em; font-weight: 500; color: var(--text-muted); }
-      .issued-ip-sub { font-size: 0.68rem; color: var(--text-sub, #8b8d98); font-family: "SF Mono", Menlo, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.01em; }
-      .issued-ip-buy-btn {
-        margin-top: 2px;
-        padding: 7px 14px;
-        border-radius: 999px;
-        border: none;
-        background: var(--accent);
-        color: #fff;
-        font-size: 0.78rem;
-        font-weight: 700;
-        cursor: pointer;
-        font-family: inherit;
-        align-self: flex-start;
-        transition: all 0.2s ease;
-      }
-      .issued-ip-buy-btn:hover { opacity: 0.85; }
-      .issued-ip-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 16px 14px; border-radius: 14px; border: 1px dashed rgba(0,0,0,0.15); background: #fff; color: var(--text-muted); font-size: 0.82rem; }
-      .issued-ip-empty-main { font-size: 0.95rem; font-weight: 700; color: var(--text); }
-      .issued-ip-empty-sub { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
-      .issued-ip-empty .ip-empty-btn { margin-top: 7px; padding: 7px 16px; border-radius: 999px; border: none; background: var(--accent); color: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: inherit; }
 
       /* ── Mobile Segmented Tabs ── */
       .mobile-tabs {
@@ -566,30 +445,6 @@
         </svg>
         创作管理
       </button>
-      <button class="profile-drawer-item" onclick="handleDrawerNav('referral.html')">
-        <svg class="drawer-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-        </svg>
-        邀请
-      </button>
-      <button class="profile-drawer-item" onclick="handleDrawerNav('rewards.html')">
-        <svg class="drawer-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-        </svg>
-        收益
-      </button>
-      <button class="profile-drawer-item" onclick="handleDrawerNav('transactions')">
-        <svg class="drawer-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        交易记录
-      </button>
-      <button class="profile-drawer-item" onclick="handleDrawerNav('whitepaper.html')">
-        <svg class="drawer-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-        白皮书
-      </button>
       <button class="profile-drawer-item" onclick="handleDrawerNav('settings.html')">
         <svg class="drawer-icon-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -631,20 +486,9 @@
         </button>
       </div>
       <div class="mobile-profile-info">
-        <div class="mp-name" id="mobileProfileName">加密小白</div>
-        <div class="mp-id" id="mobileProfileId">Story ID: 10086</div>
-        <div class="mp-bio" id="mobileProfileBio">在Web3的世界里探索短剧的无限可能。创作者、收藏家、梦想家。</div>
-        <div class="mp-wallet" id="mobileWallet" onclick="copyWallet()">
-          <svg class="mp-wallet-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="12" fill="url(#solGrad)"/>
-            <defs><linearGradient id="solGrad" x1="0" y1="0" x2="24" y2="24"><stop offset="0%" stop-color="#9945FF"/><stop offset="100%" stop-color="#14F195"/></linearGradient></defs>
-            <text x="12" y="16" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" font-family="Arial">S</text>
-          </svg>
-          <span class="mp-wallet-address" id="mobileWalletAddress">DR2x···XyZ9</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-          </svg>
-        </div>
+        <div class="mp-name" id="mobileProfileName">叙</div>
+        <div class="mp-id" id="mobileProfileId">ID: 10086</div>
+        <div class="mp-bio" id="mobileProfileBio">用短剧记录灵感，分享每一段故事。</div>
       </div>
     </div>
 
@@ -656,14 +500,6 @@
       <div class="ms-item" onclick="location.href='social.html?tab=mutual'"><span class="ms-num">6</span><span class="ms-label">互关</span></div>
       <div class="ms-item"><span class="ms-num">999</span><span class="ms-label">获赞</span></div>
     </div>
-  </div>
-
-  <!-- ===== MOBILE ISSUED IP SECTION ===== -->
-  <div class="issued-ip-section" id="mobileIssuedIPSection" style="padding:12px 16px;background:#fff;">
-    <div class="issued-ip-header">
-      <span class="issued-ip-title">发行的 IP</span>
-    </div>
-    <div class="issued-ip-list" id="mobileIssuedIPList"></div>
   </div>
 
   <!-- ===== MOBILE TABS ===== -->
@@ -707,8 +543,8 @@
           <div class="user-info-body">
             <div class="user-info-top">
               <div class="user-info-texts">
-                <div class="user-name" id="profileName">加密小白</div>
-                <div class="user-bio" id="profileBio">在Web3的世界里探索短剧的无限可能。创作者、收藏家、梦想家。</div>
+                <div class="user-name" id="profileName">叙</div>
+                <div class="user-bio" id="profileBio">用短剧记录灵感，分享每一段故事。</div>
               </div>
             </div>
           </div>
@@ -777,69 +613,6 @@
     </div>
   </div>
 
-  <!-- ===== IAP Points Bottom Sheet ===== -->
-  <div class="sheet-overlay" id="iapPointsSheet" onclick="closeIAPModal()"></div>
-  <div class="sheet-panel" id="iapPointsPanel">
-    <div class="sheet-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <span style="font-size:1.1rem;font-weight:700;">购买点数</span>
-      <span onclick="event.stopPropagation();closeIAPModal();openPointsHistory();" style="font-size:0.82rem;color:var(--text-muted);cursor:pointer;font-weight:500;">记录</span>
-    </div>
-    <p style="font-size:0.82rem;color:var(--text-sub);text-align:center;margin:-8px 0 4px;">点数用于购买 IP 卡等 App 内服务</p>
-    <p style="font-size:13px;color:var(--text);text-align:center;margin-bottom:14px;font-weight:600;">💎 余额：<span id="sheetPointsBalance">500</span></p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="iap-pkg-btn" onclick="purchasePoints(1)">
-        <div class="iap-pkg-left"><span class="iap-pkg-points">1 点数</span></div>
-        <div class="iap-pkg-right"><span class="iap-pkg-price">$1.99</span></div>
-      </button>
-      <button class="iap-pkg-btn" onclick="purchasePoints(4)">
-        <div class="iap-pkg-left"><span class="iap-pkg-points">4 点数</span></div>
-        <div class="iap-pkg-right"><span class="iap-pkg-price">$6.99</span></div>
-      </button>
-      <button class="iap-pkg-btn" onclick="purchasePoints(9)">
-        <div class="iap-pkg-left"><span class="iap-pkg-points">9 点数</span></div>
-        <div class="iap-pkg-right"><span class="iap-pkg-price">$14.99</span></div>
-      </button>
-      <button class="iap-pkg-btn" onclick="purchasePoints(19)">
-        <div class="iap-pkg-left"><span class="iap-pkg-points">19 点数</span></div>
-        <div class="iap-pkg-right"><span class="iap-pkg-price">$29.99</span></div>
-      </button>
-      <button class="iap-pkg-btn" onclick="purchasePoints(33)">
-        <div class="iap-pkg-left"><span class="iap-pkg-points">33 点数</span></div>
-        <div class="iap-pkg-right"><span class="iap-pkg-price">$49.99</span></div>
-      </button>
-    </div>
-  </div>
-
-  <!-- ===== STORY Sheet ===== -->
-  <div class="sheet-overlay" id="storySheet" onclick="closeStorySheet()"></div>
-  <div class="sheet-panel" id="storyPanel">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">STORY</div>
-    <button class="iap-pkg-btn" onclick="closeStorySheet();openStoryDepositSheet();" style="justify-content:center;gap:8px;margin-bottom:10px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-      <span style="font-size:15px;font-weight:600;">充值</span>
-    </button>
-    <button class="iap-pkg-btn" onclick="closeStorySheet();openWithdrawStorySheet();" style="justify-content:center;gap:8px;border-color:var(--border);color:var(--text-muted);background:var(--bg);">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
-      <span style="font-size:15px;font-weight:600;">提现</span>
-    </button>
-  </div>
-
-  <!-- ===== STORY Deposit Modal ===== -->
-  <div id="storyDepositModal"></div>
-
-  <!-- ===== Withdraw STORY Modal ===== -->
-  <div id="withdrawStoryModal"></div>
-
-  <!-- ===== Points History Bottom Sheet ===== -->
-  <div class="sheet-overlay" id="pointsHistorySheet" onclick="closePointsHistory()"></div>
-  <div class="sheet-panel" id="pointsHistoryPanel">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">💎 点数明细</div>
-    <div id="pointsHistoryList"></div>
-  </div>
-
   <!-- Toast -->
   <div class="toast-notification" id="toastNotification" style="position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 99999; background: rgba(26, 35, 47, 0.95); backdrop-filter: blur(8px); color: #fff; padding: 16px 24px; border-radius: 16px; font-size: 0.92rem; line-height: 1.6; box-shadow: 0 12px 40px rgba(27, 45, 71, 0.25); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; opacity: 0; pointer-events: none; max-width: 420px; text-align: center; font-weight: 500;">
     <span class="toast-icon">💡</span>
@@ -847,7 +620,6 @@
   </div>
 
   <script src="auth.js"></script>
-  <script src="actor-card.js"></script>
   <script src="sign-modal.js"></script>
   <script src="load-sidebar.js"></script>
 <script src="load-desktop-header.js?v=3"></script>
@@ -1009,102 +781,12 @@
       showToast('✅ 资料已保存', '💾');
     }
 
-    /* ── Issued IP Section ── */
-    function getMyIssuedIPs() {
-      try {
-        var map = JSON.parse(localStorage.getItem('storyfun_created_actors')) || {};
-        return Object.keys(map).map(function(k) { return map[k]; });
-      } catch(e) { return []; }
-    }
-
-    function renderIssuedIPList(containerId) {
-      var container = document.getElementById(containerId);
-      if (!container) return;
-      var ips = getMyIssuedIPs();
-      if (ips.length === 0) {
-        container.innerHTML =
-          '<div class="issued-ip-empty">' +
-            '<div class="issued-ip-empty-main">将账号发行成 IP</div>' +
-            '<div class="issued-ip-empty-sub">获得购买 IP 卡的分成 · 持卡赚取 STORY 奖励</div>' +
-            '<button class="ip-empty-btn" onclick="location.href=\'create-actor.html\'">去发行</button>' +
-          '</div>';
-        return;
-      }
-      container.innerHTML = ips.map(function(ip) {
-        var name = ip.name || '未命名 IP';
-        var ipId = ip.ipId || '';
-        var avatar = ip.avatar || '';
-        var price = ip.price || (ip.initPrice ? ip.initPrice + ' USDC' : '—');
-        var totalSupply = ip.totalSupply ? ip.totalSupply.toLocaleString() : '—';
-        var avatarHtml = avatar
-          ? '<img src="' + avatar + '" alt="' + name + '" loading="lazy" onerror="this.style.display=\'none\'" />'
-          : '<span class="ip-avatar-fallback">' + name.charAt(0) + '</span>';
-        var total = parseInt(ip.totalSupply) || 0;
-        var minted = parseInt(ip.minted) || 0;
-        var available = (parseInt(ip.available) != null) ? parseInt(ip.available) : Math.max(total - minted, 0);
-        var heat = parseFloat(ip.heat) || 0;
-        var initPrice = parseFloat(ip.initPrice) || 0;
-        var power = (typeof computeIPPower === 'function') ? computeIPPower(initPrice, heat) : 0;
-        var dataAttrs = 'data-actor="' + name + '" data-id="' + (ip.ipId || ipId || name) + '" data-total="' + total + '" data-minted="' + minted + '" data-available="' + available + '" data-price="' + price + '" data-init-price="' + initPrice + '" data-collection="' + ipId + '" data-avatar="' + avatar + '" data-heat="' + heat + '"';
-        return (
-          '<article class="issued-ip-hrow" ' + dataAttrs + '>' +
-            '<div class="issued-ip-avatar" onclick="location.href=\'actor-profile.html?name=' + encodeURIComponent(name) + '\'">' +
-              avatarHtml +
-            '</div>' +
-            '<div class="issued-ip-info">' +
-              '<div class="issued-ip-title-row">' +
-                '<h3 class="issued-ip-hname" onclick="location.href=\'actor-profile.html?name=' + encodeURIComponent(name) + '\'">' + name + '</h3>' +
-                (power > 0 ? '<span class="issued-ip-power">' + power.toFixed(2) + ' <small>积分/h</small></span>' : '') +
-              '</div>' +
-              '<div class="issued-ip-sub">IP ' + ipId + '</div>' +
-              '<button class="issued-ip-buy-btn ac-mint-btn" ' + dataAttrs + '>' + price + ' 购买</button>' +
-            '</div>' +
-          '</article>'
-        );
-      }).join('');
-    }
-
-    /* ── 购买事件委托（与 IP 市场一致） ── */
-    function bindIssuedIPBuyEvents() {
-      document.querySelectorAll('#mobileIssuedIPList .ac-mint-btn').forEach(function(btn) {
-        btn.onclick = function(e) {
-          e.stopPropagation();
-          var card = btn.closest('.issued-ip-hrow');
-          if (!card) return;
-          var name = card.dataset.actor || '';
-          var avatarSrc = card.dataset.avatar || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80';
-          var initPrice = parseFloat(card.dataset.initPrice) || 0;
-          if (typeof SignModal === 'undefined' || !SignModal.open) return;
-          SignModal.open({
-            name: name,
-            title: '确认购买 · Lv.1 IP 卡',
-            image: avatarSrc,
-            tag: 'IP 卡' + (card.dataset.collection ? ' · ' + card.dataset.collection : ''),
-            price: card.dataset.price || '10 USDC',
-            pricing: 'curve',
-            coeff: initPrice > 0 && typeof computePriceCoefficient === 'function' ? computePriceCoefficient(initPrice).toFixed(4) : null,
-            total: parseInt(card.dataset.total) || 10000,
-            minted: parseInt(card.dataset.minted) || 0,
-            onConfirm: function(done) { setTimeout(function() { done(); }, 1200); },
-            success: { text: '购买成功，IP 卡已入账' }
-          });
-        };
-      });
-    }
-
-    function renderAllIssuedIP() {
-      renderIssuedIPList('mobileIssuedIPList');
-      bindIssuedIPBuyEvents();
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
       const bioInput = document.getElementById('editBioInput');
       if (bioInput) bioInput.addEventListener('input', updateBioCharCount);
       loadProfile();
-      renderAllIssuedIP();
     });
     document.addEventListener('header-loaded', loadProfile);
-    document.addEventListener('auth-ready', renderAllIssuedIP);
 
     document.addEventListener('click', function(e) {
       if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('active')) {
@@ -1112,16 +794,6 @@
         document.body.style.overflow = '';
       }
     });
-
-    /* ── Copy Wallet Address ── */
-    function copyWallet() {
-      const fullAddress = 'DR2xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXyZ9';
-      navigator.clipboard.writeText(fullAddress).then(() => {
-        showToast('✅ 地址已复制');
-      }).catch(() => {
-        showToast('⚠️ 复制失败，请重试');
-      });
-    }
 
     /* ── Drawer Open / Close ── */
     function openProfileDrawer() {
@@ -1139,7 +811,6 @@
     /* ── Drawer Navigation ── */
     function handleDrawerNav(target) {
       closeProfileDrawer();
-      if (target === 'transactions') { showToast('🕘 交易记录功能开发中', '📋'); return; }
       window.location.href = target;
     }
 
@@ -1167,320 +838,6 @@
       }, 350);
     }
 
-    /* ── IAP Points Purchase Modal ── */
-    function openIAPModal() {
-      var bal = (typeof currentUser !== 'undefined' && currentUser.balances) ? (function() { var b = currentUser.balances; if (!b) return 500; var u = b.usdc; if (typeof u === 'number') return u; if (typeof u === 'object') { var t = 0; for (var k in u) { if (typeof u[k] === 'number') t += u[k]; } return t; } return 500; })() : 500;
-      document.getElementById('sheetPointsBalance').textContent = bal.toLocaleString();
-      document.getElementById('iapPointsSheet').classList.add('active');
-      document.getElementById('iapPointsPanel').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeIAPModal() {
-      document.getElementById('iapPointsSheet').classList.remove('active');
-      document.getElementById('iapPointsPanel').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    /* IAP purchase: optimistic update + on-chain confirmation */
-    var _purchasePollTimer = null;
-
-    function getUsdcBalance() {
-      if (typeof currentUser === 'undefined') return 300;
-      var b = currentUser.balances; if (!b) return 300;
-      var u = b.usdc; if (typeof u === 'number') return u;
-      if (typeof u === 'object') { var t = 0; for (var k in u) { if (typeof u[k] === 'number') t += u[k]; } return t; }
-      return 300;
-    }
-
-    function setUsdcBalance(val) {
-      if (typeof currentUser === 'undefined') return;
-      if (!currentUser.balances) currentUser.balances = {};
-      var b = currentUser.balances.usdc;
-      if (typeof b === 'number' || typeof b === 'undefined') { currentUser.balances.usdc = val; return; }
-      // for object form, allocate to Solana
-      if (typeof b === 'object') { b.Solana = val; }
-    }
-
-    function refreshPointsDisplay() {
-      var el = document.getElementById('mobileBalancePoints');
-      if (el) el.textContent = getUsdcBalance().toLocaleString();
-    }
-
-    function purchasePoints(points) {
-      var price = (points * 1.3).toFixed(2);
-      // Close IAP sheet
-      closeIAPModal();
-      // Show confirmation progress overlay
-      showPurchaseConfirmation(points, price);
-      // Simulate backend on-chain USDC transfer + polling
-      clearTimeout(_purchasePollTimer);
-      _purchasePollTimer = setTimeout(function() {
-        hidePurchaseConfirmation();
-        refreshPointsDisplay();
-        showToast('✅ ' + points + ' 点数已到账', '💎');
-      }, 2500);
-    }
-
-    function showPurchaseConfirmation(points, price) {
-      var existing = document.getElementById('purchaseConfirmOverlay');
-      if (existing) existing.remove();
-
-      var overlay = document.createElement('div');
-      overlay.id = 'purchaseConfirmOverlay';
-      overlay.style.cssText = 'position:fixed;inset:0;z-index:10001;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,0.4);backdrop-filter:blur(4px);';
-      overlay.innerHTML = '' +
-        '<div style="background:#fff;border-radius:24px;width:100%;max-width:360px;padding:32px 24px 24px;text-align:center;box-shadow:0 20px 60px rgba(27,45,71,0.15);">' +
-        '  <div style="font-size:48px;margin-bottom:12px;">✅</div>' +
-        '  <div style="font-size:1.15rem;font-weight:700;color:#13202e;margin-bottom:4px;">购买成功</div>' +
-        '  <div style="font-size:2rem;font-weight:800;color:#000000;margin:8px 0;">💎 +' + points + '</div>' +
-        '  <div style="margin-top:16px;background:#f0f0f3;border-radius:6px;height:4px;overflow:hidden;">' +
-        '    <div id="purchaseProgressBar" style="height:100%;background:linear-gradient(90deg,#000000,#000000);width:0%;transition:width 2.2s linear;"></div>' +
-        '  </div>' +
-        '  <div style="font-size:12px;color:#8b8d98;margin-top:8px;">点数正在结算中，请稍候...</div>' +
-        '  <button id="purchaseConfirmClose" style="margin-top:16px;padding:10px 24px;border-radius:999px;border:1px solid #deeaf7;background:#fff;font-size:0.9rem;color:#6e859e;cursor:pointer;font-family:inherit;">返回</button>' +
-        '</div>';
-      document.body.appendChild(overlay);
-      document.body.style.overflow = 'hidden';
-
-      // Animate progress bar
-      requestAnimationFrame(function() {
-        var bar = document.getElementById('purchaseProgressBar');
-        if (bar) bar.style.width = '100%';
-      });
-
-      // Close button
-      document.getElementById('purchaseConfirmClose').addEventListener('click', function() {
-        hidePurchaseConfirmation();
-      });
-
-      // Click overlay to close
-      overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) hidePurchaseConfirmation();
-      });
-
-      // Auto-close after 2.5s
-      setTimeout(function() {
-        if (document.getElementById('purchaseConfirmOverlay')) {
-          hidePurchaseConfirmation();
-        }
-      }, 2500);
-    }
-
-    function hidePurchaseConfirmation() {
-      var overlay = document.getElementById('purchaseConfirmOverlay');
-      if (overlay) {
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease';
-        setTimeout(function() { overlay.remove(); document.body.style.overflow = ''; }, 300);
-      }
-      clearTimeout(_purchasePollTimer);
-    }
-
-    /* ── Points History ── */
-    var POINTS_HISTORY = [
-      { action: '购买', points: 60, price: '$78.00', time: '08-05 17:30', type: 'plus' },
-      { action: '购买 IP 卡', points: -10, price: '', time: '08-04 14:20', type: 'minus' },
-      { action: '升级IP 卡', points: -5, price: '', time: '08-04 10:15', type: 'minus' },
-      { action: '购买', points: 6, price: '$7.80', time: '08-03 09:15', type: 'plus' },
-      { action: '补充能量', points: -2, price: '', time: '08-02 21:00', type: 'minus' },
-      { action: '发行IP 卡', points: -50, price: '', time: '08-01 16:30', type: 'minus' },
-      { action: '铸造短剧 IP 卡', points: -100, price: '', time: '07-30 11:20', type: 'minus' },
-      { action: '购买', points: 120, price: '$156.00', time: '07-28 08:45', type: 'plus' },
-    ];
-
-    function renderPointsHistory() {
-      var html = '';
-      POINTS_HISTORY.forEach(function(item) {
-        var sign = item.type === 'plus' ? '+' : '';
-        html += '<div class="ph-item">' +
-          '<div class="ph-left">' +
-            '<span class="ph-action">' + item.action + '</span>' +
-            '<span class="ph-meta">' + item.time + (item.price ? ' <span style="color:var(--text-sub)">' + item.price + '</span>' : '') + '</span>' +
-          '</div>' +
-          '<div class="ph-right">' +
-            '<span class="ph-amount ' + item.type + '">' + sign + item.points + ' 点数</span>' +
-          '</div>' +
-        '</div>';
-      });
-      document.getElementById('pointsHistoryList').innerHTML = html;
-    }
-
-    function openPointsHistory() {
-      renderPointsHistory();
-      document.getElementById('pointsHistorySheet').classList.add('active');
-      document.getElementById('pointsHistoryPanel').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closePointsHistory() {
-      document.getElementById('pointsHistorySheet').classList.remove('active');
-      document.getElementById('pointsHistoryPanel').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    /* ── Story Deposit Modal (100% replica of auth.js deposit) ── */
-    function openStoryDepositSheet() {
-      var existing = document.getElementById('storyDepositModal');
-      if (existing) existing.innerHTML = '';
-      var modal = document.getElementById('storyDepositModal');
-      modal.innerHTML = '' +
-        '<div class="deposit-overlay" id="storyDepositOverlay">' +
-        '  <div class="deposit-card" style="max-height:none;padding:20px">' +
-        '    <div class="deposit-header">' +
-        '      <span class="deposit-title">充值</span>' +
-        '      <button class="deposit-close" id="sdClose">✕</button>' +
-        '    </div>' +
-        '    <div class="deposit-body" style="gap:18px">' +
-        '      <div class="deposit-field-group">' +
-        '        <div class="deposit-field-label">币种</div>' +
-        '        <button class="deposit-select-field">' +
-        '          <div class="deposit-select-left">' +
-        '            <div class="deposit-crypto-icon" style="background:#000000;color:#fff">S</div>' +
-        '            <span class="deposit-select-label">STORY</span>' +
-        '          </div>' +
-        '          <span class="deposit-select-chevron">▾</span>' +
-        '        </button>' +
-        '      </div>' +
-        '      <div class="deposit-field-group">' +
-        '        <div class="deposit-field-label">网络</div>' +
-        '        <button class="deposit-select-field">' +
-        '          <div class="deposit-select-left">' +
-        '            <div class="deposit-crypto-icon" style="background:linear-gradient(135deg,#9945FF,#14F195);color:#fff">S</div>' +
-        '            <span class="deposit-select-label">Solana</span>' +
-        '          </div>' +
-        '          <span class="deposit-select-chevron">▾</span>' +
-        '        </button>' +
-        '      </div>' +
-        '      <div style="display:flex;justify-content:center">' +
-        '        <img class="deposit-qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=SoLanaStoryDeposit12345" alt="充值地址二维码" onerror="this.style.display=\'none\'" style="width:120px;height:120px;border-radius:8px;object-fit:cover;background:#f0f4f8" />' +
-        '      </div>' +
-        '      <div class="deposit-field-group">' +
-        '        <div class="deposit-field-label">充值地址</div>' +
-        '        <div class="deposit-address-field" style="padding:12px">' +
-        '          <span class="deposit-address-text">SoLanaStoryDeposit12345Addr67890</span>' +
-        '          <button class="deposit-copy-btn" onclick="navigator.clipboard.writeText(\'SoLanaStoryDeposit12345Addr67890\'); showToast(\'✅ 地址已复制到剪贴板\');">📋</button>' +
-        '        </div>' +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>';
-      document.body.style.overflow = 'hidden';
-      document.getElementById('sdClose').addEventListener('click', closeStoryDepositSheet);
-      document.getElementById('storyDepositOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeStoryDepositSheet();
-      });
-    }
-
-    function closeStoryDepositSheet() {
-      var m = document.getElementById('storyDepositModal');
-      if (m) m.innerHTML = '';
-      document.body.style.overflow = '';
-    }
-
-    /* ── Story Sheet ── */
-    function openStorySheet() {
-      document.getElementById('storySheet').classList.add('active');
-      document.getElementById('storyPanel').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeStorySheet() {
-      document.getElementById('storySheet').classList.remove('active');
-      document.getElementById('storyPanel').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    /* ── Withdraw STORY Modal ── */
-    function openWithdrawStorySheet() {
-      var bal = (typeof currentUser !== 'undefined' && currentUser.balances && currentUser.balances.story) ? currentUser.balances.story : 10123;
-      var balStr = bal.toLocaleString('en-US');
-      var modal = document.getElementById('withdrawStoryModal');
-      modal.innerHTML = '' +
-        '<div class="withdraw-overlay" id="withdrawStoryOverlay">' +
-        '  <div class="withdraw-card">' +
-        '    <div class="withdraw-header">' +
-        '      <span class="withdraw-title">提现 STORY</span>' +
-        '      <button class="withdraw-close" id="wsClose">✕</button>' +
-        '    </div>' +
-        '    <div class="withdraw-body">' +
-        '      <div class="withdraw-field-group">' +
-        '        <div class="withdraw-field-label">币种</div>' +
-        '        <button class="withdraw-select-field" id="wsCoinSelect">' +
-        '          <div class="withdraw-select-left">' +
-        '            <div class="withdraw-crypto-icon" style="background:#000000;color:#fff;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px">S</div>' +
-        '            <span class="withdraw-select-label">STORY</span>' +
-        '          </div>' +
-        '          <span class="withdraw-select-chevron">▾</span>' +
-        '        </button>' +
-        '      </div>' +
-        '      <div class="withdraw-field-group">' +
-        '        <div class="withdraw-field-label">提现地址</div>' +
-        '        <div class="withdraw-input-field">' +
-        '          <input type="text" id="withdrawStoryAddress" placeholder="输入接收 STORY 的钱包地址" />' +
-        '          <button class="withdraw-scan-btn" id="wsScan" type="button">' +
-        '            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M12 10v4"/><path d="M10 12h4"/></svg>' +
-        '          </button>' +
-        '        </div>' +
-        '        <span class="withdraw-input-hint">请确认地址正确，转账后无法撤回</span>' +
-        '      </div>' +
-        '      <div class="withdraw-field-group">' +
-        '        <div class="withdraw-field-label">提现网络</div>' +
-        '        <button class="withdraw-select-field">' +
-        '          <div class="withdraw-select-left">' +
-        '            <div class="withdraw-crypto-icon" style="background:linear-gradient(135deg,#9945FF,#14F195);color:#fff;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px">S</div>' +
-        '            <span class="withdraw-select-label">Solana</span>' +
-        '          </div>' +
-        '          <span class="withdraw-select-chevron">▾</span>' +
-        '        </button>' +
-        '      </div>' +
-        '      <div class="withdraw-field-group">' +
-        '        <div class="withdraw-field-label">提现金额</div>' +
-        '        <div class="withdraw-input-field">' +
-        '          <input type="number" id="withdrawStoryAmount" placeholder="输入提现金额" min="1" step="1" />' +
-        '          <span class="withdraw-input-suffix">STORY</span>' +
-        '        </div>' +
-        '        <span style="font-size:12px;color:#8B8D98;padding-top:4px">可提现 ' + balStr + ' STORY</span>' +
-        '      </div>' +
-        '      <div class="withdraw-field-group">' +
-        '        <button class="withdraw-submit-btn" id="wsSubmit">确认提现</button>' +
-        '      </div>' +
-        '      <div class="withdraw-warning-text">' +
-        '        <p>· 最小提现金额：1 STORY</p>' +
-        '        <p>· 请仔细核对提现地址和网络，转账后无法撤回</p>' +
-        '      </div>' +
-        '    </div>' +
-        '  </div>' +
-        '</div>';
-      document.body.style.overflow = 'hidden';
-
-      document.getElementById('wsClose').addEventListener('click', closeWithdrawStoryModal);
-      document.getElementById('wsSubmit').addEventListener('click', confirmWithdrawStory);
-      document.getElementById('withdrawStoryOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeWithdrawStoryModal();
-      });
-      var scan = document.getElementById('wsScan');
-      if (scan) scan.addEventListener('click', function() { showToast('⏳ 扫码功能开发中'); });
-    }
-
-    function closeWithdrawStoryModal() {
-      var m = document.getElementById('withdrawStoryModal');
-      if (m) m.innerHTML = '';
-      document.body.style.overflow = '';
-    }
-
-    function confirmWithdrawStory() {
-      var amount = parseInt(document.getElementById('withdrawStoryAmount').value);
-      var address = document.getElementById('withdrawStoryAddress').value.trim();
-      if (!amount || amount <= 0) { showToast('⚠️ 请输入有效的提现数量'); return; }
-      if (!address) { showToast('⚠️ 请输入接收地址'); return; }
-      if (amount < 1) { showToast('⚠️ 最小提现金额：1 STORY'); return; }
-      var bal = (typeof currentUser !== 'undefined' && currentUser.balances && currentUser.balances.story) ? currentUser.balances.story : 10123;
-      if (amount > bal) { showToast('⚠️ 余额不足'); return; }
-      closeWithdrawStoryModal();
-      showToast('✅ 提现 ' + amount + ' STORY 申请已提交（演示模式）', '💰');
-    }
-
     /* ── Drawer Events ── */
     document.addEventListener('DOMContentLoaded', function() {
       const menuBtn = document.getElementById('profileMenuBtn');
@@ -1494,21 +851,12 @@
     //  我的作品数据（短剧 + 视频混合）
     // ============================================================
     const MY_WORKS = [
-      { type: 'drama', title: '凤骨琉璃', cat: '古风', rt: 4.8, ep: '全44集', author: 'JACK', desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。', cover: 'image/fenggu_cover.jpg', actors: ['苏婉清','李云飞','林梦瑶','上官婉儿'], link: 'drama-player.html' },
+      { type: 'drama', title: '凤骨琉璃', cat: '古风', rt: 4.8, ep: '全44集', author: 'JACK', desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。', cover: 'image/fenggu_cover.jpg', link: 'drama-player.html' },
       { type: 'video', title: '打斗精彩片段', author: 'EVA', desc: '精彩打斗片段合集，每一帧都燃爆了！', cover: 'image/chengxiangfu_cover.jpg', link: '#' },
-      { type: 'drama', title: '我卸甲后天下大乱了', cat: '古风', rt: 4.6, ep: '全12集', author: 'EVA', desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。', cover: 'image/xiejia_cover.jpg', actors: ['李云飞','赵无极','林梦瑶'], link: 'drama-player.html' },
-      { type: 'drama', title: '丞相府今日开饭', cat: '喜剧', rt: 4.7, ep: '全24集', author: 'LENS', desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。', cover: 'image/chengxiangfu_cover.jpg', actors: ['苏婉清','上官婉儿','Luna'], link: 'drama-player.html' },
+      { type: 'drama', title: '我卸甲后天下大乱了', cat: '古风', rt: 4.6, ep: '全12集', author: 'EVA', desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。', cover: 'image/xiejia_cover.jpg', link: 'drama-player.html' },
+      { type: 'drama', title: '丞相府今日开饭', cat: '喜剧', rt: 4.7, ep: '全24集', author: 'LENS', desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。', cover: 'image/chengxiangfu_cover.jpg', link: 'drama-player.html' },
       { type: 'video', title: '金字塔探险', author: 'NOVA', desc: '探索古老金字塔的秘密，揭开千年谜团。', cover: 'image/cover-pyramid.jpg', link: '#' },
     ];
-
-    const SIMULATED_ACTORS = {
-      '苏婉清': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80',
-      '李云飞': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-      '林梦瑶': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
-      '上官婉儿': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      '赵无极': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
-      'Luna': 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-    };
 
     function renderWorks() {
       renderDesktopWorks();
@@ -1529,17 +877,12 @@
             </div>
           </article>`;
         } else {
-          const actorsHtml = (w.actors || []).map(a => {
-            const av = SIMULATED_ACTORS[a] || '';
-            return `<div class="card-actor-item" onclick="event.stopPropagation(); location.href='actor-profile.html?name=${encodeURIComponent(a)}'"><div class="card-actor-avatar"><img src="${av}" alt="${a}" loading="lazy" /></div><span class="card-actor-name">${a}</span></div>`;
-          }).join('');
           return `<article class="work-card" onclick="location.href='${w.link}'">
             <img class="card-thumb" src="${w.cover}" alt="${w.title}" />
             <div class="card-body">
               <h3>${w.title}</h3>
               <div class="card-meta"><span class="badge">${w.cat}</span><span class="episode">${w.ep}</span></div>
               <p>${w.desc}</p>
-              <div class="card-actors"><div class="card-actors-list">${actorsHtml}</div></div>
             </div>
             <div class="card-foot"><div class="info-row"><span>${w.author}</span><span class="card-rating"><span class="star-icon">★</span> ${w.rt}</span></div></div>
           </article>`;

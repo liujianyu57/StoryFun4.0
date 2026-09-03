@@ -106,11 +106,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .pp-tooltip.show{opacity:1}
 .pp-tooltip .pp-tip-img{width:86px;height:130px;border-radius:10px;object-fit:contain;display:block;box-shadow:0 4px 20px rgba(0,0,0,.15);border:2px solid rgba(0,0,0,.08)}
 .pp-tooltip .pp-tip-time{position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);background:rgba(0,0,0,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;border:.5px solid rgba(255,255,255,.12)}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:100;height:50px;padding-bottom:env(safe-area-inset-bottom,0);background:rgba(255,255,255,.9);backdrop-filter:blur(60px);-webkit-backdrop-filter:blur(60px);border-top:.5px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
-.bnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:1;height:100%;padding:4px 4px 2px;text-decoration:none;color:rgba(0,0,0,.45);transition:color .2s;-webkit-tap-highlight-color:transparent}
-.bnav a.active{color:#fff}
-.bnav svg{width:28px;height:28px;display:block;flex-shrink:0}
-.bnav span{font-weight:400;font-size:10px;line-height:12px;letter-spacing:.008em;text-align:center}
 #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:99;transition:opacity .4s}
 #loading.hide{opacity:0;pointer-events:none}
 .spinner{width:32px;height:32px;border:3px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
@@ -157,20 +152,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .cm-detail-ep-grid{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .cm-ep-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.04);border:1px solid rgba(255,255,255,.08);cursor:pointer;transition:all .15s}
 .cm-ep-item:active{background:rgba(0, 0, 0,.12);transform:scale(.98)}.cm-ep-item.active{background:rgba(0, 0, 0,.2);border-color:rgba(0, 0, 0,.4)}.cm-ep-item.active .cm-ep-title{color:#ff3b30;font-weight:700}.cm-ep-item .cm-ep-cover-wrap{position:relative;width:56px;height:80px;border-radius:6px;overflow:hidden;flex-shrink:0}.cm-ep-item .cm-ep-cover{width:100%;height:100%;border-radius:6px;object-fit:cover}.cm-ep-item .cm-ep-dur{position:absolute;right:3px;bottom:3px;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-weight:500;line-height:1.4;letter-spacing:.02em}.cm-ep-item .cm-ep-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.cm-ep-item .cm-ep-title{font-size:13px;font-weight:600;color:#fff;line-height:1.2}.cm-ep-item .cm-ep-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,.45)}.cm-ep-item .cm-ep-desc{font-size:11px;color:rgba(255,255,255,.4);line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.cm-ep-item .cm-ep-likes{display:flex;align-items:center;gap:3px;font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}.cm-ep-item .cm-ep-likes svg{width:13px;height:13px}
-.cm-role-panel{display:none;padding:0 16px;overflow-y:auto;flex:1}.cm-role-more-entry{display:flex;align-items:center;gap:8px;padding:10px 12px;margin:12px 0 4px;border-radius:10px;background:rgba(0, 0, 0,.06);border:1px solid rgba(0, 0, 0,.1);cursor:pointer;transition:all .2s;flex-shrink:0}.cm-role-more-entry:hover{background:rgba(0, 0, 0,.12);border-color:rgba(0, 0, 0,.24)}.cm-role-more-entry:active{transform:scale(.98)}.cm-role-more-entry .cmr-icon{width:28px;height:28px;border-radius:8px;background:#ff3b30;display:flex;align-items:center;justify-content:center;flex-shrink:0}.cm-role-more-entry .cmr-icon svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.cm-role-more-entry .cmr-text{flex:1;min-width:0}.cm-role-more-entry .cmr-title{font-size:13px;font-weight:600;color:#fff;line-height:1.3}.cm-role-more-entry .cmr-sub{font-size:10px;color:rgba(255,255,255,.4);line-height:1.3}.cm-role-more-entry .cmr-arrow{color:rgba(255,255,255,.35);flex-shrink:0;display:flex;align-items:center}.cm-role-more-entry .cmr-arrow svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.cm-role-card{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.cm-role-card.bound{cursor:pointer}
-.cm-role-card:last-child{border-bottom:none}
-.cm-role-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(0, 0, 0,.4)}
-.cm-role-avatar.unbound{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.04);display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.1)}
-.cm-role-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.cm-role-name{font-size:14px;font-weight:600;color:#fff;line-height:1.3}
-.cm-role-role{font-size:12px;font-weight:400;color:rgba(255,255,255,.45);margin-left:6px}
-.cm-role-ip{display:flex;align-items:center;gap:6px}.cm-sign-btn{padding:2px 8px;border-radius:999px;border:1px solid #ff3b30;background:#ff3b30;color:#fff;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0;margin-left:auto}.cm-sign-btn:active{opacity:.8}
-.cm-role-ip-tag{font-size:11px;font-weight:600;color:#ff3b30;padding:0;background:none}
-.ip-mining-panel{display:none;position:absolute;left:16px;top:50%;transform:translateY(-50%);z-index:2;flex-direction:column;align-items:center;gap:20px;background:rgba(0,0,0,.35);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:.5px solid rgba(255,255,255,.12);pointer-events:auto}#imActorList{display:flex;flex-direction:column;gap:8px}.im-actor-row{display:flex;flex-direction:column;align-items:center;gap:2px}.im-actor-row .im-avatar-wrap{position:relative;width:32px;height:32px}.im-actor-row .im-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);box-shadow:0 0 8px rgba(0, 0, 0,.2)}.im-actor-row .im-mining-dot{display:none}@keyframes miningPulse{0%,100%{opacity:1;box-shadow:0 0 6px rgba(255,59,48,.6)}50%{opacity:.4;box-shadow:0 0 2px rgba(255,59,48,.2)}}.im-actor-row .im-hash{font-size:10px;font-weight:600;color:#fff;text-align:center;line-height:1.2;white-space:nowrap}.im-actor-row .im-hash small{display:block;font-size:8px;font-weight:400;color:rgba(255,255,255,.4)}@media(min-width:769px){.ip-mining-panel{display:flex}}
-
-.cm-role-status{font-size:11px;color:rgba(255,255,255,.3)}
 
 .cm-footer{padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0));border-top:1px solid rgba(255,255,255,.1);flex-shrink:0}
 .cm-footer .comment-input-wrap{display:flex;gap:8px;margin-bottom:0;padding:0}
@@ -203,7 +184,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .comment-count{font-size:12px;color:rgba(255,255,255,.45)}
 @media(max-width:768px){body{padding-bottom:0!important}}
 
-@media(min-width:769px){#app{position:fixed;left:180px;right:68px;top:56px;bottom:76px;border-radius:20px 20px 0 0;overflow:hidden}.search-btn{display:none!important}body{background:#fff;overflow:hidden}.slide{height:calc(100vh - 132px);overflow:hidden;border-radius:20px 20px 0 0}body{display:block;align-items:unset;justify-content:unset}.top-tab-bar{display:none!important}.bnav{display:none}.watch-bar{position:absolute!important;left:0!important;right:0!important;bottom:0!important;transform:none!important}.player-progress{left:180px!important;right:68px!important;bottom:68px!important;transform:none!important}#cmDrawer{left:180px!important;right:68px!important;top:56px!important;bottom:20px!important;overflow:hidden!important}.cm-drawer .cm-overlay{background:transparent}.cm-drawer .cm-panel{width:380px;left:auto;right:0;top:0;bottom:0;max-height:none;transform:translateX(100%);border-radius:0 20px 20px 0}.cm-drawer.open .cm-panel{transform:translateX(0)}.dm-send-drawer .dm-panel{max-width:400px;left:50%;transform:translateX(-50%) translateY(100%)}.dm-send-drawer.open .dm-panel{transform:translateX(-50%) translateY(0)}.feed-nav-btns{position:fixed;right:18px;top:0;display:flex;flex-direction:column;gap:16px;z-index:500}.feed-nav-btn{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px)}.feed-nav-btn:hover{background:rgba(0,0,0,.1);transform:scale(1.1)}.feed-nav-btn:active{transform:scale(.9)}.desktop-actions{display:flex!important;position:fixed;right:32px;bottom:120px;z-index:500;flex-direction:column;align-items:center;gap:18px}.desktop-actions .act-icon{width:48px!important;height:56px!important}.desktop-actions .act-creator .ac-avatar{width:48px!important;height:56px!important}.danmaku-btn{display:none!important}.danmaku-btn{display:none!important}.info{bottom:56px!important}.actions{bottom:96px!important}.dt-page-nav{position:fixed!important;right:16px!important;top:50%!important;transform:translateY(-50%)!important;z-index:50!important;display:flex!important;flex-direction:column!important;gap:12px!important}.desktop-toolbar{display:flex!important;left:180px!important;right:68px!important;bottom:20px!important;border-radius:0 0 20px 20px}}
+@media(min-width:769px){#app{position:fixed;left:180px;right:68px;top:56px;bottom:76px;border-radius:20px 20px 0 0;overflow:hidden}.search-btn{display:none!important}body{background:#fff;overflow:hidden}.slide{height:calc(100vh - 132px);overflow:hidden;border-radius:20px 20px 0 0}body{display:block;align-items:unset;justify-content:unset}.top-tab-bar{display:none!important}.watch-bar{position:absolute!important;left:0!important;right:0!important;bottom:0!important;transform:none!important}.player-progress{left:180px!important;right:68px!important;bottom:68px!important;transform:none!important}#cmDrawer{left:180px!important;right:68px!important;top:56px!important;bottom:20px!important;overflow:hidden!important}.cm-drawer .cm-overlay{background:transparent}.cm-drawer .cm-panel{width:380px;left:auto;right:0;top:0;bottom:0;max-height:none;transform:translateX(100%);border-radius:0 20px 20px 0}.cm-drawer.open .cm-panel{transform:translateX(0)}.dm-send-drawer .dm-panel{max-width:400px;left:50%;transform:translateX(-50%) translateY(100%)}.dm-send-drawer.open .dm-panel{transform:translateX(-50%) translateY(0)}.feed-nav-btns{position:fixed;right:18px;top:0;display:flex;flex-direction:column;gap:16px;z-index:500}.feed-nav-btn{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px)}.feed-nav-btn:hover{background:rgba(0,0,0,.1);transform:scale(1.1)}.feed-nav-btn:active{transform:scale(.9)}.desktop-actions{display:flex!important;position:fixed;right:32px;bottom:120px;z-index:500;flex-direction:column;align-items:center;gap:18px}.desktop-actions .act-icon{width:48px!important;height:56px!important}.desktop-actions .act-creator .ac-avatar{width:48px!important;height:56px!important}.danmaku-btn{display:none!important}.danmaku-btn{display:none!important}.info{bottom:56px!important}.actions{bottom:96px!important}.dt-page-nav{position:fixed!important;right:16px!important;top:50%!important;transform:translateY(-50%)!important;z-index:50!important;display:flex!important;flex-direction:column!important;gap:12px!important}.desktop-toolbar{display:flex!important;left:180px!important;right:68px!important;bottom:20px!important;border-radius:0 0 20px 20px}}
 .dm-send-drawer{position:fixed;inset:0;z-index:310;visibility:hidden;transition:visibility .3s}
 .dm-send-drawer.open{visibility:visible}
 .dm-send-drawer .dm-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s}
@@ -292,21 +273,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .dh-avatar-dropdown .dd-header{display:flex;align-items:center;gap:12px;padding:18px 18px 14px}
 .dh-avatar-dropdown .dd-header img{width:40px;height:40px;border-radius:50%;object-fit:cover}
 .dh-avatar-dropdown .dd-name{font-weight:600;font-size:14px;color:var(--text);line-height:1.2}
-.dh-avatar-dropdown .dd-sub{font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:6px}.dd-wallet{font-family:monospace;font-size:10px;color:var(--text-muted);background:rgba(0,0,0,.04);padding:2px 8px;border-radius:6px}.dd-copy-btn{width:24px;height:24px;border-radius:999px;border:none;background:rgba(0,0,0,.04);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}.dd-copy-btn:hover{background:rgba(0, 0, 0,.1);color:var(--accent)}.dd-copy-btn svg{width:14px;height:14px}
+.dh-avatar-dropdown .dd-sub{font-size:11px;color:var(--text-muted);margin-top:2px;display:flex;align-items:center;gap:6px}.dd-copy-btn{width:24px;height:24px;border-radius:999px;border:none;background:rgba(0,0,0,.04);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}.dd-copy-btn:hover{background:rgba(0, 0, 0,.1);color:var(--accent)}.dd-copy-btn svg{width:14px;height:14px}
 .dh-avatar-dropdown .dd-divider{height:1px;background:rgba(0,0,0,.05);margin:0}
-.dh-avatar-dropdown .dd-balance{padding:14px 18px;display:flex;flex-direction:column;gap:10px}
-.dh-avatar-dropdown .dd-bal-row{display:flex;align-items:center;justify-content:space-between}
-.dh-avatar-dropdown .dd-bal-left{display:flex;align-items:center;gap:8px}
-.dh-avatar-dropdown .dd-bal-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
-.dh-avatar-dropdown .dd-bal-icon.story{background:rgba(0, 0, 0,.1);color:#000000}
-.dh-avatar-dropdown .dd-bal-icon.usdc{background:rgba(59,130,246,.1);color:#3b82f6}
-.dh-avatar-dropdown .dd-bal-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.2}
-.dh-avatar-dropdown .dd-bal-name small{display:block;font-size:10px;color:var(--text-muted);font-weight:400}
-.dh-avatar-dropdown .dd-bal-val{text-align:right;font-size:14px;font-weight:600;color:var(--text)}
-.dh-avatar-dropdown .dd-bal-val small{display:block;font-size:10px;color:var(--text-muted);font-weight:400}
 .dh-avatar-dropdown .dd-item{display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;border:none;background:none;width:100%;text-align:left}
 .dh-avatar-dropdown .dd-item:hover{background:rgba(0,0,0,.025)}
-.dh-avatar-dropdown .dd-item.logout{color:#f45b69}.dd-actions{padding:10px 18px 12px;display:flex;flex-direction:column;gap:8px}.dd-actions .dd-btn-row{display:flex;gap:8px}.dd-actions .dd-btn{flex:1;padding:8px 0;border-radius:999px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;font-family:inherit}.dd-actions .dd-btn.dd-trade{width:100%;background:rgba(0,0,0,.04);color:var(--text)}.dd-actions .dd-btn.dd-trade:hover{background:rgba(0,0,0,.08)}.dd-actions .dd-btn.dd-deposit{background:var(--accent);color:#fff;font-size:13px;padding:10px 0}.dd-actions .dd-btn.dd-deposit:hover{opacity:.9}.dd-actions .dd-btn.dd-withdraw{background:rgba(0,0,0,.04);color:var(--text)}.dd-actions .dd-btn.dd-withdraw:hover{background:rgba(0,0,0,.08)}
+.dh-avatar-dropdown .dd-item.logout{color:#f45b69}
 
 /* ── Auth (Login / Logout) ── */
 .auth-container{display:flex;align-items:center}
@@ -321,7 +292,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .auth-dropdown-header{display:flex;align-items:center;gap:12px;padding:16px 18px}
 .auth-dropdown-header img{width:40px;height:40px;border-radius:50%;object-fit:cover}
 .auth-dropdown-name{font-weight:600;font-size:.92rem;color:var(--text)}
-.auth-dropdown-wallet{font-size:.78rem;color:var(--text-muted);font-family:monospace;margin-top:2px}
 .auth-dropdown-divider{height:1px;background:var(--border);margin:0}
 .auth-dropdown-item{display:flex;align-items:center;gap:10px;padding:12px 18px;color:var(--text);text-decoration:none;font-size:.9rem;transition:background .15s;cursor:pointer}
 .auth-dropdown-item:hover{background:rgba(0,0,0,.03)}
@@ -339,17 +309,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .auth-social-btn:hover{background:var(--accent-soft);border-color:var(--accent)}
 .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text-muted);font-size:12px}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.auth-wallet-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:999px;border:none;background:#000000;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;transition:opacity .15s}
-.auth-wallet-btn:hover{opacity:.9}
 .auth-modal-tos{text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px}
 .auth-modal-tos a{color:var(--accent);text-decoration:none}
-.auth-balance-row{display:flex;align-items:center;justify-content:space-between;padding:10px 18px}
-.auth-balance-label{font-size:.8rem;color:var(--text-muted);font-weight:500}
-.auth-balance-val{font-size:.95rem;font-weight:600;color:var(--text)}
-.auth-balance-actions{display:flex;gap:8px;padding:8px 18px 12px}
-.auth-balance-actions .btn{padding:8px 0;border-radius:999px;border:none;font-size:12px;font-weight:600;cursor:pointer;flex:1;text-align:center}
-.auth-balance-actions .btn-primary{background:var(--accent);color:#fff}
-.auth-balance-actions .btn-outline{background:rgba(0,0,0,.04);color:var(--text)}
 /*
  * Prevent desktop header auth styles from colliding with .dh-avatar
  */
@@ -390,7 +351,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .desktop-header .dh-avatar{width:34px;height:34px;border-radius:50%;object-fit:contain;cursor:pointer;border:1.5px solid rgba(0,0,0,.08);flex-shrink:0;transition:border-color .15s}
 .desktop-header .dh-avatar:hover{border-color:var(--accent)}
 .desktop-header .dh-login-btn{padding:6px 16px;border-radius:999px;border:1px solid var(--accent);background:none;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;transition:all .15s}
-.desktop-header .dh-login-btn:hover{background:var(--accent-soft)}.desktop-header .dh-usdc-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 4px 3px 14px;border-radius:999px;background:rgba(0,0,0,.04);font-size:12px;font-weight:600;color:var(--text);flex-shrink:0;cursor:pointer;position:relative}.desktop-header .dh-usdc-badge svg{width:14px;height:14px;flex-shrink:0}.desktop-header .dh-usdc-badge .dh-avatar-wrap{margin:0}.desktop-header .dh-usdc-badge .dh-avatar{width:30px;height:30px;border:none}
+.desktop-header .dh-login-btn:hover{background:var(--accent-soft)}
 @media(min-width:769px){.desktop-header{left:160px;right:0}}
 @media(max-width:768px){.desktop-header{display:none}}
 @media(min-width:769px){#app.sqz{right:448px!important;border-radius:20px 0 0 0!important}.player-progress.sqz{right:448px!important}.desktop-toolbar.sqz{right:448px!important;border-radius:0 0 0 20px!important}#cmDrawer.sqz{right:68px!important}.sqz .slide{border-radius:20px 0 0 0!important}}@media(min-width:769px){#app.sqz{right:448px!important;border-radius:20px 0 0 0!important}.player-progress.sqz{right:448px!important}.desktop-toolbar.sqz{right:448px!important;border-radius:0 0 0 20px!important}#cmDrawer.sqz{right:68px!important}.sqz .slide{border-radius:20px 0 0 0!important}}
@@ -400,7 +361,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .app-fullscreen #playerProgress{position:fixed!important;left:0!important;right:0!important;bottom:48px!important;height:8px!important;z-index:1003!important}
 .app-fullscreen #watchBar{position:fixed!important;left:0!important;right:0!important;bottom:56px!important;height:44px!important;z-index:1002!important}
 .app-fullscreen #dtPageNav{position:fixed!important;right:12px!important;top:auto!important;bottom:calc(68px + 44px + 54px + 350px + env(safe-area-inset-bottom,0px))!important;z-index:1005!important;display:flex!important}
-.app-fullscreen .desktop-header,.app-fullscreen .bnav,.app-fullscreen .top-tab-bar,.app-fullscreen .side-drawer,.app-fullscreen .side-overlay{display:none!important}
+.app-fullscreen .desktop-header,.app-fullscreen .top-tab-bar,.app-fullscreen .side-drawer,.app-fullscreen .side-overlay{display:none!important}
 .app-fullscreen .slide{height:100vh!important}
 .app-fullscreen .info{bottom:calc(56px + 44px + 12px + env(safe-area-inset-bottom,0px))!important}
 .app-fullscreen .actions{bottom:calc(68px + 44px + 54px + env(safe-area-inset-bottom,0px))!important}
@@ -428,35 +389,9 @@ body.clean-mode .clean-exit-btn{display:flex}
 <div class="side-overlay" id="sideOverlay"></div>
 <div class="side-drawer" id="sideDrawer">
   <div class="sd-header"><button class="sd-close" id="sdClose">✕</button></div>
-  <!-- ═══ 资产区（余额 + 操作） ═══ -->
-  <div class="sd-assets" style="padding:0 20px 14px;">
-    <div class="sd-assets-balance" style="display:flex;gap:8px;margin-bottom:10px;">
-      <div class="sd-asset-item" style="flex:1;display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.04);">
-        <span style="font-size:10px;font-weight:600;color:rgba(0,0,0,.45);letter-spacing:.04em;">STORY</span>
-        <span class="sd-balance-story" style="font-size:16px;font-weight:700;color:#1a1a2e;" id="sdBalanceStory">10,123</span>
-      </div>
-      <div class="sd-asset-item" style="flex:1;display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:14px;background:rgba(0,0,0,.04);">
-        <span style="font-size:10px;font-weight:600;color:rgba(0,0,0,.45);letter-spacing:.04em;">USDC</span>
-        <span class="sd-balance-usdc" style="font-size:16px;font-weight:700;color:#1a1a2e;" id="sdBalanceUsdc">100.23</span>
-      </div>
-    </div>
-    <div class="sd-assets-actions" style="display:flex;gap:8px;">
-      <button onclick="openDepositModal()" style="flex:1;padding:10px 0;border-radius:999px;border:none;background:#1a1a2e;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">充值</button>
-    </div>
-  </div>
-  <div class="sd-user" style="display:flex;flex-direction:row;align-items:stretch;gap:10px;padding:8px 20px 20px;">
-    <div onclick="location.href='referral.html'" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0;border-radius:12px;cursor:pointer;background:rgba(0,0,0,.03);">
-      <span style="width:24px;height:24px;color:#1a1a2e;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>
-      <span style="font-size:12px;font-weight:600;color:#1a1a2e;">邀请</span>
-    </div>
-    <div onclick="location.href='rewards.html'" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0;border-radius:12px;cursor:pointer;background:rgba(0,0,0,.03);">
-      <span style="width:24px;height:24px;color:#1a1a2e;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-      <span style="font-size:12px;font-weight:600;color:#1a1a2e;">收益</span>
-    </div>
-  </div>
   <div class="sd-section-label" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="location.href='notifications.html'">通知消息<span class="sd-notify-dot" style="margin-left:8px;margin-top:0"></span><span style="font-size:16px;color:rgba(0,0,0,.25);margin-right:4px">›</span></div>
   <div class="sd-notify-list">
-    <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text">@Jack 购买了你的IP 卡 <strong>苏婉清</strong></div><div class="sd-notify-time">12分钟前</div></div><span class="sd-notify-dot"></span></div>
+    <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text">@Jack 评论了你的短剧 <strong>《凤骨琉璃》</strong></div><div class="sd-notify-time">12分钟前</div></div><span class="sd-notify-dot"></span></div>
     <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text"><strong>李云飞</strong> 赞了你的视频</div><div class="sd-notify-time">18分钟前</div></div></div>
     <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text"><strong>苏婉清</strong> 收藏了你的短剧 《凤骨琉璃》</div><div class="sd-notify-time">42分钟前</div></div></div>
   </div>
@@ -467,7 +402,6 @@ body.clean-mode .clean-exit-btn{display:flex}
 <div id="loading"><div class="spinner"></div></div>
 <div id="toast"></div>
 <div id="app">
-  <div class="ip-mining-panel" id="ipMiningPanel"><div id="imActorList"></div></div>
   <div id="track"></div>
   <div class="player-progress" id="playerProgress"><div class="pp-fill" id="ppFill"><div class="pp-thumb" id="ppThumb"></div></div></div>
   <div class="pp-tooltip" id="ppTooltip"><img class="pp-tip-img" id="ppTipImg" src="" alt=""><span class="pp-tip-time" id="ppTipTime">00:00 / 00:00</span></div>
@@ -518,12 +452,6 @@ body.clean-mode .clean-exit-btn{display:flex}
   </button>
 </div>
 
-<nav class="bnav">
-  <a href="recommend.html"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M24.8376 14.0001C24.8376 19.9861 19.9849 24.8388 13.9989 24.8388C8.01281 24.8388 3.16016 19.9861 3.16016 14.0001C3.16016 8.014 8.01281 3.16135 13.9989 3.16135C19.9849 3.16135 24.8376 8.014 24.8376 14.0001Z" fill="none" stroke="currentColor" stroke-width="1.49333" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.9263 14.4331C19.2596 14.2407 19.2596 13.7595 18.9263 13.5671L11.9101 9.51633C11.5768 9.32388 11.1601 9.56444 11.1601 9.94934V18.0509C11.1601 18.4358 11.5768 18.6763 11.9101 18.4839L18.9263 14.4331Z" fill="currentColor"/></svg><span>短剧</span></a>
-  <a href="actors.html"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M13.9053 2.66797C13.9639 2.63382 14.0361 2.63382 14.0947 2.66797L23.6611 8.24805C23.719 8.2818 23.7549 8.34415 23.7549 8.41113V19.5889C23.7549 19.6559 23.719 19.7182 23.6611 19.752L14.0947 25.332C14.0361 25.3662 13.9639 25.3662 13.9053 25.332L4.33887 19.752C4.28101 19.7182 4.24512 19.6558 4.24512 19.5889V8.41113C4.24512 8.34415 4.28101 8.2818 4.33887 8.24805L13.9053 2.66797Z" stroke="currentColor" stroke-width="1.49"/><path d="M22.6563 8.44303C23.016 8.24379 23.4695 8.3734 23.669 8.73307C23.8682 9.09289 23.7377 9.54634 23.3779 9.74576C21.6325 10.7132 20.1068 11.5637 18.5801 12.4137C17.0633 13.2582 15.5452 14.1028 13.8125 15.0631V24.3102C13.8125 24.7217 13.4788 25.0553 13.0674 25.0553C12.656 25.0552 12.3223 24.7216 12.3223 24.3102V14.4225L7.04103 11.3434C6.68599 11.136 6.56634 10.6791 6.77345 10.3239C6.98081 9.96862 7.43763 9.84903 7.79298 10.0563L13.584 13.4333C13.5983 13.4416 13.6115 13.4515 13.625 13.4606C15.1372 12.6218 16.4962 11.8682 17.8545 11.112C19.3813 10.2619 20.9093 9.41129 22.6563 8.44303ZM8.43947 5.54069C8.64694 5.18573 9.10378 5.0659 9.459 5.27311L13.6924 7.74283C14.0472 7.95035 14.1671 8.40721 13.96 8.76237C13.7526 9.11733 13.2957 9.237 12.9404 9.02994L8.70704 6.56022C8.35201 6.35277 8.23224 5.89593 8.43947 5.54069Z" fill="currentColor"/></svg><span>IP市场</span></a>
-  <a href="studio.html"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M4.66797 5.83333V22.1667C4.66797 22.811 5.1903 23.3333 5.83464 23.3333H22.168C22.8123 23.3333 23.3346 22.811 23.3346 22.1667V5.83333C23.3346 5.18899 22.8123 4.66666 22.168 4.66666H5.83464C5.1903 4.66666 4.66797 5.18899 4.66797 5.83333Z" stroke="currentColor" stroke-width="1.49" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11.6667V18.6667" stroke="currentColor" stroke-width="1.49" stroke-linecap="round"/><path d="M10.5 15.1667H17.5" stroke="currentColor" stroke-width="1.49" stroke-linecap="round"/></svg><span>IP收益</span></a>
-</nav>
-
 <div class="cm-drawer" id="cmDrawer"><div class="cm-overlay" id="cmOverlay"></div><div class="cm-panel"><div class="cm-handle"></div><div class="cm-header"><div class="cm-title" id="cmTitle">短剧简介</div><button class="cm-close" id="cmClose">✕</button></div><div class="cm-body" id="cmBody"></div><div class="cm-footer" id="cmFooter"></div></div></div>
 <div class="dm-send-drawer" id="dmSendDrawer"><div class="dm-overlay" id="dmOverlay"></div><div class="dm-panel"><div class="dm-handle"></div><div class="dm-input-wrap"><div class="dm-textarea-wrap"><textarea id="dmInput" placeholder="发送一条友善的弹幕..." maxlength="30" rows="1"></textarea><span class="dm-char-count" id="dmCharCount">0/30</span></div><button class="dm-send-btn" id="dmSendBtn">发送</button></div><div class="dm-emoji-bar" id="dmEmojiBar"><div class="dm-emoji-row" id="dmEmojiRow"></div><button class="dm-emoji-toggle" id="dmEmojiToggle" title="展开表情">›</button></div></div></div>
 
@@ -536,7 +464,7 @@ function switchTab(tab,ev){
   const tabBar=document.getElementById('topTabBar');
   const dramaPg=document.getElementById('dramaGridPage');
   const app=document.getElementById('app');
-  const bnav=document.querySelector('.bnav');
+  const bnav=document.querySelector('.bottom-nav-wrapper');
   const watchBar=document.getElementById('watchBar');
   const playerProg=document.getElementById('playerProgress');
   const searchBtn=document.getElementById('searchBtn');
@@ -556,7 +484,7 @@ function switchTab(tab,ev){
     dramaPg.classList.add('show');
     var dIframe = document.getElementById("dramaIframe"); if (dIframe && (!dIframe.src || dIframe.getAttribute('src') === '')) { dIframe.src = dIframe.getAttribute("data-src"); }
     app.style.display='none';
-    bnav.style.display='none';
+    if(bnav)bnav.style.display='none';
     var bnp = document.getElementById('bottom-nav-placeholder');
     if (bnp) bnp.style.display = 'none';
     var bw = document.querySelector('.bottom-nav-wrapper');
@@ -578,7 +506,7 @@ function switchTab(tab,ev){
     if(searchSVG2) { searchSVG2.style.stroke = ''; searchSVG2.style.filter = ''; }
     dramaPg.classList.remove('show');
     app.style.display='';
-    bnav.style.display='';
+    if(bnav)bnav.style.display='';
     var bnp = document.getElementById('bottom-nav-placeholder');
     if (bnp) bnp.style.display = '';
     var bw = document.querySelector('.bottom-nav-wrapper');
@@ -602,31 +530,23 @@ function renderDramaGrid(){
 
 /* ── Original feed code ── */
 const DATA = [
-  {id:'001',type:'drama',title:'凤骨琉璃',cat:'古风',rt:4.6,ep:'全44集',totalEp:44,author:'JACK',avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',actors:['苏婉清','李云飞','赵老四','王五爷'],cover:'image/fenggu_cover.jpg',video:'video/凤骨琉璃.mp4',likes:33300,cmts:890,fav:false,like:false,desc:'一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织，宫墙之内步步惊心，爱恨情仇纠葛难解的古风传奇，让人欲罢不能。'},
-  {id:'v001',type:'video',title:'打斗精彩片段',author:'EVA',avatar:'https://images.unsplash.com/photo-1457449940276-e8deed18bfff?auto=format&fit=crop&w=200&q=80',actors:[],cover:'image/chengxiangfu_cover.jpg',video:'video/打斗视频.mp4',likes:15200,cmts:234,fav:false,like:false,desc:'精彩打斗片段合集，每一帧都燃爆了！'},
-  {id:'002',type:'drama',title:'我卸甲后天下大乱了',cat:'古风',rt:4.4,ep:'全12集',totalEp:12,author:'EVA',avatar:'https://images.unsplash.com/photo-1457449940276-e8deed18bfff?auto=format&fit=crop&w=200&q=80',actors:['赵无极','林梦瑶','顾倾城'],cover:'image/xiejia_cover.jpg',video:'video/我卸甲后天下大乱了.mp4',likes:28600,cmts:567,fav:true,like:false,desc:'卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。'},
-  {id:'003',type:'drama',title:'丞相府今日开饭',cat:'喜剧',rt:4.5,ep:'全24集',totalEp:24,author:'LENS',avatar:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',actors:['苏婉清','上官婉儿'],cover:'image/chengxiangfu_cover.jpg',video:'video/丞相府今日开饭.mp4',likes:19800,cmts:423,fav:false,like:true,desc:'丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。'},
-  {id:'v002',type:'video',title:'凤骨琉璃 EP01',author:'JACK',avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',actors:[],cover:'image/fenggu_cover.jpg',video:'video/凤骨琉璃.mp4',likes:22100,cmts:456,fav:false,like:false,desc:'凤骨琉璃第一集精彩片段。'},
-  {id:'004',type:'drama',title:'时间管理局',cat:'科幻',rt:4.8,ep:'全16集',totalEp:16,author:'NOVA',avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',actors:['周九','吴十'],cover:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',likes:32100,cmts:891,fav:false,like:false,desc:'穿梭时空，修复那些被篡改的历史关键节点'},
-  {id:'v003',type:'video',title:'长安如梦 EP01',author:'ROSE',avatar:'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',actors:[],cover:'image/cover-candle.jpg',video:'video/打斗视频.mp4',likes:18900,cmts:312,fav:false,like:false,desc:'长安如梦，梦回大唐盛世繁华。'},
-  {id:'005',type:'drama',title:'迷途恋人',cat:'爱情',rt:3.9,ep:'全20集',totalEp:20,author:'ROSE',avatar:'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',actors:['郑一','冯二'],cover:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',likes:56000,cmts:1203,fav:true,like:false,desc:'失忆后重遇初恋，命运却开了一个残酷的玩笑'},
-  {id:'006',type:'drama',title:'代码风暴',cat:'动作',rt:4.2,ep:'第7集 / 共30集',totalEp:30,author:'CYPHER',avatar:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',actors:['陈三','刘四'],cover:'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=800&q=80',likes:27800,cmts:654,fav:false,like:false,desc:'天才程序员被诬陷入狱，出狱后展开惊天复仇计划'},
-  {id:'v004',type:'video',title:'零夜序章',author:'CYPHER',avatar:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',actors:[],cover:'image/cover-zero-night.jpg',video:'video/丞相府今日开饭.mp4',likes:16500,cmts:278,fav:false,like:false,desc:'零夜序章，黑暗中的第一缕光明。'},
-  {id:'007',type:'drama',title:'笑面人生',cat:'喜剧',rt:4.5,ep:'全36集',totalEp:36,author:'SMILE',avatar:'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80',actors:['杨五','朱六'],cover:'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800&q=80',likes:42000,cmts:987,fav:false,like:true,desc:'平凡小人物用笑声治愈身边每一个受伤的灵魂'},
-  {id:'v005',type:'video',title:'金字塔探险',author:'NOVA',avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',actors:[],cover:'image/cover-pyramid.jpg',video:'video/凤骨琉璃.mp4',likes:20100,cmts:345,fav:false,like:false,desc:'探索古老金字塔的秘密，揭开千年谜团。'},
-  {id:'008',type:'drama',title:'第七层梦境',cat:'悬疑',rt:4.3,ep:'第2集 / 共18集',totalEp:18,author:'DREAMER',avatar:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',actors:['黄七','曹八'],cover:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',likes:31500,cmts:756,fav:false,like:false,desc:'进入他人梦境，却发现再也分不清真假虚实'},
-  {id:'009',type:'drama',title:'金融暗战',cat:'金融',rt:4.0,ep:'全44集',totalEp:44,author:'BULL',avatar:'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',actors:['周九','吴十'],cover:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',likes:22000,cmts:534,fav:true,like:false,desc:'华尔街之狼 vs 国内资本大鳄，谁是最后赢家'},
-  {id:'v006',type:'video',title:'全押时刻',author:'BULL',avatar:'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',actors:[],cover:'image/cover-allin.jpg',video:'video/我卸甲后天下大乱了.mp4',likes:23400,cmts:398,fav:false,like:false,desc:'当机会来临，你是否敢全押？一场惊心动魄的博弈。'},
-  {id:'010',type:'drama',title:'星际拓荒者',cat:'科幻',rt:4.7,ep:'全26集',totalEp:26,author:'STELLAR',avatar:'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=200&q=80',actors:['何九','吕十'],cover:'https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=800&q=80',likes:48900,cmts:1123,fav:false,like:false,desc:'人类最后的希望，踏上前所未有的星际征程'}
+  {id:'001',type:'drama',title:'凤骨琉璃',cat:'古风',rt:4.6,ep:'全44集',totalEp:44,author:'JACK',avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',cover:'image/fenggu_cover.jpg',video:'video/凤骨琉璃.mp4',likes:33300,cmts:890,fav:false,like:false,desc:'一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织，宫墙之内步步惊心，爱恨情仇纠葛难解的古风传奇，让人欲罢不能。'},
+  {id:'v001',type:'video',title:'打斗精彩片段',author:'EVA',avatar:'https://images.unsplash.com/photo-1457449940276-e8deed18bfff?auto=format&fit=crop&w=200&q=80',cover:'image/chengxiangfu_cover.jpg',video:'video/打斗视频.mp4',likes:15200,cmts:234,fav:false,like:false,desc:'精彩打斗片段合集，每一帧都燃爆了！'},
+  {id:'002',type:'drama',title:'我卸甲后天下大乱了',cat:'古风',rt:4.4,ep:'全12集',totalEp:12,author:'EVA',avatar:'https://images.unsplash.com/photo-1457449940276-e8deed18bfff?auto=format&fit=crop&w=200&q=80',cover:'image/xiejia_cover.jpg',video:'video/我卸甲后天下大乱了.mp4',likes:28600,cmts:567,fav:true,like:false,desc:'卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。'},
+  {id:'003',type:'drama',title:'丞相府今日开饭',cat:'喜剧',rt:4.5,ep:'全24集',totalEp:24,author:'LENS',avatar:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',cover:'image/chengxiangfu_cover.jpg',video:'video/丞相府今日开饭.mp4',likes:19800,cmts:423,fav:false,like:true,desc:'丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。'},
+  {id:'v002',type:'video',title:'凤骨琉璃 EP01',author:'JACK',avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',cover:'image/fenggu_cover.jpg',video:'video/凤骨琉璃.mp4',likes:22100,cmts:456,fav:false,like:false,desc:'凤骨琉璃第一集精彩片段。'},
+  {id:'004',type:'drama',title:'时间管理局',cat:'科幻',rt:4.8,ep:'全16集',totalEp:16,author:'NOVA',avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',likes:32100,cmts:891,fav:false,like:false,desc:'穿梭时空，修复那些被篡改的历史关键节点'},
+  {id:'v003',type:'video',title:'长安如梦 EP01',author:'ROSE',avatar:'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',cover:'image/cover-candle.jpg',video:'video/打斗视频.mp4',likes:18900,cmts:312,fav:false,like:false,desc:'长安如梦，梦回大唐盛世繁华。'},
+  {id:'005',type:'drama',title:'迷途恋人',cat:'爱情',rt:3.9,ep:'全20集',totalEp:20,author:'ROSE',avatar:'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',likes:56000,cmts:1203,fav:true,like:false,desc:'失忆后重遇初恋，命运却开了一个残酷的玩笑'},
+  {id:'006',type:'drama',title:'代码风暴',cat:'动作',rt:4.2,ep:'第7集 / 共30集',totalEp:30,author:'CYPHER',avatar:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=800&q=80',likes:27800,cmts:654,fav:false,like:false,desc:'天才程序员被诬陷入狱，出狱后展开惊天复仇计划'},
+  {id:'v004',type:'video',title:'零夜序章',author:'CYPHER',avatar:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',cover:'image/cover-zero-night.jpg',video:'video/丞相府今日开饭.mp4',likes:16500,cmts:278,fav:false,like:false,desc:'零夜序章，黑暗中的第一缕光明。'},
+  {id:'007',type:'drama',title:'笑面人生',cat:'喜剧',rt:4.5,ep:'全36集',totalEp:36,author:'SMILE',avatar:'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800&q=80',likes:42000,cmts:987,fav:false,like:true,desc:'平凡小人物用笑声治愈身边每一个受伤的灵魂'},
+  {id:'v005',type:'video',title:'金字塔探险',author:'NOVA',avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',cover:'image/cover-pyramid.jpg',video:'video/凤骨琉璃.mp4',likes:20100,cmts:345,fav:false,like:false,desc:'探索古老金字塔的秘密，揭开千年谜团。'},
+  {id:'008',type:'drama',title:'第七层梦境',cat:'悬疑',rt:4.3,ep:'第2集 / 共18集',totalEp:18,author:'DREAMER',avatar:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',likes:31500,cmts:756,fav:false,like:false,desc:'进入他人梦境，却发现再也分不清真假虚实'},
+  {id:'009',type:'drama',title:'金融暗战',cat:'金融',rt:4.0,ep:'全44集',totalEp:44,author:'BULL',avatar:'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',likes:22000,cmts:534,fav:true,like:false,desc:'华尔街之狼 vs 国内资本大鳄，谁是最后赢家'},
+  {id:'v006',type:'video',title:'全押时刻',author:'BULL',avatar:'https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=200&q=80',cover:'image/cover-allin.jpg',video:'video/我卸甲后天下大乱了.mp4',likes:23400,cmts:398,fav:false,like:false,desc:'当机会来临，你是否敢全押？一场惊心动魄的博弈。'},
+  {id:'010',type:'drama',title:'星际拓荒者',cat:'科幻',rt:4.7,ep:'全26集',totalEp:26,author:'STELLAR',avatar:'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=200&q=80',cover:'https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=800&q=80',likes:48900,cmts:1123,fav:false,like:false,desc:'人类最后的希望，踏上前所未有的星际征程'}
 ];
-
-var ACTOR_INFO = {
-  '苏婉清':{avatar:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80',ipPower:'8,562'},
-  '李云飞':{avatar:'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',ipPower:'6,230'},
-  '林梦瑶':{avatar:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',ipPower:'5,891'},
-  '赵无极':{avatar:'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',ipPower:'7,105'},
-  '上官婉儿':{avatar:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',ipPower:'4,720'}
-};
 
 
 const total=DATA.length;
@@ -653,20 +573,19 @@ let countdownSec=0;
 
 function updateCountdown(){}
 
-function ensureComments(d){if(d.comments)return;const names=['清风','明月','繁星','晨曦','暮雪','城北','城南','夜雨','晓风','归燕'];const texts=['好剧！剧情节奏把控得太好，已经追起来了。','期待更新🔥 每一集都很有代入感。','这部剧绝了，IP 卡表现都在线。','追剧中…画面太美了！','剧情太精彩了，人物冲突很带感。','赞赞赞👍 这是今年最好看的AI短剧之一。','对白写得很棒，感情线也很细腻。','世界观很有意思，想多看几集。','节奏紧凑，反转不断，强烈推荐。','剧情扎实，IP 卡演技也在线。'];var idNum=parseInt(d.id,10)||(d.id||'').length;d.comments=Array.from({length:5},(_,i)=>({id:Date.now()+i,name:names[(i+idNum)%names.length],avatar:names[(i+2+idNum)%names.length].slice(0,1),text:texts[(i+idNum)%texts.length],time:`${(i+1)*3}分钟前`,likes:5+i*3}))}
+function ensureComments(d){if(d.comments)return;const names=['清风','明月','繁星','晨曦','暮雪','城北','城南','夜雨','晓风','归燕'];const texts=['好剧！剧情节奏把控得太好，已经追起来了。','期待更新🔥 每一集都很有代入感。','这部剧绝了，演技和剧情都在线。','追剧中…画面太美了！','剧情太精彩了，人物冲突很带感。','赞赞赞👍 这是今年最好看的短剧之一。','对白写得很棒，感情线也很细腻。','世界观很有意思，想多看几集。','节奏紧凑，反转不断，强烈推荐。','剧情扎实，人物塑造和节奏都在线。'];var idNum=parseInt(d.id,10)||(d.id||'').length;d.comments=Array.from({length:5},(_,i)=>({id:Date.now()+i,name:names[(i+idNum)%names.length],avatar:names[(i+2+idNum)%names.length].slice(0,1),text:texts[(i+idNum)%texts.length],time:`${(i+1)*3}分钟前`,likes:5+i*3}))}
 function renderDrawerComments(d){ensureComments(d);const commentList=document.getElementById('drawerCommentList');const countEl=document.getElementById('drawerCommentCount');if(!commentList||!countEl)return;commentList.innerHTML=d.comments.map(c=>`<div class="cm-item"><img class="cm-avatar" src="https://api.dicebear.com/7.x/thumbs/svg?seed=${c.name}" alt="${c.name}"><div class="cm-content"><div class="cm-meta"><span class="cm-name">${c.name}</span><span class="cm-time">${c.time}</span></div><div class="cm-text">${c.text}</div><div class="cm-actions"><button>👍 ${c.likes}</button><button>💬 回复</button></div></div></div>`).join('');countEl.textContent=d.comments.length}
 function postDrawerComment(id){const input=document.getElementById('drawerCommentInput');if(!input)return;const text=input.value.trim();if(!text){showToast('请输入评论内容','✏️');return}if(text.length>200){showToast('评论不能超过200字','⚠️');return}const d=DATA.find(x=>x.id===id);if(!d)return;ensureComments(d);const comment={id:Date.now(),name:'我',avatar:'我',text,time:'刚刚',likes:0};d.comments.unshift(comment);input.value='';renderDrawerComments(d);showToast('✅ 评论已发布','✅')}
 function openDrawer(id){ CMPanel.open(id); }
 function closeDrawer(){ CMPanel.close(); }
 
-function render(){let h='';for(let i=0;i<total;i++){const d=DATA[i];const acts=(d.actors||[]).slice(0,2).map(a=>`<span class="c-name">${a}</span>`).join('<span class="c-div"> / </span>');const isVideo=d.type==='video';const videoHTML=d.video?`<video class="slide-video" src="${d.video}" muted loop playsinline poster="${d.cover}"${i===0?' autoplay':''}></video>`:`<img class="slide-img" src="${d.cover}" alt="${d.title}" loading="${i===0?'eager':'lazy'}" onerror="this.style.display='none'"/>`;const titleHTML=isVideo?'@'+d.author:d.title;const tagsHTML=isVideo?'':'<span class="info-rating"><span class="star">★</span>'+d.rt+'';const descHTML=isVideo?'<span class="desc-text">'+d.desc+'</span>':'<span class="desc-ep">第1集</span><span class="desc-sep">|</span><span class="desc-text">'+d.desc+'</span>';const titleOnclick=isVideo?"location.href='user-profile-visitor.html?author="+d.author+"'":"location.href='drama-player.html'";h+=`<div class="slide" style="top:${i*100}vh">${videoHTML}<div class="dm-layer" id="dm_${i}"></div><div class="slide-mask"></div><div class="play-btn" id="pb_${d.id}"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="info"><div class="danmaku-btn"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 6.5h7" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M4.5 8.5h5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M4.5 10.5h3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>弹幕</div><div class="info-title">${titleHTML}<span class="gt"> ›</span></div><div class="info-tags">${tagsHTML}</div><div class="info-desc">${descHTML}<span class="desc-expand" data-id="${d.id}">展开</span></div></div><div class="actions"><button class="act-creator"><img class="ac-avatar" src="${d.avatar}" alt="${d.author}"><span class="ac-follow${d.followed?' followed':''}" data-follow="${d.author}">${d.followed?'✓':'+'}</span></button><button class="act-btn" data-act="fav" data-id="${d.id}"><div class="act-icon${d.fav?' bookmarked':''}"><svg viewBox="0 0 24 24" width="20" height="20" fill="${d.fav?'currentColor':'none'}" stroke="${d.fav?'currentColor':'currentColor'}" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div><span class="act-label">${fmt(Math.floor(d.likes*0.3))}</span></button><button class="act-btn" data-act="cmt" data-id="${d.id}"><div class="act-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><span class="act-label">${fmt(d.cmts)}</span></button><button class="act-btn" data-act="like" data-id="${d.id}"><div class="act-icon${d.like?' liked':''}"><svg viewBox="0 0 24 24" width="20" height="20" fill="${d.like?'#ff4d6a':'none'}" stroke="${d.like?'#ff4d6a':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span class="act-label">${fmt(d.likes)}</span></button><button class="act-btn" data-act="share" data-id="${d.id}"><div class="act-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg></div><span class="act-label">分享</span></button><button class="act-btn act-more-btn" data-act="more" data-id="${d.id}"><div class="act-icon">⋯</div></button><div class="act-more-popup" id="mpop_${d.id}" style="display:none"><div class="act-more-item" data-more-act="not-interested">不感兴趣</div><div class="act-more-item" data-more-act="report">举报</div></div></div></div>`;}track.innerHTML=h;track.style.height=(total*100)+'vh';wh=window.innerHeight;goTo(0,false);bindEvents();setTimeout(()=>loading.classList.add('hide'),350);updateWatchBar()}
-function goTo(i,animate){if(animFlag)return;if(animate)animFlag=true;i=Math.max(0,Math.min(total-1,i));idx=i;document.querySelectorAll('.slide-video').forEach(v=>v.pause());track.style.transition=animate?'transform .38s cubic-bezier(.22,1,.36,1)':'none';track.style.transform=`translateY(${-i*wh}px)`;const curV=document.querySelector(`#track .slide:nth-child(${i+1}) .slide-video`);if(curV){curV.currentTime=0;curV.play().catch(()=>{})}initDanmaku(i);updateMiningPanel();updateWatchBar();if(cmDrawer.classList.contains("open")){openDrawer(DATA[idx].id)}if(cmDrawer.classList.contains("open")){openDrawer(DATA[idx].id)}if(animate)setTimeout(()=>{animFlag=false},400);playProgress=0;countdownSec=0;resetWatchBarRight();updatePlayProgressUI();if(!playInterval)startPlayProgress()}
+function render(){let h='';for(let i=0;i<total;i++){const d=DATA[i];const isVideo=d.type==='video';const videoHTML=d.video?`<video class="slide-video" src="${d.video}" muted loop playsinline poster="${d.cover}"${i===0?' autoplay':''}></video>`:`<img class="slide-img" src="${d.cover}" alt="${d.title}" loading="${i===0?'eager':'lazy'}" onerror="this.style.display='none'"/>`;const titleHTML=isVideo?'@'+d.author:d.title;const tagsHTML=isVideo?'':'<span class="info-rating"><span class="star">★</span>'+d.rt+'';const descHTML=isVideo?'<span class="desc-text">'+d.desc+'</span>':'<span class="desc-ep">第1集</span><span class="desc-sep">|</span><span class="desc-text">'+d.desc+'</span>';const titleOnclick=isVideo?"location.href='user-profile-visitor.html?author="+d.author+"'":"location.href='drama-player.html'";h+=`<div class="slide" style="top:${i*100}vh">${videoHTML}<div class="dm-layer" id="dm_${i}"></div><div class="slide-mask"></div><div class="play-btn" id="pb_${d.id}"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="info"><div class="danmaku-btn"><svg viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 6.5h7" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M4.5 8.5h5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M4.5 10.5h3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>弹幕</div><div class="info-title">${titleHTML}<span class="gt"> ›</span></div><div class="info-tags">${tagsHTML}</div><div class="info-desc">${descHTML}<span class="desc-expand" data-id="${d.id}">展开</span></div></div><div class="actions"><button class="act-creator"><img class="ac-avatar" src="${d.avatar}" alt="${d.author}"><span class="ac-follow${d.followed?' followed':''}" data-follow="${d.author}">${d.followed?'✓':'+'}</span></button><button class="act-btn" data-act="fav" data-id="${d.id}"><div class="act-icon${d.fav?' bookmarked':''}"><svg viewBox="0 0 24 24" width="20" height="20" fill="${d.fav?'currentColor':'none'}" stroke="${d.fav?'currentColor':'currentColor'}" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg></div><span class="act-label">${fmt(Math.floor(d.likes*0.3))}</span></button><button class="act-btn" data-act="cmt" data-id="${d.id}"><div class="act-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div><span class="act-label">${fmt(d.cmts)}</span></button><button class="act-btn" data-act="like" data-id="${d.id}"><div class="act-icon${d.like?' liked':''}"><svg viewBox="0 0 24 24" width="20" height="20" fill="${d.like?'#ff4d6a':'none'}" stroke="${d.like?'#ff4d6a':'currentColor'}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span class="act-label">${fmt(d.likes)}</span></button><button class="act-btn" data-act="share" data-id="${d.id}"><div class="act-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg></div><span class="act-label">分享</span></button><button class="act-btn act-more-btn" data-act="more" data-id="${d.id}"><div class="act-icon">⋯</div></button><div class="act-more-popup" id="mpop_${d.id}" style="display:none"><div class="act-more-item" data-more-act="not-interested">不感兴趣</div><div class="act-more-item" data-more-act="report">举报</div></div></div></div>`;}track.innerHTML=h;track.style.height=(total*100)+'vh';wh=window.innerHeight;goTo(0,false);bindEvents();setTimeout(()=>loading.classList.add('hide'),350);updateWatchBar()}
+function goTo(i,animate){if(animFlag)return;if(animate)animFlag=true;i=Math.max(0,Math.min(total-1,i));idx=i;document.querySelectorAll('.slide-video').forEach(v=>v.pause());track.style.transition=animate?'transform .38s cubic-bezier(.22,1,.36,1)':'none';track.style.transform=`translateY(${-i*wh}px)`;const curV=document.querySelector(`#track .slide:nth-child(${i+1}) .slide-video`);if(curV){curV.currentTime=0;curV.play().catch(()=>{})}initDanmaku(i);updateWatchBar();if(cmDrawer.classList.contains("open")){openDrawer(DATA[idx].id)}if(cmDrawer.classList.contains("open")){openDrawer(DATA[idx].id)}if(animate)setTimeout(()=>{animFlag=false},400);playProgress=0;countdownSec=0;resetWatchBarRight();updatePlayProgressUI();if(!playInterval)startPlayProgress()}
 function nextSlide(){if(idx>=total-1){showToast('— 已经到底啦 —');return}animFlag=false;goTo(idx+1,true)}
 function prevSlide(){if(idx<=0){showToast('— 已是最上 —');return}animFlag=false;goTo(idx-1,true)}
 document.getElementById('dtPageNav').children[0].addEventListener('click',function(e){e.stopPropagation();prevSlide()});document.getElementById('dtPageNav').children[1].addEventListener('click',function(e){e.stopPropagation();nextSlide()});
-function togglePause(e){if(e.target.closest('.actions')||e.target.closest('.info')||e.target.closest('.bnav')||e.target.closest('.play-btn')||e.target.closest('.player-progress'))return;paused=!paused;const btn=document.querySelector(`#pb_${DATA[idx].id}`);if(!btn)return;btn.classList.toggle('show',paused);const curV=document.querySelector(`#track .slide:nth-child(${idx+1}) .slide-video`);if(curV){if(paused)curV.pause();else curV.play().catch(()=>{})}var dmLayer=document.getElementById('dm_'+idx);if(dmLayer){dmLayer.querySelectorAll('.dm-item').forEach(function(el){el.style.animationPlayState=paused?'paused':'running'})}}
+function togglePause(e){if(e.target.closest('.actions')||e.target.closest('.info')||e.target.closest('.bottom-nav-wrapper')||e.target.closest('.play-btn')||e.target.closest('.player-progress'))return;paused=!paused;const btn=document.querySelector(`#pb_${DATA[idx].id}`);if(!btn)return;btn.classList.toggle('show',paused);const curV=document.querySelector(`#track .slide:nth-child(${idx+1}) .slide-video`);if(curV){if(paused)curV.pause();else curV.play().catch(()=>{})}var dmLayer=document.getElementById('dm_'+idx);if(dmLayer){dmLayer.querySelectorAll('.dm-item').forEach(function(el){el.style.animationPlayState=paused?'paused':'running'})}}
 function bindEvents(){document.querySelectorAll('[data-act="like"]').forEach(b=>{b.addEventListener('click',function(e){e.stopPropagation();const d=DATA.find(x=>x.id===this.dataset.id);if(!d)return;d.like=!d.like;const ic=this.querySelector('.act-icon'),lb=this.querySelector('.act-label');if(d.like){ic.classList.add('liked');ic.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="#ff4d6a"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';d.likes++;showToast('已点赞')}else{ic.classList.remove('liked');ic.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';d.likes--}lb.textContent=fmt(d.likes)})});document.querySelectorAll('[data-act="fav"]').forEach(b=>{b.addEventListener('click',function(e){e.stopPropagation();const d=DATA.find(x=>x.id===this.dataset.id);if(!d)return;d.fav=!d.fav;const ic=this.querySelector('.act-icon');if(d.fav){ic.classList.add('bookmarked');ic.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>';showToast('已收藏')}else{ic.classList.remove('bookmarked');ic.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>'}})});document.querySelectorAll('[data-act="cmt"]').forEach(b=>{b.addEventListener('click',function(e){e.stopPropagation();const d=DATA.find(x=>x.id===this.dataset.id);if(d)openDrawer(d.id)})});document.querySelectorAll('[data-act="share"]').forEach(b=>{b.addEventListener('click',function(e){e.stopPropagation();showToast('📋 分享功能开发中')})});document.querySelectorAll('.danmaku-btn').forEach(el=>{el.addEventListener('click',function(e){e.stopPropagation();openDanmakuDrawer()})});document.querySelectorAll('.info-title,.info-tags').forEach(el=>{el.addEventListener('click',function(e){e.stopPropagation();var d=DATA[idx];if(d&&d.type==='drama'){openDrawer(d.id);setTimeout(function(){var t=document.querySelector('#cmDrawer .cm-tab[data-cmtab="drama"]');if(t)t.click()},100)}})});document.querySelectorAll('.act-creator').forEach(el=>{el.addEventListener('click',function(e){e.stopPropagation();if(e.target.closest('.ac-follow'))return;const d=DATA[idx];if(d&&d.author)location.href='user-profile-visitor.html?author='+encodeURIComponent(d.author)})});document.querySelectorAll('.ac-follow').forEach(el=>{el.addEventListener('click',function(e){e.stopPropagation();const authorName=this.dataset.follow;if(!authorName)return;const isFollowed=this.classList.contains('followed');DATA.forEach(d=>{if(d.author===authorName)d.followed=!isFollowed});if(!isFollowed){this.classList.add('followed');this.textContent='✓';showToast('已关注 '+authorName)}else{this.classList.remove('followed');this.textContent='+';showToast('已取消关注 '+authorName)}})});document.querySelectorAll('.info-author').forEach(el=>{el.addEventListener('click',function(){showToast(`👤 跳转 ${this.dataset.author} 的主页`)})});document.querySelectorAll('.desc-expand').forEach(el=>{el.addEventListener('click',function(e){e.stopPropagation();var txt=this.parentElement.querySelector('.desc-text');if(!txt)return;if(txt.classList.contains('expanded')){txt.classList.remove('expanded');this.textContent='展开'}else{txt.classList.add('expanded');this.textContent='收起'}})});setTimeout(function(){document.querySelectorAll('.info-desc').forEach(function(wrap){var txt=wrap.querySelector('.desc-text');var btn=wrap.querySelector('.desc-expand');if(txt&&btn){if(txt.scrollWidth>txt.clientWidth){btn.style.display=''}else{btn.style.display='none'}}})},100);document.getElementById('cmClose').addEventListener('click',closeDrawer);document.getElementById('cmOverlay').addEventListener('click',closeDrawer);document.querySelectorAll('.slide').forEach(el=>{el.addEventListener('click',togglePause)});watchBar.addEventListener('click',function(){const d=DATA[idx];if(!d||d.type==='video')return;location.href=`drama-player.html?id=${d.id}&title=${encodeURIComponent(d.title)}&total=${d.totalEp}&cat=${encodeURIComponent(d.cat)}&author=${encodeURIComponent(d.author)}&avatar=${encodeURIComponent(d.avatar)}&cover=${encodeURIComponent(d.cover)}&desc=${encodeURIComponent(d.desc)}&video=${encodeURIComponent(d.video||'')}`});playerProg.addEventListener('mousedown',onProgressPointerDown);playerProg.addEventListener('touchstart',onProgressPointerDown,{passive:true})}
-function updateMiningPanel(){var panel=document.getElementById('ipMiningPanel');if(!panel)return;var list=document.getElementById('imActorList');if(!list)return;var cur=DATA[idx];if(!cur||cur.type!=='drama'||!cur.actors||!cur.actors.length){panel.style.display='none';return}var html='';var cnt=0;for(var i=0;i<cur.actors.length&&cnt<5;i++){var name=cur.actors[i];var info=ACTOR_INFO[name];if(!info)continue;cnt++;html+='<div class="im-actor-row"><div class="im-avatar-wrap"><img class="im-avatar" src="'+info.avatar+'" alt="'+name+'" onerror="this.style.display=\'none\'"><div class="im-mining-dot"></div></div><div class="im-hash"><strong style="color:#ff3b30;font-weight:700;">'+info.ipPower+'</strong><small><svg viewBox="0 0 24 24" style="width:9px;height:9px;vertical-align:-1px;margin-right:2px;"><circle cx="12" cy="12" r="10" fill="#f5b042"/><circle cx="12" cy="12" r="10" stroke="#d9951a" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="7" stroke="rgba(255,255,255,.6)" stroke-width="1.2" fill="none"/><path d="M12 8l.9 1.9 2.1.2-1.6 1.4.5 2-1.9-1-1.9 1 .5-2-1.6-1.4 2.1-.2L12 8z" fill="#fff"/></svg>/H</small></div></div>'}if(cnt===0){panel.style.display='none';return}list.innerHTML=html;panel.style.display='flex'}
 function initDanmaku(i){var layer=document.getElementById('dm_'+i);if(!layer)return;layer.innerHTML='';var texts=['好剧！已追','节奏太棒了','画面绝美','演技在线','这剧我爱了','期待下一集','反转太绝了','追剧中…','强烈推荐','今年最佳','剧情扎实','这编剧太强了','收藏了','台词满分','越看越上头'];for(var j=0;j<4;j++){var t=texts[Math.floor(Math.random()*texts.length)];var el=document.createElement('div');el.className='dm-item';el.textContent=t;el.style.top=(j*36+4)+'px';el.style.animationDuration=(6+Math.random()*8)+'s';el.style.animationDelay=(Math.random()*1.5)+'s';layer.appendChild(el)}}
 var dmSendDrawer=document.getElementById('dmSendDrawer');var dmOverlay=document.getElementById('dmOverlay');var dmInput=document.getElementById('dmInput');var dmSendBtn=document.getElementById('dmSendBtn');var dmCharCount=document.getElementById('dmCharCount');var dmEmojiRow=document.getElementById('dmEmojiRow');var dmEmojiToggle=document.getElementById('dmEmojiToggle');var dmEmojiExpanded=false;
 var DM_EMOJI_LIST=['😀','😂','❤️','🔥','👍','🎉','😭','😍','🤔','👏','💪','✨','🎬','📺','🍿','💬','🎵','💯','🙌','😱','💀'];
@@ -685,7 +604,7 @@ dmOverlay.addEventListener('click',closeDanmakuDrawer);
 buildEmojiRow();
 
 let ts=0,td=0,sw=0;
-document.addEventListener('touchstart',function(e){if(e.target.closest('.actions')||e.target.closest('.info')||e.target.closest('.bnav')||e.target.closest('.player-progress')||e.target.closest('#cmDrawer')||e.target.closest('#dmSendDrawer'))return;ts=e.touches[0].clientY;sw=1},{passive:true});
+document.addEventListener('touchstart',function(e){if(e.target.closest('.actions')||e.target.closest('.info')||e.target.closest('.bottom-nav-wrapper')||e.target.closest('.player-progress')||e.target.closest('#cmDrawer')||e.target.closest('#dmSendDrawer'))return;ts=e.touches[0].clientY;sw=1},{passive:true});
 document.addEventListener('touchmove',function(e){if(!sw)return;td=e.touches[0].clientY-ts;const max=wh*.12;let dr=Math.max(-max,Math.min(max,td));if((idx===0&&dr>0)||(idx>=total-1&&dr<0))dr*=.25;track.style.transition='none';track.style.transform=`translateY(${-idx*wh+dr}px)`},{passive:true});
 document.addEventListener('touchend',function(){if(!sw)return;sw=0;if(td<-wh*.12)nextSlide();else if(td>wh*.12)prevSlide();else goTo(idx,true);td=0},{passive:true});
 window.addEventListener('resize',function(){wh=window.innerHeight;goTo(idx,false)});
@@ -698,26 +617,7 @@ function openSide(){
     location.href = 'mobile-login.html?redirect=' + encodeURIComponent(location.pathname);
     return;
   }
-  syncSideAssets();
   sideDrawer.classList.add("open");sideOverlay.classList.add("open");
-}
-
-/* ── 抽屉资产余额同步（与 profile-center 一致） ── */
-function syncSideAssets() {
-  var storyEl = document.getElementById('sdBalanceStory');
-  var usdcEl = document.getElementById('sdBalanceUsdc');
-  if (typeof currentUser === 'undefined' || !currentUser || !currentUser.balances) return;
-  if (storyEl && typeof currentUser.balances.story === 'number') {
-    storyEl.textContent = currentUser.balances.story.toLocaleString();
-  }
-  if (usdcEl) {
-    var u = currentUser.balances.usdc;
-    if (typeof u === 'number') usdcEl.textContent = u.toFixed(2);
-    else if (typeof u === 'object') {
-      var t = 0; for (var k in u) { if (typeof u[k] === 'number') t += u[k]; }
-      usdcEl.textContent = t.toFixed(2);
-    }
-  }
 }
 function closeSide(){sideDrawer.classList.remove("open");sideOverlay.classList.remove("open")}
 menuBtn.addEventListener("click",function(e){e.stopPropagation();openSide()});
@@ -775,7 +675,7 @@ function saveRecentSearch(q) {
   localStorage.setItem('dh_recent_searches', JSON.stringify(list));
 }
 function renderSearchDropdown() {
-  var hotTags = ['凤骨琉璃', '打斗精彩片段', '古风短剧', '1011', 'AI短剧', '苏婉清', '星际拓荒者', '时间管理局'];
+  var hotTags = ['凤骨琉璃', '打斗精彩片段', '古风短剧', '科幻短剧', '悬疑短剧', '星际拓荒者', '时间管理局', '丞相府今日开饭'];
   var hotEl = document.getElementById('sdHotTags');
   if (hotEl) {
     hotEl.innerHTML = hotTags.map(function(t) {
@@ -838,7 +738,7 @@ function removeRecentSearch(q) {
 })();
 function toggleDesktopDanmaku(){window.desktopDanmakuOn=!window.desktopDanmakuOn;var btn=document.getElementById('dtDanmakuBtn');if(window.desktopDanmakuOn){btn.classList.add('dt-active');document.querySelectorAll('.dm-layer').forEach(function(l){l.style.display=''});showToast('弹幕已开启')}else{btn.classList.remove('dt-active');document.querySelectorAll('.dm-layer').forEach(function(l){l.style.display='none'});showToast('弹幕已关闭')}}
 function sendDesktopDanmaku(){var input=document.getElementById('dtDanmakuInput');if(!input)return;var text=input.value.trim();if(!text){showToast('请输入弹幕内容');return}if(text.length>30){showToast('弹幕不能超过30字');return}var layer=document.getElementById('dm_'+idx);if(!layer){showToast('弹幕发送失败');return}var usedTops=[];layer.querySelectorAll('.dm-item').forEach(function(el){usedTops.push(parseInt(el.style.top)||0)});var topPos=4;var candidates=[4,52,100,76,28];for(var ci=0;ci<candidates.length;ci++){if(usedTops.indexOf(candidates[ci])===-1){topPos=candidates[ci];break}}var el=document.createElement('div');el.className='dm-item';el.textContent=text;el.style.top=topPos+'px';el.style.animationDuration=(7+Math.random()*5)+'s';el.style.animationPlayState=paused?'paused':'running';layer.appendChild(el);input.value='';showToast('弹幕已发送 🎉')}
-function toggleCleanMode(){cleanMode=!cleanMode;document.body.classList.toggle('clean-mode',cleanMode);var btn=document.getElementById('dtCleanBtn');var infoEls=document.querySelectorAll('.slide .info');var actionEls=document.querySelectorAll('.slide .actions');var maskEls=document.querySelectorAll('.slide-mask');if(cleanMode){btn.classList.add('dt-active');document.querySelectorAll('.dm-layer').forEach(function(l){l.style.display='none'});infoEls.forEach(function(el){el.style.display='none'});actionEls.forEach(function(el){el.style.display='none'});maskEls.forEach(function(el){el.style.opacity='0'});showToast('清屏模式');var ipPanel=document.getElementById('ipMiningPanel');if(ipPanel)ipPanel.style.display='none'}else{btn.classList.remove('dt-active');if(window.desktopDanmakuOn){document.querySelectorAll('.dm-layer').forEach(function(l){l.style.display=''})}infoEls.forEach(function(el){el.style.display=''});actionEls.forEach(function(el){el.style.display=''});maskEls.forEach(function(el){el.style.opacity=''});var ipPanel=document.getElementById('ipMiningPanel');if(ipPanel){var cur=DATA[idx];if(cur&&cur.type==='drama'&&cur.actors&&cur.actors.length)ipPanel.style.display='flex'}}}
+function toggleCleanMode(){cleanMode=!cleanMode;document.body.classList.toggle('clean-mode',cleanMode);var btn=document.getElementById('dtCleanBtn');var infoEls=document.querySelectorAll('.slide .info');var actionEls=document.querySelectorAll('.slide .actions');var maskEls=document.querySelectorAll('.slide-mask');if(cleanMode){btn.classList.add('dt-active');document.querySelectorAll('.dm-layer').forEach(function(l){l.style.display='none'});infoEls.forEach(function(el){el.style.display='none'});actionEls.forEach(function(el){el.style.display='none'});maskEls.forEach(function(el){el.style.opacity='0'});showToast('清屏模式')}else{btn.classList.remove('dt-active');if(window.desktopDanmakuOn){document.querySelectorAll('.dm-layer').forEach(function(l){l.style.display=''})}infoEls.forEach(function(el){el.style.display=''});actionEls.forEach(function(el){el.style.display=''});maskEls.forEach(function(el){el.style.opacity=''})}}
 function toggleAutoPlayNext(){window.autoPlayNext=!window.autoPlayNext;var btn=document.getElementById('dtAutoPlayBtn');if(window.autoPlayNext){btn.classList.add('dt-active');showToast('连播已开启')}else{btn.classList.remove('dt-active');showToast('连播已关闭')}}
 function cmEpSelect(ep){ if(window._cmEpURL){ location.href = window._cmEpURL + '&ep=' + ep; } }
 function showDesktopEpList(){var d=DATA[idx];if(!d||d.type==='video'){showToast('当前为短视频，无选集');return}location.href='drama-player.html?id='+d.id+'&title='+encodeURIComponent(d.title)+'&total='+d.totalEp+'&cat='+encodeURIComponent(d.cat)+'&author='+encodeURIComponent(d.author)+'&avatar='+encodeURIComponent(d.avatar)+'&cover='+encodeURIComponent(d.cover)+'&desc='+encodeURIComponent(d.desc)+'&video='+encodeURIComponent(d.video||'')}
@@ -870,21 +770,17 @@ document.addEventListener('fullscreenchange',function(){
 
 function setDetailRating(did,star,el){var stars=document.querySelectorAll('#ratingStars_'+did+' .cr-star');var scoreEl=document.getElementById('ratingScore_'+did);for(var i=0;i<stars.length;i++){stars[i].classList.toggle('active',i<star)}if(scoreEl)scoreEl.textContent='';localStorage.setItem('drama_rating_'+did,star);showToast('已评分 '+star+' 星')}
 
-
-/* cm-role-card.bound click -> actor profile */
-document.addEventListener('click',function(e){var card=e.target.closest('.cm-role-card.bound');if(card){e.stopPropagation();var nameEl=card.querySelector('.cm-role-name');var name=nameEl?nameEl.childNodes[0]?nameEl.childNodes[0].textContent.trim():'':'';if(name)location.href='actor-profile.html?name='+encodeURIComponent(name)}});
-
 // 初始化 CMPanel 组件
 CMPanel.init({
   drawerId: 'cmDrawer',
   theme: 'dark',
-  hasActors: true,
+  hasActors: false,
   defaultTab: 'cmt',
   squashTargets: ['app', 'playerProgress', 'desktopToolbar'],
   getData: function(id) {
     var d = DATA.find(function(x) { return x.id === id; });
     if (!d) return null;
-    return { id: d.id, title: d.title, type: d.type, rt: d.rt, cat: d.cat, ep: d.ep, totalEp: d.totalEp, cover: d.cover, desc: d.desc, actors: d.actors || [], author: d.author, avatar: d.avatar, video: d.video || '', likes: d.likes, cmts: d.cmts };
+    return { id: d.id, title: d.title, type: d.type, rt: d.rt, cat: d.cat, ep: d.ep, totalEp: d.totalEp, cover: d.cover, desc: d.desc, author: d.author, avatar: d.avatar, video: d.video || '', likes: d.likes, cmts: d.cmts };
   },
   buildDetailHTML: function(d) {
     if (d.type !== 'drama') return '';
@@ -902,18 +798,6 @@ CMPanel.init({
     }
     return '<div class="cm-detail-panel" id="cmDetailPanel"><div class="cm-detail-header"><img class="cm-detail-cover" src="' + d.cover + '" alt="' + d.title + '"><div class="cm-detail-info"><div class="cm-detail-title">' + d.title + '</div><div class="cm-detail-meta"><span class="cm-detail-rating"><span class="star">☆ </span> ' + d.rt + '</span><span class="cm-detail-tag">' + d.cat + '</span><span class="cm-detail-tag">' + d.ep + '</span></div></div></div><div class="cm-detail-stats"><div class="cm-stat"><span class="cm-stat-num">' + views + '</span><span class="cm-stat-label">完播</span></div><div class="cm-stat"><span class="cm-stat-num">' + heat + '</span><span class="cm-stat-label">热度</span></div></div><div class="cm-detail-desc">' + d.desc + '</div><div class="cm-detail-rating-stars"><span class="cr-label">我要评分</span><span class="cr-star">★</span><span class="cr-star">★</span><span class="cr-star">★</span><span class="cr-star">★</span><span class="cr-star">★</span><span class="cr-score">未评</span></div><div class="cm-detail-ep-grid">' + epGrid + '</div></div>';
   },
-  buildRoleHTML: function(d) {
-    if (!d.actors || !d.actors.length) return '';
-    var html = '<div class="cm-role-panel" id="cmRolePanel"><div class="cm-role-more-entry" onclick="location.href=\'actors.html\'"><div class="cmr-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="cmr-text"><div class="cmr-title">购买更多IP 卡</div></div><div class="cmr-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>';
-    for (var ai = 0; ai < d.actors.length; ai++) {
-      var aname = d.actors[ai];
-      var ainfo = ACTOR_INFO[aname];
-      if (ainfo) {
-        html += '<div class="cm-role-card bound"><img class="cm-role-avatar" src="' + ainfo.avatar + '" alt="' + aname + '"><div class="cm-role-info"><div class="cm-role-name">' + aname + '</div><div class="cm-role-ip"><span class="cm-role-ip-tag"><svg viewBox="0 0 24 24" style="width:11px;height:11px;vertical-align:-1px;margin-right:3px;"><circle cx="12" cy="12" r="10" fill="#f5b042"/><circle cx="12" cy="12" r="10" stroke="#d9951a" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="7" stroke="rgba(255,255,255,.6)" stroke-width="1.2" fill="none"/><path d="M12 8l.9 1.9 2.1.2-1.6 1.4.5 2-1.9-1-1.9 1 .5-2-1.6-1.4 2.1-.2L12 8z" fill="#fff"/></svg><strong style="font-size:12px;font-weight:800;color:#ff3b30;">' + ainfo.ipPower + '</strong> <span style="font-weight:400;color:#8a8f98;font-size:10px;">积分/h</span></span></div></div><button class="cm-sign-btn">购买</button></div>';
-      }
-    }
-    return html + '</div>';
-  },
   addComment: function(id, comment) {
     var d = DATA.find(function(x) { return x.id === id; });
     if (!d) return;
@@ -926,21 +810,6 @@ requestAnimationFrame(function(){
   render();
 });
 initDanmaku(0);
-setTimeout(function(){
-  var miningPanel=document.getElementById('ipMiningPanel');
-  if(miningPanel){
-    miningPanel.style.cursor='pointer';
-    miningPanel.addEventListener('click',function(e){
-      e.stopPropagation();
-      if(!DATA[idx]||DATA[idx].type!=='drama')return;
-      openDrawer(DATA[idx].id);
-      setTimeout(function(){
-        var roleTab=document.querySelector('#cmDrawer .cm-tab[data-cmtab="role"]');
-        if(roleTab)roleTab.click();
-      },100);
-    });
-  }
-},500);
 
 /* More button popup */
 document.addEventListener("click",function(e){var btn=e.target.closest(".act-more-btn");if(btn){e.stopPropagation();var popup=document.getElementById("mpop_"+btn.dataset.id);if(popup){popup.style.display=popup.style.display==="flex"?"none":"flex"}}else{var item=e.target.closest(".act-more-item");if(item){e.stopPropagation();var act=item.dataset.moreAct;var popup2=item.closest(".act-more-popup");if(act==="not-interested"){showToast("已反馈，将减少此类推荐");if(popup2)popup2.style.display="none"}else if(act==="report"){if(popup2)popup2.style.display="none";openLpDrawer()}}else if(!e.target.closest(".act-more-popup")){document.querySelectorAll(".act-more-popup").forEach(function(p){p.style.display="none"})}}},true);
@@ -957,7 +826,7 @@ document.addEventListener("click",function(e){var btn=e.target.closest(".act-mor
 <script src="mobile-drawer.js"></script>
 <script>
 (function() {
-  var WATCH_HISTORY = [
+  var WATCH_RECORDS = [
     { type: 'drama', title: '凤骨琉璃', progress: '3/44集', total: 44, desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。', cover: 'image/fenggu_cover.jpg' },
     { type: 'drama', title: '我卸甲后天下大乱了', progress: '7/12集', total: 12, desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。', cover: 'image/xiejia_cover.jpg' },
     { type: 'drama', title: '丞相府今日开饭', progress: '12/24集', total: 24, desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。', cover: 'image/chengxiangfu_cover.jpg' }
@@ -966,7 +835,7 @@ document.addEventListener("click",function(e){var btn=e.target.closest(".act-mor
   function renderSdHistory() {
     var list = document.getElementById('sdHistoryList');
     if (!list) return;
-    var dramas = WATCH_HISTORY.filter(function(w) { return w.type === 'drama'; }).slice(0, 3);
+    var dramas = WATCH_RECORDS.filter(function(w) { return w.type === 'drama'; }).slice(0, 3);
     list.innerHTML = dramas.map(function(d) {
       var url = 'drama-player.html?title=' + encodeURIComponent(d.title) +
         '&total=' + d.total +

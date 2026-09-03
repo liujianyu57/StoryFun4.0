@@ -91,26 +91,6 @@
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
     .btn-email:hover { background: #00a078; }
-    .login-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-    .login-divider::before,
-    .login-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    .btn-wallet {
-      background: transparent;
-      border: 2px dashed var(--accent);
-      color: var(--accent);
-    }
-    .btn-wallet:hover { background: rgba(0, 0, 0, 0.06); }
     .login-tos {
       text-align: center;
       color: var(--text-muted);
@@ -293,7 +273,7 @@
     // 在 mockLogin 完成后，通过定时检测 currentUser 状态来触发跳转
     var _origMockLogin = window.mockLogin;
     if (typeof _origMockLogin === 'function') {
-      // 不覆盖 mockLogin，而是监听 auth-ready 事件（已在上面绑定）
+      // 不覆盖 mockLogin，而是监听 auth-ready 事件（已在上面注册监听）
       // mockLogin 内部会 dispatch auth-ready 事件
     }
 

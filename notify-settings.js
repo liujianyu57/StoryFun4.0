@@ -6,11 +6,8 @@
 //    2. 提供类型开关查询 isNotifyEnabled(type, sub)
 //    3. 提供变更监听 onNotifySettingsChange
 //
-//  类型结构（与 notifications.html 的 data-category/data-revtype/data-sotype 对应）：
+//  类型结构（与 notifications.html 的 data-sotype 对应）：
 //    master               总开关
-//    revenue.ip           收益 - IP 购买
-//    revenue.manage       收益 - IP 卡管理
-//    revenue.show         收益 - 激活收益
 //    social.like          互动 - 点赞
 //    social.save          互动 - 收藏
 //    social.comment       互动 - 评论
@@ -25,7 +22,6 @@
   // 默认设置：全部开启
   var DEFAULT_SETTINGS = {
     master: true,
-    revenue: { ip: true, manage: true, show: true },
     social: { like: true, save: true, comment: true, follow: true }
   };
 
@@ -67,7 +63,7 @@
   }
 
   // 更新某一项开关，立即持久化并通知监听者
-  // setNotifySetting('revenue.ip', false) / setNotifySetting('master', false)
+  // setNotifySetting('social.like', false) / setNotifySetting('master', false)
   function setNotifySetting(path, value) {
     var settings = getSettings();
     var parts = path.split('.');
@@ -166,11 +162,6 @@
     }
 
     rows += switchHTML('master', !!s.master, '接收通知', '');
-    rows += '<div class="sf-notify-group-title">收益通知</div>';
-    rows += switchHTML('revenue', groupOn('revenue'), '收益通知（总）', '');
-    rows += switchHTML('revenue.ip', !!s.revenue.ip, 'IP 购买', '');
-    rows += switchHTML('revenue.manage', !!s.revenue.manage, 'IP 卡管理', '');
-    rows += switchHTML('revenue.show', !!s.revenue.show, '激活收益', '');
     rows += '<div class="sf-notify-group-title">互动通知</div>';
     rows += switchHTML('social', groupOn('social'), '互动通知（总）', '');
     rows += switchHTML('social.like', !!s.social.like, '点赞', '');
@@ -195,7 +186,7 @@
     overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
 
     // 交互：叶子开关直接保存；组开关统一保存组内子项；master 关闭置灰所有
-    var groupDefs = { revenue: ['ip', 'manage', 'show'], social: ['like', 'save', 'comment', 'follow'] };
+    var groupDefs = { social: ['like', 'save', 'comment', 'follow'] };
     overlay.querySelectorAll('input[type=checkbox]').forEach(function (input) {
       input.addEventListener('change', function () {
         var path = this.getAttribute('data-path');

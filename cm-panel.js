@@ -5,11 +5,9 @@
        drawerId: 'cmDrawer',          // 抽屉容器 ID
        theme: 'dark',                 // 'dark' | 'light'
        hasDrama: true,               // 是否有短剧详情 tab
-       hasActors: true,              // 是否有角色 tab
-       defaultTab: 'drama',          // 默认展开 tab: 'cmt' | 'drama' | 'role'
+       defaultTab: 'drama',          // 默认展开 tab: 'cmt' | 'drama'
        getData: function(id) { ... }, // 根据 id 获取数据对象
        buildDetailHTML: function(d) { return { html, epClick } },
-       buildRoleHTML: function(d) { return html },
        getComments: function(id) { return [] },
        addComment: function(id, comment) {},
        onOpen: function(data) {},
@@ -33,14 +31,14 @@ var CMPanel = (function() {
   var _defaultTexts = [
     '好剧！剧情节奏把控得太好，已经追起来了。',
     '期待更新🔥 每一集都很有代入感。',
-    '这部剧绝了，角色表现都在线。',
+    '这部剧绝了，演技和剧情都在线。',
     '追剧中…画面太美了！',
     '剧情太精彩了，人物冲突很带感。',
     '赞赞赞👍 这是今年最好看的AI短剧之一。',
     '对白写得很棒，感情线也很细腻。',
     '世界观很有意思，想多看几集。',
     '节奏紧凑，反转不断，强烈推荐。',
-    '剧情扎实，角色演技也在线。'
+    '剧情扎实，演技和台词都在线。'
   ];
 
   function _fmt(n) {
@@ -191,8 +189,6 @@ var CMPanel = (function() {
     if (ft) ft.style.display = showCmt ? '' : 'none';
     var dp = document.getElementById('cmDetailPanel');
     if (dp) dp.classList.toggle('show', tabName === 'drama');
-    var rp = document.getElementById('cmRolePanel');
-    if (rp) rp.style.display = tabName === 'role' ? 'block' : 'none';
   }
 
   function _setupTabEvents() {
@@ -219,17 +215,15 @@ var CMPanel = (function() {
     var cmTitle = document.getElementById('cmTitle');
     if (!drawer || !cmBody || !cmTitle) return;
 
-    // 短视频：隐藏「短剧」「角色」页签，仅保留评论
+    // 短视频：隐藏「短剧」页签，仅保留评论
     var isVideo = data.type === 'video';
     var hasDrama = !isVideo && _config.hasDrama !== false;
-    var hasActors = !isVideo && _config.hasActors !== false;
-    var defaultTab = isVideo ? 'cmt' : (_config.defaultTab || 'cmt');
+    var defaultTab = isVideo ? 'cmt' : (_config.defaultTab === 'drama' ? 'drama' : 'cmt');
 
     // 构建 tabs
     cmTitle.innerHTML = '<div class="cm-tabs">' +
       '<button class="cm-tab ' + (defaultTab === 'cmt' ? 'active' : '') + '" data-cmtab="cmt">评论</button>' +
       (hasDrama ? '<button class="cm-tab ' + (defaultTab === 'drama' ? 'active' : '') + '" data-cmtab="drama">短剧</button>' : '') +
-      (hasActors ? '<button class="cm-tab ' + (defaultTab === 'role' ? 'active' : '') + '" data-cmtab="role">角色</button>' : '') +
       '</div>';
 
     // 构建详情 HTML
@@ -238,13 +232,7 @@ var CMPanel = (function() {
       detailHTML = _config.buildDetailHTML ? _config.buildDetailHTML(data) : '';
     }
 
-    // 构建角色 HTML
-    var roleHTML = '';
-    if (hasActors) {
-      roleHTML = _config.buildRoleHTML ? _config.buildRoleHTML(data) : '';
-    }
-
-    cmBody.innerHTML = '<div class="comment-panel" id="commentPanel"><div class="comment-header"><span class="comment-title">用户评论</span><span class="comment-count">(<span id="drawerCommentCount">0</span>)</span></div><div id="drawerCommentList"></div></div>' + detailHTML + roleHTML;
+    cmBody.innerHTML = '<div class="comment-panel" id="commentPanel"><div class="comment-header"><span class="comment-title">用户评论</span><span class="comment-count">(<span id="drawerCommentCount">0</span>)</span></div><div id="drawerCommentList"></div></div>' + detailHTML;
 
     // 注入 footer（评论输入框）
     var existingFooter = document.getElementById('cmFooter');

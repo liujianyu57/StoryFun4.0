@@ -16,29 +16,23 @@
   --text-muted:#8896a8;
   --border:#eef0f4;
   --danger:#f45b69;
-  --warning:#f59e0b;
-  --story-green:#000000;
   font-family:"PingFang SC","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-color:transparent}
 .app{max-width:500px;margin:0 auto;height:100vh;background:var(--surface);display:flex;flex-direction:column;box-shadow:0 0 30px rgba(0,0,0,.04)}
 
 /* Top Bar */
-.top-bar{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;padding-top:env(safe-area-inset-top,0)}
+.top-bar{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;padding-top:env(safe-area-inset-top,0);border-bottom:.5px solid var(--border);flex-shrink:0}
 .top-bar .back-btn{width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.04);color:var(--text);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
 .top-bar .back-btn:active{background:rgba(0,0,0,.08)}
+.top-title{font-size:16px;font-weight:600;color:var(--text);text-align:center;flex:1}
+.top-bar .top-spacer{width:32px;flex-shrink:0}
 
-/* Tab Bar — only 2 tabs */
-.tab-bar{display:flex;gap:0;padding:0 16px;border-bottom:.5px solid var(--border);background:var(--surface);flex-shrink:0}
-.tab-item{flex:1;text-align:center;padding:12px 0 10px;font-size:14px;font-weight:500;color:var(--text-muted);cursor:pointer;position:relative;transition:color .2s;-webkit-tap-highlight-color:transparent;border:none;background:none}
-.tab-item.active{color:var(--text);font-weight:600}
-.tab-item.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:3px;border-radius:3px;background:var(--accent)}
-
-/* Revenue filter bar */
-.rev-filter-bar{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scrollbar-width:none}
-.rev-filter-bar::-webkit-scrollbar{display:none}
-.rev-filter-chip{padding:5px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.rev-filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scrollbar-width:none;border-bottom:.5px solid var(--border)}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-chip{padding:5px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* Scroll */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 0}
@@ -71,82 +65,6 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
   background:#ff2d55;
 }
 
-/* Revenue card — column layout */
-.notify-item[data-category="revenue"]{
-  flex-direction:column;
-  align-items:stretch;
-  gap:0;
-  padding:14px 18px 12px;
-}
-.notify-item[data-category="revenue"].unread::before{
-  top:21px;
-  transform:none;
-}
-
-/* Revenue top row — icon + content */
-.revenue-row{
-  display:flex;
-  align-items:flex-start;
-  gap:14px;
-}
-
-/* Revenue card — three layer hierarchy */
-
-/* L1: Category label — iOS-style pill badge */
-.revenue-title{
-  display:inline-block;
-  font-size:10px;
-  font-weight:600;
-  color:var(--accent);
-  background:var(--accent-dim);
-  padding:3px 8px;
-  border-radius:999px;
-  letter-spacing:.03em;
-  text-transform:uppercase;
-  margin-bottom:7px;
-}
-
-/* Revenue card body — regular weight */
-.notify-item[data-category="revenue"] .notify-desc{
-  font-weight:400;
-  font-size:14px;
-  line-height:1.55;
-  color:var(--text);
-}
-
-/* L2b: Amount standalone line */
-.revenue-amount{
-  font-size:15px;
-  font-weight:700;
-  margin-top:4px;
-}
-.revenue-amount .rcv-usdc{color:var(--accent)}
-.revenue-amount .rcv-story{color:var(--story-green)}
-
-/* L3: Time — ultra subtle */
-.notify-item[data-category="revenue"] .notify-meta{
-  font-size:11px;
-  color:var(--text-muted);
-  margin-top:6px;
-}
-
-/* Revenue action button — right side, solid accent */
-.rev-act-btn{
-  flex-shrink:0;
-  padding:6px 16px;
-  border-radius:999px;
-  border:none;
-  background:var(--accent);
-  color:#fff;
-  font-size:12px;
-  font-weight:600;
-  cursor:pointer;
-  transition:all .15s;
-  white-space:nowrap;
-  align-self:center;
-}
-.rev-act-btn:active{opacity:.8}
-
 /* Left icon area */
 .notify-icon{
   width:44px;
@@ -160,16 +78,11 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
 }
 .notify-icon.avatar{overflow:hidden;background:#f0f2f5}
 .notify-icon.avatar img{width:100%;height:100%;object-fit:cover}
-.notify-icon.revenue{background:var(--accent-dim)}
-.notify-icon.system{background:rgba(94,111,131,.08)}
 
 /* Content */
 .notify-content{flex:1;min-width:0}
 .notify-desc{font-size:14px;color:var(--text);line-height:1.5;font-weight:500}
 .notify-desc strong{font-weight:700}
-.notify-desc .amount{font-weight:700}
-.notify-desc .amount.usdc{color:var(--accent)}
-.notify-desc .amount.story{color:var(--story-green)}
 .notify-meta{font-size:12px;color:var(--text-muted);margin-top:3px}
 .notify-time{font-size:11px;color:var(--text-muted);opacity:.7;margin-top:2px}
 
@@ -310,103 +223,32 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
 }
 .notify-empty .empty-icon{font-size:40px;opacity:.3}
 .notify-empty p{font-size:14px}
-
-/* Text emphasis inside desc */
-.em-green{color:var(--story-green);font-weight:700}
-.em-teal{color:var(--accent);font-weight:700}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- Top Bar with tabs -->
+  <!-- Top Bar -->
   <div class="top-bar">
     <button class="back-btn" onclick="history.back()">‹</button>
-    <div class="tab-bar" style="flex:1;justify-content:center;border-bottom:none;padding:0;gap:20px">
-      <button class="tab-item active" data-tab="revenue">系统<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff2d55;margin-left:5px;vertical-align:middle"></span></button>
-      <button class="tab-item" data-tab="social">互动<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff2d55;margin-left:5px;vertical-align:middle"></span></button>
-    </div>
-    <div style="width:32px;flex-shrink:0"></div>
+    <div class="top-title">通知消息</div>
+    <div class="top-spacer"></div>
   </div>
 
-  <!-- Revenue Filter Bar -->
-  <div class="rev-filter-bar" id="revFilterBar">
-    <button class="rev-filter-chip active" data-revtype="all">全部</button>
-    <button class="rev-filter-chip" data-revtype="ip">IP购买</button>
-    <button class="rev-filter-chip" data-revtype="manage">IP 卡管理</button>
-    <button class="rev-filter-chip" data-revtype="show">激活收益</button>
-  </div>
-
-  <!-- Social Filter Bar -->
-  <div class="rev-filter-bar" id="socFilterBar" style="display:none">
-    <button class="rev-filter-chip active" data-sotype="all">全部</button>
-    <button class="rev-filter-chip" data-sotype="like">点赞</button>
-    <button class="rev-filter-chip" data-sotype="save">收藏</button>
-    <button class="rev-filter-chip" data-sotype="comment">评论</button>
-    <button class="rev-filter-chip" data-sotype="follow">关注</button>
+  <!-- Filter Bar -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-chip active" data-sotype="all">全部</button>
+    <button class="filter-chip" data-sotype="like">点赞</button>
+    <button class="filter-chip" data-sotype="save">收藏</button>
+    <button class="filter-chip" data-sotype="comment">评论</button>
+    <button class="filter-chip" data-sotype="follow">关注</button>
   </div>
 
   <!-- List -->
   <div class="scroll">
 
-    <!-- ═══ 收益 Tab ═══ -->
-    <!-- 1. IP 被购买 -->
-    <div class="notify-item unread" data-category="revenue" data-revtype="ip">
-      <div class="revenue-row">
-        <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div>
-        <div class="notify-content">
-          <div class="revenue-title">购买 IP 卡</div>
-          <div class="notify-desc">@Jack 购买了 IP 卡 <strong>苏婉清</strong></div>
-          <div class="revenue-amount">你获得分成 <span class="rcv-usdc">126.80 USDC</span></div>
-          <div class="notify-meta">12分钟前</div>
-        </div>
-        <button class="rev-act-btn" onclick="location.href='rewards.html'">领取</button>
-      </div>
-      <div class="notify-footer">
-        <button class="notify-more" onclick="toggleDelete(event,this)">···</button>
-        <div class="delete-dropdown"><button class="delete-btn" onclick="deleteNotify(event,this)">删除</button></div>
-      </div>
-    </div>
-
-    <!-- 2. 能量不足 -->
-    <div class="notify-item unread" data-category="revenue" data-revtype="manage">
-      <div class="revenue-row">
-        <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" alt=""></div>
-        <div class="notify-content">
-          <div class="revenue-title">IP 卡管理</div>
-          <div class="notify-desc"><strong>赵无极</strong> 能量不足，尽快补充能量或停用</div>
-          <div class="revenue-amount">当前能量 <span style="color:#f59e0b">0</span></div>
-          <div class="notify-meta">28分钟前</div>
-        </div>
-        <button class="rev-act-btn" onclick="location.href='studio.html'">补充</button>
-      </div>
-      <div class="notify-footer">
-        <button class="notify-more" onclick="toggleDelete(event,this)">···</button>
-        <div class="delete-dropdown"><button class="delete-btn" onclick="deleteNotify(event,this)">删除</button></div>
-      </div>
-    </div>
-
-    <!-- 3. 激活收益到账 -->
-    <div class="notify-item" data-category="revenue" data-revtype="show">
-      <div class="revenue-row">
-        <div class="notify-icon revenue">🎬</div>
-        <div class="notify-content">
-          <div class="revenue-title">激活收益</div>
-          <div class="notify-desc">2026/6/15 ～ 2026/6/21 激活结束</div>
-          <div class="revenue-amount">你获得收益 <span class="rcv-story">415.70 STORY</span></div>
-          <div class="notify-meta">2小时前</div>
-        </div>
-        <button class="rev-act-btn" onclick="location.href='rewards.html'">领取</button>
-      </div>
-      <div class="notify-footer">
-        <button class="notify-more" onclick="toggleDelete(event,this)">···</button>
-        <div class="delete-dropdown"><button class="delete-btn" onclick="deleteNotify(event,this)">删除</button></div>
-      </div>
-    </div>
-
-    <!-- ═══ 互动 Tab ═══ -->
-    <!-- 4a. 点赞视频 -->
-    <div class="notify-item unread" data-category="social" data-sotype="like">
+    <!-- 1a. 点赞视频 -->
+    <div class="notify-item unread" data-sotype="like">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -422,8 +264,8 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
       </div>
     </div>
 
-    <!-- 4b. 点赞短剧 -->
-    <div class="notify-item unread" data-category="social" data-sotype="like">
+    <!-- 1b. 点赞短剧 -->
+    <div class="notify-item unread" data-sotype="like">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -439,8 +281,8 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
       </div>
     </div>
 
-    <!-- 5a. 收藏视频 -->
-    <div class="notify-item unread" data-category="social" data-sotype="save">
+    <!-- 2a. 收藏视频 -->
+    <div class="notify-item unread" data-sotype="save">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -456,8 +298,8 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
       </div>
     </div>
 
-    <!-- 5b. 收藏短剧 -->
-    <div class="notify-item unread" data-category="social" data-sotype="save">
+    <!-- 2b. 收藏短剧 -->
+    <div class="notify-item unread" data-sotype="save">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -473,8 +315,8 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
       </div>
     </div>
 
-    <!-- 6. 收到评论 -->
-    <div class="notify-item unread" data-category="social" data-sotype="comment">
+    <!-- 3. 收到评论 -->
+    <div class="notify-item unread" data-sotype="comment">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -494,8 +336,8 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
       </div>
     </div>
 
-    <!-- 7a. 互相关注 -->
-    <div class="notify-item unread" data-category="social" data-sotype="follow">
+    <!-- 4a. 互相关注 -->
+    <div class="notify-item unread" data-sotype="follow">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -511,8 +353,8 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
       </div>
     </div>
 
-    <!-- 7b. 有人关注我 -->
-    <div class="notify-item unread" data-category="social" data-sotype="follow">
+    <!-- 4b. 有人关注我 -->
+    <div class="notify-item unread" data-sotype="follow">
       <div class="social-row">
         <div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" alt=""></div>
         <div class="notify-content">
@@ -534,96 +376,53 @@ html,body{width:100%;height:100%;background:var(--bg);-webkit-tap-highlight-colo
 <script src="notify-settings.js"></script>
 <script>
 // ============================================================
-//  通知设置联动：统一根据「激活 tab + 激活筛选 + 通知设置」计算每个条目的可见性
+//  通知列表：仅保留「互动」类通知（点赞/收藏/评论/关注）
+//  可见性 = 通知总开关 × 该类型设置 × 顶部筛选
 // ============================================================
-function applyNotifyVisibility() {
-  var activeTab = document.querySelector('.tab-item.active');
-  var tab = activeTab ? activeTab.dataset.tab : 'revenue';
+function applyVisibility() {
+  var activeChip = document.querySelector('#filterBar .filter-chip.active');
+  var soType = activeChip ? activeChip.dataset.sotype : 'all';
 
-  // 读取激活的筛选 chip（收益/互动各一组）
-  var activeRevChip = document.querySelector('#revFilterBar .rev-filter-chip.active');
-  var activeSocChip = document.querySelector('#socFilterBar .rev-filter-chip.active');
-  var revType = activeRevChip ? activeRevChip.dataset.revtype : 'all';
-  var soType = activeSocChip ? activeSocChip.dataset.sotype : 'all';
-
-  var masterOff = (typeof window.StoryFunNotify === 'undefined') ? false : !window.StoryFunNotify.getSettings().master;
+  var masterOn = true;
+  if (typeof window.StoryFunNotify !== 'undefined') {
+    masterOn = !!window.StoryFunNotify.getSettings().master;
+  }
 
   document.querySelectorAll('.notify-item').forEach(function(item) {
-    var cat = item.getAttribute('data-category');
-    var subType = cat === 'revenue' ? item.getAttribute('data-revtype') : item.getAttribute('data-sotype');
-
+    var subType = item.getAttribute('data-sotype');
     // 1) 总开关关闭 → 全部隐藏
-    if (masterOff) { item.style.display = 'none'; return; }
+    if (!masterOn) { item.style.display = 'none'; return; }
     // 2) 该类型在设置中被关闭 → 隐藏
-    if (typeof window.StoryFunNotify !== 'undefined' && !window.StoryFunNotify.isNotifyEnabled(cat, subType)) {
+    if (typeof window.StoryFunNotify !== 'undefined' && !window.StoryFunNotify.isNotifyEnabled('social', subType)) {
       item.style.display = 'none'; return;
     }
-    // 3) tab 不匹配 → 隐藏
-    if (cat !== tab) { item.style.display = 'none'; return; }
-    // 4) 筛选 chip 不匹配 → 隐藏
-    if (cat === 'revenue' && revType !== 'all' && item.getAttribute('data-revtype') !== revType) { item.style.display = 'none'; return; }
-    if (cat === 'social' && soType !== 'all' && item.getAttribute('data-sotype') !== soType) { item.style.display = 'none'; return; }
+    // 3) 筛选 chip 不匹配 → 隐藏
+    if (soType !== 'all' && subType !== soType) { item.style.display = 'none'; return; }
     item.style.display = 'flex';
   });
 
   renderEmpty();
 }
 
-// Tab switching
-var revFilterBar = document.getElementById('revFilterBar');
-var socFilterBar = document.getElementById('socFilterBar');
-document.querySelectorAll('.tab-item').forEach(function(tab){
-  tab.addEventListener('click',function(){
-    document.querySelectorAll('.tab-item').forEach(function(t){t.classList.remove('active')});
-    this.classList.add('active');
-    var v = this.dataset.tab;
-    // Show/hide filter bars
-    if(revFilterBar) revFilterBar.style.display = v === 'revenue' ? 'flex' : 'none';
-    if(socFilterBar) socFilterBar.style.display = v === 'social' ? 'flex' : 'none';
-    // Reset active filters
-    var activeBar = v === 'revenue' ? revFilterBar : socFilterBar;
-    if(activeBar){
-      activeBar.querySelectorAll('.rev-filter-chip').forEach(function(c){c.classList.remove('active')});
-      var allChip = activeBar.querySelector('[data-revtype="all"], [data-sotype="all"]');
-      if(allChip) allChip.classList.add('active');
-    }
-    applyNotifyVisibility();
-  });
-});
-
-// Revenue filter — listen on revFilterBar only
-if(revFilterBar){
-  revFilterBar.querySelectorAll('.rev-filter-chip').forEach(function(chip){
-    chip.addEventListener('click',function(){
-      revFilterBar.querySelectorAll('.rev-filter-chip').forEach(function(c){c.classList.remove('active')});
+// Filter chips
+var filterBar = document.getElementById('filterBar');
+if (filterBar) {
+  filterBar.querySelectorAll('.filter-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      filterBar.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
       this.classList.add('active');
-      applyNotifyVisibility();
+      applyVisibility();
     });
   });
 }
 
-// Social filter — listen on socFilterBar only
-if(socFilterBar){
-  socFilterBar.querySelectorAll('.rev-filter-chip').forEach(function(chip){
-    chip.addEventListener('click',function(){
-      socFilterBar.querySelectorAll('.rev-filter-chip').forEach(function(c){c.classList.remove('active')});
-      this.classList.add('active');
-      applyNotifyVisibility();
-    });
-  });
-}
-
-// Show empty state when no items
-function renderEmpty(){
-  var activeTab = document.querySelector('.tab-item.active').dataset.tab;
+// Show empty state when no items visible
+function renderEmpty() {
   var scroll = document.querySelector('.scroll');
-
-  // Remove existing empty states
-  scroll.querySelectorAll('.notify-empty').forEach(function(e){e.remove()});
+  scroll.querySelectorAll('.notify-empty').forEach(function(e) { e.remove(); });
 
   // 总开关关闭 → 统一提示
-  var masterOff = (typeof window.StoryFunNotify !== 'undefined') && !window.StoryFunNotify.getSettings().master;
-  if (masterOff) {
+  if (typeof window.StoryFunNotify !== 'undefined' && !window.StoryFunNotify.getSettings().master) {
     var emptyAll = document.createElement('div');
     emptyAll.className = 'notify-empty';
     emptyAll.innerHTML = '<div class="empty-icon">🔕</div><p>已关闭全部通知，可在「设置 → 通知设置」中开启</p>';
@@ -631,44 +430,43 @@ function renderEmpty(){
     return;
   }
 
-  var visible = document.querySelectorAll('.notify-item[data-category="'+activeTab+'"]');
-  var allHidden = true;
-  visible.forEach(function(item){
-    if(item.style.display !== 'none') allHidden = false;
+  var anyVisible = false;
+  document.querySelectorAll('.notify-item').forEach(function(item) {
+    if (item.style.display !== 'none') anyVisible = true;
   });
 
-  if(allHidden){
-    var msg = activeTab === 'revenue' ? '暂无收益通知' : '暂无互动通知';
+  if (!anyVisible) {
     var empty = document.createElement('div');
     empty.className = 'notify-empty';
-    empty.innerHTML = '<div class="empty-icon">'+ (activeTab==='revenue'?'📭':'💬') +'</div><p>'+msg+'</p>';
+    empty.innerHTML = '<div class="empty-icon">💬</div><p>暂无互动通知</p>';
     scroll.appendChild(empty);
   }
 }
 
 // More / Delete
-function toggleDelete(e, btn){
+function toggleDelete(e, btn) {
   e.stopPropagation();
   // Close all other dropdowns
-  document.querySelectorAll('.delete-dropdown.show').forEach(function(d){
-    if(d.parentElement !== btn.parentElement) d.classList.remove('show');
+  document.querySelectorAll('.delete-dropdown.show').forEach(function(d) {
+    if (d.parentElement !== btn.parentElement) d.classList.remove('show');
   });
   var dd = btn.parentElement.querySelector('.delete-dropdown');
   dd.classList.toggle('show');
 }
 
-function deleteNotify(e, btn){
+function deleteNotify(e, btn) {
   e.stopPropagation();
   btn.closest('.notify-item').remove();
+  renderEmpty();
 }
 
 // Follow button toggle
-function toggleFollow(btn){
-  if(btn.classList.contains('mutual')){
+function toggleFollow(btn) {
+  if (btn.classList.contains('mutual')) {
     btn.classList.remove('mutual');
     btn.classList.add('followed');
     btn.textContent = '已关注';
-  } else if(btn.classList.contains('followed')){
+  } else if (btn.classList.contains('followed')) {
     btn.classList.remove('followed');
     btn.textContent = '关注';
   } else {
@@ -678,14 +476,12 @@ function toggleFollow(btn){
 }
 
 // Close dropdowns on outside click
-document.addEventListener('click', function(){
-  document.querySelectorAll('.delete-dropdown.show').forEach(function(d){d.classList.remove('show')});
+document.addEventListener('click', function() {
+  document.querySelectorAll('.delete-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
 });
 
-// Initial — show revenue tab
-(function init(){
-  applyNotifyVisibility();
-})();
+// Initial
+applyVisibility();
 </script>
 <script src="load-sidebar.js"></script>
 </body>

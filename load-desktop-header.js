@@ -7,44 +7,6 @@
 (function() {
     'use strict';
 
-    // 动态引入商城依赖：items.js（ItemStore）→ shop.js（商城弹窗）
-    // 带时间戳版本号，避免浏览器缓存旧文件
-    (function() {
-        if (!document.getElementById('itemsJs')) {
-            var a = document.createElement('script');
-            a.id = 'itemsJs'; a.src = 'items.js?v=' + Date.now();
-            document.head.appendChild(a);
-        }
-        if (!document.getElementById('shopJs')) {
-            var s = document.createElement('script');
-            s.id = 'shopJs'; s.src = 'shop2.js?v=' + Date.now();
-            document.head.appendChild(s);
-        }
-    })();
-    // 购买入口兜底：依赖未加载完成时点击，先加载再打开
-    // target：无 → 商店；'supply'/'manual' → 数量购买弹窗；'sub' → 订阅弹窗
-    window.openShopSafe = function(target) {
-        function go() {
-            if (typeof window.ItemStore === 'undefined' || typeof window.Shop === 'undefined') return false;
-            if (target === 'sub') { window.Shop.openSub(); }
-            else if (target === 'supply' || target === 'manual') { window.Shop.openBuyModal(target); }
-            else { window.Shop.open(); }
-            return true;
-        }
-        if (go()) return;
-        var need = [];
-        if (typeof window.ItemStore === 'undefined') need.push('items.js');
-        if (typeof window.Shop === 'undefined') need.push('shop2.js');
-        var loaded = 0;
-        need.forEach(function(src) {
-            var s = document.createElement('script');
-            s.src = src + '?v=' + Date.now();
-            s.onload = function() { loaded++; if (loaded === need.length) go(); };
-            document.head.appendChild(s);
-        });
-        setTimeout(go, 800);
-    };
-
     // 内嵌 Desktop Header 样式
     function injectStyles() {
         if (document.getElementById('dh-injected-styles')) return;
@@ -164,29 +126,14 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="dh-shop-wrap">' +
-                    '<button class="dh-icon-btn" title="商店">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>' +
-                    '</button>' +
-                    '<div class="dh-shop-dropdown">' +
-                        '<div style="font-size:14px;font-weight:700;color:#13202e;padding:2px 4px 10px;">商店</div>' +
-                        '<div id="dhShopList"></div>' +
-                    '</div>' +
-                '</div>' +
                 '<div class="dh-notify-wrap">' +
                     '<button class="dh-icon-btn" title="通知">' +
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' +
                         '<span class="dh-notify-dot"></span>' +
                     '</button>' +
                     '<div class="dh-notify-dropdown" id="dhNotifyDropdown">' +
-                        '<div class="dn-header"><button class="dn-tab active" onclick="dhSwitchTab(event,\'revenue\')">系统<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff2d55;margin-left:5px;vertical-align:middle"></span></button><button class="dn-tab" onclick="dhSwitchTab(event,\'social\')">互动<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff2d55;margin-left:5px;vertical-align:middle"></span></button></div>' +
+                        '<div class="dn-header"><button class="dn-tab active" onclick="dhSwitchTab(event,\'social\')">互动<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff2d55;margin-left:5px;vertical-align:middle"></span></button></div>' +
                         '<div class="dn-scroll">' +
-                            '<!-- IP 被购买 -->' +
-                            '<div class="notify-item unread" data-category="revenue"><div class="revenue-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="revenue-title">购买 IP 卡</div><div class="notify-desc">@Jack 购买了 IP 卡 <strong>苏婉清</strong></div><div class="revenue-amount">你获得分成 <span class="rcv-usdc">126.80 USDC</span></div><div class="notify-meta">12分钟前</div></div><button class="rev-act-btn" onclick="location.href=\'rewards.html\'">领取</button></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
-                            '<!-- 能量不足 -->' +
-                            '<div class="notify-item unread" data-category="revenue"><div class="revenue-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="revenue-title">IP 卡管理</div><div class="notify-desc"><strong>赵无极</strong> 能量不足，尽快补充能量或停用</div><div class="revenue-amount">当前能量 <span style="color:#f59e0b">0</span></div><div class="notify-meta">28分钟前</div></div><button class="rev-act-btn" onclick="location.href=\'studio.html\'">补充</button></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
-                            '<!-- 激活收益到账 -->' +
-                            '<div class="notify-item" data-category="revenue"><div class="revenue-row"><div class="notify-icon revenue">🎬</div><div class="notify-content"><div class="revenue-title">激活收益</div><div class="notify-desc">2026/6/15 ～ 2026/6/21 激活结束</div><div class="revenue-amount">你获得收益 <span class="rcv-story">415.70 STORY</span></div><div class="notify-meta">2小时前</div></div><button class="rev-act-btn" onclick="location.href=\'rewards.html\'">领取</button></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
                             '<!-- 点赞视频 -->' +
                             '<div class="notify-item unread" data-category="social"><div class="social-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="notify-desc"><strong>李云飞</strong></div><div class="notify-desc" style="font-weight:400">赞了你的视频</div><div class="notify-time">18分钟前</div></div><div class="notify-thumb"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=200&q=80" alt=""></div></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
                             '<!-- 点赞短剧 -->' +
@@ -215,43 +162,13 @@
                         '<a class="dh-publish-item" href="publish-video.html">' +
                             '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><polygon points="7,5.5 7,10.5 11.5,8" fill="currentColor"/></svg>发布视频' +
                         '</a>' +
-                        '<a class="dh-publish-item" href="create-actor.html">' +
-                            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2"/><path d="M2 14v-1.3a2.7 2.7 0 0 1 2.7-2.7h2.6a2.7 2.7 0 0 1 2.7 2.7V14"/></svg>发行IP' +
-                        '</a>' +
                     '</div>' +
                 '</div>' +
                 '<div class="auth-container" id="authContainer"></div>' +
             '</div>';
     }
 
-    // 注入 HTML 到 body 最前面（如果已存在则跳过渲染，但仍确保商店 hover 入口存在）
-    function ensureShopBtn() {
-        var header = document.getElementById('desktopHeader');
-        if (!header) return;
-        if (header.querySelector('.dh-icon-btn[title="商店"]')) return; // 已有
-        var btn = document.createElement('button');
-        btn.className = 'dh-icon-btn';
-        btn.title = '商店';
-        btn.style.cssText = 'width:36px;height:36px;border-radius:50%;border:none;background:none;color:rgba(0,0,0,.55);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;transition:background .15s;';
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>';
-        var wrap = document.createElement('div');
-        wrap.className = 'dh-shop-wrap';
-        var dd = document.createElement('div');
-        dd.className = 'dh-shop-dropdown';
-        dd.innerHTML = '<div style="font-size:14px;font-weight:700;color:#13202e;padding:2px 4px 10px;">商店</div><div id="dhShopList"></div>';
-        wrap.appendChild(btn);
-        wrap.appendChild(dd);
-        var notify = header.querySelector('.dh-icon-btn[title="通知"]') || header.querySelector('.dh-notify-wrap');
-        if (notify) {
-            // 找到 notify 在 header 下的直接子节点（insertBefore 要求目标为 header 直接子级）
-            var target = notify;
-            while (target.parentNode && target.parentNode !== header) target = target.parentNode;
-            if (target.parentNode === header) header.insertBefore(wrap, target);
-            else header.appendChild(wrap);
-        } else {
-            header.appendChild(wrap);
-        }
-    }
+    // 注入 HTML 到 body 最前面（如果已存在则跳过渲染）
     function injectHeaderHTML() {
         if (!document.getElementById('desktopHeader')) {
             var html = buildHeaderHTML();
@@ -262,7 +179,6 @@
                 document.body.insertBefore(header, document.body.firstChild);
             }
         }
-        ensureShopBtn();
     }
 
     // 绑定搜索交互
@@ -377,9 +293,6 @@
                 '</a>' +
                 '<a class="dh-publish-item" href="publish-video.html">' +
                     '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><polygon points="7,5.5 7,10.5 11.5,8" fill="currentColor"/></svg>发布视频' +
-                '</a>' +
-                '<a class="dh-publish-item" href="create-actor.html">' +
-                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="2"/><path d="M2 14v-1.3a2.7 2.7 0 0 1 2.7-2.7h2.6a2.7 2.7 0 0 1 2.7 2.7V14"/></svg>发行IP' +
                 '</a>';
 
             pubBtn.parentNode.insertBefore(wrap, pubBtn);
@@ -396,11 +309,8 @@
             var nDropdown = document.createElement('div');
             nDropdown.className = 'dh-notify-dropdown';
             nDropdown.innerHTML =
-                '<div class="dn-header"><button class="dn-tab active" onclick="dhSwitchTab(event,\'revenue\')">系统</button><button class="dn-tab" onclick="dhSwitchTab(event,\'social\')">互动</button></div>' +
+                '<div class="dn-header"><button class="dn-tab active" onclick="dhSwitchTab(event,\'social\')">互动</button></div>' +
                 '<div class="dn-scroll">' +
-                    '<div class="notify-item unread" data-category="revenue"><div class="revenue-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="revenue-title">购买 IP 卡</div><div class="notify-desc">@Jack 购买了 IP 卡 <strong>苏婉清</strong></div><div class="revenue-amount">你获得分成 <span class="rcv-usdc">126.80 USDC</span></div><div class="notify-meta">12分钟前</div></div><button class="rev-act-btn" onclick="location.href=\'rewards.html\'">领取</button></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
-                    '<div class="notify-item unread" data-category="revenue"><div class="revenue-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="revenue-title">IP 卡管理</div><div class="notify-desc"><strong>赵无极</strong> 能量不足，尽快补充能量或停用</div><div class="revenue-amount">当前能量 <span style="color:#f59e0b">0</span></div><div class="notify-meta">28分钟前</div></div><button class="rev-act-btn" onclick="location.href=\'studio.html\'">补充</button></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
-                    '<div class="notify-item" data-category="revenue"><div class="revenue-row"><div class="notify-icon revenue">🎬</div><div class="notify-content"><div class="revenue-title">激活收益</div><div class="notify-desc">2026/6/15 ～ 2026/6/21 激活结束</div><div class="revenue-amount">你获得收益 <span class="rcv-story">415.70 STORY</span></div><div class="notify-meta">2小时前</div></div><button class="rev-act-btn" onclick="location.href=\'rewards.html\'">领取</button></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
                     '<div class="notify-item unread" data-category="social"><div class="social-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="notify-desc"><strong>李云飞</strong></div><div class="notify-desc" style="font-weight:400">赞了你的视频</div><div class="notify-time">18分钟前</div></div><div class="notify-thumb"><img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=200&q=80" alt=""></div></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
                     '<div class="notify-item unread" data-category="social"><div class="social-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="notify-desc"><strong>苏婉清</strong></div><div class="notify-desc" style="font-weight:400">赞了你的短剧 《凤骨琉璃》</div><div class="notify-time">42分钟前</div></div><div class="notify-thumb"><img src="https://images.unsplash.com/photo-1512070679279-8988d32161be?auto=format&fit=crop&w=200&q=80" alt=""></div></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
                     '<div class="notify-item unread" data-category="social"><div class="social-row"><div class="notify-icon avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" alt=""></div><div class="notify-content"><div class="notify-desc"><strong>林梦瑶</strong></div><div class="notify-desc" style="font-weight:400">收藏了你的视频</div><div class="notify-time">1小时前</div></div><div class="notify-thumb"><img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=200&q=80" alt=""></div></div><div class="notify-footer"><button class="notify-more" onclick="dhToggleDelete(event,this)">···</button><div class="delete-dropdown"><button class="delete-btn" onclick="dhDeleteNotify(event,this)">删除</button></div></div></div>' +
@@ -428,25 +338,18 @@
         document.head.appendChild(script);
     }
 
-    // 给 header 通知下拉条目打上子类型标记（revenue: ip/manage/show；social: like/save/comment/follow）
+    // 给 header 通知下拉条目打上子类型标记（social: like/save/comment/follow）
     // 依据条目内文本判断，避免逐条改写长 HTML 字符串
     function classifyHeaderNotifyItems() {
         document.querySelectorAll('.dh-notify-dropdown .notify-item').forEach(function(item) {
             var cat = item.getAttribute('data-category');
             if (!cat) return;
             var text = item.textContent || '';
-            if (cat === 'revenue') {
-                var rt = 'ip';
-                if (text.indexOf('IP 卡管理') !== -1) rt = 'manage';
-                else if (text.indexOf('激活') !== -1 || text.indexOf('收益') !== -1) rt = 'show';
-                item.setAttribute('data-revtype', rt);
-            } else {
-                var st = 'like';
-                if (text.indexOf('收藏') !== -1) st = 'save';
-                else if (text.indexOf('评论') !== -1) st = 'comment';
-                else if (text.indexOf('关注') !== -1) st = 'follow';
-                item.setAttribute('data-sotype', st);
-            }
+            var st = 'like';
+            if (text.indexOf('收藏') !== -1) st = 'save';
+            else if (text.indexOf('评论') !== -1) st = 'comment';
+            else if (text.indexOf('关注') !== -1) st = 'follow';
+            item.setAttribute('data-sotype', st);
         });
     }
 
@@ -456,13 +359,13 @@
         if (!dd) return;
         var settings = (typeof window.StoryFunNotify !== 'undefined') ? window.StoryFunNotify.getSettings() : null;
         var activeTabEl = dd.querySelector('.dn-tab.active');
-        var tabText = activeTabEl ? (activeTabEl.textContent || '').trim() : '系统';
-        var tabCat = tabText.indexOf('互动') !== -1 ? 'social' : 'revenue';
+        var tabText = activeTabEl ? (activeTabEl.textContent || '').trim() : '互动';
+        var tabCat = 'social';
 
         var anyUnreadVisible = false;
         dd.querySelectorAll('.notify-item').forEach(function(item) {
             var cat = item.getAttribute('data-category');
-            var sub = cat === 'revenue' ? item.getAttribute('data-revtype') : item.getAttribute('data-sotype');
+            var sub = item.getAttribute('data-sotype');
             var enabled = true;
             if (settings) {
                 enabled = settings.master && window.StoryFunNotify.isNotifyEnabled(cat, sub);
@@ -522,21 +425,7 @@
         if (!enhanceExistingHeader()) {
             injectHeaderHTML();
         }
-        ensureShopBtn();
         bindSearch();
-        // 商店 hover：进入时渲染一次（不在鼠标移动中反复重渲染，避免打断点击）
-        document.addEventListener('mouseover', function (e) {
-            var wrap = e.target && e.target.closest ? e.target.closest('.dh-shop-wrap') : null;
-            if (!wrap || wrap._rendered) return;
-            wrap._rendered = true;
-            if (window.Shop && window.Shop.renderCenter) window.Shop.renderCenter();
-        });
-        document.addEventListener('mouseout', function (e) {
-            var wrap = e.target && e.target.closest ? e.target.closest('.dh-shop-wrap') : null;
-            if (wrap && e.relatedTarget && !wrap.contains(e.relatedTarget)) wrap._rendered = false;
-        });
-        // 初始渲染一次（页面加载后下拉内容就绪）
-        if (window.Shop && window.Shop.renderCenter) window.Shop.renderCenter();
         // 通知设置联动：打标 + 按设置过滤下拉条目与红点
         ensureNotifySettingsScript(function() {
             classifyHeaderNotifyItems();

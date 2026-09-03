@@ -44,7 +44,6 @@
     .auth-dropdown-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
     .auth-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .auth-dropdown-name { font-weight: 600; font-size: 0.92rem; color: var(--text); }
-    .auth-dropdown-wallet { font-size: 0.78rem; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
     .auth-dropdown-divider { height: 1px; background: var(--border); margin: 0; }
     .auth-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: var(--text); text-decoration: none; font-size: 0.9rem; transition: background 0.15s; cursor: pointer; }
     .auth-dropdown-item:hover { background: rgba(0,0,0,0.03); }
@@ -68,8 +67,6 @@
     .auth-social-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 0.85rem; margin: 4px 0; }
     .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .auth-wallet-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius:999px; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-    .auth-wallet-btn:hover { background: rgba(0, 0, 0,0.2); }
     .auth-modal-tos { text-align: center; color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; margin: 4px 0 0; }
     .auth-modal-tos a { color: var(--accent); text-decoration: none; }
     .auth-modal-tos a:hover { text-decoration: underline; }
@@ -224,7 +221,6 @@
 
     .char-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 28px; }
 
-    /* IP 卡 卡（参考 studio.html 的激活位卡，去掉能量条/补充/停用） */
     .char-card { position: relative; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); transition: all 0.25s ease; display: flex; flex-direction: column; min-width: 0; }
     .char-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .char-card .char-avatar-area { position: relative; width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #e8f5ef, #d4ece5); overflow: hidden; flex-shrink: 0; z-index: 1; }
@@ -604,7 +600,6 @@
       .upload-item .title-edit input { font-size: 0.85rem; width: 100%; border-radius:999px; margin-top: 6px; }
       .upload-item .item-actions { margin-left: auto; gap: 4px; flex-shrink: 0; align-self: flex-start; }
 
-      /* ── IP 卡卡片：Apple 风格 ── */
       .char-grid { grid-template-columns: 1fr; gap: 14px; margin-bottom: 20px; }
       .char-panel-header {
         flex-direction: column;
@@ -852,29 +847,6 @@
       </div>
     </div>
 
-
-    <!-- Step 3: 角色管理 - 已移除（短剧天然归属账号，无需绑定 IP） -->
-
-    <!-- Actor Bind Modal（绑定功能已移除，弹窗保留代码兜底隐藏） -->
-    <div class="char-modal-overlay" id="actorBindModal" style="display:none;">
-      <div class="char-modal">
-        <div class="char-modal-header">
-          <h3 id="actorBindModalTitle">🎭 选择IP 卡</h3>
-          <button class="char-modal-close" onclick="charManager.closeBindModal()">✕</button>
-        </div>
-        <div class="char-modal-body">
-          <div id="actorBindGrid" class="actor-bind-grid"></div>
-        </div>
-        <div class="char-modal-footer" style="justify-content:space-between;">
-          <span style="font-size:0.82rem;color:var(--text-muted);" id="actorBindCount"></span>
-          <div style="display:flex;gap:10px;">
-            <button class="button-ghost" onclick="charManager.closeBindModal()">取消</button>
-            <button class="button" id="actorBindConfirmBtn" onclick="charManager.confirmBindModal()" disabled>确认绑定</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 
 <!-- Video Preview Modal -->
@@ -973,263 +945,6 @@ function goToStep(num) {
   }
 }
 
-    // === Actor IP Database ===
-    const ACTOR_IP_DB = {
-      'Luna': { name: 'Luna', image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80', description: '未来偶像型AI角色，科技感造型，适合对话与剧情分润场景。', power: '5,230' },
-      '苏婉清': { name: '苏婉清', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80', description: '温婉端庄的江南女子，琴棋书画样样精通，举止间尽显大家闺秀风范。', power: '8,562' },
-      '李云飞': { name: '李云飞', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', description: '身手矫健的侠客，性格豪爽仗义，自幼习武练就一身好本领。', power: '6,230' },
-      '林梦瑶': { name: '林梦瑶', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80', description: '聪慧机敏的现代女性，擅长推理分析，拥有敏锐的洞察力。', power: '5,891' },
-      '赵无极': { name: '赵无极', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80', description: '深不可测的武林高手，亦正亦邪，武功深不可测，行事风格独特。', power: '7,105' },
-      '上官婉儿': { name: '上官婉儿', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', description: '才情横溢的宫廷女官，精通诗词歌赋，智慧与美貌并重。', power: '4,720' },
-      '叶倾城': { name: '叶倾城', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80', description: '倾国倾城的绝世佳人，一颦一笑皆动人心魄，气质高贵冷艳。', power: '6,540' },
-      '慕容云': { name: '慕容云', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80', description: '冷峻孤傲的世家公子，剑术超群，性格深沉内敛，眉宇间带着一丝忧郁。', power: '5,910' },
-      '花木兰': { name: '花木兰', image: 'https://images.unsplash.com/photo-1592621385612-4d7129426394?auto=format&fit=crop&w=200&q=80', description: '英姿飒爽的女将军，替父从军征战沙场，巾帼不让须眉，忠孝两全。', power: '7,880' },
-      '东方朔': { name: '东方朔', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', description: '神秘莫测的方士，通晓天文地理，善奇门遁甲之术，行事飘忽不定。', power: '6,120' },
-      '柳如是': { name: '柳如是', image: 'https://images.unsplash.com/photo-1602233158242-3ba0ac4d2167?auto=format&fit=crop&w=200&q=80', description: '秦淮河畔的才女，琴棋书画无一不精，性格清高傲骨，不为世俗所困。', power: '4,350' },
-      '萧景琰': { name: '萧景琰', image: 'https://images.unsplash.com/photo-1506089676908-3592f7389d4d?auto=format&fit=crop&w=200&q=80', description: '威震四方的大将军，战功赫赫，为人刚正不阿，深受将士爱戴。', power: '8,210' },
-      '江小鱼': { name: '江小鱼', image: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=200&q=80', description: '古灵精怪的江湖少年，机智幽默，轻功了得，总能在危机关头化险为夷。', power: '3,980' }
-    };
-
-    // IP 卡 编号映射（卡片与绑定弹窗共用）
-    const ACTOR_IP_ID = {
-      'Luna': '5874...2301',
-      '苏婉清': '3131...7979',
-      '李云飞': '6428...1170',
-      '林梦瑶': '7905...4482',
-      '赵无极': '1026...6659',
-      '上官婉儿': '3341...2288',
-      '叶倾城': '8857...9913',
-      '慕容云': '2210...7746',
-      '花木兰': '5590...3387',
-      '东方朔': '4473...1128',
-      '柳如是': '6682...5594',
-      '萧景琰': '7741...8850',
-      '江小鱼': '9933...7718'
-    };
-
-    /**
-     * Character Manager - Figma Inspired Card Grid
-     */
-    const charManager = {
-      characters: [],
-      bindCharId: null,
-
-      init() {
-        this.render();
-      },
-
-      addActor(actorKey) {
-        if (this.characters.includes(actorKey)) {
-          this.showToast('该IP 卡 已在此剧中绑定');
-          return false;
-        }
-        if (this.characters.length >= 5) {
-          this.showToast('每部短剧最多绑定 5 个IP 卡');
-          return false;
-        }
-        this.characters.push(actorKey);
-        return true;
-      },
-
-      removeActor(actorKey) {
-        this.characters = this.characters.filter(k => k !== actorKey);
-        this.render();
-      },
-
-      render() {
-        const grid = document.getElementById('charGrid');
-        if (!grid) return; // 绑定 UI 已移除（短剧天然归属账号）
-        grid.innerHTML = this.characters.map(k => this.renderCard(k)).join('');
-        if (this.characters.length < 5) {
-          grid.insertAdjacentHTML('beforeend', this.renderAddCard());
-        }
-        this.bindCardEvents();
-      },
-
-      bindCardEvents() {
-        // Bind remove buttons
-        document.querySelectorAll('.js-remove-actor').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = btn.closest('.char-card');
-            const key = card.dataset.actorKey;
-            this.removeActor(key);
-          });
-        });
-        // Bind click events for add card
-        const addCard = document.querySelector('.js-add-actor');
-        if (addCard) {
-          addCard.addEventListener('click', () => this.openBindModal());
-        }
-      },
-
-      renderCard(actorKey) {
-        const actor = ACTOR_IP_DB[actorKey];
-        const name = actor ? actor.name : actorKey;
-        const image = actor ? actor.image : '';
-        const avatarArea = image
-          ? '<div class="char-avatar-area"><img src="' + image + '" alt="' + this.escapeHtml(name) + '" /></div>'
-          : '<div class="char-avatar-area"><div class="char-avatar-placeholder">🎭</div></div>';
-
-        return '<div class="char-card" data-actor-key="' + this.escapeHtml(actorKey) + '">'
-          + avatarArea
-          + '<div class="char-body">'
-          + '<div class="char-name" title="' + this.escapeHtml(name) + '">' + this.escapeHtml(name) + '</div>'
-          + '<div class="char-salary">IP：' + (ACTOR_IP_ID[actorKey] || '—') + '</div>'
-          + '<button class="char-remove-btn js-remove-actor">移除</button>'
-          + '</div></div>';
-      },
-
-      renderAddCard() {
-        return '<div class="char-card add-card js-add-actor">'
-          + '<div class="add-card-content">'
-          + '<div class="add-icon">+</div>'
-          + '</div></div>';
-      },
-
-      // ===== Actor Binding Methods =====
-
-      getUserActorKeys() {
-        // Return the list of actor IP keys that the user holds
-        const held = (typeof currentUser !== 'undefined' && currentUser && currentUser.actorNfts) ? currentUser.actorNfts : [];
-        return held.filter(k => ACTOR_IP_DB[k]);
-      },
-
-      openBindModal() {
-        this.bindSelection = [];
-
-        this.renderBindModal();
-        document.getElementById('actorBindModal').classList.add('active');
-      },
-
-      closeBindModal() {
-        document.getElementById('actorBindModal').classList.remove('active');
-        this.bindSelection = [];
-      },
-
-      renderBindModal() {
-        const grid = document.getElementById('actorBindGrid');
-        const countEl = document.getElementById('actorBindCount');
-        const confirmBtn = document.getElementById('actorBindConfirmBtn');
-        const actorKeys = this.getUserActorKeys();
-        this.bindSelection = this.bindSelection || [];
-
-        if (actorKeys.length === 0) {
-          grid.innerHTML = '<div class="actor-bind-empty"><div class="empty-icon">🎭</div>您还没有持有任何IP 卡<br/><button class="char-bind-btn" style="margin-top:14px;max-width:240px;" onclick="charManager.gotoMarket()">前往 IP 市场 →</button></div>';
-          countEl.textContent = '';
-          if (confirmBtn) confirmBtn.disabled = true;
-          return;
-        }
-
-        let html = '';
-        actorKeys.forEach((key) => {
-          const actor = ACTOR_IP_DB[key];
-          const isBound = this.characters.includes(key);
-          const isSelected = this.bindSelection.includes(key);
-          const checkBox = isBound
-            ? '<span style="width:20px;height:20px;border-radius:6px;border:1px solid var(--border);background:rgba(0,0,0,0.04);flex-shrink:0;display:grid;place-items:center;color:var(--text-muted);font-size:0.65rem;">—</span>'
-            : '<span style="width:20px;height:20px;border-radius:6px;border:2px solid ' + (isSelected ? 'var(--accent)' : '#d5dfeb') + ';background:' + (isSelected ? 'var(--accent)' : '#fff') + ';flex-shrink:0;display:grid;place-items:center;color:#fff;font-size:0.7rem;transition:all 0.18s;">' + (isSelected ? '✓' : '') + '</span>';
-
-          html += '<div class="actor-bind-item js-bind-select' + (isBound ? ' is-bound' : '') + (isSelected ? ' is-selected' : '') + '" data-actor-key="' + key + '">'
-            + checkBox
-            + '<img class="abi-avatar" src="' + actor.image + '" alt="' + this.escapeHtml(actor.name) + '" onerror="this.outerHTML=\'<div class=abi-avatar style=display:grid;place-items:center;font-size:1.2rem;>🎭</div>\'" />'
-            + '<div class="abi-info">'
-            + '<div class="abi-name">' + this.escapeHtml(actor.name) + '</div>'
-            + '<div class="abi-id">IP：' + (ACTOR_IP_ID[key] || '—') + '</div>'
-            + (isBound ? '<div style="font-size:0.65rem;color:var(--text-muted);">已绑定</div>' : '')
-            + '</div></div>';
-        });
-
-        grid.innerHTML = html;
-        const remaining = Math.max(0, 5 - this.characters.length);
-        countEl.textContent = '已选 ' + this.bindSelection.length + ' 个';
-        if (confirmBtn) confirmBtn.disabled = this.bindSelection.length === 0;
-
-        grid.querySelectorAll('.js-bind-select').forEach(el => {
-          el.addEventListener('click', () => {
-            if (el.classList.contains('is-bound')) return;
-            const key = el.dataset.actorKey;
-            const idx = this.bindSelection.indexOf(key);
-            if (idx !== -1) {
-              this.bindSelection.splice(idx, 1);
-            } else {
-              const maxSelect = Math.max(0, 5 - this.characters.length);
-              if (this.bindSelection.length >= maxSelect) {
-                this.showToast('最多还可绑定 ' + maxSelect + ' 个IP 卡');
-                return;
-              }
-              this.bindSelection.push(key);
-            }
-            this.renderBindModal();
-          });
-        });
-      },
-
-      confirmBindModal() {
-        const added = [];
-        (this.bindSelection || []).forEach((key) => {
-          if (!this.characters.includes(key) && this.characters.length < 5) {
-            this.characters.push(key);
-            added.push(key);
-          }
-        });
-        this.closeBindModal();
-        this.render();
-        if (added.length > 0) {
-          this.showToast('✅ 已绑定 ' + added.length + ' 个IP 卡');
-        }
-      },
-
-      saveDraft() {
-        this.showToast('草稿已保存！');
-      },
-
-      gotoMarket() {
-        // 点击瞬间保存草稿，避免跳转后表单内容丢失
-        try {
-          const coverZone = document.querySelector('.cover-upload');
-          const coverImg = coverZone ? coverZone.querySelector('img') : null;
-          const draft = {
-            title: document.getElementById('pTitle') ? document.getElementById('pTitle').value : '',
-            desc: document.getElementById('pDesc') ? document.getElementById('pDesc').value : '',
-            cover: coverImg ? coverImg.src : '',
-            tags: Array.from(document.querySelectorAll('#step1 .tag-option.selected')).map(el => el.textContent.trim()),
-            actors: this.characters.slice(),
-            videos: batchUpload.files.map(f => f.originalName),
-            ts: Date.now(),
-            from: 'publish'
-          };
-          localStorage.setItem('publish_draft', JSON.stringify(draft));
-        } catch (e) {}
-        location.href = 'actors.html';
-      },
-
-      escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-      },
-
-      showToast(msg) {
-        const existing = document.querySelector('.batch-toast');
-        if (existing) existing.remove();
-        const toast = document.createElement('div');
-        toast.className = 'batch-toast';
-        toast.textContent = msg;
-        Object.assign(toast.style, {
-          position: 'fixed', bottom: '24px', left: '50%',
-          transform: 'translateX(-50%) translateY(100px)',
-          background: 'rgba(26,35,47,0.92)', backdropFilter: 'blur(8px)',
-          color: '#fff', padding: '12px 24px', borderRadius: '14px',
-          fontSize: '0.92rem', boxShadow: '0 8px 32px rgba(27,45,71,0.25)',
-          zIndex: '10000', transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease',
-          opacity: '0', maxWidth: '400px', textAlign: 'center', fontWeight: '500',
-        });
-        document.body.appendChild(toast);
-        requestAnimationFrame(() => { toast.style.transform = 'translateX(-50%) translateY(0)'; toast.style.opacity = '1'; });
-        setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(100px)'; toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 2500);
-      },
-    };
 
 /**
  * Batch Video Upload Engine
@@ -1654,9 +1369,8 @@ const batchUpload = {
 
 document.addEventListener('DOMContentLoaded', () => {
   batchUpload.init();
-  charManager.init();
 
-  // 从角色市场返回时恢复草稿
+  // 恢复上次未完成的草稿
   try {
     const draft = JSON.parse(localStorage.getItem('publish_draft') || 'null');
     if (draft && draft.from === 'publish') {
@@ -1678,15 +1392,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (el.textContent.trim() === tag) el.classList.add('selected');
         });
       });
-      if (draft.actors && draft.actors.length) {
-        charManager.characters = draft.actors.slice();
-        charManager.render();
-      }
-      if (draft.videos && draft.videos.length) {
-        charManager.showToast('已恢复草稿，请重新选择视频文件');
-      } else {
-        charManager.showToast('已恢复草稿');
-      }
+      batchUpload.showToast('已恢复草稿');
     }
   } catch (e) {}
 
@@ -1710,7 +1416,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSaveDraft.addEventListener('click', function(e) {
       e.stopPropagation();
       closeDropdown.classList.remove('active');
-      charManager.saveDraft();
+      batchUpload.showToast('草稿已保存！');
       setTimeout(function() { history.back(); }, 500);
     });
   }

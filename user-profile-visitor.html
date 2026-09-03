@@ -64,43 +64,6 @@
     .mdc-rating { color: #ffc107; font-weight: 600; }
     .mdc-ep { color: var(--text-sub); }
 
-    /* ── Issued IP Section ── */
-    .issued-ip-section { padding: 12px 16px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
-    .issued-ip-title { font-size: 15px; font-weight: 700; color: var(--text); }
-    .issued-ip-list { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .issued-ip-list::-webkit-scrollbar { display: none; }
-    /* ═══ 发行的 IP 横排卡（头像左 + 信息右） ═══ */
-    .issued-ip-hrow {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-      width: 290px;
-      padding: 10px;
-      border-radius: 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 10px rgba(27,45,71,0.05);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .issued-ip-hrow:active { transform: scale(0.98); }
-    .issued-ip-avatar {
-      position: relative;
-      width: 88px;
-      height: 88px;
-      border-radius: 12px;
-      overflow: hidden;
-      flex-shrink: 0;
-      background: linear-gradient(135deg,#e0f7ff 0%,#ffffff 100%);
-    }
-    .issued-ip-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .issued-ip-avatar .ip-avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; color: var(--text-muted); }
-    .issued-ip-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-    .issued-ip-hname { font-size: 0.92rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .issued-ip-sub { font-size: 0.68rem; color: var(--text-sub, #8b8d98); font-family: "SF Mono", Menlo, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.01em; }
-    .issued-ip-empty { padding: 16px 14px; border-radius: 14px; border: 1px dashed var(--border); background: var(--surface); color: var(--text-sub); font-size: 0.82rem; text-align: center; }
-
     .mobile-empty { padding: 60px 24px; text-align: center; color: var(--text-sub); }
     .me-icon { font-size: 40px; margin-bottom: 12px; }
     .me-icon p { font-size: 14px; }
@@ -138,12 +101,6 @@
       <div class="ms-item"><span class="ms-num">6</span><span class="ms-label">互关</span></div>
       <div class="ms-item"><span class="ms-num">999</span><span class="ms-label">获赞</span></div>
     </div>
-  </div>
-
-  <!-- ===== ISSUED IP SECTION ===== -->
-  <div class="issued-ip-section">
-    <div class="issued-ip-title">TA 发行的 IP</div>
-    <div class="issued-ip-list" id="issuedIPList"></div>
   </div>
 
   <div class="mobile-tabs">
@@ -217,42 +174,6 @@
       document.getElementById('mobileProfileId').textContent = '@' + author.toLowerCase();
       document.getElementById('mobileAvatarLetter').textContent = author.charAt(0);
     }
-
-    // ── Issued IP Section（他人视角，仅展示）──
-    function renderIssuedIPList() {
-      var container = document.getElementById('issuedIPList');
-      if (!container) return;
-      var ips = [];
-      try {
-        var map = JSON.parse(localStorage.getItem('storyfun_created_actors')) || {};
-        ips = Object.keys(map).map(function(k) { return map[k]; });
-      } catch(e) {}
-      if (ips.length === 0) {
-        container.innerHTML = '<div class="issued-ip-empty">TA 还未发行 IP</div>';
-        return;
-      }
-      container.innerHTML = ips.map(function(ip) {
-        var name = ip.name || '未命名 IP';
-        var ipId = ip.ipId || '';
-        var avatar = ip.avatar || '';
-        var price = ip.price || (ip.initPrice ? ip.initPrice + ' USDC' : '—');
-        var totalSupply = ip.totalSupply ? ip.totalSupply.toLocaleString() : '—';
-        var avatarHtml = avatar
-          ? '<img src="' + avatar + '" alt="' + name + '" loading="lazy" onerror="this.style.display=\'none\'" />'
-          : '<span class="ip-avatar-fallback">' + name.charAt(0) + '</span>';
-        return (
-          '<div class="issued-ip-hrow" onclick="location.href=\'actor-profile.html?name=' + encodeURIComponent(name) + '\'">' +
-            '<div class="issued-ip-avatar">' + avatarHtml +
-            '</div>' +
-            '<div class="issued-ip-info">' +
-              '<div class="issued-ip-hname">' + name + '</div>' +
-              '<div class="issued-ip-sub">IP ' + ipId + '</div>' +
-            '</div>' +
-          '</div>'
-        );
-      }).join('');
-    }
-    renderIssuedIPList();
   </script>
 <script src="load-sidebar.js"></script>
 </body>

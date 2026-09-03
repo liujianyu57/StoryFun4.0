@@ -41,7 +41,6 @@
     .auth-dropdown-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
     .auth-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .auth-dropdown-name { font-weight: 600; font-size: 0.92rem; color: var(--text); }
-    .auth-dropdown-wallet { font-size: 0.78rem; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
     .auth-dropdown-divider { height: 1px; background: var(--border); margin: 0; }
     .auth-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: var(--text); text-decoration: none; font-size: 0.9rem; transition: background 0.15s; cursor: pointer; }
     .auth-dropdown-item:hover { background: rgba(0,0,0,0.03); }
@@ -385,28 +384,6 @@
       </div>
     </div>
 
-    <!-- Step 3: 角色管理 - 已移除（短剧天然归属账号，无需绑定 IP） -->
-
-    <!-- Actor Bind Modal（绑定功能已移除，弹窗保留代码兜底隐藏） -->
-    <div class="char-modal-overlay" id="actorBindModal" style="display:none;">
-      <div class="char-modal">
-        <div class="char-modal-header">
-          <h3 id="actorBindModalTitle">🎭 选择IP 卡</h3>
-          <button class="char-modal-close" onclick="charManager.closeBindModal()">✕</button>
-        </div>
-        <div class="char-modal-body">
-          <div id="actorBindGrid" class="actor-bind-grid"></div>
-        </div>
-        <div class="char-modal-footer" style="justify-content:space-between;">
-          <span style="font-size:0.82rem;color:var(--text-muted);" id="actorBindCount"></span>
-          <div style="display:flex;gap:10px;">
-            <button class="button-ghost" onclick="charManager.closeBindModal()">取消</button>
-            <button class="button" id="actorBindConfirmBtn" onclick="charManager.confirmBindModal()" disabled>确认绑定</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script src="load-sidebar.js"></script>
@@ -441,11 +418,11 @@
       if (title) {
         // Simulate loading existing data based on known dramas
         const dramaDatabase = {
-          '长安如梦': { cover: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80', desc: '温婉端庄的江南女子，琴棋书画样样精通。古装爱情短剧，讲述一段跨越阶级的感人故事。', tags: ['古装', '爱情'], price: 9.8, free: 1, discount: 10 },
-          '江南烟雨': { cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80', desc: '江南水乡的浪漫邂逅，一段关于家族恩怨与儿女情长的故事。', tags: ['古装', '剧情'], price: 12.5, free: 1, discount: 15, actors: ['苏婉清'] },
+          '长安如梦': { cover: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80', desc: '温婉端庄的江南女子，琴棋书画样样精通。古装爱情短剧，讲述一段跨越阶级的感人故事。', tags: ['古装', '爱情'] },
+          '江南烟雨': { cover: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80', desc: '江南水乡的浪漫邂逅，一段关于家族恩怨与儿女情长的故事。', tags: ['古装', '剧情'] },
 
-          '星际迷航': { cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80', desc: '在遥远的星际殖民时代，一段跨越光年的人性与AI觉醒之旅。', tags: ['科幻', '冒险'], price: 8.0, free: 1, discount: 10 },
-          '迷雾之城': { cover: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80', desc: '每一条线索都指向过去的真相，AI角色与观众共同推演悬疑谜题。', tags: ['悬疑', '推理'], price: 6.5, free: 2, discount: 5 },
+          '星际迷航': { cover: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=80', desc: '在遥远的星际殖民时代，一段跨越光年的人性与AI觉醒之旅。', tags: ['科幻', '冒险'] },
+          '迷雾之城': { cover: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80', desc: '迷雾笼罩的城市里，每一条线索都指向过去的真相，一起揭开扑朔迷离的秘密。', tags: ['悬疑', '推理'] },
         };
         // Always start from dramaDatabase defaults (ignores stale localStorage cache)
         const drama = dramaDatabase[title];
@@ -479,22 +456,6 @@
             if (el.dataset.tag === tag) el.classList.add('selected');
           });
         });
-      }
-      if (data.price) {
-        // pricing data available but step 4 removed
-      }
-      // Restore bound actor IPs
-      var boundActors = data.actors;
-      if (!boundActors && data.characters && Array.isArray(data.characters)) {
-        // Backward compatibility: derive actor keys from legacy characters
-        boundActors = data.characters
-          .filter(function(c) { return c.actorKey; })
-          .map(function(c) { return c.actorKey; });
-      }
-      if (boundActors && Array.isArray(boundActors)) {
-        charManager.characters = boundActors.slice();
-        boundActors.forEach(function(k) { charManager.persisted[k] = true; });
-        charManager.render();
       }
     }
 
@@ -575,244 +536,6 @@
       }
     });
 
-    // === Actor IP Database ===
-    const ACTOR_IP_DB = {
-      'Luna': { name: 'Luna', image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80', description: '未来偶像型AI角色，科技感造型，适合对话与剧情分润场景。', power: '5,230' },
-      '苏婉清': { name: '苏婉清', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80', description: '温婉端庄的江南女子，琴棋书画样样精通，举止间尽显大家闺秀风范。', power: '8,562' },
-      '李云飞': { name: '李云飞', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80', description: '身手矫健的侠客，性格豪爽仗义，自幼习武练就一身好本领。', power: '6,230' },
-      '林梦瑶': { name: '林梦瑶', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80', description: '聪慧机敏的现代女性，擅长推理分析，拥有敏锐的洞察力。', power: '5,891' },
-      '赵无极': { name: '赵无极', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80', description: '深不可测的武林高手，亦正亦邪，武功深不可测，行事风格独特。', power: '7,105' },
-      '上官婉儿': { name: '上官婉儿', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80', description: '才情横溢的宫廷女官，精通诗词歌赋，智慧与美貌并重。', power: '4,720' },
-      '叶倾城': { name: '叶倾城', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80', description: '倾国倾城的绝世佳人，一颦一笑皆动人心魄，气质高贵冷艳。', power: '6,540' },
-      '慕容云': { name: '慕容云', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80', description: '冷峻孤傲的世家公子，剑术超群，性格深沉内敛，眉宇间带着一丝忧郁。', power: '5,910' },
-      '花木兰': { name: '花木兰', image: 'https://images.unsplash.com/photo-1592621385612-4d7129426394?auto=format&fit=crop&w=200&q=80', description: '英姿飒爽的女将军，替父从军征战沙场，巾帼不让须眉，忠孝两全。', power: '7,880' },
-      '东方朔': { name: '东方朔', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80', description: '神秘莫测的方士，通晓天文地理，善奇门遁甲之术，行事飘忽不定。', power: '6,120' },
-      '柳如是': { name: '柳如是', image: 'https://images.unsplash.com/photo-1602233158242-3ba0ac4d2167?auto=format&fit=crop&w=200&q=80', description: '秦淮河畔的才女，琴棋书画无一不精，性格清高傲骨，不为世俗所困。', power: '4,350' },
-      '萧景琰': { name: '萧景琰', image: 'https://images.unsplash.com/photo-1506089676908-3592f7389d4d?auto=format&fit=crop&w=200&q=80', description: '威震四方的大将军，战功赫赫，为人刚正不阿，深受将士爱戴。', power: '8,210' },
-      '江小鱼': { name: '江小鱼', image: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=200&q=80', description: '古灵精怪的江湖少年，机智幽默，轻功了得，总能在危机关头化险为夷。', power: '3,980' }
-    };
-
-    // IP 卡 编号映射（卡片与绑定弹窗共用）
-    const ACTOR_IP_ID = {
-      'Luna': '5874...2301',
-      '苏婉清': '3131...7979',
-      '李云飞': '6428...1170',
-      '林梦瑶': '7905...4482',
-      '赵无极': '1026...6659',
-      '上官婉儿': '3341...2288',
-      '叶倾城': '8857...9913',
-      '慕容云': '2210...7746',
-      '花木兰': '5590...3387',
-      '东方朔': '4473...1128',
-      '柳如是': '6682...5594',
-      '萧景琰': '7741...8850',
-      '江小鱼': '9933...7718'
-    };
-
-    // === Character Manager ===
-    const charManager = {
-      characters: [],
-      persisted: {},
-
-      init() {
-        this.render();
-      },
-
-      addActor(actorKey) {
-        if (this.characters.includes(actorKey)) {
-          showToast('该IP 卡 已在此剧中绑定');
-          return false;
-        }
-        if (this.characters.length >= 5) {
-          showToast('每部短剧最多绑定 5 个IP 卡');
-          return false;
-        }
-        this.characters.push(actorKey);
-        return true;
-      },
-
-      removeActor(actorKey) {
-        if (this.persisted[actorKey]) {
-          showToast('该IP 卡 已通过审核，不可移除');
-          return;
-        }
-        this.characters = this.characters.filter(k => k !== actorKey);
-        this.render();
-      },
-
-      getUserActorKeys() {
-        // Return the list of actor IP keys that the user holds
-        const held = (typeof currentUser !== 'undefined' && currentUser && currentUser.actorNfts) ? currentUser.actorNfts : [];
-        return held.filter(k => ACTOR_IP_DB[k]);
-      },
-
-      render() {
-        const grid = document.getElementById('charGrid');
-        if (!grid) return; // 绑定 UI 已移除（短剧天然归属账号）
-        grid.innerHTML = this.characters.map(k => this.renderCard(k)).join('');
-        if (this.characters.length < 5) {
-          grid.insertAdjacentHTML('beforeend', this.renderAddCard());
-        }
-        this.bindEvents();
-      },
-
-      bindEvents() {
-        const grid = document.getElementById('charGrid');
-        const newGrid = grid.cloneNode(true);
-        grid.parentNode.replaceChild(newGrid, grid);
-
-        newGrid.addEventListener('click', (e) => {
-          const removeBtn = e.target.closest('.js-remove-actor');
-          const addCard = e.target.closest('.js-add-actor');
-
-          if (removeBtn) {
-            const card = removeBtn.closest('.char-card');
-            this.removeActor(card.dataset.actorKey);
-          } else if (addCard) {
-            this.openBindModal();
-          }
-        });
-      },
-
-      renderCard(actorKey) {
-        const actor = ACTOR_IP_DB[actorKey];
-        const name = actor ? actor.name : actorKey;
-        const image = actor ? actor.image : '';
-        const persisted = !!this.persisted[actorKey];
-        const avatarArea = image
-          ? '<div class="char-avatar-area"><img src="' + image + '" alt="' + this.escapeHtml(name) + '" /></div>'
-          : '<div class="char-avatar-area"><div class="char-avatar-placeholder">🎭</div></div>';
-
-        const actionsHtml = persisted
-          ? '<div style="margin-top:6px;font-size:0.72rem;color:var(--accent);text-align:center;padding:4px 0;">已绑定</div>'
-          : '<button class="char-remove-btn js-remove-actor">移除</button>';
-
-        return '<div class="char-card" data-actor-key="' + this.escapeHtml(actorKey) + '">'
-          + avatarArea
-          + '<div class="char-body">'
-          + '<div class="char-name" title="' + this.escapeHtml(name) + '">' + this.escapeHtml(name) + '</div>'
-          + '<div class="char-salary">IP：' + (ACTOR_IP_ID[actorKey] || '—') + '</div>'
-          + actionsHtml
-          + '</div></div>';
-      },
-
-      renderAddCard() {
-        return '<div class="char-card add-card js-add-actor">'
-          + '<div class="add-card-content">'
-          + '<div class="add-icon">+</div>'
-          + '</div></div>';
-      },
-
-      // ===== Actor Binding Methods =====
-
-      openBindModal() {
-        // 调试：已超过 7 天新增窗口时拦截
-        if (window._bindExpired) {
-          showToast('已超过 7天窗口期，不可新增绑定 IP 卡IP');
-          return;
-        }
-        this.bindSelection = [];
-
-        this.renderBindModal();
-        document.getElementById('actorBindModal').classList.add('active');
-      },
-
-      closeBindModal() {
-        document.getElementById('actorBindModal').classList.remove('active');
-        this.bindSelection = [];
-      },
-
-      renderBindModal() {
-        const grid = document.getElementById('actorBindGrid');
-        const countEl = document.getElementById('actorBindCount');
-        const confirmBtn = document.getElementById('actorBindConfirmBtn');
-        const actorKeys = this.getUserActorKeys();
-        this.bindSelection = this.bindSelection || [];
-
-        if (actorKeys.length === 0) {
-          grid.innerHTML = '<div class="actor-bind-empty"><div class="empty-icon">🎭</div>您还没有持有任何IP 卡<br/><button class="char-bind-btn" style="margin-top:14px;max-width:240px;" onclick="charManager.gotoMarket()">前往 IP 市场 →</button></div>';
-          countEl.textContent = '';
-          if (confirmBtn) confirmBtn.disabled = true;
-          return;
-        }
-
-        let html = '';
-        actorKeys.forEach((key) => {
-          const actor = ACTOR_IP_DB[key];
-          const isBound = this.characters.includes(key);
-          const isSelected = this.bindSelection.includes(key);
-          const checkBox = isBound
-            ? '<span style="width:20px;height:20px;border-radius:6px;border:1px solid var(--border);background:rgba(0,0,0,0.04);flex-shrink:0;display:grid;place-items:center;color:var(--text-muted);font-size:0.65rem;">—</span>'
-            : '<span style="width:20px;height:20px;border-radius:6px;border:2px solid ' + (isSelected ? 'var(--accent)' : '#d5dfeb') + ';background:' + (isSelected ? 'var(--accent)' : '#fff') + ';flex-shrink:0;display:grid;place-items:center;color:#fff;font-size:0.7rem;transition:all 0.18s;">' + (isSelected ? '✓' : '') + '</span>';
-
-          html += '<div class="actor-bind-item js-bind-select' + (isBound ? ' is-bound' : '') + (isSelected ? ' is-selected' : '') + '" data-actor-key="' + key + '">'
-            + checkBox
-            + '<img class="abi-avatar" src="' + actor.image + '" alt="' + this.escapeHtml(actor.name) + '" onerror="this.outerHTML=\'<div class=abi-avatar style=display:grid;place-items:center;font-size:1.2rem;>🎭</div>\'" />'
-            + '<div class="abi-info">'
-            + '<div class="abi-name">' + this.escapeHtml(actor.name) + '</div>'
-            + '<div class="abi-id">IP：' + (ACTOR_IP_ID[key] || '—') + '</div>'
-            + (isBound ? '<div style="font-size:0.65rem;color:var(--text-muted);">已绑定</div>' : '')
-            + '</div></div>';
-        });
-
-        grid.innerHTML = html;
-        const remaining = Math.max(0, 5 - this.characters.length);
-        countEl.textContent = '已选 ' + this.bindSelection.length + ' 个';
-        if (confirmBtn) confirmBtn.disabled = this.bindSelection.length === 0;
-
-        grid.querySelectorAll('.js-bind-select').forEach(el => {
-          el.addEventListener('click', () => {
-            if (el.classList.contains('is-bound')) return;
-            const key = el.dataset.actorKey;
-            const idx = this.bindSelection.indexOf(key);
-            if (idx !== -1) {
-              this.bindSelection.splice(idx, 1);
-            } else {
-              const maxSelect = Math.max(0, 5 - this.characters.length);
-              if (this.bindSelection.length >= maxSelect) {
-                showToast('最多还可绑定 ' + maxSelect + ' 个IP 卡');
-                return;
-              }
-              this.bindSelection.push(key);
-            }
-            this.renderBindModal();
-          });
-        });
-      },
-
-      confirmBindModal() {
-        const added = [];
-        (this.bindSelection || []).forEach((key) => {
-          if (!this.characters.includes(key) && this.characters.length < 5) {
-            this.characters.push(key);
-            added.push(key);
-          }
-        });
-        this.closeBindModal();
-        this.render();
-        if (added.length > 0) {
-          showToast('✅ 已绑定 ' + added.length + ' 个IP 卡');
-        }
-      },
-
-      gotoMarket() {
-        // 点击瞬间保存草稿，避免跳转后表单内容丢失
-        try {
-          const draft = {
-            title: document.getElementById('editDramaName') ? document.getElementById('editDramaName').value : '',
-            desc: document.getElementById('editDescription') ? document.getElementById('editDescription').value : '',
-            cover: coverUploadData.dataUrl || '',
-            tags: Array.from(document.querySelectorAll('#step1 .tag-option.selected')).map(el => el.dataset.tag),
-            actors: this.characters.slice(),
-            from: 'edit'
-          };
-          localStorage.setItem('edit_draft', JSON.stringify(draft));
-        } catch (e) {}
-        location.href = 'actors.html';
-      },
-
-      escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
-    };
 
     // === Batch Video Upload Engine (from publish.html) ===
     const batchUpload = {
@@ -1268,11 +991,8 @@
       const desc = document.getElementById('editDescription').value.trim();
       const tags = Array.from(document.querySelectorAll('.tag-option.selected')).map(el => el.dataset.tag);
 
-      // Save bound actor IPs
-      const actors = charManager.characters.slice();
-
       // Save to localStorage
-      const data = { cover, desc, tags, actors };
+      const data = { cover, desc, tags };
       try {
         localStorage.setItem('editDrama_' + name, JSON.stringify(data));
       } catch(e) {}
@@ -1307,10 +1027,9 @@
       document.getElementById('editDescription').addEventListener('input', updateDescCount);
       loadDramaData();
       setupCoverUpload();
-      charManager.init();
       batchUpload.init();
 
-      // 从角色市场返回时恢复草稿
+      // 恢复上次未完成的草稿
       try {
         const draft = JSON.parse(localStorage.getItem('edit_draft') || 'null');
         if (draft && draft.from === 'edit') {
@@ -1333,10 +1052,6 @@
               if (el.dataset.tag === tag) el.classList.add('selected');
             });
           });
-          if (draft.actors && draft.actors.length) {
-            charManager.characters = draft.actors.slice();
-            charManager.render();
-          }
           showToast('已恢复草稿');
         }
       } catch (e) {}

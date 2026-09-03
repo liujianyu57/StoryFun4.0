@@ -27,13 +27,6 @@
   --cm-detail-rating-bg: rgba(0,0,0,.04);
   --cm-detail-tag-bg: rgba(0,0,0,.04);
   --cm-detail-tag-color: rgba(0,0,0,.5);
-  --cm-role-name: #13202e;
-  --cm-role-role: rgba(0,0,0,.45);
-  --cm-role-status: rgba(0,0,0,.3);
-  --cm-role-card-border: rgba(0,0,0,.05);
-  --cm-role-avatar-border: rgba(0, 0, 0,.4);
-  --cm-role-unbound-bg: rgba(0,0,0,.04);
-  --cm-role-unbound-border: rgba(0,0,0,.08);
   --cm-ep-item-bg: rgba(0,0,0,.04);
   --cm-ep-item-border: rgba(0,0,0,.06);
   --cm-ep-title: #13202e;
@@ -47,9 +40,6 @@
   --cm-cr-score: rgba(0,0,0,.5);
   --cm-comment-header: rgba(0,0,0,.5);
   --cm-comment-title: rgba(0,0,0,.9);
-  --cm-more-entry-title: #13202e;
-  --cm-more-entry-arrow: rgba(0,0,0,.3);
-  --cm-more-entry-sub: rgba(0,0,0,.4);
 }
 
 /* ---- 暗色主题 ---- */
@@ -75,10 +65,6 @@ body[data-cm-theme="dark"] {
   --cm-detail-rating-bg: rgba(255,255,255,.1);
   --cm-detail-tag-bg: rgba(255,255,255,.08);
   --cm-detail-tag-color: rgba(255,255,255,.6);
-  --cm-role-name: #fff;
-  --cm-role-role: rgba(255,255,255,.45);
-  --cm-role-status: rgba(255,255,255,.3);
-  --cm-role-card-border: rgba(255,255,255,.05);
   --cm-ep-item-bg: rgba(0,0,0,.04);
   --cm-ep-item-border: rgba(255,255,255,.08);
   --cm-ep-title: #fff;
@@ -90,9 +76,6 @@ body[data-cm-theme="dark"] {
   --cm-cr-score: rgba(255,255,255,.7);
   --cm-comment-header: rgba(255,255,255,.5);
   --cm-comment-title: rgba(255,255,255,.9);
-  --cm-more-entry-title: #fff;
-  --cm-more-entry-arrow: rgba(255,255,255,.35);
-  --cm-more-entry-sub: rgba(255,255,255,.4);
 }
 
 /* ---- 抽屉容器 ---- */
@@ -435,156 +418,6 @@ body[data-cm-theme="dark"] {
   height: 13px;
 }
 
-/* ---- 角色面板 ---- */
-.cm-role-panel {
-  display: none;
-  padding: 0 16px;
-  overflow-y: auto;
-  flex: 1;
-}
-.cm-role-more-entry {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  margin: 12px 0 4px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0,.06);
-  border: 1px solid rgba(0, 0, 0,.1);
-  cursor: pointer;
-  transition: all .2s;
-  flex-shrink: 0;
-}
-.cm-role-more-entry:hover {
-  background: rgba(0, 0, 0,.12);
-  border-color: rgba(0, 0, 0,.24);
-}
-.cm-role-more-entry:active { transform: scale(.98); }
-.cm-role-more-entry .cmr-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #ff3b30;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.cm-role-more-entry .cmr-icon svg {
-  width: 14px;
-  height: 14px;
-  stroke: #fff;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.cm-role-more-entry .cmr-text { flex: 1; min-width: 0; }
-.cm-role-more-entry .cmr-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--cm-more-entry-title);
-  line-height: 1.3;
-}
-.cm-role-more-entry .cmr-sub {
-  font-size: 10px;
-  color: var(--cm-more-entry-sub);
-  line-height: 1.3;
-}
-.cm-role-more-entry .cmr-arrow {
-  color: var(--cm-more-entry-arrow);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}
-.cm-role-more-entry .cmr-arrow svg {
-  width: 14px;
-  height: 14px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.cm-role-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--cm-role-card-border);
-}
-.cm-role-card.bound { cursor: pointer; }
-.cm-role-card:last-child { border-bottom: none; }
-.cm-role-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid var(--cm-role-avatar-border);
-}
-.cm-role-avatar.unbound {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--cm-role-unbound-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--cm-role-unbound-border);
-}
-.cm-role-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.cm-role-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--cm-role-name);
-  line-height: 1.3;
-}
-.cm-role-role {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--cm-role-role);
-  margin-left: 6px;
-}
-.cm-role-ip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.cm-role-ip-tag {
-  font-size: 11px;
-  font-weight: 600;
-  color: #ff3b30;
-  background: rgba(0, 0, 0,.12);
-  padding: 1px 8px;
-  border-radius: 999px;
-}
-.cm-role-status {
-  font-size: 11px;
-  color: var(--cm-role-status);
-}
-.cm-sign-btn {
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid #ff3b30;
-  background: #ff3b30;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .15s;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-.cm-sign-btn:active { opacity: .8; }
-
 /* ---- Footer / 评论输入 ---- */
 .cm-footer {
   padding: 10px 16px;
@@ -781,51 +614,6 @@ body[data-cm-theme="dark"] {
   color: var(--cm-text-muted);
 }
 
-/* ---- IP Modal ---- */
-.cm-ip-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  pointer-events: none;
-}
-.cm-ip-modal-overlay.active {
-  display: flex;
-  pointer-events: none;
-}
-.cm-ip-modal-box {
-  background: #fff;
-  border-radius: 20px;
-  max-width: 340px;
-  width: 90%;
-  padding: 28px 24px 22px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.12);
-  text-align: center;
-  pointer-events: auto;
-}
-.cm-ip-modal-box h3 {
-  color: #13202e;
-  font-size: 1.1rem;
-  margin: 0 0 16px;
-}
-.cm-ip-modal-close {
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: rgba(0,0,0,.06);
-  color: #13202e;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 16px;
-  transition: background .2s;
-}
-.cm-ip-modal-close:hover { background: rgba(0,0,0,.1); }
-
 /* ---- 桌面端响应式 ---- */
 @media(min-width:769px) {
   .cm-drawer .cm-overlay { background: transparent; }
@@ -858,8 +646,6 @@ body[data-cm-theme="dark"] {
   .cm-detail-title,
   .cm-detail-desc,
   .cm-detail-rating,
-  .cm-role-name,
-  .cm-role-role,
   .cm-detail-rating-stars .cr-label,
   .cm-detail-rating-stars .cr-score,
   .cm-detail-tag,
@@ -867,10 +653,6 @@ body[data-cm-theme="dark"] {
   .cm-detail-desc { color: rgba(255,255,255,.6) !important; }
   .cm-detail-rating { color: rgba(255,255,255,.85) !important; }
   .cm-detail-tag { color: rgba(255,255,255,.55) !important; }
-  .cm-role-role { color: rgba(255,255,255,.45) !important; }
-  .cm-role-more-entry .cmr-title { color: rgba(255,255,255,.9) !important; }
-  .cm-role-more-entry .cmr-arrow { color: rgba(255,255,255,.4) !important; }
-  .cm-role-status { color: rgba(255,255,255,.3) !important; }
   .cm-detail-rating-stars .cr-star { color: rgba(255,255,255,.2) !important; }
   .cm-detail-rating-stars .cr-star.active { color: #ffbb3a !important; }
   .cm-ep-item { background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.08) !important; }
@@ -880,9 +662,6 @@ body[data-cm-theme="dark"] {
   .cm-ep-item .cm-ep-meta { color: rgba(255,255,255,.35) !important; }
   .cm-ep-item.active { background: rgba(0, 0, 0,.18) !important; border-color: rgba(0, 0, 0,.4) !important; }
   .cm-ep-item.active .cm-ep-title { color: #ff3b30 !important; font-weight: 700 !important; }
-  .cm-role-card { border-bottom-color: rgba(255,255,255,.05) !important; }
-  .cm-sign-btn { color: #fff !important; }
-  .cm-role-ip-tag { color: #ff3b30 !important; }
   .cm-footer { border-top-color: rgba(255,255,255,.1) !important; }
   .cm-footer .comment-input-wrap input { background: rgba(255,255,255,.06) !important; color: rgba(255,255,255,.9) !important; border-color: rgba(255,255,255,.15) !important; }
   .cm-footer .comment-input-wrap input::placeholder { color: rgba(255,255,255,.35) !important; }

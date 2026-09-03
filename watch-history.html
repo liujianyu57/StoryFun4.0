@@ -184,7 +184,7 @@
   </div>
 
   <script>
-    var WATCH_HISTORY = [
+    var watchHistoryData = [
       { type: 'drama', title: '凤骨琉璃', progress: '3/44集', total: 44, desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。', cover: 'image/fenggu_cover.jpg' },
       { type: 'drama', title: '我卸甲后天下大乱了', progress: '7/12集', total: 12, desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。', cover: 'image/xiejia_cover.jpg' },
       { type: 'drama', title: '丞相府今日开饭', progress: '12/24集', total: 24, desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。', cover: 'image/chengxiangfu_cover.jpg' },
@@ -203,7 +203,7 @@
 
     function renderDramaGrid() {
       var grid = document.getElementById('dramaGrid');
-      var dramas = WATCH_HISTORY.filter(function(w) { return w.type === 'drama'; });
+      var dramas = watchHistoryData.filter(function(w) { return w.type === 'drama'; });
       if (dramas.length === 0) {
         grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🕐</div><p>暂无短剧观看记录</p></div>';
         return;
@@ -239,7 +239,7 @@
     function renderVideoGrid() {
       var grid = document.getElementById('videoGrid');
       var items = [];
-      WATCH_HISTORY.forEach(function(w) {
+      watchHistoryData.forEach(function(w) {
         if (w.type === 'drama') {
           var epCount = parseInt((w.progress.match(/\d+\//) || ['3/'])[0].replace('/','')) || 3;
           for (var i = 1; i <= Math.min(epCount, 2); i++) {
@@ -294,7 +294,7 @@
       var okBtn = document.getElementById('confirmOkBtn');
       okBtn.onclick = function() {
         closeConfirmModal();
-        WATCH_HISTORY.length = 0;
+        watchHistoryData.length = 0;
         renderDramaGrid();
         renderVideoGrid();
         switchSubTab('drama');

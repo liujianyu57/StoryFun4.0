@@ -35,7 +35,6 @@
     .auth-dropdown-header { display: flex; align-items: center; gap: 12px; padding: 16px 18px; }
     .auth-dropdown-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
     .auth-dropdown-name { font-weight: 600; font-size: 0.92rem; color: var(--text); }
-    .auth-dropdown-wallet { font-size: 0.78rem; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
     .auth-dropdown-divider { height: 1px; background: var(--border); margin: 0; }
     .auth-dropdown-item { display: flex; align-items: center; gap: 10px; padding: 12px 18px; color: var(--text); text-decoration: none; font-size: 0.9rem; transition: background 0.15s; cursor: pointer; }
     .auth-dropdown-item:hover { background: rgba(0,0,0,0.03); }
@@ -58,8 +57,6 @@
     .auth-social-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 0.85rem; margin: 4px 0; }
     .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .auth-wallet-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius:999px; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-    .auth-wallet-btn:hover { background: rgba(0, 0, 0,0.2); }
     .auth-modal-tos { text-align: center; color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; margin: 4px 0 0; }
     .auth-modal-tos a { color: var(--accent); text-decoration: none; }
     .auth-modal-tos a:hover { text-decoration: underline; }
@@ -311,99 +308,6 @@
     }
     
 
-    /* ===== 参演IP 卡 大头像 — 积分面板风格 ===== */
-    .featured-cast {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 0;
-    }
-    .featured-cast-list {
-      display: flex;
-      gap: 22px;
-      flex-wrap: wrap;
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 14px;
-      padding: 12px 20px 10px;
-      border: 0.5px solid rgba(255,255,255,0.08);
-    }
-    .featured-cast-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      transition: transform 0.25s ease;
-    }
-    .featured-cast-item:hover {
-      transform: translateY(-4px);
-    }
-    .featured-cast-avatar-wrap {
-      position: relative;
-      width: 52px;
-      height: 52px;
-    }
-    .featured-cast-avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid var(--accent);
-      box-shadow: 0 0 12px rgba(0, 0, 0,0.25);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      flex-shrink: 0;
-    }
-    .featured-cast-item:hover .featured-cast-avatar {
-      border-color: #999999;
-      box-shadow: 0 0 20px rgba(0, 0, 0,0.4);
-    }
-    .featured-cast-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .featured-cast-mining-dot {
-      display: none;
-    }
-    @keyframes featuredMiningPulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(255,59,48,.6); }
-      50% { opacity: 0.4; box-shadow: 0 0 2px rgba(255,59,48,.2); }
-    }
-    .featured-cast-name {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.85);
-      white-space: nowrap;
-    }
-    .featured-cast-power {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #ff3b30;
-      letter-spacing: -0.01em;
-      text-shadow: 0 0 12px rgba(255,59,48,0.35);
-      line-height: 1;
-    }
-    .featured-cast-unit {
-      font-size: 0.58rem;
-      font-weight: 500;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-    @media (max-width: 760px) {
-      .featured-cast { gap: 10px; }
-      .featured-cast-item { padding: 8px 10px 6px; }
-      .featured-cast-avatar, .featured-cast-avatar-wrap { width: 36px; height: 36px; }
-      .featured-cast-name { font-size: 0.6rem; }
-      .featured-cast-hash { display: none; }
-      .featured-cast-list { gap: 8px; }
-    }
-
-
     /* ===== 顶部搜索栏 (Banner 区域) ===== */
     .top-search-bar {
       display: none;
@@ -561,9 +465,6 @@
       .card { background: var(--surface); box-shadow: 0 2px 12px rgba(27,45,71,0.06); border: 1px solid var(--border); }
       .card:hover { box-shadow: 0 4px 20px rgba(27,45,71,0.10); }
       .card-body p { color: var(--text-muted); }
-      .card-actors { border-top: none; }
-      .card-actor-name { color: var(--text-muted); }
-      .card-actor-avatar { border-color: var(--border); }
       .info-row { color: var(--text-muted); }
       .episode { background: rgba(0,0,0,0.04); color: var(--text-muted); }
       .badge { background: var(--accent-soft); color: var(--accent); }
@@ -612,12 +513,6 @@
       .gallery .card-body h3 { font-size: 0.85rem; margin-bottom: 0; }
       .gallery .card-body p { display: none; }
       .gallery .card-meta { display: none; }
-      .gallery .card-actors { bottom: 30px; left: 8px; padding: 0; }
-      .gallery .card-actor-name { display: none; }
-      .gallery .card-actor-avatar { width: 26px; height: 26px; border-width: 1.5px; border-color: rgba(255,255,255,0.6); }
-      .gallery .card-actor-avatar-wrap { width: 26px; height: 26px; }
-      .gallery .card-actors-list { gap: 3px; padding: 3px 6px; border-radius: 8px; background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.12); }
-      .gallery .card-actor-item { gap: 0; }
       .gallery .card-caption .caption-left .badge { display: none; }
                   .gallery .card { min-height: auto; }
 
@@ -692,10 +587,7 @@
 #featured-desc{color:rgba(255,255,255,.85)!important}
 #featured-meta,#featured-meta *{color:rgba(255,255,255,.8)!important}
 .featured-meta .episode{background:rgba(255,255,255,.12)!important;color:#fff!important}
-#featured-cast,#featured-cast *{color:rgba(255,255,255,.75)!important}
-.featured-cast-power,.featured-cast-power *{color:#ff3b30!important;text-shadow:0 0 12px rgba(255,59,48,0.35)!important}
 .search-container,.top-search-bar{display:none!important}
-.featured-cast-label{color:rgba(255,255,255,.5)!important}
   
 /* ── Desktop Header ── */
 .desktop-header{position:fixed;top:0;left:0;right:0;justify-content:flex-end;z-index:151;height:56px;padding:0 20px;display:none;align-items:center;gap:12px;background:#fff;border-bottom:1px solid rgba(0,0,0,0.06)}
@@ -774,9 +666,6 @@
             <span class="meta-stat"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2c-2 3-3.5 6-3.5 9 0 2.5 1.5 4 3.5 4s3.5-1.5 3.5-4c0-3-1.5-6-3.5-9z"/></svg><span id="featured-heat">333.2万</span></span>
             <span class="meta-stat meta-rating" id="featured-rating"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="8 1.5 9.8 5.5 14 6 10.8 9 11.6 13 8 11 4.4 13 5.2 9 2 6 6.2 5.5"/></svg><span>4.8</span></span>
           </div>
-          <div class="featured-cast" id="featured-cast">
-            <div class="featured-cast-list" id="featured-cast-list"></div>
-          </div>
         </div>
       </div>
       <!-- 底部圆点指示器 -->
@@ -800,7 +689,7 @@
   <div class="app-shell">
     <div class="top-search-bar" onclick="location.href='search.html'" style="margin-bottom:10px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <span>搜索短剧、角色、用户</span>
+      <span>搜索短剧、创作者、用户</span>
     </div>
     <section class="hero">
       <div class="hero-panel">
@@ -846,41 +735,22 @@
   <script src="load-bottom-nav.js"></script>
 
   <script>
-    // IP 卡 数据库（与 actors.html 保持一致）
-    const ACTOR_AVATARS = {
-      'Luna': 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-      '苏婉清': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80',
-      '李云飞': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-      '林梦瑶': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
-      '赵无极': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80',
-      '上官婉儿': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
-    };
-    const ACTOR_POWER = {
-      'Luna': '5,230',
-      '苏婉清': '8,562',
-      '李云飞': '6,230',
-      '林梦瑶': '5,891',
-      '赵无极': '7,105',
-      '上官婉儿': '4,720'
-    };
-
     const featuredDramas = [
-      { id: 1, title: '凤骨琉璃', category: '古风', episodes: '全44集', creator: 'JACK', views: '22.3万完播', heat: '333.2万热度', rating: '4.8', desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。', img: 'image/fenggu_cover.jpg', video: 'video/凤骨琉璃.mp4', actors: ['苏婉清', '李云飞', '林梦瑶', '上官婉儿'], certType: 'official' },
-      { id: 2, title: '我卸甲后天下大乱了', category: '古风', episodes: '全12集', creator: 'EVA', views: '2.4万完播', heat: '286.5万热度', rating: '4.6', desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。', img: 'image/xiejia_cover.jpg', video: 'video/我卸甲后天下大乱了.mp4', actors: ['李云飞', '赵无极', '林梦瑶'], certType: 'community' },
-      { id: 3, title: '丞相府今日开饭', category: '喜剧', episodes: '全24集', creator: 'LENS', views: '1.8万完播', heat: '198.4万热度', rating: '4.7', desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。', img: 'image/chengxiangfu_cover.jpg', video: 'video/丞相府今日开饭.mp4', actors: ['苏婉清', '上官婉儿', 'Luna'], certType: 'partner' },
-      { id: 4, title: '隔世追凶', category: '悬疑', episodes: '全18集', creator: 'NOVA', views: '3.1万完播', heat: '412.7万热度', rating: '4.5', desc: '跨越三十年的连环悬案，AI侦探与人类警探联手揭开尘封真相。', img: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80', actors: ['林梦瑶', '赵无极', '李云飞'], certType: 'creator' },
-      { id: 5, title: '星河之约', category: '科幻', episodes: '全32集', creator: 'STAR', views: '4.2万完播', heat: '521.3万热度', rating: '4.9', desc: '在遥远的星际殖民时代，一段跨越光年的人性与AI觉醒之旅。', img: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?auto=format&fit=crop&w=1200&q=80', actors: ['Luna', '林梦瑶', '上官婉儿'], certType: 'community' }
+      { id: 1, title: '凤骨琉璃', category: '古风', episodes: '全44集', creator: 'JACK', views: '22.3万完播', heat: '333.2万热度', rating: '4.8', desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。', img: 'image/fenggu_cover.jpg', video: 'video/凤骨琉璃.mp4', certType: 'official' },
+      { id: 2, title: '我卸甲后天下大乱了', category: '古风', episodes: '全12集', creator: 'EVA', views: '2.4万完播', heat: '286.5万热度', rating: '4.6', desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。', img: 'image/xiejia_cover.jpg', video: 'video/我卸甲后天下大乱了.mp4', certType: 'community' },
+      { id: 3, title: '丞相府今日开饭', category: '喜剧', episodes: '全24集', creator: 'LENS', views: '1.8万完播', heat: '198.4万热度', rating: '4.7', desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。', img: 'image/chengxiangfu_cover.jpg', video: 'video/丞相府今日开饭.mp4', certType: 'partner' },
+      { id: 4, title: '隔世追凶', category: '悬疑', episodes: '全18集', creator: 'NOVA', views: '3.1万完播', heat: '412.7万热度', rating: '4.5', desc: '跨越三十年的连环悬案，AI侦探与人类警探联手揭开尘封真相。', img: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80', certType: 'creator' },
+      { id: 5, title: '星河之约', category: '科幻', episodes: '全32集', creator: 'STAR', views: '4.2万完播', heat: '521.3万热度', rating: '4.9', desc: '在遥远的星际殖民时代，一段跨越光年的人性与AI觉醒之旅。', img: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?auto=format&fit=crop&w=1200&q=80', certType: 'community' }
 
     ];
 
     // ===== 短剧卡片数据（供公共组件 drama-card.js 渲染） =====
-    // 字段：title/cover/category/sort/certType/actors/views/heat/rating/badge/episodes/creator/creatorAvatar/link
-    // 与原有 6 张硬编码卡片一一对应（data-category / data-sort / 徽章 / 演员 / 统计 / 角标）
+    // 字段：title/cover/category/sort/certType/views/heat/rating/badge/episodes/creator/creatorAvatar/link
+    // 与原有 6 张硬编码卡片一一对应（data-category / data-sort / 徽章 / 统计 / 角标）
     const GALLERY_DRAMAS = [
       {
         title: '凤骨琉璃', cover: 'image/fenggu_cover.jpg',
         category: '古风', sort: 'completion', certType: 'official',
-        actors: ['苏婉清', '李云飞', '林梦瑶', '上官婉儿'],
         views: '22.3万', heat: '333.2万', rating: '4.8',
         episodes: '全44集', creator: 'JACK',
         desc: '一曲凤骨琉璃，半世浮华若梦。权谋与红颜交织的古风传奇。',
@@ -891,7 +761,6 @@
       {
         title: '我卸甲后天下大乱了', cover: 'image/xiejia_cover.jpg',
         category: '古风', sort: 'newest', certType: 'community',
-        actors: ['李云飞', '赵无极', '林梦瑶'],
         views: '2.4万', heat: '286.5万', rating: '4.6',
         episodes: '全12集', creator: 'EVA',
         desc: '卸下铠甲那一刻，天下风云骤变。一段关于权谋、征战与抉择的古风传奇。',
@@ -902,7 +771,6 @@
       {
         title: '丞相府今日开饭', cover: 'image/chengxiangfu_cover.jpg',
         category: '喜剧', sort: 'hot', certType: 'partner',
-        actors: ['苏婉清', '上官婉儿', 'Luna'],
         views: '1.8万', heat: '198.4万', rating: '4.7',
         episodes: '全24集', creator: 'LENS',
         desc: '丞相府的厨房里藏着天下大势，一道菜引发的朝堂风波。古风美食喜剧。',
@@ -913,7 +781,6 @@
       {
         title: '隔世追凶', cover: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80',
         category: '悬疑', sort: 'newest', certType: 'official',
-        actors: ['林梦瑶', '赵无极'],
         views: '3.1万', heat: '412.7万', rating: '4.3',
         episodes: '全18集', creator: 'NOVA',
         desc: '跨越三十年的连环悬案，AI侦探与人类警探联手揭开尘封真相。',
@@ -924,7 +791,6 @@
       {
         title: '星河之约', cover: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?auto=format&fit=crop&w=1200&q=80',
         category: '科幻', sort: 'completion', certType: 'community',
-        actors: ['Luna', '苏婉清'],
         views: '4.2万', heat: '521.3万', rating: '4.9',
         episodes: '全32集', creator: 'STAR',
         desc: '在遥远的星际殖民时代，一段跨越光年的人性与AI觉醒之旅。',
@@ -935,7 +801,6 @@
       {
         title: '暗网迷踪', cover: 'https://images.unsplash.com/photo-1531685250784-7569952593d2?auto=format&fit=crop&w=1200&q=80',
         category: '真实改编', sort: 'hot', certType: 'creator',
-        actors: ['李云飞', '林梦瑶'],
         views: '28.9万', heat: '698.1万', rating: '4.5',
         episodes: '全10集', creator: 'VOID',
         desc: '深网暗处的迷案追踪，真实事件改编的悬念篇章。',
@@ -944,26 +809,6 @@
         link: ''
       }
     ];
-
-    // 渲染角色阵容 — IP 积分卡片风格
-    function renderFeaturedCast(actors) {
-      var list = document.getElementById('featured-cast-list');
-      list.innerHTML = '';
-      if (!actors || actors.length === 0) {
-        document.getElementById('featured-cast').style.display = 'none';
-        return;
-      }
-      document.getElementById('featured-cast').style.display = 'flex';
-      actors.forEach(function(name) {
-        var avatarUrl = ACTOR_AVATARS[name] || 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80';
-        var power = ACTOR_POWER[name] || '—';
-        var item = document.createElement('div');
-        item.className = 'featured-cast-item';
-        item.setAttribute('onclick', 'event.stopPropagation(); var u="actor-profile.html?name=' + encodeURIComponent(name) + '"; if(window!==window.parent){parent.location.href=u}else{location.href=u}');
-        item.innerHTML = '<div class="featured-cast-avatar-wrap"><div class="featured-cast-avatar"><img src="' + avatarUrl + '" alt="' + name + '" loading="lazy" /></div><div class="featured-cast-mining-dot"></div></div><span class="featured-cast-name">' + name + '</span><span class="featured-cast-power" style="color:#ff3b30!important;text-shadow:0 0 12px rgba(255,59,48,0.35)"><svg viewBox="0 0 24 24" style="width:11px;height:11px;vertical-align:-1px;margin-right:2px;"><circle cx="12" cy="12" r="10" fill="#f5b042"/><circle cx="12" cy="12" r="10" stroke="#d9951a" stroke-width="1.5" fill="none"/><circle cx="12" cy="12" r="7" stroke="rgba(255,255,255,.6)" stroke-width="1.2" fill="none"/><path d="M12 8l.9 1.9 2.1.2-1.6 1.4.5 2-1.9-1-1.9 1 .5-2-1.6-1.4 2.1-.2L12 8z" fill="#fff"/></svg>' + power + '</span><span class="featured-cast-unit">积分/h</span>';
-        list.appendChild(item);
-      });
-    }
 
     window.featCurrentIndex = 0;
     window.featNext = function() {
@@ -1027,8 +872,6 @@
         document.getElementById('featured-heat').textContent = drama.heat.replace('热度','');
         document.getElementById('featured-rating').innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="8 1.5 9.8 5.5 14 6 10.8 9 11.6 13 8 11 4.4 13 5.2 9 2 6 6.2 5.5"/></svg><span>' + (drama.rating || '--') + '</span>';
 
-        renderFeaturedCast(drama.actors);
-
         // 5. Remove slide class
         requestAnimationFrame(function() {
           requestAnimationFrame(function() {
@@ -1051,17 +894,11 @@
             (function(i) {
               var d = GALLERY_DRAMAS[i];
               if (!d) return;
-              var avatars = (d.actors || []).map(function(n) {
-                return window.ACTOR_AVATARS && window.ACTOR_AVATARS[n] ? window.ACTOR_AVATARS[n] : '';
-              }).join(',');
-              var actorNames = encodeURIComponent((d.actors || []).join(','));
               var qs = 'title=' + encodeURIComponent(d.title) +
                 '&total=' + encodeURIComponent((d.episodes || '全24集').match(/\d+/)?.[0] || '24') +
                 '&cover=' + encodeURIComponent(d.cover) +
                 '&desc=' + encodeURIComponent(d.desc || '') +
-                '&video=' + encodeURIComponent(d.video || '') +
-                '&actors=' + encodeURIComponent(avatars) +
-                '&actorNames=' + actorNames;
+                '&video=' + encodeURIComponent(d.video || '');
               wrappers[i].setAttribute('onclick', 'location.href=\'drama-player.html?' + qs + '\'');
             })(wi);
           }
@@ -1119,23 +956,10 @@
         }
       });
 
-      // 初始渲染第一个短剧的标识和角色阵容
-      renderFeaturedCast(featuredDramas[0].actors);
-
-
       // ═══ Search dropdown ═══
       const searchDropdown = document.getElementById('searchDropdown');
+      const searchInput = document.getElementById('searchInput');
       const GALLERY_CARDS = document.querySelectorAll('.card');
-
-      /** Get all actor names from a card element */
-      function getCardActorNames(card) {
-        const names = [];
-        card.querySelectorAll('.card-actor-name').forEach(el => {
-          const name = el.textContent.trim();
-          if (name) names.push(name);
-        });
-        return names;
-      }
 
       function renderSearchDropdown(query) {
         const q = query.toLowerCase().trim();
@@ -1144,13 +968,11 @@
           return;
         }
 
-        // Search by drama title AND description AND actor names
+        // 按短剧标题、分类与集数匹配
         const results = Array.from(GALLERY_CARDS).filter(card => {
           const title = card.querySelector('h3')?.textContent || '';
-          const desc = card.querySelector('p')?.textContent || '';
-          const actors = getCardActorNames(card);
-          const allText = [title, desc, ...actors].join(' ').toLowerCase();
-          return allText.includes(q);
+          const sub = (card.querySelector('.badge')?.textContent || '') + ' ' + (card.querySelector('.episode')?.textContent || '');
+          return (title + ' ' + sub).toLowerCase().includes(q);
         });
 
         const limited = results.slice(0, 6);
@@ -1165,7 +987,6 @@
           const category = card.querySelector('.badge')?.textContent || '';
           const episode = card.querySelector('.episode')?.textContent || '';
           const thumbSrc = card.querySelector('.card-thumb')?.src || '';
-          const actors = getCardActorNames(card).join(', ');
           return `<a class="search-dropdown-item" href="drama-player.html">
             <img src="${thumbSrc}" alt="${title}" />
             <div class="sdi-info">
@@ -1173,7 +994,6 @@
               <span class="sdi-sub">
                 ${category ? `<span class="sdi-badge">${category}</span>` : ''}
                 ${episode ? `<span>${episode}</span>` : ''}
-                ${actors ? `<span>参演: ${actors}</span>` : ''}
               </span>
             </div>
           </a>`;
@@ -1309,23 +1129,19 @@
         });
       }
 
-      // 卡片点击跳转已在渲染后统一绑定（桌面端/手机端共用完整参数链接）
+      // 卡片点击跳转已在渲染后统一设置（桌面端/手机端共用完整参数链接）
 
       // Banner 点击跳转播放器
       window.featGoToPlayer = function() {
         var d = featuredDramas[window.featCurrentIndex];
         if (!d) return;
-        var avatars = (d.actors || []).map(function(n) { return ACTOR_AVATARS[n] || ''; }).join(',');
-        var actorNames = encodeURIComponent((d.actors || []).join(','));
         var total = (d.episodes || '全24集').match(/\d+/);
         total = total ? total[0] : '24';
         var url = 'drama-player.html?title=' + encodeURIComponent(d.title) +
           '&total=' + total +
           '&cover=' + encodeURIComponent(d.img) +
           '&desc=' + encodeURIComponent(d.desc || '') +
-          '&video=' + encodeURIComponent(d.video || '') +
-          '&actors=' + encodeURIComponent(avatars) +
-          '&actorNames=' + actorNames;
+          '&video=' + encodeURIComponent(d.video || '');
         if (window !== window.parent) { parent.location.href = url; }
         else { location.href = url; }
       };

@@ -75,16 +75,16 @@ body{padding-bottom:50px;padding-bottom:calc(50px + env(safe-area-inset-bottom,0
 
 <script>
 const DATA = [
-  {id:'001',title:'凤骨琉璃',cat:'古风',rt:4.6,ep:'全44集',totalEp:44,author:'JACK',actors:['苏婉清','李云飞'],cover:'image/fenggu_cover.jpg',video:'video/凤骨琉璃.mp4',likes:33300},
-  {id:'002',title:'我卸甲后天下大乱了',cat:'古风',rt:4.4,ep:'全12集',totalEp:12,author:'EVA',actors:['赵无极','林梦瑶'],cover:'image/xiejia_cover.jpg',video:'video/我卸甲后天下大乱了.mp4',likes:28600},
-  {id:'003',title:'丞相府今日开饭',cat:'喜剧',rt:4.5,ep:'全24集',totalEp:24,author:'LENS',actors:['苏婉清','上官婉儿'],cover:'image/chengxiangfu_cover.jpg',video:'video/丞相府今日开饭.mp4',likes:19800},
-  {id:'004',title:'时间管理局',cat:'科幻',rt:4.8,ep:'全16集',totalEp:16,author:'NOVA',actors:['周九','吴十'],cover:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',likes:32100},
-  {id:'005',title:'迷途恋人',cat:'爱情',rt:3.9,ep:'全20集',totalEp:20,author:'ROSE',actors:['郑一','冯二'],cover:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',likes:56000},
-  {id:'006',title:'代码风暴',cat:'动作',rt:4.2,ep:'第7集 / 共30集',totalEp:30,author:'CYPHER',actors:['陈三','刘四'],cover:'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=800&q=80',likes:27800},
-  {id:'007',title:'笑面人生',cat:'喜剧',rt:4.5,ep:'全36集',totalEp:36,author:'SMILE',actors:['杨五','朱六'],cover:'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800&q=80',likes:42000},
-  {id:'008',title:'第七层梦境',cat:'悬疑',rt:4.3,ep:'第2集 / 共18集',totalEp:18,author:'DREAMER',actors:['黄七','曹八'],cover:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',likes:31500},
-  {id:'009',title:'金融暗战',cat:'金融',rt:4.0,ep:'全44集',totalEp:44,author:'BULL',actors:['周九','吴十'],cover:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',likes:22000},
-  {id:'010',title:'星际拓荒者',cat:'科幻',rt:4.7,ep:'全26集',totalEp:26,author:'STELLAR',actors:['何九','吕十'],cover:'https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=800&q=80',likes:48900}
+  {id:'001',title:'凤骨琉璃',cat:'古风',rt:4.6,ep:'全44集',totalEp:44,author:'JACK',cover:'image/fenggu_cover.jpg',video:'video/凤骨琉璃.mp4',likes:33300},
+  {id:'002',title:'我卸甲后天下大乱了',cat:'古风',rt:4.4,ep:'全12集',totalEp:12,author:'EVA',cover:'image/xiejia_cover.jpg',video:'video/我卸甲后天下大乱了.mp4',likes:28600},
+  {id:'003',title:'丞相府今日开饭',cat:'喜剧',rt:4.5,ep:'全24集',totalEp:24,author:'LENS',cover:'image/chengxiangfu_cover.jpg',video:'video/丞相府今日开饭.mp4',likes:19800},
+  {id:'004',title:'时间管理局',cat:'科幻',rt:4.8,ep:'全16集',totalEp:16,author:'NOVA',cover:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',likes:32100},
+  {id:'005',title:'迷途恋人',cat:'爱情',rt:3.9,ep:'全20集',totalEp:20,author:'ROSE',cover:'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',likes:56000},
+  {id:'006',title:'代码风暴',cat:'动作',rt:4.2,ep:'第7集 / 共30集',totalEp:30,author:'CYPHER',cover:'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=800&q=80',likes:27800},
+  {id:'007',title:'笑面人生',cat:'喜剧',rt:4.5,ep:'全36集',totalEp:36,author:'SMILE',cover:'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=800&q=80',likes:42000},
+  {id:'008',title:'第七层梦境',cat:'悬疑',rt:4.3,ep:'第2集 / 共18集',totalEp:18,author:'DREAMER',cover:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',likes:31500},
+  {id:'009',title:'金融暗战',cat:'金融',rt:4.0,ep:'全44集',totalEp:44,author:'BULL',cover:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80',likes:22000},
+  {id:'010',title:'星际拓荒者',cat:'科幻',rt:4.7,ep:'全26集',totalEp:26,author:'STELLAR',cover:'https://images.unsplash.com/photo-1444723121867-7a241cacace9?auto=format&fit=crop&w=800&q=80',likes:48900}
 ];
 
 var searchInput = document.getElementById('searchInput');

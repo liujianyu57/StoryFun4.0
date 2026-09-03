@@ -59,18 +59,6 @@
                     '</div>' +
                 '</a>' +
                 '<nav class="sb-nav" id="sbNav">' +
-                    '<div class="sb-nav-dropdown">' +
-                        '<a href="1011.html" class="sb-nav-item">' +
-                            '<svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>' +
-                            '<span class="sb-label">1011</span>' +
-                        '</a>' +
-                        '<div class="sb-submenu">' +
-                            '<a href="1011.html"><svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>1011主题</a>' +
-                            '<a href="1011-museum.html" target="_blank"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>1011博物馆</a>' +
-                            '<a href="task.html"><svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2l10 6v14H2V8l10-6z"/><path d="M12 22V10"/></svg>1011诺亚方舟</a>' +
-                        '</div>' +
-                    '</div>' +
-                '<div class="sb-divider"></div>' +
                     '<a href="recommend.html" class="sb-nav-item" data-page="recommend.html">' +
                         '<svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>' +
                         '<span class="sb-label">推荐</span>' +
@@ -79,23 +67,15 @@
                         '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' +
                         '<span class="sb-label">短剧</span>' +
                     '</a>' +
-                    '<a href="actors.html" class="sb-nav-item" data-page="actors.html">' +
-                        '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
-                        '<span class="sb-label">IP 市场</span>' +
-                    '</a>' +
-                    '<a href="studio.html" class="sb-nav-item" data-page="studio.html">' +
+                    '<a href="narrator.html" class="sb-nav-item" data-page="narrator.html">' +
                         '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-                        '<span class="sb-label">IP 收益</span>' +
+                        '<span class="sb-label">创作</span>' +
                     '</a>' +
                     '<a href="profile-center.html" class="sb-nav-item" data-page="profile-center.html">' +
                         '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
                         '<span class="sb-label">我的</span>' +
                     '</a>' +
-                '<div class="sb-divider"></div>' +
-                    '<a href="whitepaper.html" class="sb-nav-item" data-page="whitepaper.html">' +
-                        '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>' +
-                        '<span class="sb-label">白皮书</span>' +
-                    '</a>' +
+                    '<div class="sb-divider"></div>' +
                 '</nav>' +
                 '<div class="sb-settings">' +
                     '<div class="sb-settings-trigger">' +
