@@ -19,9 +19,8 @@
     }
     .market-data-link:hover { border-color: var(--border-strong); color: var(--text); }
 
-    .market-toolbar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 20px; }
-    .toolbar-group { display: inline-flex; align-items: center; gap: 8px; }
-    .sort-label { font-size: 11.5px; color: var(--text-3); font-weight: 500; }
+    .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -124,31 +123,17 @@
 
     <!-- 工具栏 -->
     <div class="market-toolbar">
-      <div class="toolbar-group">
-        <span class="sort-label">排序</span>
-        <div class="pill-seg" id="sortSeg">
-          <button data-s="recent" class="on">最近买入</button>
-          <button data-s="newest">最新</button>
-          <button data-s="oldest">最旧</button>
-          <button data-s="marketcap">市值</button>
-          <button data-s="volume">成交量</button>
-        </div>
+      <div class="pill-seg" id="sortSeg">
+        <button data-s="recent" class="on">最近买入</button>
+        <button data-s="newest">最新</button>
+        <button data-s="marketcap">市值</button>
+        <button data-s="volume">成交量</button>
       </div>
-      <div class="toolbar-group">
-        <span class="sort-label">时间</span>
-        <div class="pill-seg" id="timeSeg">
-          <button data-t="all" class="on">全部</button>
-          <button data-t="24h">24h</button>
-          <button data-t="7d">7d</button>
-        </div>
-      </div>
-      <div class="toolbar-group">
-        <span class="sort-label">状态</span>
-        <div class="pill-seg" id="filterSeg">
-          <button data-f="all" class="on">全部</button>
-          <button data-f="curve">未毕业</button>
-          <button data-f="grad">已毕业</button>
-        </div>
+      <span class="toolbar-sep"></span>
+      <div class="pill-seg" id="timeSeg">
+        <button data-t="all" class="on">全部</button>
+        <button data-t="24h">24h</button>
+        <button data-t="7d">7d</button>
       </div>
       <div class="toolbar-right">
         <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
@@ -177,7 +162,7 @@
     // ============================================================
     //  市场页
     // ============================================================
-    var state = { filter: 'all', sort: 'recent', time: 'all', q: '' };
+    var state = { sort: 'recent', time: 'all', q: '' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -226,8 +211,6 @@
       var cutoff = state.time === '24h' ? Date.now() - 86400000
         : state.time === '7d' ? Date.now() - 7 * 86400000 : 0;
       var list = (Launch.coins || []).filter(function (c) {
-        if (state.filter === 'curve' && c.graduated) return false;
-        if (state.filter === 'grad' && !c.graduated) return false;
         // 时间窗：该窗口内有最近买入（或刚发行）视为活跃
         if (cutoff && !c.lastBuyAt) return false;
         if (cutoff && c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
@@ -261,9 +244,8 @@
       location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
     }
     function resetFilters() {
-      state.filter = 'all'; state.sort = 'recent'; state.time = 'all'; state.q = '';
-      document.querySelectorAll('#filterSeg button, #sortSeg button, #timeSeg button').forEach(function (b) { b.classList.remove('on'); });
-      document.querySelector('#filterSeg button[data-f="all"]').classList.add('on');
+      state.sort = 'recent'; state.time = 'all'; state.q = '';
+      document.querySelectorAll('#sortSeg button, #timeSeg button').forEach(function (b) { b.classList.remove('on'); });
       document.querySelector('#sortSeg button[data-s="recent"]').classList.add('on');
       document.querySelector('#timeSeg button[data-t="all"]').classList.add('on');
       document.getElementById('coinSearch').value = '';
@@ -289,14 +271,6 @@
     window.onLaunchShellReady = function () {
       render();
       bindCoverHover();
-      document.getElementById('filterSeg').addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-f]');
-        if (!b) return;
-        document.querySelectorAll('#filterSeg button').forEach(function (x) { x.classList.remove('on'); });
-        b.classList.add('on');
-        state.filter = b.getAttribute('data-f');
-        render();
-      });
       document.getElementById('coinSearch').addEventListener('input', function (e) {
         state.q = e.target.value.trim();
         render();
