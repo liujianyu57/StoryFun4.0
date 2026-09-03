@@ -7,15 +7,17 @@
   <link rel="stylesheet" href="launch.css" />
   <style>
     /* ===== 页面特有：市场 ===== */
-    .market-hero { padding: 34px 0 6px; }
+    .market-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 30px 0 18px; }
     .market-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .market-sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
-
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0 24px; }
-    .stat-card { padding: 16px 18px; }
-    .stat-label { font-size: 12px; color: var(--text-2); }
-    .stat-value { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; }
-    .stat-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .market-data-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+      font-size: 12.5px; font-weight: 600; text-decoration: none;
+      transition: border-color .15s, color .15s;
+    }
+    .market-data-link:hover { border-color: var(--border-strong); color: var(--text); }
 
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
@@ -72,7 +74,6 @@
     .toolbar-create:hover { opacity: .9; }
 
     @media (max-width: 900px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
       .search-input { width: 100%; margin-top: 4px; }
       .toolbar-right { width: 100%; margin-left: 0; }
       .coin-grid { grid-template-columns: repeat(2, 1fr); }
@@ -87,12 +88,15 @@
 
   <main class="launch-shell" id="marketApp">
     <div class="market-hero">
-      <div class="market-title">发射台</div>
-      <div class="market-sub">短视频叙事的代币，在曲线与池之间成长。</div>
+      <div>
+        <div class="market-title">发射台</div>
+        <div class="market-sub">短视频叙事的代币，在曲线与池之间成长。</div>
+      </div>
+      <a class="market-data-link" href="analytics.html">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+        数据
+      </a>
     </div>
-
-    <!-- 概况 -->
-    <div class="stats-row" id="statsRow"></div>
 
     <!-- 工具栏 -->
     <div class="market-toolbar">
@@ -195,20 +199,6 @@
       grid.innerHTML = list.map(cardHTML).join('');
     }
 
-    function stats() {
-      var coins = Launch.coins || [];
-      var totalCap = coins.reduce(function (s, c) { return s + c.marketCap; }, 0);
-      var vol24 = coins.reduce(function (s, c) { return s + (c.volumeUsd || 0); }, 0);
-      var today = coins.filter(function (c) { return c.isNew; }).length;
-      var grad = coins.filter(function (c) { return c.graduated; }).length;
-      var html =
-        '<div class="card stat-card"><div class="stat-label">总市值</div><div class="stat-value num">' + Launch.fmtUsd(totalCap) + '</div><div class="stat-sub">' + coins.length + ' 个币</div></div>' +
-        '<div class="card stat-card"><div class="stat-label">24h 成交</div><div class="stat-value num">' + Launch.fmtUsd(vol24) + '</div><div class="stat-sub">持续增长</div></div>' +
-        '<div class="card stat-card"><div class="stat-label">今日新币</div><div class="stat-value num">' + today + '</div><div class="stat-sub">等待被发现</div></div>' +
-        '<div class="card stat-card"><div class="stat-label">已毕业</div><div class="stat-value num">' + grad + '</div><div class="stat-sub">流动性已锁定</div></div>';
-      document.getElementById('statsRow').innerHTML = html;
-    }
-
     function openCoin(id) {
       location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
     }
@@ -237,7 +227,6 @@
     }
 
     window.onLaunchShellReady = function () {
-      stats();
       render();
       bindCoverHover();
       document.getElementById('filterSeg').addEventListener('click', function (e) {

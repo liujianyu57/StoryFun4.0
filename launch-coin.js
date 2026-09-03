@@ -554,6 +554,61 @@
   function watchNotifCount() { return notifications.length; }
 
   // ============================================================
+  //  Analytics 聚合
+  // ============================================================
+  function analytics(mode) {
+    // mode: '24h' | 'all'
+    var coins = SEED || [];
+    var is24h = mode === '24h';
+    var cutoff = is24h ? Date.now() - 86400000 : 0;
+    var totalCap = 0, totalVol = 0, holdersTotal = 0, createdToday = 0;
+    var graduatedToday = 0, graduations = [], newCoins = [];
+    var recentTrades = [];
+    coins.forEach(function (c) {
+      totalCap += c.marketCap || 0;
+      var vol = c.volumeUsd || 0;
+      if (is24h) vol = Math.round(vol * 0.2); // 演示：24h 占总量的约 20%
+      totalVol += vol;
+      holdersTotal += c.holders || 0;
+      if (c.launchedAt >= cutoff) { createdToday++; newCoins.push(c); }
+      if (c.graduated && c.gradAt && c.gradAt >= cutoff) { graduatedToday++; }
+      if (c.graduated) graduations.push(c);
+    });
+    // 发行趋势（演示 mock：近 7 天）
+    var trend = [];
+    for (var d = 6; d >= 0; d--) {
+      var day = Date.now() - d * 86400000;
+      var n = 0;
+      coins.forEach(function (c) { if (c.launchedAt >= day && c.launchedAt < day + 86400000) n++; });
+      // 用确定性伪随机补一点趋势（原型演示）
+      n = Math.max(n, Math.round((d === 6 ? 1 : 2) + Math.sin(d) * 0.8 + 1));
+      trend.push({ label: fmtDay(day), value: n });
+    }
+    graduations.sort(function (a, b) { return (b.gradAt || 0) - (a.gradAt || 0); });
+    newCoins.sort(function (a, b) { return b.launchedAt - a.launchedAt; });
+    // 交易历史（演示用 tx 池汇总）
+    var txPool = USER.tx || [];
+    recentTrades = txPool.slice(0, 8);
+    return {
+      totalCap: totalCap,
+      totalVol: totalVol,
+      holders: holdersTotal,
+      launched: coins.length,
+      createdToday: createdToday,
+      graduatedToday: graduatedToday,
+      graduations: graduations.slice(0, 6),
+      newCoins: newCoins.slice(0, 6),
+      trend: trend,
+      recentTrades: recentTrades,
+      gradThresholdUsd: K.gradThresholdUsd
+    };
+  }
+  function fmtDay(ts) {
+    var dt = new Date(ts);
+    return (dt.getMonth() + 1) + '/' + dt.getDate();
+  }
+
+  // ============================================================
   //  暴露 API
   // ============================================================
   window.Launch = {
@@ -580,6 +635,8 @@
     notifyBigTrade: notifyBigTrade,
     notifications: notifications,
     watchNotifCount: watchNotifCount,
+    analytics: analytics,
+    fmtDay: fmtDay,
     persist: persist,
     // debug
     debug: { setEth: setEth, forceGraduate: forceGraduate, forceUngraduate: forceUngraduate, resetAll: resetAll }

@@ -24,6 +24,7 @@
             '<span class="lp-brand-badge">Launch</span>' +
           '</a>' +
           '<a href="launchpad.html" class="lp-nav-link' + (page === 'launchpad.html' ? ' on' : '') + '">市场</a>' +
+          '<a href="analytics.html" class="lp-nav-link' + (page === 'analytics.html' ? ' on' : '') + '">数据</a>' +
           '<a href="assets.html" class="lp-nav-link' + (page === 'assets.html' ? ' on' : '') + '">资产</a>' +
           '<div class="lp-header-spacer"></div>' +
           '<div class="lp-header-actions">' +
