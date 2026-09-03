@@ -238,7 +238,7 @@
           <section class="sec-card">
             <div class="sec-head">
               <span class="sec-num">2</span>
-              <div><div class="sec-title">参数</div><div class="sec-sub">名称与简介会用于市场展示</div></div>
+              <div><div class="sec-title">参数</div><div class="sec-sub">名称、简介、社交与币配置</div></div>
             </div>
             <div class="sec-body">
               <div class="f-row">
@@ -274,23 +274,8 @@
                   </div>
                 </div>
               </div>
-              <div class="inline-warn danger" id="paramErr"></div>
-            </div>
-          </section>
 
-          <!-- ③ 费用 -->
-          <section class="sec-card">
-            <div class="sec-head">
-              <span class="sec-num">3</span>
-              <div><div class="sec-title">费用</div><div class="sec-sub">发行与交易费用设置</div></div>
-            </div>
-            <div class="sec-body">
-              <div class="fee-grid">
-                <div class="fee-cell"><div class="k">发行费</div><div class="v num">0.0005 ETH</div></div>
-                <div class="fee-cell"><div class="k">生成费</div><div class="v num" id="feeGen">0.02 ETH</div></div>
-                <div class="fee-cell"><div class="k">交易费</div><div class="v num">1%</div></div>
-                <div class="fee-cell"><div class="k">创作者税</div><div class="v num" id="feeCreator">0%</div></div>
-              </div>
+              <!-- 高级设置（币配置的一部分，随参数） -->
               <hr class="adv-divider" />
               <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
                 <span>高级设置</span>
@@ -314,6 +299,23 @@
                   <span class="lbl" style="flex:1">创作者钱包<small>留空使用当前钱包</small></span>
                   <span class="wallet-static" id="walletAddr">0x7A2b…3fD8</span>
                 </div>
+              </div>
+              <div class="inline-warn danger" id="paramErr"></div>
+            </div>
+          </section>
+
+          <!-- ③ 费用 -->
+          <section class="sec-card">
+            <div class="sec-head">
+              <span class="sec-num">3</span>
+              <div><div class="sec-title">费用</div><div class="sec-sub">费率随参数自动计算</div></div>
+            </div>
+            <div class="sec-body">
+              <div class="fee-grid">
+                <div class="fee-cell"><div class="k">发行费</div><div class="v num">0.0005 ETH</div></div>
+                <div class="fee-cell"><div class="k">生成费</div><div class="v num" id="feeGen">0.02 ETH</div></div>
+                <div class="fee-cell"><div class="k">交易费</div><div class="v num">1%</div></div>
+                <div class="fee-cell"><div class="k">创作者税</div><div class="v num" id="feeCreator">0%</div></div>
               </div>
             </div>
           </section>
