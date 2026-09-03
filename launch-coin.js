@@ -37,7 +37,7 @@
     tx: []                     // 我的交易历史
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 3;
+  var SCHEMA_VERSION = 5;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -80,6 +80,7 @@
       change24h: o.change24h,
       isNew: o.isNew || false,
       lastBuyAt: o.lastBuyAt || o.launchedAt || Date.now(),  // 最近一次买入时间（市场排序用）
+      buyerAddr: o.buyerAddr || walletFrom('seed:' + o.id),       // 最近买入钱包（展示用，确定性模拟）
       // 创建页扩展字段
       social: o.social || null,          // {x, tg}
       creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
@@ -146,13 +147,13 @@
       id: 'c_candle', name: '烛火与王冠', symbol: 'CANDLE', tagline: '在权力的烛光里，谁先燃尽。',
       creator: 'Sylvan', creatorAddr: '0xB20f…9e01', cover: IMG.candle, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.0001, holders: 1206, volumeUsd: 22000, launchedAt: D(10), graduated: false, progress: 0.28,
-      poolUsd: 2210, change24h: 0.05, lastBuyAt: D(96), spark: [0.3, 0.35, 0.4, 0.38, 0.45]
+      poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45]
     }),
     seedCoin({
       id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。',
       creator: 'Noah', creatorAddr: '0x57C9…f1a3', cover: IMG.survivor, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.00018, holders: 2304, volumeUsd: 88000, launchedAt: D(40), graduated: true, gradAt: D(21),
-      poolUsd: 15400, change24h: -0.24, lastBuyAt: D(150), spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5],
+      poolUsd: 15400, change24h: -0.24, lastBuyAt: D(12), spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5],
       social: { x: 'noah_survive', tg: 'noah_bunker' },
       creatorTaxPct: 3,
     }),
@@ -166,13 +167,13 @@
       id: 'c_names', name: '无名者档案', symbol: 'NAMES', tagline: '名字被夺走的人，自己写回自己的名字。',
       creator: '白鹭', creatorAddr: '0x33A1…c8f0', cover: IMG.names, video: '', sourceType: 'work', sourceTitle: '短剧《无名者档案》',
       priceUsd: 0.00055, holders: 1732, volumeUsd: 67100, launchedAt: D(66), graduated: true, gradAt: D(49),
-      poolUsd: 20300, change24h: 0.11, lastBuyAt: D(60), spark: [0.2, 0.3, 0.5, 0.55, 0.8, 0.75]
+      poolUsd: 20300, change24h: 0.11, lastBuyAt: D(30), spark: [0.2, 0.3, 0.5, 0.55, 0.8, 0.75]
     }),
     seedCoin({
       id: 'c_pyramid', name: '金字塔之梦', symbol: 'PYRAMID', tagline: '梦境深处，法老仍在等待。',
       creator: 'Ramesh', creatorAddr: '0xF90C…d2e8', cover: IMG.pyramid, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.000078, holders: 501, volumeUsd: 8900, launchedAt: D(1), graduated: false, progress: 0.03,
-      poolUsd: 190, change24h: 0.15, isNew: true, lastBuyAt: D(8), spark: [0.4, 0.45]
+      poolUsd: 190, change24h: 0.15, isNew: true, lastBuyAt: D(0.4), spark: [0.4, 0.45]
     }),
     seedCoin({
       id: 'c_hero', name: '孤胆英雄传', symbol: 'HERO', tagline: '无人记得的名字，撑起整座城。',
@@ -258,6 +259,12 @@
     var d = Math.floor(h / 24); return d + 'd';
   }
   function shortAddr(a) { return a || '—'; }
+  function walletFrom(seed) {
+    var h = 2166136261;
+    for (var i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    var hex = ('00000000' + (h >>> 0).toString(16)).slice(-8).toUpperCase();
+    return '0x' + hex.slice(0, 2) + hex.slice(2, 4).toLowerCase() + '…' + hex.slice(4, 6).toLowerCase() + hex.slice(6, 8).toUpperCase();
+  }
   function usdToEth(u) { return u / K.ETH_USD; }
   function ethToUsd(e) { return e * K.ETH_USD; }
   function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
@@ -337,6 +344,7 @@
     c.marketCap = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + net;
     c.lastBuyAt = Date.now();
+    c.buyerAddr = walletFrom(USER.id);
     c.holders = (c.holders || 1) + Math.floor(Math.random() * 2);
     if (typeof c.spark === 'undefined') c.spark = [];
     c.spark.push(c.progress);
@@ -428,7 +436,7 @@
     c.priceUsd = Math.max(c.priceUsd * (1 + wiggle), 1e-10);
     c.marketCap = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + net;
-    if (side === 'buy') c.lastBuyAt = Date.now();
+    if (side === 'buy') { c.lastBuyAt = Date.now(); c.buyerAddr = walletFrom(USER.id); }
     c.holders = (c.holders || 1) + Math.floor(Math.random() * 2);
     if (typeof c.spark === 'undefined') c.spark = [];
     c.spark.push(1);

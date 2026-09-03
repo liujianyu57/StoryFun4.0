@@ -86,28 +86,32 @@
     .coin-badge.new { background: rgba(10,11,13,.85); color: #fff; }
     .coin-badge.grad { background: #0E9F6E; color: #fff; }
 
-    /* 信息区 */
+    /* 信息区：pons 信号语言 = 币名 + MC + 曲线进度 + 最近买家（无价格/涨跌/量/持有） */
     .coin-info { padding: 13px 15px 14px; }
     .coin-name { display: flex; align-items: baseline; gap: 7px; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
-    .coin-sym { font-size: 11px; color: var(--text-3); font-weight: 600; letter-spacing: .03em; }
+    .coin-sym { font-size: 11px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
 
-    .coin-price-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
-    .coin-price { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
-    .coin-chg {
-      font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
-      display: inline-flex; align-items: center;
-    }
-    .coin-chg.up { background: rgba(22,199,132,.1); }
-    .coin-chg.down { background: rgba(246,70,93,.08); }
+    /* 市值：大号等宽 + MC 单位 */
+    .coin-mc-row { display: flex; align-items: baseline; gap: 6px; margin-top: 9px; }
+    .coin-mc { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
+    .coin-mc-unit { font-size: 10px; font-weight: 800; color: var(--text-3); letter-spacing: .06em; }
 
-    .coin-meta { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-2); margin-top: 9px; }
-    .coin-meta b { font-weight: 600; color: var(--text); }
-    .coin-meta .mono { font-family: var(--mono); font-size: 11.5px; }
-    .coin-foot { display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: var(--text-3); margin-top: 6px; }
+    /* 曲线进度：细条 + 右侧精确百分比 */
+    .coin-progress-row { display: flex; align-items: center; gap: 10px; margin-top: 11px; min-height: 15px; }
+    .coin-progress { flex: 1; height: 4px; border-radius: 4px; background: var(--accent-soft); overflow: hidden; }
+    .coin-progress i { display: block; height: 100%; background: var(--text); border-radius: 4px; }
+    .coin-progress.grad i { background: #0E9F6E; }
+    .coin-pct { font-size: 11px; font-weight: 800; color: var(--text-2); font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; letter-spacing: -0.01em; }
 
-    /* 毕业进度：底部极细条 */
-    .coin-progress { height: 3px; border-radius: 3px; background: var(--accent-soft); margin-top: 11px; overflow: hidden; }
-    .coin-progress i { display: block; height: 100%; background: var(--text); border-radius: 3px; }
+    /* 已毕业状态行（占位与进度行等高） */
+    .coin-state { display: flex; align-items: center; gap: 5px; margin-top: 11px; min-height: 15px; font-size: 11.5px; font-weight: 700; color: #0E9F6E; }
+    .coin-state svg { flex-shrink: 0; }
+    .coin-state-sub { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--text-3); }
+
+    /* 最近买家：钱包 + 相对时间 */
+    .coin-buyer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); }
+    .coin-wallet { font-family: var(--mono); font-size: 11px; color: var(--text-2); letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .coin-ago { font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
     .toolbar-create {
       height: 36px; padding: 0 16px; border-radius: 999px; background: var(--accent);
@@ -210,21 +214,41 @@
       });
     }
 
-    // 卡片（live / near 同形态；near 加高亮角标）
-    function cardHTML(c) {
-      var badge = '';
-      if (c.isNew) badge = '<span class="coin-badge new">NEW</span>';
-      else if (c.progress > 0.7) badge = '<span class="coin-badge grad">🎓 距毕业 ' + Math.round(c.progress * 100) + '%</span>';
-      else badge = '<span class="coin-badge">' + Math.round(c.progress * 100) + '%</span>';
-
-      var progress = '<div class="coin-progress"><i style="width:' + Math.round(Math.min(100, c.progress * 100)) + '%"></i></div>';
-      var lastBuyLine = c.lastBuyAt
-        ? '<span>买入 ' + Launch.timeAgo(c.lastBuyAt) + '</span>'
-        : '<span>—</span>';
+    // pons 信号语言卡片：币名 + $TICKER + MC + 曲线进度% + 最近买家（无价格/涨跌/量/持有数）
+    function mcTxt(u) { return Launch.fmtUsd(u).replace(/\.0(K|M)$/, '$1'); } // $900.0K → $900K
+    function pctText(p) {
+      if (p == null) return '—';
+      var v = (p * 100).toFixed(2);
+      return v.replace(/\.?0+$/, '') + '%';   // 94.12% / 66.66% / 5%
+    }
+    function ponsCard(c) {
+      var grad = !!c.graduated;
+      var badge = c.isNew
+        ? '<span class="coin-badge new">NEW</span>'
+        : grad ? '<span class="coin-badge grad">已毕业</span>' : '';
       var media = '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
       var veil = c.video
         ? '<div class="play-veil"><div class="play-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div></div>'
         : '';
+      var mid;
+      if (grad) {
+        var gradTxt = c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前' : '';
+        mid = '<div class="coin-state">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0E9F6E" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' +
+                '<span>公开池</span>' +
+                (gradTxt ? '<span class="coin-state-sub">' + gradTxt + '</span>' : '') +
+              '</div>';
+      } else {
+        var wp = Math.min(100, Math.max(0, (c.progress || 0) * 100)).toFixed(2);
+        mid = '<div class="coin-progress-row">' +
+                '<div class="coin-progress"><i style="width:' + wp + '%"></i></div>' +
+                '<span class="coin-pct num">' + pctText(c.progress) + '</span>' +
+              '</div>';
+      }
+      var buyer = c.buyerAddr
+        ? '<span class="coin-wallet" title="最近买家">' + esc(c.buyerAddr) + '</span>'
+        : '<span class="coin-wallet">—</span>';
+      var ago = c.lastBuyAt ? '<span class="coin-ago">' + Launch.timeAgo(c.lastBuyAt) + ' 前</span>' : '';
       return '' +
         '<div class="coin-card' + (state.tab === 'near' ? ' is-near' : '') + '" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
           '<div class="coin-cover-wrap">' +
@@ -232,34 +256,10 @@
           '</div>' +
           '<div class="coin-info">' +
             '<div class="coin-name">' + esc(c.name) + '<span class="coin-sym">$' + esc(c.symbol) + '</span></div>' +
-            '<div class="coin-price-row"><span class="coin-price num">' + Launch.fmtPrice(c.priceUsd) + '</span>' +
-              '<span class="coin-chg num ' + Launch.dirClass(c.change24h) + '">' + Launch.pct(c.change24h) + '</span></div>' +
-            '<div class="coin-meta"><span>市值 <b class="num">' + Launch.fmtUsd(c.marketCap) + '</b></span>' +
-              '<span>量 <b class="num">' + Launch.fmtUsd(c.volumeUsd || 0) + '</b></span></div>' +
-            progress +
-            '<div class="coin-foot">' +
-              '<span>' + Launch.fmtNum(c.holders) + ' 持有</span>' + lastBuyLine +
-            '</div>' +
-          '</div>' +
-        '</div>';
-    }
-
-    // 已毕业卡片（展示毕业时间/池规模）
-    function gradCardHTML(c) {
-      var gradAgo = c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前毕业' : '已毕业';
-      var media = '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
-      return '' +
-        '<div class="coin-card is-grad" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
-          '<div class="coin-cover-wrap">' +
-            '<div class="coin-cover">' + media + '<span class="coin-badge grad">🎓 已毕业</span></div>' +
-          '</div>' +
-          '<div class="coin-info">' +
-            '<div class="coin-name">' + esc(c.name) + '<span class="coin-sym">$' + esc(c.symbol) + '</span></div>' +
-            '<div class="coin-price-row"><span class="coin-price num">' + Launch.fmtPrice(c.priceUsd) + '</span>' +
-              '<span class="coin-chg num ' + Launch.dirClass(c.change24h) + '">' + Launch.pct(c.change24h) + '</span></div>' +
-            '<div class="coin-meta"><span>市值 <b class="num">' + Launch.fmtUsd(c.marketCap) + '</b></span>' +
-              '<span>池 <b class="num">' + Launch.fmtUsd(c.poolUsd || 0) + '</b></span></div>' +
-            '<div class="coin-foot"><span>流动性已锁定</span><span>' + gradAgo + '</span></div>' +
+            '<div class="coin-mc-row"><span class="coin-mc num">' + mcTxt(c.marketCap) + '</span>' +
+              '<span class="coin-mc-unit">MC</span></div>' +
+            mid +
+            '<div class="coin-buyer">' + buyer + ago + '</div>' +
           '</div>' +
         '</div>';
     }
@@ -337,8 +337,7 @@
         return;
       }
       empty.style.display = 'none';
-      var htmlFn = state.tab === 'grad' ? gradCardHTML : cardHTML;
-      grid.innerHTML = list.map(htmlFn).join('');
+      grid.innerHTML = list.map(ponsCard).join('');
     }
 
     function openCoin(id) {
