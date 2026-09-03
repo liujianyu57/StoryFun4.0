@@ -10,6 +10,7 @@
     .market-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 30px 0 18px; }
     .market-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .market-sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+    .hero-links { display: flex; align-items: center; gap: 8px; }
     .market-data-link {
       display: inline-flex; align-items: center; gap: 6px;
       height: 34px; padding: 0 14px; border-radius: 999px;
@@ -18,18 +19,10 @@
       transition: border-color .15s, color .15s;
     }
     .market-data-link:hover { border-color: var(--border-strong); color: var(--text); }
+    .market-data-link b { font-weight: 700; color: var(--text); }
 
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
-    .grad-only {
-      display: inline-flex; align-items: center; gap: 5px;
-      height: 32px; padding: 0 13px; border-radius: 999px;
-      border: 1px solid var(--border); background: var(--surface);
-      font-size: 12.5px; font-weight: 600; color: var(--text-2);
-      transition: all .15s;
-    }
-    .grad-only:hover { border-color: var(--border-strong); color: var(--text); }
-    .grad-only.on { background: #0E9F6E; border-color: #0E9F6E; color: #fff; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -121,13 +114,19 @@
   <main class="launch-shell" id="marketApp">
     <div class="market-hero">
       <div>
-        <div class="market-title">发射台</div>
-        <div class="market-sub">短视频叙事的代币，在曲线与池之间成长。</div>
+        <div class="market-title">市场</div>
+        <div class="market-sub">正在爬向毕业的币 · curve 售罄即上池</div>
       </div>
-      <a class="market-data-link" href="analytics.html">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
-        数据
-      </a>
+      <div class="hero-links">
+        <a class="market-data-link" href="graduated.html" id="gradLink">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          已毕业 <b class="num" id="gradCount">0</b>
+        </a>
+        <a class="market-data-link" href="analytics.html">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+          数据
+        </a>
+      </div>
     </div>
 
     <!-- 工具栏 -->
@@ -145,8 +144,6 @@
         <button data-t="24h">24h</button>
         <button data-t="7d">7d</button>
       </div>
-      <span class="toolbar-sep"></span>
-      <button class="pill grad-only" id="gradOnlyBtn" onclick="toggleGradOnly()">🎓 已毕业</button>
       <div class="toolbar-right">
         <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
         <button class="toolbar-create" onclick="location.href='launch.html'">
@@ -174,7 +171,7 @@
     // ============================================================
     //  市场页
     // ============================================================
-    var state = { sort: 'recent', time: 'all', gradOnly: false, q: '' };
+    var state = { sort: 'recent', time: 'all', q: '' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -223,8 +220,8 @@
       var cutoff = state.time === '24h' ? Date.now() - 86400000
         : state.time === '7d' ? Date.now() - 7 * 86400000 : 0;
       var list = (Launch.coins || []).filter(function (c) {
-        // 只看已毕业
-        if (state.gradOnly && !c.graduated) return false;
+        // 主列表 = 未毕业（正在爬向毕业）
+        if (c.graduated) return false;
         // 时间窗：该窗口内有最近买入（或刚发行）视为活跃
         if (cutoff && !c.lastBuyAt) return false;
         if (cutoff && c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
@@ -257,19 +254,11 @@
     function openCoin(id) {
       location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
     }
-    function toggleGradOnly() {
-      state.gradOnly = !state.gradOnly;
-      var btn = document.getElementById('gradOnlyBtn');
-      if (btn) btn.classList.toggle('on', state.gradOnly);
-      render();
-    }
     function resetFilters() {
-      state.sort = 'recent'; state.time = 'all'; state.gradOnly = false; state.q = '';
+      state.sort = 'recent'; state.time = 'all'; state.q = '';
       document.querySelectorAll('#sortSeg button, #timeSeg button').forEach(function (b) { b.classList.remove('on'); });
       document.querySelector('#sortSeg button[data-s="recent"]').classList.add('on');
       document.querySelector('#timeSeg button[data-t="all"]').classList.add('on');
-      var g = document.getElementById('gradOnlyBtn');
-      if (g) g.classList.remove('on');
       document.getElementById('coinSearch').value = '';
       render();
     }
@@ -291,6 +280,12 @@
     }
 
     window.onLaunchShellReady = function () {
+      // 已毕业数量（hero 入口）
+      var g = document.getElementById('gradCount');
+      if (g && window.Launch) {
+        var n = (Launch.coins || []).filter(function (c) { return c.graduated; }).length;
+        g.textContent = n;
+      }
       render();
       bindCoverHover();
       document.getElementById('coinSearch').addEventListener('input', function (e) {
