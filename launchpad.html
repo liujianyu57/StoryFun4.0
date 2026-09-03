@@ -19,9 +19,9 @@
     }
     .market-data-link:hover { border-color: var(--border-strong); color: var(--text); }
 
-    .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
-    .toolbar-sort { display: inline-flex; align-items: center; gap: 8px; }
-    .sort-label { font-size: 12px; color: var(--text-3); }
+    .market-toolbar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 20px; }
+    .toolbar-group { display: inline-flex; align-items: center; gap: 8px; }
+    .sort-label { font-size: 11.5px; color: var(--text-3); font-weight: 500; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -65,6 +65,7 @@
     .coin-price { font-size: 15px; font-weight: 700; }
     .coin-chg { font-size: 12.5px; font-weight: 700; }
     .coin-meta { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-2); margin-top: 7px; }
+    .coin-lastbuy { color: var(--text-3); }
     .coin-progress { height: 3px; border-radius: 3px; background: var(--accent-soft); margin-top: 10px; overflow: hidden; }
     .coin-progress i { display: block; height: 100%; background: var(--text); border-radius: 3px; }
 
@@ -102,17 +103,30 @@
 
     <!-- 工具栏 -->
     <div class="market-toolbar">
-      <div class="pill-seg" id="filterSeg">
-        <button data-f="all" class="on">全部</button>
-        <button data-f="curve">未毕业</button>
-        <button data-f="grad">已毕业</button>
-      </div>
-      <div class="toolbar-sort">
+      <div class="toolbar-group">
         <span class="sort-label">排序</span>
         <div class="pill-seg" id="sortSeg">
-          <button data-s="marketcap" class="on">市值</button>
-          <button data-s="new">最新</button>
-          <button data-s="change">24h</button>
+          <button data-s="recent" class="on">最近买入</button>
+          <button data-s="newest">最新</button>
+          <button data-s="oldest">最旧</button>
+          <button data-s="marketcap">市值</button>
+          <button data-s="volume">成交量</button>
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <span class="sort-label">时间</span>
+        <div class="pill-seg" id="timeSeg">
+          <button data-t="all" class="on">全部</button>
+          <button data-t="24h">24h</button>
+          <button data-t="7d">7d</button>
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <span class="sort-label">状态</span>
+        <div class="pill-seg" id="filterSeg">
+          <button data-f="all" class="on">全部</button>
+          <button data-f="curve">未毕业</button>
+          <button data-f="grad">已毕业</button>
         </div>
       </div>
       <div class="toolbar-right">
@@ -142,7 +156,7 @@
     // ============================================================
     //  市场页
     // ============================================================
-    var state = { filter: 'all', sort: 'marketcap', q: '' };
+    var state = { filter: 'all', sort: 'recent', time: 'all', q: '' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -161,14 +175,14 @@
       if (!c.graduated) {
         progress = '<div class="coin-progress"><i style="width:' + Math.round(Math.min(100, c.progress * 100)) + '%"></i></div>';
       }
-
-      var media = c.video
-        ? '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />'
-        : '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
+      // 最近买入时间（有则显示，Recent buys 排序时信息更有用）
+      var lastBuyLine = c.lastBuyAt
+        ? '<span class="coin-lastbuy">最近买入 ' + Launch.timeAgo(c.lastBuyAt) + '</span>'
+        : '';
+      var media = '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
       var veil = c.video
         ? '<div class="play-veil"><div class="play-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div></div>'
         : '';
-      var srcTxt = c.sourceType === 'ai' ? 'AI 叙事' : '短剧作品';
       return '' +
         '<div class="coin-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
           '<div class="coin-cover" data-video="' + esc(c.video || '') + '">' + media + veil + badge + '</div>' +
@@ -176,16 +190,24 @@
             '<div class="coin-name">' + esc(c.name) + '<span class="coin-sym">$' + esc(c.symbol) + '</span></div>' +
             '<div class="coin-price-row"><span class="coin-price num">' + Launch.fmtPrice(c.priceUsd) + '</span>' +
               '<span class="coin-chg num ' + Launch.dirClass(c.change24h) + '">' + Launch.pct(c.change24h) + '</span></div>' +
-            '<div class="coin-meta"><span>市值 ' + Launch.fmtUsd(c.marketCap) + '</span><span>' + Launch.fmtNum(c.holders) + ' 持有者</span></div>' +
+            '<div class="coin-meta"><span>市值 ' + Launch.fmtUsd(c.marketCap) + '</span><span class="num">量 ' + Launch.fmtUsd(c.volumeUsd || 0) + '</span></div>' +
+            '<div class="coin-meta" style="justify-content:flex-start;gap:8px">' +
+              '<span class="num">' + Launch.fmtNum(c.holders) + ' 持有</span>' + lastBuyLine +
+            '</div>' +
             progress +
           '</div>' +
         '</div>';
     }
 
     function filtered() {
+      var cutoff = state.time === '24h' ? Date.now() - 86400000
+        : state.time === '7d' ? Date.now() - 7 * 86400000 : 0;
       var list = (Launch.coins || []).filter(function (c) {
         if (state.filter === 'curve' && c.graduated) return false;
         if (state.filter === 'grad' && !c.graduated) return false;
+        // 时间窗：该窗口内有最近买入（或刚发行）视为活跃
+        if (cutoff && !c.lastBuyAt) return false;
+        if (cutoff && c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
         if (state.q) {
           var hay = (c.name + ' ' + c.symbol).toLowerCase();
           if (hay.indexOf(state.q.toLowerCase()) === -1) return false;
@@ -193,9 +215,12 @@
         return true;
       });
       list.sort(function (a, b) {
-        if (state.sort === 'new') return b.launchedAt - a.launchedAt;
-        if (state.sort === 'change') return b.change24h - a.change24h;
-        return b.marketCap - a.marketCap;
+        if (state.sort === 'newest') return b.launchedAt - a.launchedAt;
+        if (state.sort === 'oldest') return a.launchedAt - b.launchedAt;
+        if (state.sort === 'marketcap') return b.marketCap - a.marketCap;
+        if (state.sort === 'volume') return (b.volumeUsd || 0) - (a.volumeUsd || 0);
+        // recent buys（默认）
+        return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
       });
       return list;
     }
@@ -213,9 +238,11 @@
       location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
     }
     function resetFilters() {
-      state.filter = 'all'; state.q = '';
-      document.querySelectorAll('#filterSeg button').forEach(function (b) { b.classList.remove('on'); });
+      state.filter = 'all'; state.sort = 'recent'; state.time = 'all'; state.q = '';
+      document.querySelectorAll('#filterSeg button, #sortSeg button, #timeSeg button').forEach(function (b) { b.classList.remove('on'); });
       document.querySelector('#filterSeg button[data-f="all"]').classList.add('on');
+      document.querySelector('#sortSeg button[data-s="recent"]').classList.add('on');
+      document.querySelector('#timeSeg button[data-t="all"]').classList.add('on');
       document.getElementById('coinSearch').value = '';
       render();
     }
@@ -257,6 +284,14 @@
         document.querySelectorAll('#sortSeg button').forEach(function (x) { x.classList.remove('on'); });
         b.classList.add('on');
         state.sort = b.getAttribute('data-s');
+        render();
+      });
+      document.getElementById('timeSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-t]');
+        if (!b) return;
+        document.querySelectorAll('#timeSeg button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        state.time = b.getAttribute('data-t');
         render();
       });
     };
