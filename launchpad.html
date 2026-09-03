@@ -23,6 +23,24 @@
 
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+
+    /* 阶段 Tab */
+    .stage-tabs { position: relative; display: flex; gap: 26px; margin: 2px 0 20px; border-bottom: 1px solid var(--border); }
+    .stage-tab {
+      display: inline-flex; align-items: center; gap: 7px; padding: 10px 2px 12px;
+      border: none; background: none; cursor: pointer;
+      font-size: 15px; font-weight: 600; color: var(--text-2);
+      transition: color .15s; position: relative; margin-bottom: -1px;
+    }
+    .stage-tab:hover { color: var(--text); }
+    .stage-tab.on { color: var(--text); }
+    .st-cnt {
+      min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--text-2);
+      font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .stage-tab.on .st-cnt { background: var(--accent); color: #fff; }
+    .stage-underline { position: absolute; bottom: -1px; height: 2px; background: var(--accent); border-radius: 2px; transition: left .22s cubic-bezier(.2,.8,.2,1), width .22s; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -115,18 +133,31 @@
     <div class="market-hero">
       <div>
         <div class="market-title">市场</div>
-        <div class="market-sub">正在爬向毕业的币 · curve 售罄即上池</div>
+        <div class="market-sub">从 curve 到池——代币的毕业之路</div>
       </div>
       <div class="hero-links">
-        <a class="market-data-link" href="graduated.html" id="gradLink">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-          已毕业 <b class="num" id="gradCount">0</b>
-        </a>
         <a class="market-data-link" href="analytics.html">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
           数据
         </a>
       </div>
+    </div>
+
+    <!-- 阶段 Tab -->
+    <div class="stage-tabs" id="stageTabs">
+      <button class="stage-tab on" data-tab="live">
+        <span class="st-name">进行中</span>
+        <span class="st-cnt num" id="cntLive">0</span>
+      </button>
+      <button class="stage-tab" data-tab="near">
+        <span class="st-name">临近毕业</span>
+        <span class="st-cnt num" id="cntNear">0</span>
+      </button>
+      <button class="stage-tab" data-tab="grad">
+        <span class="st-name">已毕业</span>
+        <span class="st-cnt num" id="cntGrad">0</span>
+      </button>
+      <span class="stage-underline" id="stageUnderline"></span>
     </div>
 
     <!-- 工具栏 -->
@@ -138,7 +169,7 @@
         <button data-s="marketcap">市值</button>
         <button data-s="volume">成交量</button>
       </div>
-      <span class="toolbar-sep"></span>
+      <span class="toolbar-sep" id="toolbarSep"></span>
       <div class="pill-seg" id="timeSeg">
         <button data-t="all" class="on">全部</button>
         <button data-t="24h">24h</button>
@@ -158,8 +189,8 @@
 
     <div class="empty" id="emptyState" style="display:none">
       <div class="empty-icon">◎</div>
-      <div class="empty-title">未找到匹配的币</div>
-      <div class="empty-desc">换个关键词，或看看全部</div>
+      <div class="empty-title" id="emptyTitle">未找到匹配的币</div>
+      <div class="empty-desc" id="emptyDesc">换个关键词，或看看全部</div>
       <button class="btn btn-ghost" onclick="resetFilters()">查看全部</button>
     </div>
   </main>
@@ -171,7 +202,7 @@
     // ============================================================
     //  市场页
     // ============================================================
-    var state = { sort: 'recent', time: 'all', q: '' };
+    var state = { tab: 'live', sort: 'recent', time: 'all', q: '' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -179,17 +210,14 @@
       });
     }
 
+    // 卡片（live / near 同形态；near 加高亮角标）
     function cardHTML(c) {
       var badge = '';
-      if (c.isNew && !c.graduated) badge = '<span class="coin-badge new">NEW</span>';
-      else if (c.graduated) badge = '<span class="coin-badge grad">🎓 已毕业</span>';
-      else if (c.progress > 0.8) badge = '<span class="coin-badge">距毕业 ' + Math.round(c.progress * 100) + '%</span>';
+      if (c.isNew) badge = '<span class="coin-badge new">NEW</span>';
+      else if (c.progress > 0.7) badge = '<span class="coin-badge grad">🎓 距毕业 ' + Math.round(c.progress * 100) + '%</span>';
       else badge = '<span class="coin-badge">' + Math.round(c.progress * 100) + '%</span>';
 
-      var progress = '';
-      if (!c.graduated) {
-        progress = '<div class="coin-progress"><i style="width:' + Math.round(Math.min(100, c.progress * 100)) + '%"></i></div>';
-      }
+      var progress = '<div class="coin-progress"><i style="width:' + Math.round(Math.min(100, c.progress * 100)) + '%"></i></div>';
       var lastBuyLine = c.lastBuyAt
         ? '<span>买入 ' + Launch.timeAgo(c.lastBuyAt) + '</span>'
         : '<span>—</span>';
@@ -198,7 +226,7 @@
         ? '<div class="play-veil"><div class="play-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div></div>'
         : '';
       return '' +
-        '<div class="coin-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
+        '<div class="coin-card' + (state.tab === 'near' ? ' is-near' : '') + '" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
           '<div class="coin-cover-wrap">' +
             '<div class="coin-cover" data-video="' + esc(c.video || '') + '">' + media + veil + badge + '</div>' +
           '</div>' +
@@ -216,15 +244,38 @@
         '</div>';
     }
 
+    // 已毕业卡片（展示毕业时间/池规模）
+    function gradCardHTML(c) {
+      var gradAgo = c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前毕业' : '已毕业';
+      var media = '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
+      return '' +
+        '<div class="coin-card is-grad" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
+          '<div class="coin-cover-wrap">' +
+            '<div class="coin-cover">' + media + '<span class="coin-badge grad">🎓 已毕业</span></div>' +
+          '</div>' +
+          '<div class="coin-info">' +
+            '<div class="coin-name">' + esc(c.name) + '<span class="coin-sym">$' + esc(c.symbol) + '</span></div>' +
+            '<div class="coin-price-row"><span class="coin-price num">' + Launch.fmtPrice(c.priceUsd) + '</span>' +
+              '<span class="coin-chg num ' + Launch.dirClass(c.change24h) + '">' + Launch.pct(c.change24h) + '</span></div>' +
+            '<div class="coin-meta"><span>市值 <b class="num">' + Launch.fmtUsd(c.marketCap) + '</b></span>' +
+              '<span>池 <b class="num">' + Launch.fmtUsd(c.poolUsd || 0) + '</b></span></div>' +
+            '<div class="coin-foot"><span>流动性已锁定</span><span>' + gradAgo + '</span></div>' +
+          '</div>' +
+        '</div>';
+    }
+
     function filtered() {
       var cutoff = state.time === '24h' ? Date.now() - 86400000
         : state.time === '7d' ? Date.now() - 7 * 86400000 : 0;
       var list = (Launch.coins || []).filter(function (c) {
-        // 主列表 = 未毕业（正在爬向毕业）
-        if (c.graduated) return false;
-        // 时间窗：该窗口内有最近买入（或刚发行）视为活跃
-        if (cutoff && !c.lastBuyAt) return false;
-        if (cutoff && c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
+        if (state.tab === 'grad') { if (!c.graduated) return false; }
+        else { if (c.graduated) return false; }
+        if (state.tab === 'near' && c.progress <= 0.7) return false;
+        // 时间窗仅对 live/near 生效
+        if (state.tab !== 'grad' && cutoff) {
+          if (!c.lastBuyAt) return false;
+          if (c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
+        }
         if (state.q) {
           var hay = (c.name + ' ' + c.symbol).toLowerCase();
           if (hay.indexOf(state.q.toLowerCase()) === -1) return false;
@@ -232,23 +283,62 @@
         return true;
       });
       list.sort(function (a, b) {
+        if (state.tab === 'grad') return (b.gradAt || 0) - (a.gradAt || 0);
         if (state.sort === 'newest') return b.launchedAt - a.launchedAt;
         if (state.sort === 'oldest') return a.launchedAt - b.launchedAt;
         if (state.sort === 'marketcap') return b.marketCap - a.marketCap;
         if (state.sort === 'volume') return (b.volumeUsd || 0) - (a.volumeUsd || 0);
-        // recent buys（默认）
         return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
       });
       return list;
+    }
+
+    function tabCounts() {
+      var coins = Launch.coins || [];
+      var live = coins.filter(function (c) { return !c.graduated; }).length;
+      var near = coins.filter(function (c) { return !c.graduated && c.progress > 0.7; }).length;
+      var grad = coins.filter(function (c) { return c.graduated; }).length;
+      document.getElementById('cntLive').textContent = live;
+      document.getElementById('cntNear').textContent = near;
+      document.getElementById('cntGrad').textContent = grad;
+    }
+
+    function moveUnderline(btn) {
+      var ul = document.getElementById('stageUnderline');
+      if (ul && btn) {
+        ul.style.left = btn.offsetLeft + 'px';
+        ul.style.width = btn.offsetWidth + 'px';
+      }
+    }
+
+    function setTab(t) {
+      state.tab = t;
+      document.querySelectorAll('.stage-tab').forEach(function (x) { x.classList.remove('on'); });
+      var btn = document.querySelector('.stage-tab[data-tab="' + t + '"]');
+      if (btn) btn.classList.add('on');
+      // 工具栏可见性：grad tab 时间窗无意义，隐藏 time seg
+      var hideTime = t === 'grad';
+      document.getElementById('timeSeg').style.display = hideTime ? 'none' : '';
+      document.getElementById('toolbarSep').style.display = hideTime ? 'none' : '';
+      render();
+      requestAnimationFrame(function () { moveUnderline(btn); });
     }
 
     function render() {
       var list = filtered();
       var grid = document.getElementById('coinGrid');
       var empty = document.getElementById('emptyState');
-      if (!list.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+      if (!list.length) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        var labels = { live: '还没有进行中的币', near: '暂无临近毕业的币', grad: '还没有币毕业' };
+        document.getElementById('emptyTitle').textContent = labels[state.tab] || '未找到匹配的币';
+        document.getElementById('emptyDesc').textContent = state.q ? '换个关键词试试' : '晚点再来看看';
+        return;
+      }
       empty.style.display = 'none';
-      grid.innerHTML = list.map(cardHTML).join('');
+      var htmlFn = state.tab === 'grad' ? gradCardHTML : cardHTML;
+      grid.innerHTML = list.map(htmlFn).join('');
     }
 
     function openCoin(id) {
@@ -280,14 +370,24 @@
     }
 
     window.onLaunchShellReady = function () {
-      // 已毕业数量（hero 入口）
-      var g = document.getElementById('gradCount');
-      if (g && window.Launch) {
-        var n = (Launch.coins || []).filter(function (c) { return c.graduated; }).length;
-        g.textContent = n;
-      }
+      tabCounts();
+      // 阶段 tab 切换
+      document.getElementById('stageTabs').addEventListener('click', function (e) {
+        var b = e.target.closest('.stage-tab');
+        if (!b) return;
+        setTab(b.getAttribute('data-tab'));
+      });
+      window.addEventListener('resize', function () {
+        var btn = document.querySelector('.stage-tab.on');
+        moveUnderline(btn);
+      });
       render();
       bindCoverHover();
+      // 初始下划线
+      requestAnimationFrame(function () {
+        var btn = document.querySelector('.stage-tab.on');
+        moveUnderline(btn);
+      });
       document.getElementById('coinSearch').addEventListener('input', function (e) {
         state.q = e.target.value.trim();
         render();
