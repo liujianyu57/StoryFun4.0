@@ -37,6 +37,8 @@
             '.desktop-header .dh-icon-btn:hover{background:rgba(0,0,0,.06);color:#13202e}',
             '.desktop-header .dh-icon-btn svg{width:20px;height:20px}',
             '.desktop-header .dh-notify-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff2d55;border:1.5px solid #fff}',
+            '.desktop-header .dh-launch-link{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;border:1px solid var(--border,#e5e7eb);color:#13202e;font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap}',
+            '.desktop-header .dh-launch-link:hover{background:rgba(0,0,0,.05)}',
             '.desktop-header .dh-publish-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 16px;border-radius:999px;border:none;background:#000000;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0}',
             '.desktop-header .dh-publish-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0, 0, 0,.3)}',
             '.desktop-header .dh-publish-btn svg{width:16px;height:16px}',
@@ -151,6 +153,9 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
+                '<a href="launchpad.html" class="dh-launch-link">' +
+                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 2.5v11M3.5 2.5L14 6.5 3.5 10.5M3.5 7.5L11.5 10"/></svg>发射台' +
+                '</a>' +
                 '<div class="dh-publish-wrap">' +
                     '<button class="dh-publish-btn">' +
                         '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/></svg>发布' +

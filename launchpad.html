@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>发射台 · Story.fun</title>
+  <link rel="stylesheet" href="launch.css" />
+  <style>
+    /* ===== 页面特有：市场 ===== */
+    .market-hero { padding: 34px 0 6px; }
+    .market-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .market-sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0 24px; }
+    .stat-card { padding: 16px 18px; }
+    .stat-label { font-size: 12px; color: var(--text-2); }
+    .stat-value { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; }
+    .stat-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .search-input {
+      width: 240px; height: 36px; padding: 0 12px 0 34px;
+      border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+      font-size: 13px; outline: none; color: var(--text);
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 11px center; background-size: 15px;
+    }
+    .search-input:focus { border-color: var(--accent); }
+
+    .coin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(218px, 1fr)); gap: 16px; }
+    .coin-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s;
+      position: relative;
+    }
+    .coin-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .coin-cover { position: relative; aspect-ratio: 16 / 11; background: var(--surface-2); overflow: hidden; }
+    .coin-cover img, .coin-cover video { width: 100%; height: 100%; object-fit: cover; }
+    .coin-cover .play-veil {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      background: rgba(10, 11, 13, 0); transition: background .2s;
+    }
+    .coin-card:hover .play-veil { background: rgba(10, 11, 13, 0.18); }
+    .play-veil .play-ico {
+      width: 40px; height: 40px; border-radius: 50%; background: rgba(10,11,13,.6);
+      display: grid; place-items: center; opacity: 0; transition: opacity .2s;
+    }
+    .coin-card:hover .play-ico { opacity: 1; }
+    .coin-badge {
+      position: absolute; top: 10px; left: 10px; height: 22px; padding: 0 9px;
+      border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center;
+      background: rgba(255,255,255,.92); color: var(--text); backdrop-filter: blur(6px);
+    }
+    .coin-badge.new { background: rgba(10,11,13,.82); color: #fff; }
+    .coin-badge.grad { background: #0E9F6E; color: #fff; }
+    .coin-info { padding: 12px 14px 14px; }
+    .coin-name { display: flex; align-items: center; gap: 6px; font-size: 14.5px; font-weight: 700; }
+    .coin-sym { font-size: 11px; color: var(--text-3); font-weight: 600; }
+    .coin-price-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 7px; }
+    .coin-price { font-size: 15px; font-weight: 700; }
+    .coin-chg { font-size: 12.5px; font-weight: 700; }
+    .coin-meta { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-2); margin-top: 7px; }
+    .coin-progress { height: 3px; border-radius: 3px; background: var(--accent-soft); margin-top: 10px; overflow: hidden; }
+    .coin-progress i { display: block; height: 100%; background: var(--text); border-radius: 3px; }
+
+    .toolbar-create {
+      height: 36px; padding: 0 16px; border-radius: 999px; background: var(--accent);
+      color: #fff; border: none; font-size: 13px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .toolbar-create:hover { opacity: .9; }
+
+    @media (max-width: 900px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .search-input { width: 100%; margin-top: 4px; }
+      .toolbar-right { width: 100%; margin-left: 0; }
+      .coin-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .coin-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="launch-header-host"></div>
+
+  <main class="launch-shell" id="marketApp">
+    <div class="market-hero">
+      <div class="market-title">发射台</div>
+      <div class="market-sub">短视频叙事的代币，在曲线与池之间成长。</div>
+    </div>
+
+    <!-- 概况 -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- 工具栏 -->
+    <div class="market-toolbar">
+      <div class="pill-seg" id="filterSeg">
+        <button data-f="all" class="on">全部</button>
+        <button data-f="curve">未毕业</button>
+        <button data-f="grad">已毕业</button>
+      </div>
+      <div class="toolbar-right">
+        <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
+        <button class="toolbar-create" onclick="location.href='launch.html'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          创建
+        </button>
+      </div>
+    </div>
+
+    <!-- 币网格 -->
+    <div class="coin-grid" id="coinGrid"></div>
+
+    <div class="empty" id="emptyState" style="display:none">
+      <div class="empty-icon">◎</div>
+      <div class="empty-title">未找到匹配的币</div>
+      <div class="empty-desc">换个关键词，或看看全部</div>
+      <button class="btn btn-ghost" onclick="resetFilters()">查看全部</button>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+  <script src="launch-coin.js"></script>
+  <script src="launch-shell.js"></script>
+  <script>
+    // ============================================================
+    //  市场页
+    // ============================================================
+    var state = { filter: 'all', sort: 'marketcap', q: '' };
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function cardHTML(c) {
+      var badge = '';
+      if (c.isNew && !c.graduated) badge = '<span class="coin-badge new">NEW</span>';
+      else if (c.graduated) badge = '<span class="coin-badge grad">🎓 已毕业</span>';
+      else if (c.progress > 0.5) badge = '<span class="coin-badge">距毕业 ' + Math.round(c.progress * 100) + '%</span>';
+      else badge = '<span class="coin-badge">' + Math.round(c.progress * 100) + '%</span>';
+
+      var progress = '';
+      if (!c.graduated) {
+        progress = '<div class="coin-progress"><i style="width:' + Math.round(Math.min(100, c.progress * 100)) + '%"></i></div>';
+      }
+
+      var media = c.video
+        ? '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />'
+        : '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
+      var veil = c.video
+        ? '<div class="play-veil"><div class="play-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div></div>'
+        : '';
+      var srcTxt = c.sourceType === 'ai' ? 'AI 叙事' : '短剧作品';
+      return '' +
+        '<div class="coin-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
+          '<div class="coin-cover" data-video="' + esc(c.video || '') + '">' + media + veil + badge + '</div>' +
+          '<div class="coin-info">' +
+            '<div class="coin-name">' + esc(c.name) + '<span class="coin-sym">$' + esc(c.symbol) + '</span></div>' +
+            '<div class="coin-price-row"><span class="coin-price num">' + Launch.fmtPrice(c.priceUsd) + '</span>' +
+              '<span class="coin-chg num ' + Launch.dirClass(c.change24h) + '">' + Launch.pct(c.change24h) + '</span></div>' +
+            '<div class="coin-meta"><span>市值 ' + Launch.fmtUsd(c.marketCap) + '</span><span>' + Launch.fmtNum(c.holders) + ' 持有者</span></div>' +
+            progress +
+          '</div>' +
+        '</div>';
+    }
+
+    function filtered() {
+      var list = (Launch.coins || []).filter(function (c) {
+        if (state.filter === 'curve' && c.graduated) return false;
+        if (state.filter === 'grad' && !c.graduated) return false;
+        if (state.q) {
+          var hay = (c.name + ' ' + c.symbol).toLowerCase();
+          if (hay.indexOf(state.q.toLowerCase()) === -1) return false;
+        }
+        return true;
+      });
+      list.sort(function (a, b) {
+        if (state.sort === 'new') return b.launchedAt - a.launchedAt;
+        if (state.sort === 'change') return b.change24h - a.change24h;
+        return b.marketCap - a.marketCap;
+      });
+      return list;
+    }
+
+    function render() {
+      var list = filtered();
+      var grid = document.getElementById('coinGrid');
+      var empty = document.getElementById('emptyState');
+      if (!list.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      grid.innerHTML = list.map(cardHTML).join('');
+    }
+
+    function stats() {
+      var coins = Launch.coins || [];
+      var totalCap = coins.reduce(function (s, c) { return s + c.marketCap; }, 0);
+      var vol24 = coins.reduce(function (s, c) { return s + (c.volumeUsd || 0); }, 0);
+      var today = coins.filter(function (c) { return c.isNew; }).length;
+      var grad = coins.filter(function (c) { return c.graduated; }).length;
+      var html =
+        '<div class="card stat-card"><div class="stat-label">总市值</div><div class="stat-value num">' + Launch.fmtUsd(totalCap) + '</div><div class="stat-sub">' + coins.length + ' 个币</div></div>' +
+        '<div class="card stat-card"><div class="stat-label">24h 成交</div><div class="stat-value num">' + Launch.fmtUsd(vol24) + '</div><div class="stat-sub">持续增长</div></div>' +
+        '<div class="card stat-card"><div class="stat-label">今日新币</div><div class="stat-value num">' + today + '</div><div class="stat-sub">等待被发现</div></div>' +
+        '<div class="card stat-card"><div class="stat-label">已毕业</div><div class="stat-value num">' + grad + '</div><div class="stat-sub">流动性已锁定</div></div>';
+      document.getElementById('statsRow').innerHTML = html;
+    }
+
+    function openCoin(id) {
+      location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
+    }
+    function resetFilters() {
+      state.filter = 'all'; state.q = '';
+      document.querySelectorAll('#filterSeg button').forEach(function (b) { b.classList.remove('on'); });
+      document.querySelector('#filterSeg button[data-f="all"]').classList.add('on');
+      document.getElementById('coinSearch').value = '';
+      render();
+    }
+
+    // hover 视频预览（封面 → 播放）
+    function bindCoverHover() {
+      document.getElementById('coinGrid').addEventListener('mouseover', function (e) {
+        var cover = e.target.closest('.coin-cover');
+        if (!cover || cover._v) return;
+        var vid = cover.getAttribute('data-video');
+        var img = cover.querySelector('img');
+        if (!vid || !img) return;
+        var v = document.createElement('video');
+        v.src = vid; v.muted = true; v.loop = true; v.playsInline = true;
+        v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
+        cover.appendChild(v); cover._v = true;
+        v.play().catch(function () {});
+      });
+    }
+
+    window.onLaunchShellReady = function () {
+      stats();
+      render();
+      bindCoverHover();
+      document.getElementById('filterSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-f]');
+        if (!b) return;
+        document.querySelectorAll('#filterSeg button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        state.filter = b.getAttribute('data-f');
+        render();
+      });
+      document.getElementById('coinSearch').addEventListener('input', function (e) {
+        state.q = e.target.value.trim();
+        render();
+      });
+    };
+  </script>
+</body>
+</html>

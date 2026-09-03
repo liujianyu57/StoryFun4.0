@@ -1,6 +1,6 @@
 # Story.fun 产品原型 Demo
 
-> AI 短剧内容社区 的产品原型。纯前端 HTML 原型，无需安装任何环境，用浏览器直接打开即可演示。
+> AI 短剧内容社区 + 叙事币发射台 的产品原型。纯前端 HTML 原型，无需安装任何环境，用浏览器直接打开即可演示。
 
 ## 🚀 怎么打开
 
@@ -59,6 +59,21 @@
 | `player-controls.js` / `screen-fullscreen.js` | 播放器控件 / 全屏 |
 | `recommend-perf.js` | 推荐页性能优化 |
 | `mobile-drawer.js` / `mobile-drawer.css` | 移动抽屉组件 |
+
+### 发射台（Launch · 短视频叙事的代币发射）
+
+| 页面 | 说明 |
+|---|---|
+| `launchpad.html` | 市场总览 · 浏览未毕业/已毕业的叙事币 |
+| `launch.html` | 创建 · 用 AI 生成或我的作品做叙事，三步发币 |
+| `coin-detail.html` | 交易 · curve/池 两阶段 K 线、Swap、持有者、聊天 |
+| `assets.html` | 我的资产 · 持仓/创建的币/交易历史/AI 叙事 |
+| `launch-coin.js` | 发射台数据与规则引擎（mock：curve、毕业、费用） |
+| `launch.css` | 发射台设计系统（浅色 · 黑主色） |
+| `launch-shell.js` | 发射台顶栏/通知/调试面板 |
+| `coin-link.js` | 播放页「已上链」反链徽标 |
+
+> 演示提示：URL 加 `?debug=1` 可打开调试面板（补 ETH / 一键毕业 / 重置数据）。
 
 ## 🗂 目录说明
 

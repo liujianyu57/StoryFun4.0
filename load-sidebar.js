@@ -71,6 +71,10 @@
                         '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
                         '<span class="sb-label">创作</span>' +
                     '</a>' +
+                    '<a href="launchpad.html" class="sb-nav-item" data-page="launchpad.html">' +
+                        '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 3v18M5 3l14 5-14 5M19 21l-1-6-4-2 4-2 1-6"/><path d="M5 3v6m0 6v6"/></svg>' +
+                        '<span class="sb-label">发射台</span>' +
+                    '</a>' +
                     '<a href="profile-center.html" class="sb-nav-item" data-page="profile-center.html">' +
                         '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
                         '<span class="sb-label">我的</span>' +

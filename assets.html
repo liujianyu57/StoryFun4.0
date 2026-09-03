@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的资产 · 发射台</title>
+  <link rel="stylesheet" href="launch.css" />
+  <style>
+    /* ===== 我的资产 ===== */
+    .as-hero { padding: 30px 0 4px; }
+    .as-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .as-sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+
+    .as-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0 8px; }
+    .as-stat { padding: 16px 18px; }
+    .as-stat .k { font-size: 12px; color: var(--text-2); }
+    .as-stat .v { font-size: 20px; font-weight: 800; margin-top: 4px; letter-spacing: -0.01em; }
+    .as-stat .s { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+    .as-tabs { display: flex; gap: 4px; margin: 24px 0 16px; border-bottom: 1px solid var(--border); }
+    .as-tab {
+      border: none; background: none; padding: 10px 14px; font-size: 14px; font-weight: 600;
+      color: var(--text-2); border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .as-tab.on { color: var(--text); border-bottom-color: var(--accent); }
+    .as-tab .cnt { font-size: 11px; color: var(--text-3); margin-left: 5px; }
+
+    .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .asset-card { display: flex; gap: 14px; padding: 14px; align-items: center; }
+    .asset-cover { width: 64px; height: 64px; border-radius: 14px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; position: relative; cursor: pointer; }
+    .asset-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .asset-body { flex: 1; min-width: 0; }
+    .asset-name { font-weight: 700; font-size: 14.5px; display: flex; gap: 6px; align-items: baseline; cursor: pointer; }
+    .asset-name:hover { text-decoration: underline; }
+    .asset-sub { font-size: 12px; color: var(--text-2); margin-top: 3px; }
+    .asset-right { text-align: right; flex-shrink: 0; }
+    .asset-right .v { font-weight: 700; font-size: 14px; }
+    .asset-right .s { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
+    .asset-btn {
+      margin-top: 8px; height: 30px; padding: 0 12px; border-radius: 9px; font-size: 12.5px; font-weight: 600;
+      border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    }
+    .asset-btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+    .asset-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* 历史 */
+    .history-card { padding: 6px 18px 14px; }
+    .his-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .his-row:last-child { border-bottom: none; }
+    .his-side { width: 44px; font-weight: 700; }
+    .his-side.buy { color: var(--up); }
+    .his-side.sell { color: var(--down); }
+    .his-coin { font-weight: 600; width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .his-mid { flex: 1; color: var(--text-2); text-align: right; }
+    .his-time { color: var(--text-3); font-size: 11.5px; width: 40px; text-align: right; }
+
+    /* AI 叙事回放 */
+    .ai-card { padding: 14px; display: flex; gap: 12px; align-items: center; }
+    .ai-thumb { width: 92px; height: 60px; border-radius: 10px; overflow: hidden; position: relative; cursor: pointer; background: var(--text); flex-shrink: 0; }
+    .ai-thumb video { width: 100%; height: 100%; object-fit: cover; }
+    .ai-thumb .pb { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; }
+
+    @media (max-width: 760px) {
+      .as-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div id="launch-header-host"></div>
+
+  <div class="lp-overlay" id="playModal">
+    <div class="lp-modal" style="max-width:680px;padding:0;overflow:hidden;background:#0A0B0D">
+      <video id="playVideo" controls autoplay playsinline style="width:100%;display:block;max-height:70vh"></video>
+    </div>
+  </div>
+
+  <main class="launch-shell">
+    <div class="as-hero">
+      <div class="as-title">我的资产</div>
+      <div class="as-sub">持仓、创建的币与交易历史。</div>
+    </div>
+
+    <div class="as-summary" id="asSummary"></div>
+
+    <div class="as-tabs">
+      <button class="as-tab on" data-t="hold">我持有的</button>
+      <button class="as-tab" data-t="made">我创建的</button>
+      <button class="as-tab" data-t="tx">交易历史</button>
+      <button class="as-tab" data-t="ai">我的 AI 叙事</button>
+    </div>
+
+    <div id="asContent">
+      <div class="empty" id="needLogin" style="display:none">
+        <div class="empty-icon">🔑</div>
+        <div class="empty-title">登录后查看资产</div>
+        <div class="empty-desc">需要登录才能查看持仓与创建的币</div>
+        <button class="btn btn-primary" onclick="openLoginModal()">登录 / 注册</button>
+      </div>
+      <div id="asBody"></div>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+  <script src="launch-coin.js"></script>
+  <script src="launch-shell.js"></script>
+  <script>
+    // ============================================================
+    //  我的资产
+    // ============================================================
+    var tab = 'hold';
+    var esc = function (s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    };
+
+    function coinById(id) { return Launch.coinById(id); }
+    function myHoldings() {
+      var out = [];
+      Object.keys(Launch.USER.holdings || {}).forEach(function (id) {
+        var c = coinById(id); var h = Launch.USER.holdings[id];
+        if (c && h && h.amount > 0) out.push({ coin: c, hold: h });
+      });
+      return out;
+    }
+    function myCreated() {
+      return (Launch.USER.created || []).map(coinById).filter(Boolean);
+    }
+    function myAiVideos() {
+      var out = [];
+      try {
+        var vids = JSON.parse(localStorage.getItem('storyfun_my_videos') || '[]');
+        out = vids.filter(function (v) { return v.kind === 'ai'; });
+      } catch (e) {}
+      return out;
+    }
+
+    function renderSummary() {
+      var holds = myHoldings();
+      var made = myCreated();
+      var totalValUsd = holds.reduce(function (s, h) { return s + h.hold.amount * h.coin.priceUsd; }, 0);
+      var costUsd = holds.reduce(function (s, h) { return s + h.hold.amount * h.hold.avgUsd; }, 0);
+      var pnl = totalValUsd - costUsd;
+      var pnlPct = costUsd > 0 ? pnl / costUsd : 0;
+      var claimedTotal = Object.keys(Launch.USER.claimed || {}).reduce(function (s, k) { return s + Launch.USER.claimed[k]; }, 0);
+      var claimable = Object.keys(Launch.USER.claimable || {}).reduce(function (s, k) { return s + Launch.USER.claimable[k]; }, 0);
+      document.getElementById('asSummary').innerHTML =
+        '<div class="card as-stat"><div class="k">持仓估值</div><div class="v num">' + Launch.fmtUsd(totalValUsd) + '</div><div class="s">' + holds.length + ' 个币</div></div>' +
+        '<div class="card as-stat"><div class="k">未实现盈亏</div><div class="v num ' + (pnl >= 0 ? 'up' : 'down') + '">' + (pnl >= 0 ? '+' : '') + Launch.fmtUsd(pnl) + '</div><div class="s num ' + (pnl >= 0 ? 'up' : 'down') + '">' + Launch.pct(pnlPct) + '</div></div>' +
+        '<div class="card as-stat"><div class="k">创建</div><div class="v num">' + made.length + '</div><div class="s">' + (claimable > 0 ? '可领取 ' + Launch.fmtUsd(claimable) : '暂无待领取收益') + '</div></div>' +
+        '<div class="card as-stat"><div class="k">累计领取</div><div class="v num">' + Launch.fmtUsd(claimedTotal) + '</div><div class="s">创作者收益</div></div>';
+    }
+
+    function renderHold() {
+      var holds = myHoldings();
+      var host = document.getElementById('asBody');
+      if (!holds.length) {
+        host.innerHTML = '<div class="empty"><div class="empty-icon">◎</div><div class="empty-title">还没有持仓</div><div class="empty-desc">发现一个叙事，从第一笔开始</div><button class="btn btn-primary" onclick="location.href=\'launchpad.html\'">去市场看看</button></div>';
+        return;
+      }
+      host.innerHTML = '<div class="asset-grid">' + holds.map(function (h) {
+        var c = h.coin;
+        var val = h.hold.amount * c.priceUsd;
+        var pnl = val - h.hold.amount * h.hold.avgUsd;
+        return '<div class="card asset-card">' +
+          '<div class="asset-cover" onclick="goCoin(\'' + c.id + '\')"><img src="' + esc(c.cover) + '" alt=""></div>' +
+          '<div class="asset-body">' +
+            '<div class="asset-name" onclick="goCoin(\'' + c.id + '\')">' + esc(c.name) + '<span class="faint num">$' + esc(c.symbol) + '</span></div>' +
+            '<div class="asset-sub">持仓 <span class="num">' + fmtAmt(h.hold.amount) + '</span> · 均价 ' + Launch.fmtPrice(h.hold.avgUsd) + '</div>' +
+          '</div>' +
+          '<div class="asset-right">' +
+            '<div class="v num">' + Launch.fmtUsd(val) + '</div>' +
+            '<div class="s num ' + Launch.dirClass(pnl) + '">' + (pnl >= 0 ? '+' : '') + Launch.fmtUsd(pnl) + '</div>' +
+            '<button class="asset-btn ghost" onclick="goCoin(\'' + c.id + '\')">交易</button>' +
+          '</div></div>';
+      }).join('') + '</div>';
+    }
+
+    function renderMade() {
+      var made = myCreated();
+      var host = document.getElementById('asBody');
+      if (!made.length) {
+        host.innerHTML = '<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">还没有创建的币</div><div class="empty-desc">用一个叙事开始第一个币</div><button class="btn btn-primary" onclick="location.href=\'launch.html\'">创建第一个</button></div>';
+        return;
+      }
+      host.innerHTML = '<div class="asset-grid">' + made.map(function (c) {
+        var claimable = Launch.USER.claimable[c.id] || 0;
+        var createdTotal = Launch.USER.claimed[c.id] || 0;
+        return '<div class="card asset-card">' +
+          '<div class="asset-cover" onclick="goCoin(\'' + c.id + '\')"><img src="' + esc(c.cover) + '" alt=""></div>' +
+          '<div class="asset-body">' +
+            '<div class="asset-name" onclick="goCoin(\'' + c.id + '\')">' + esc(c.name) + '<span class="faint num">$' + esc(c.symbol) + '</span></div>' +
+            '<div class="asset-sub">' + Launch.fmtNum(c.holders) + ' 持有者 · 市值 ' + Launch.fmtUsd(c.marketCap) + '</div>' +
+            '<div class="asset-sub">' + (c.graduated ? '🎓 已毕业' : 'curve 中') + ' · 已领取 ' + Launch.fmtUsd(createdTotal) + '</div>' +
+          '</div>' +
+          '<div class="asset-right">' +
+            '<button class="asset-btn" id="claim_' + c.id + '" onclick="doClaim(\'' + c.id + '\')"' + (claimable <= 0 ? ' disabled' : '') + '>领取 ' + Launch.fmtUsd(claimable) + '</button>' +
+            '<div style="margin-top:6px"><button class="asset-btn ghost" onclick="goCoin(\'' + c.id + '\')">详情</button></div>' +
+          '</div></div>';
+      }).join('') + '</div>';
+    }
+
+    function renderTx() {
+      var txs = Launch.USER.tx || [];
+      var host = document.getElementById('asBody');
+      if (!txs.length) {
+        host.innerHTML = '<div class="empty"><div class="empty-icon">⇅</div><div class="empty-title">还没有交易</div><div class="empty-desc">买入第一笔后，历史会显示在这里</div><button class="btn btn-primary" onclick="location.href=\'launchpad.html\'">去市场看看</button></div>';
+        return;
+      }
+      host.innerHTML = '<div class="card history-card">' + txs.slice(0, 40).map(function (t) {
+        var c = coinById(t.coinId);
+        return '<div class="his-row">' +
+          '<span class="his-side ' + t.side + '">' + (t.side === 'buy' ? '买入' : '卖出') + '</span>' +
+          '<span class="his-coin">' + esc(c ? c.name : t.symbol) + '</span>' +
+          '<span class="his-mid num">' + (t.amount ? fmtAmt(t.amount) + ' · ' : '') + Launch.fmtUsd(t.grossUsd) + '</span>' +
+          '<span class="his-time">' + Launch.timeAgo(t.at || Date.now()) + '</span></div>';
+      }).join('') + '</div>';
+    }
+
+    function renderAi() {
+      var vids = myAiVideos();
+      var host = document.getElementById('asBody');
+      if (!vids.length) {
+        host.innerHTML = '<div class="empty"><div class="empty-icon">✦</div><div class="empty-title">还没有 AI 叙事</div><div class="empty-desc">在创建流程中用 AI 生成，视频会自动保存在这里</div><button class="btn btn-primary" onclick="location.href=\'launch.html\'">去生成</button></div>';
+        return;
+      }
+      host.innerHTML = '<div class="asset-grid">' + vids.map(function (v, i) {
+        var coined = !!v.coinId;
+        return '<div class="card ai-card">' +
+          '<div class="ai-thumb" onclick="playAi(' + i + ')">' +
+            (v.video ? '<video src="' + esc(v.video) + '" muted playsinline></video>' : '<img src="' + esc(v.cover || 'image/hero-bg-blur.jpg') + '" alt="">') +
+            '<div class="pb"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div></div>' +
+          '<div class="asset-body">' +
+            '<div class="asset-name">' + esc(v.title || '未命名叙事') + '</div>' +
+            '<div class="asset-sub">' + (coined ? '🎬 已发币 · ' : '') + 'AI 生成 · 15s · ' + esc(v.desc || '').slice(0, 24) + '</div>' +
+          '</div>' +
+          (coined && v.coinId
+            ? '<button class="asset-btn ghost" onclick="goCoin(\'' + esc(v.coinId) + '\')">发币详情</button>'
+            : '<button class="asset-btn" onclick="reuse(' + i + ')">用它发币</button>') +
+          '</div>';
+      }).join('') + '</div>';
+      window._aiVids = vids;
+    }
+
+    function fmtAmt(n) {
+      if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+      return Math.floor(n) + '';
+    }
+    function goCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
+    function playAi(i) {
+      var v = window._aiVids[i];
+      if (!v || !v.video) { Launch.toast('该叙事暂无视频', 'warn'); return; }
+      document.getElementById('playVideo').src = v.video;
+      document.getElementById('playModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(function () { document.getElementById('playVideo').play().catch(function () {}); }, 120);
+    }
+    function reuse(i) {
+      var v = window._aiVids[i];
+      if (!v) return;
+      location.href = 'launch.html?reuse=' + encodeURIComponent(JSON.stringify(v));
+    }
+    document.getElementById('playModal').addEventListener('click', function (e) {
+      if (e.target === this) { this.classList.remove('open'); document.getElementById('playVideo').pause(); document.body.style.overflow = ''; }
+    });
+
+    function doClaim(id) {
+      if (!Launch.isLoggedIn()) { openLoginModal(); return; }
+      var r = Launch.claim(id);
+      if (r.ok) {
+        Launch.toast('已领取 ' + Launch.fmtUsd(r.usd), 'ok');
+        renderSummary();
+        renderMade();
+      } else {
+        Launch.toast(r.msg || '暂无可领取收益', 'warn');
+      }
+    }
+
+    function render() {
+      var logged = Launch.isLoggedIn();
+      document.getElementById('needLogin').style.display = logged ? 'none' : 'block';
+      document.getElementById('asBody').style.display = logged ? '' : 'none';
+      document.getElementById('asSummary').style.display = logged ? '' : 'none';
+      if (!logged) return;
+      renderSummary();
+      if (tab === 'hold') renderHold();
+      else if (tab === 'made') renderMade();
+      else if (tab === 'tx') renderTx();
+      else if (tab === 'ai') renderAi();
+    }
+
+    window.onLaunchShellReady = function () {
+      // Tab
+      document.querySelectorAll('.as-tab').forEach(function (b) {
+        b.addEventListener('click', function () {
+          tab = b.getAttribute('data-t');
+          document.querySelectorAll('.as-tab').forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          render();
+        });
+      });
+      // 登录状态变化重新渲染
+      window.addEventListener('auth-ready', function () { render(); });
+      render();
+    };
+  </script>
+</body>
+</html>
