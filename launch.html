@@ -109,9 +109,10 @@
       cursor: pointer;
     }
     .adv-toggle:hover { opacity: .75; }
-    .adv-toggle svg { transition: transform .18s; color: var(--text-3); }
-    .adv-body { padding-top: 2px; }
-    .adv-toggle.closed + .adv-body { display: none; }
+    .adv-toggle svg { transition: transform .18s; color: var(--text-3); transform: rotate(-90deg); }
+    .adv-toggle:not(.closed) svg { transform: rotate(0deg); }
+    .adv-body { display: none; padding-top: 2px; }
+    .adv-toggle:not(.closed) + .adv-body { display: block; }
     .adv-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--border-light, #F0F1F3); }
     .adv-row:first-child { border-top: none; }
     .adv-row .lbl { font-size: 13px; font-weight: 500; }
@@ -285,7 +286,7 @@
 
               <!-- 高级设置（币配置的一部分，随参数） -->
               <hr class="adv-divider" />
-              <button class="adv-toggle" id="advToggle" onclick="toggleAdv()">
+              <button class="adv-toggle closed" id="advToggle" onclick="toggleAdv()">
                 <span>高级设置</span>
                 <svg id="advArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
               </button>
