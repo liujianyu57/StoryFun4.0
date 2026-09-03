@@ -7,40 +7,37 @@
   <link rel="stylesheet" href="launch.css" />
   <style>
     /* ===== 页面特有：市场 ===== */
-    .market-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 30px 0 18px; }
-    .market-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-    .market-sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
-    .hero-links { display: flex; align-items: center; gap: 8px; }
-    .market-data-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      height: 34px; padding: 0 14px; border-radius: 999px;
-      border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
-      font-size: 12.5px; font-weight: 600; text-decoration: none;
-      transition: border-color .15s, color .15s;
-    }
-    .market-data-link:hover { border-color: var(--border-strong); color: var(--text); }
-    .market-data-link b { font-weight: 700; color: var(--text); }
-
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
 
-    /* 阶段 Tab */
-    .stage-tabs { position: relative; display: flex; gap: 26px; margin: 2px 0 20px; border-bottom: 1px solid var(--border); }
+    /* 阶段大分段胶囊：白底细边框容器，选中格黑底白字（顶部呼吸带承托） */
+    .stage-tabs {
+      display: flex; gap: 4px; padding: 4px; max-width: 640px;
+      margin: 30px 0 22px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px;
+    }
     .stage-tab {
-      display: inline-flex; align-items: center; gap: 7px; padding: 10px 2px 12px;
-      border: none; background: none; cursor: pointer;
-      font-size: 15px; font-weight: 600; color: var(--text-2);
-      transition: color .15s; position: relative; margin-bottom: -1px;
+      flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 44px; border: none; border-radius: 999px; cursor: pointer;
+      background: transparent; color: var(--text-2);
+      font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
+      transition: background .18s ease, color .18s ease;
     }
     .stage-tab:hover { color: var(--text); }
-    .stage-tab.on { color: var(--text); }
+    .stage-tab.on { background: var(--accent); color: #fff; }
     .st-cnt {
-      min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+      min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px;
       background: var(--accent-soft); color: var(--text-2);
-      font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
     }
-    .stage-tab.on .st-cnt { background: var(--accent); color: #fff; }
-    .stage-underline { position: absolute; bottom: -1px; height: 2px; background: var(--accent); border-radius: 2px; transition: left .22s cubic-bezier(.2,.8,.2,1), width .22s; }
+    .stage-tab.on .st-cnt { background: rgba(255,255,255,.2); color: #fff; }
+
+    /* 工具栏降噪：让下方小 pill 与上方大胶囊拉开层级 */
+    .market-toolbar .pill-seg { padding: 2px; }
+    .market-toolbar .pill-seg button { height: 24px; padding: 0 11px; font-size: 12px; font-weight: 500; }
+    .market-toolbar .pill-seg button.on { font-weight: 600; }
+
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -121,11 +118,15 @@
     .toolbar-create:hover { opacity: .9; }
 
     @media (max-width: 900px) {
+      .stage-tabs { max-width: none; }
       .search-input { width: 100%; margin-top: 4px; }
       .toolbar-right { width: 100%; margin-left: 0; }
       .coin-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 520px) {
+      .stage-tabs { gap: 3px; padding: 3px; margin-top: 22px; }
+      .stage-tab { height: 40px; gap: 6px; font-size: 13.5px; }
+      .st-cnt { min-width: 19px; height: 19px; padding: 0 5px; font-size: 10.5px; }
       .coin-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -134,19 +135,6 @@
   <div id="launch-header-host"></div>
 
   <main class="launch-shell" id="marketApp">
-    <div class="market-hero">
-      <div>
-        <div class="market-title">市场</div>
-        <div class="market-sub">从 curve 到池——代币的毕业之路</div>
-      </div>
-      <div class="hero-links">
-        <a class="market-data-link" href="analytics.html">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
-          数据
-        </a>
-      </div>
-    </div>
-
     <!-- 阶段 Tab -->
     <div class="stage-tabs" id="stageTabs">
       <button class="stage-tab on" data-tab="live">
@@ -161,7 +149,6 @@
         <span class="st-name">已毕业</span>
         <span class="st-cnt num" id="cntGrad">0</span>
       </button>
-      <span class="stage-underline" id="stageUnderline"></span>
     </div>
 
     <!-- 工具栏 -->
@@ -303,14 +290,6 @@
       document.getElementById('cntGrad').textContent = grad;
     }
 
-    function moveUnderline(btn) {
-      var ul = document.getElementById('stageUnderline');
-      if (ul && btn) {
-        ul.style.left = btn.offsetLeft + 'px';
-        ul.style.width = btn.offsetWidth + 'px';
-      }
-    }
-
     function setTab(t) {
       state.tab = t;
       document.querySelectorAll('.stage-tab').forEach(function (x) { x.classList.remove('on'); });
@@ -321,7 +300,6 @@
       document.getElementById('timeSeg').style.display = hideTime ? 'none' : '';
       document.getElementById('toolbarSep').style.display = hideTime ? 'none' : '';
       render();
-      requestAnimationFrame(function () { moveUnderline(btn); });
     }
 
     function render() {
@@ -376,17 +354,8 @@
         if (!b) return;
         setTab(b.getAttribute('data-tab'));
       });
-      window.addEventListener('resize', function () {
-        var btn = document.querySelector('.stage-tab.on');
-        moveUnderline(btn);
-      });
       render();
       bindCoverHover();
-      // 初始下划线
-      requestAnimationFrame(function () {
-        var btn = document.querySelector('.stage-tab.on');
-        moveUnderline(btn);
-      });
       document.getElementById('coinSearch').addEventListener('input', function (e) {
         state.q = e.target.value.trim();
         render();
