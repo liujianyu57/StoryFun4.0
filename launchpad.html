@@ -21,6 +21,15 @@
 
     .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+    .grad-only {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 13px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 12.5px; font-weight: 600; color: var(--text-2);
+      transition: all .15s;
+    }
+    .grad-only:hover { border-color: var(--border-strong); color: var(--text); }
+    .grad-only.on { background: #0E9F6E; border-color: #0E9F6E; color: #fff; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .search-input {
       width: 240px; height: 36px; padding: 0 12px 0 34px;
@@ -126,6 +135,7 @@
       <div class="pill-seg" id="sortSeg">
         <button data-s="recent" class="on">最近买入</button>
         <button data-s="newest">最新</button>
+        <button data-s="oldest">最旧</button>
         <button data-s="marketcap">市值</button>
         <button data-s="volume">成交量</button>
       </div>
@@ -135,6 +145,8 @@
         <button data-t="24h">24h</button>
         <button data-t="7d">7d</button>
       </div>
+      <span class="toolbar-sep"></span>
+      <button class="pill grad-only" id="gradOnlyBtn" onclick="toggleGradOnly()">🎓 已毕业</button>
       <div class="toolbar-right">
         <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
         <button class="toolbar-create" onclick="location.href='launch.html'">
@@ -162,7 +174,7 @@
     // ============================================================
     //  市场页
     // ============================================================
-    var state = { sort: 'recent', time: 'all', q: '' };
+    var state = { sort: 'recent', time: 'all', gradOnly: false, q: '' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -211,6 +223,8 @@
       var cutoff = state.time === '24h' ? Date.now() - 86400000
         : state.time === '7d' ? Date.now() - 7 * 86400000 : 0;
       var list = (Launch.coins || []).filter(function (c) {
+        // 只看已毕业
+        if (state.gradOnly && !c.graduated) return false;
         // 时间窗：该窗口内有最近买入（或刚发行）视为活跃
         if (cutoff && !c.lastBuyAt) return false;
         if (cutoff && c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
@@ -243,11 +257,19 @@
     function openCoin(id) {
       location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
     }
+    function toggleGradOnly() {
+      state.gradOnly = !state.gradOnly;
+      var btn = document.getElementById('gradOnlyBtn');
+      if (btn) btn.classList.toggle('on', state.gradOnly);
+      render();
+    }
     function resetFilters() {
-      state.sort = 'recent'; state.time = 'all'; state.q = '';
+      state.sort = 'recent'; state.time = 'all'; state.gradOnly = false; state.q = '';
       document.querySelectorAll('#sortSeg button, #timeSeg button').forEach(function (b) { b.classList.remove('on'); });
       document.querySelector('#sortSeg button[data-s="recent"]').classList.add('on');
       document.querySelector('#timeSeg button[data-t="all"]').classList.add('on');
+      var g = document.getElementById('gradOnlyBtn');
+      if (g) g.classList.remove('on');
       document.getElementById('coinSearch').value = '';
       render();
     }
