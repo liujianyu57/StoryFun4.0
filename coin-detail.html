@@ -829,52 +829,38 @@ var holders = [];
     function renderMeta() {
       var host = document.getElementById('metaHost');
       if (!host) return;
-      if (!coin || coin.graduated) { host.style.display = 'none'; host.innerHTML = ''; return; }
+      // 参考：Creator fees / Holder fee sharing 卡仅在“费已路由给持有人”时出现
+      if (!coin || coin.graduated || !coin.shareToHolders) {
+        host.style.display = 'none'; host.innerHTML = ''; return;
+      }
       var pair = coin.pair || 'ETH';
       var nm = coin.name || coin.symbol || 'Token';
       var h6 = 0, ss = coin.id || 'x';
       for (var i6 = 0; i6 < ss.length; i6++) h6 = (h6 * 31 + ss.charCodeAt(i6)) >>> 0;
       var r6 = function (x) { return Math.round(x * 1e6) / 1e6; };
       var q6 = function (x) { return r6(x).toFixed(6).replace(/\.?0+$/, '') || '0'; };
-      // 演示数值（确定性、与参考同量级：如 18.548326 NFLX / 71 sweeps）
-      var earned = r6(1.2 + (h6 % 48000) / 1000);            // ~1.2 – 49
-      var sweeps = 12 + (h6 % 120);                           // 12–131
-      var paidRatio = 0.6 + ((h6 >>> 5) % 35) / 100;          // 0.60–0.94
+      var earned = r6(1.2 + (h6 % 48000) / 1000);
+      var sweeps = 12 + (h6 % 120);
+      var paidRatio = 0.6 + ((h6 >>> 5) % 35) / 100;
       var paid = r6(earned * paidRatio);
-      var pot = r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100)); // ≈ 5%–20%
+      var pot = r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100));
       var dist = 1 + ((h6 >>> 7) % 10);
       function valHtml(u) { return '<span class="ff-value num">' + q6(u) + ' <small>' + esc(pair) + '</small></span>'; }
       var html = '';
-      // 卡 1：Creator fees（持有人路由 = 参考实页文案；创建者钱包 = 领取形态）
       html += '<div class="card fee-card">' +
-        '<div class="ff-head"><span class="ff-title">Creator fees</span></div>';
-      if (coin.shareToHolders) {
-        html += '<div class="ff-assets">' + valHtml(earned) +
+        '<div class="ff-head"><span class="ff-title">Creator fees</span></div>' +
+        '<div class="ff-assets">' + valHtml(earned) +
           '<span class="ff-sub">Earned by ' + esc(nm) + ' across ' + sweeps + ' sweeps</span></div>' +
-          '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>';
-      } else {
-        html += '<div class="ff-assets">' + valHtml(earned) +
-          '<span class="ff-sub">可领取 · 创作者费归创建者钱包（含 Creator tax）</span></div>' +
-          '<p class="ff-hint">创作者费直接归创建者钱包，可随时领取。</p>' +
-          '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">领取</button>';
-      }
-      html += '</div>';
-      // 卡 2：Holder fee sharing
+        '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>' +
+        '</div>';
       html += '<div class="card fee-card">' +
-        '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>';
-      if (coin.shareToHolders) {
-        html += '<div class="ff-assets">' + valHtml(paid) +
+        '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>' +
+        '<div class="ff-assets">' + valHtml(paid) +
           '<span class="ff-sub">Paid to holders across ' + dist + ' distribution' + (dist === 1 ? '' : 's') + '</span></div>' +
-          '<div class="ff-assets">' + valHtml(pot) +
+        '<div class="ff-assets">' + valHtml(pot) +
           '<span class="ff-sub">In the pot for the next distribution</span></div>' +
-          '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>';
-      } else {
-        html += '<div class="ff-assets">' + valHtml(0) +
-          '<span class="ff-sub">Routing off · 费当前归创建者钱包</span></div>' +
-          '<p class="ff-hint">开启后部署分发合约并把每笔创作者费路由给持有人（两次链上确认，永久生效）。</p>' +
-          '<button class="btn btn-ghost ff-act" onclick="Launch.toast(\'原型：需两次链上确认开启费共享\',\'ok\')">开启费共享（原型）</button>';
-      }
-      html += '</div>';
+        '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>' +
+        '</div>';
       host.innerHTML = html;
       host.style.display = 'grid';
     }
