@@ -546,7 +546,7 @@
       if (state.expPage > pages) state.expPage = pages;
       if (state.expPage < 1) state.expPage = 1;
       var slice = list.slice((state.expPage - 1) * per, state.expPage * per);
-      document.getElementById('expCount').textContent = Launch.fmtNum(list.length) + ' climbing';
+      document.getElementById('expCount').textContent = Launch.fmtNum(list.length) + ' launched';
       grid.innerHTML = slice.map(cardHTML).join('');
       empty.style.display = list.length ? 'none' : 'block';
       renderPager('expPager', state.expPage, pages, function (p) { state.expPage = p; renderExplore(); });
