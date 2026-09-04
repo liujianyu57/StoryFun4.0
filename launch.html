@@ -515,7 +515,7 @@
                     </button>
                   </div>
                   <div class="snipe-list" id="snipeList"></div>
-                  <span class="f-note snipe-note" id="snipeNote">完整 0x 地址（42 位）· 回车或点 + 添加 · 上限 32 个 · 你自己与收款钱包默认免收</span>
+                  <span class="f-note snipe-note" id="snipeNote">Buys in the launch second pay 99%, decaying to zero across 3s. Declare the wallets your team opens with.</span>
                 </div>
               </div>
               <div class="inline-warn danger" id="paramErr"></div>
@@ -1067,7 +1067,7 @@
     // ---- Snipe tax exemptions：输入 + 添加 + 胶囊列表（上限 32，pons 工厂限制） ----
     var snipeList = [];
     var SNIPE_MAX = 32;
-    var SNIPE_HINT = '完整 0x 地址（42 位）· 回车或点 + 添加 · 上限 32 个 · 你自己与收款钱包默认免收';
+    var SNIPE_HINT = 'Buys in the launch second pay 99%, decaying to zero across 3s. Declare the wallets your team opens with.';
     function snipeNoteSet(msg, isErr) {
       var n = document.getElementById('snipeNote');
       if (!n) return;
