@@ -3,122 +3,170 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>创建 · 发射台</title>
+  <title>创建代币 · Story.fun</title>
   <link rel="stylesheet" href="launch.css" />
   <style>
-    /* ===== 创建（单页：叙事→参数→费用→创建 居中主列 + 右侧汇总） ===== */
-    .create-wrap { max-width: 1080px; margin: 0 auto; padding: 30px 0 110px; }
-    .cr-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 26px; flex-wrap: wrap; }
-    .cr-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-    .cr-desc { font-size: 13px; color: var(--text-2); margin-top: 5px; }
-    .cr-link-back { font-size: 13px; color: var(--text-2); display: inline-flex; gap: 6px; align-items: center; }
-    .cr-link-back:hover { color: var(--text); }
+    /* ===== Launch token（pons 骨架 · 全中文） ===== */
+    .create-wrap { max-width: 1080px; margin: 0 auto; padding: 22px 0 110px; }
+    .cr-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .cr-link-back {
+      display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px;
+      border-radius: 999px; font-size: 13px; color: var(--text-2); background: var(--surface);
+      border: 1px solid var(--border); text-decoration: none;
+    }
+    .cr-link-back:hover { color: var(--text); border-color: var(--border-strong); }
+    .cr-version { font-size: 12px; color: var(--text-3); }
 
-    .cr-grid { display: grid; grid-template-columns: minmax(0, 660px) 340px; gap: 26px; align-items: start; justify-content: center; }
-    .cr-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-    .cr-aside { min-width: 0; }
+    .cr-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
+    .cr-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .cr-aside { position: sticky; top: calc(var(--header-h) + 18px); }
 
-    /* 步骤卡 */
-    .sec-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
-    .sec-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px 0; }
-    .sec-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-    .sec-title { font-size: 15px; font-weight: 700; }
-    .sec-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
-    .sec-body { padding: 16px 20px 20px; }
+    /* 卡片 */
+    .pane { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; }
+    .pane-pad { padding: 18px 20px; }
+    .pane-title { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+    .pane-sub { font-size: 12.5px; color: var(--text-2); margin-top: 3px; }
 
-    /* 叙事来源 */
-    .source-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .source-card { border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; background: var(--surface); transition: all .15s; }
-    .source-card:hover { border-color: var(--border-strong); }
-    .source-card.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,11,13,.05); }
-    .source-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--accent-soft); display: grid; place-items: center; font-size: 16px; margin-bottom: 8px; }
-    .source-card.on .source-ico { background: var(--accent); color: #fff; }
-    .source-name { font-size: 14px; font-weight: 700; }
-    .source-sub { font-size: 11.5px; color: var(--text-2); margin-top: 3px; line-height: 1.45; }
+    /* ===== 关联叙事（选填）折叠块 ===== */
+    .story-toggle {
+      display: flex; align-items: center; justify-content: space-between; width: 100%;
+      border: none; background: none; padding: 0; cursor: pointer; text-align: left;
+    }
+    .story-toggle-l { display: flex; align-items: center; gap: 10px; }
+    .story-ico {
+      width: 30px; height: 30px; border-radius: 10px; background: var(--accent-soft);
+      display: grid; place-items: center; font-size: 15px; color: var(--text-2); flex-shrink: 0;
+    }
+    .story-chev { color: var(--text-3); transition: transform .18s; flex-shrink: 0; }
+    .story-toggle:not(.closed) .story-chev { transform: rotate(180deg); }
+    .story-body { display: none; margin-top: 14px; }
+    .story-toggle:not(.closed) + .story-body { display: block; }
 
-    /* AI */
-    .ai-panel { display: none; margin-top: 14px; }
+    .story-src-row { display: flex; gap: 10px; }
+    .story-src {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 13px; padding: 12px 14px;
+      background: var(--surface); cursor: pointer; text-align: left; transition: all .15s;
+    }
+    .story-src:hover { border-color: var(--border-strong); }
+    .story-src.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,11,13,.05); }
+    .story-src-name { font-size: 13.5px; font-weight: 700; }
+    .story-src-sub { font-size: 11.5px; color: var(--text-2); margin-top: 3px; line-height: 1.45; }
+
+    /* AI 生成子面板 */
+    .ai-panel { display: none; margin-top: 12px; }
     .ai-panel.show { display: block; }
     .ai-prompt-wrap { display: flex; gap: 8px; }
-    .style-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 12px; }
-    .style-chip { height: 28px; padding: 0 13px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; }
+    .style-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
+    .style-chip {
+      height: 27px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer;
+    }
     .style-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .gen-btn { height: 44px; flex-shrink: 0; }
-    .gen-hint { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
-    .gen-stage { display: none; margin-top: 14px; border-radius: 14px; overflow: hidden; background: var(--text); color: #fff; }
+    .gen-hint { font-size: 11.5px; color: var(--text-3); margin-top: 6px; display: flex; justify-content: space-between; }
+    .gen-stage { display: none; margin-top: 12px; border-radius: 12px; background: var(--text); color: #fff; overflow: hidden; }
     .gen-stage.show { display: block; }
-    .gen-kws { display: flex; gap: 6px; flex-wrap: wrap; padding: 16px 18px 4px; }
+    .gen-kws { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 16px 4px; }
     .gen-kw { font-size: 12px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 3px 10px; opacity: 0; animation: kwIn .4s forwards; }
     @keyframes kwIn { from { opacity: 0; transform: scale(.9);} to { opacity: 1; } }
-    .gen-progress { margin: 8px 18px 2px; height: 3px; background: rgba(255,255,255,.15); border-radius: 3px; overflow: hidden; }
+    .gen-progress { margin: 8px 16px 2px; height: 3px; background: rgba(255,255,255,.15); border-radius: 3px; overflow: hidden; }
     .gen-progress i { display: block; height: 100%; background: #fff; width: 0%; transition: width .2s; }
-    .gen-row { display: flex; align-items: baseline; justify-content: space-between; padding: 6px 18px 12px; }
-    .gen-timer { font-family: var(--mono); font-size: 26px; font-weight: 800; }
+    .gen-row { display: flex; align-items: baseline; justify-content: space-between; padding: 6px 16px 12px; }
+    .gen-timer { font-family: var(--mono); font-size: 24px; font-weight: 800; }
     .gen-caption { font-size: 12px; color: rgba(255,255,255,.6); }
-    .gen-poster { display: none; grid-template-columns: 74px 1fr; gap: 12px; margin-top: 14px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); }
-    .gen-poster.show { display: grid; }
-    .gen-poster-img { width: 74px; height: 74px; border-radius: 10px; overflow: hidden; background: var(--surface); position: relative; }
-    .gen-poster-img img, .gen-poster-img video { width: 100%; height: 100%; object-fit: cover; }
-    .gen-poster-name { font-size: 14px; font-weight: 700; }
-    .gen-poster-tag { font-size: 11px; color: var(--text-2); margin: 3px 0 6px; }
-    .gen-poster-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+    .gen-result {
+      display: none; grid-template-columns: 64px 1fr; gap: 12px; margin-top: 12px; padding: 11px;
+      border: 1px solid var(--border); border-radius: 13px; background: var(--surface-2);
+    }
+    .gen-result.show { display: grid; }
+    .gen-result-thumb { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--surface); position: relative; }
+    .gen-result-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .gen-result-name { font-size: 13.5px; font-weight: 700; }
+    .gen-result-tag { font-size: 11px; color: var(--text-2); margin: 2px 0 4px; }
+    .gen-result-desc { font-size: 11.5px; color: var(--text-2); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-    /* 作品 */
-    .work-panel { display: none; margin-top: 14px; }
+    /* 作品选择子面板 */
+    .work-panel { display: none; margin-top: 12px; }
     .work-panel.show { display: block; }
-    .work-list { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); max-height: 220px; overflow-y: auto; }
-    .work-item { display: flex; align-items: center; gap: 12px; padding: 9px 14px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background .12s; }
+    .work-list { border: 1px solid var(--border); border-radius: 13px; overflow: hidden; max-height: 210px; overflow-y: auto; }
+    .work-item { display: flex; align-items: center; gap: 11px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
     .work-item:last-child { border-bottom: none; }
     .work-item:hover { background: var(--surface-2); }
     .work-item.on { background: rgba(10,11,13,.04); }
-    .work-cover { width: 52px; height: 40px; border-radius: 8px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; }
+    .work-cover { width: 46px; height: 36px; border-radius: 8px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; }
     .work-cover img { width: 100%; height: 100%; object-fit: cover; }
     .work-info { flex: 1; min-width: 0; }
-    .work-title { font-size: 13px; font-weight: 600; }
+    .work-title { font-size: 12.5px; font-weight: 600; }
     .work-meta { font-size: 11px; color: var(--text-2); margin-top: 2px; }
-    .work-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: grid; place-items: center; flex-shrink: 0; color: transparent; }
+    .work-check { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: grid; place-items: center; flex-shrink: 0; color: transparent; }
     .work-item.on .work-check { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .ready-banner { display: none; margin-top: 14px; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #F4FBF7; border: 1px solid rgba(14,159,110,.25); }
-    .ready-banner.show { display: flex; }
-    .ready-ico { width: 40px; height: 40px; border-radius: 10px; overflow: hidden; background: var(--surface); flex-shrink: 0; }
-    .ready-ico img { width: 100%; height: 100%; object-fit: cover; }
-    .ready-name { font-size: 14px; font-weight: 700; }
-    .ready-sub { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
 
-    /* 参数 */
-    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-    .f-note { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
-    .cover-row { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
-    .cover-thumb { width: 66px; height: 50px; border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: var(--surface-2); }
-    .cover-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .cover-thumb.on { border-color: var(--accent); }
+    /* ===== 表单 ===== */
+    .lp-title-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+    .lp-title { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; }
+    .lp-step { font-size: 12px; color: var(--text-3); }
+    .lp-form { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; }
+    .lp-wide { grid-column: 1 / -1; }
+    .field-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+    .field-label .opt { color: var(--text-3); font-weight: 400; }
+    .f-note { font-size: 11.5px; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
 
-    .inline-warn { display: none; align-items: center; gap: 8px; font-size: 12.5px; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
-    .inline-warn.show { display: flex; }
-    .inline-warn.danger { background: #FEF2F2; color: #B91C1C; }
-    .inline-warn.warn { background: #FFFBEB; color: #92400E; }
+    /* 币图上传 */
+    .upload { display: flex; align-items: center; gap: 12px; }
+    .upload-box {
+      width: 84px; height: 84px; border-radius: 14px; overflow: hidden; flex-shrink: 0;
+      border: 1.5px dashed var(--border-strong); background: var(--surface-2); cursor: pointer;
+      display: grid; place-items: center; color: var(--text-3); position: relative;
+    }
+    .upload-box:hover { border-color: var(--text-3); color: var(--text-2); }
+    .upload-box img { width: 100%; height: 100%; object-fit: cover; }
+    .upload-box .up-plus { font-size: 22px; }
+    .upload-copy { font-size: 13px; color: var(--text-2); font-weight: 600; cursor: pointer; }
+    .upload-hint { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+    .upload input[type=file] { display: none; }
 
-    /* 费用 / 高级 */
-    .due-line { text-align: center; font-size: 13px; color: var(--text-2); padding: 2px 0 12px; }
-    .due-line b { color: var(--text); font-weight: 700; }
-    .adv-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0 4px; }
+    /* 前缀输入 */
+    .prefixed { position: relative; }
+    .prefixed > span {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      font-size: 12.5px; color: var(--text-3); pointer-events: none;
+    }
+    .prefixed .input { padding-left: 58px; }
+
+    /* 配对资产 */
+    .pair-row { display: flex; align-items: center; gap: 8px; }
+    .pair-token {
+      height: 42px; padding: 0 14px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border); background: var(--surface-2); font-size: 13.5px; font-weight: 600;
+    }
+    .pair-token .eth-dot {
+      width: 18px; height: 18px; border-radius: 50%; background: #627EEA; color: #fff;
+      display: grid; place-items: center; font-size: 9px; font-weight: 800;
+    }
+
+    /* 开发者预买 */
+    .buy-entry { position: relative; max-width: 260px; }
+    .buy-entry .input { padding-right: 52px; }
+    .buy-token {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 12.5px; font-weight: 700; color: var(--text-2);
+    }
+
+    /* ===== 高级设置 ===== */
+    .adv-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0 2px; }
     .adv-toggle {
       display: flex; align-items: center; justify-content: space-between; width: 100%;
-      padding: 10px 0; border: none; background: none;
-      font-size: 13px; font-weight: 700; color: var(--text);
-      cursor: pointer;
+      padding: 10px 0; border: none; background: none; font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer;
     }
-    .adv-toggle:hover { opacity: .75; }
-    .adv-toggle svg { transition: transform .18s; color: var(--text-3); transform: rotate(-90deg); }
-    .adv-toggle:not(.closed) svg { transform: rotate(0deg); }
+    .adv-toggle svg { color: var(--text-3); transition: transform .18s; }
+    .adv-toggle:not(.closed) svg { transform: rotate(180deg); }
     .adv-body { display: none; padding-top: 2px; }
     .adv-toggle:not(.closed) + .adv-body { display: block; }
-    .adv-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid var(--border-light, #F0F1F3); }
+    .adv-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-top: 1px solid #F0F1F3; }
     .adv-row:first-child { border-top: none; }
     .adv-row .lbl { font-size: 13px; font-weight: 500; }
     .adv-row .lbl small { display: block; font-size: 11px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
     .adv-row .ctrl { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
-    .tax-val { font-size: 12px; font-weight: 700; width: 28px; text-align: right; }
+    .tax-val { font-size: 12px; font-weight: 700; width: 30px; text-align: right; }
     input[type=range] { width: 110px; accent-color: var(--accent); }
     .switch { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 100%; height: 100%; position: absolute; cursor: pointer; margin: 0; }
@@ -126,24 +174,43 @@
     .switch i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
     .switch input:checked + i { background: var(--accent); }
     .switch input:checked + i::after { transform: translateX(16px); }
-    .wallet-static { font-family: var(--mono); font-size: 12px; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .wallet-edit { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; justify-content: flex-end; }
+    .wallet-static { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
 
-    /* 汇总卡 */
-    .sum-card { position: sticky; top: calc(var(--header-h) + 16px); }
-    .sum-name { display: flex; align-items: center; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-    .sum-cover { width: 48px; height: 48px; border-radius: 12px; overflow: hidden; background: var(--surface-2); }
-    .sum-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .sum-ticker { font-size: 17px; font-weight: 800; }
-    .sum-sym { font-size: 12px; color: var(--text-3); font-weight: 600; }
-    .sum-rows { padding: 6px 0; }
-    .sum-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-2); padding: 7px 0; }
-    .sum-row b { color: var(--text); font-weight: 600; }
-    .sum-row .ok { color: #0E9F6E; font-weight: 600; }
-    .sum-row.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 12px; font-weight: 700; color: var(--text); }
-    .sum-tip { font-size: 11.5px; color: var(--text-3); line-height: 1.6; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 12px; }
+    /* 错误 */
+    .inline-warn { display: none; align-items: center; gap: 8px; font-size: 12.5px; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+    .inline-warn.show { display: flex; }
+    .inline-warn.danger { background: #FEF2F2; color: #B91C1C; }
+    .form-error { display: none; font-size: 11.5px; color: #B91C1C; margin-top: 5px; }
+    .form-error.show { display: block; }
 
-    /* 创建 */
-    .create-cta { height: 52px; width: 100%; font-size: 15px; }
+    /* ===== 底部 action ===== */
+    .cr-actions {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 14px 0 4px; flex-wrap: wrap;
+    }
+    .cr-due { font-size: 13px; color: var(--text-2); }
+    .cr-due b { color: var(--text); font-weight: 700; }
+    .cr-gas { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+    .create-cta { height: 46px; min-width: 180px; font-size: 14.5px; }
+
+    /* ===== 右列预览卡 ===== */
+    .preview-card { padding: 20px; }
+    .pv-img {
+      width: 100%; aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden;
+      background: var(--surface-2); border: 1px solid var(--border);
+      display: grid; place-items: center; color: var(--text-3); margin-bottom: 14px;
+    }
+    .pv-img img { width: 100%; height: 100%; object-fit: cover; }
+    .pv-img .pv-ph { font-size: 26px; }
+    .pv-id { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+    .pv-name { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+    .pv-ticker { font-size: 12px; color: var(--text-3); font-weight: 700; }
+    .pv-rows { border-top: 1px solid var(--border); }
+    .pv-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-2); padding: 9px 0; border-bottom: 1px solid #F0F1F3; }
+    .pv-row:last-child { border-bottom: none; }
+    .pv-row b { color: var(--text); font-weight: 600; }
+    .pv-row .ok { color: #0E9F6E; font-weight: 600; }
 
     .success-wrap { text-align: center; padding: 60px 0 30px; display: none; }
     .success-ico { width: 72px; height: 72px; border-radius: 50%; background: var(--text); color: #fff; display: grid; place-items: center; margin: 0 auto 18px; font-size: 30px; animation: pop .4s ease; }
@@ -154,11 +221,12 @@
     .hide { display: none; }
 
     @media (max-width: 1000px) {
-      .cr-grid { grid-template-columns: minmax(0, 660px); }
-      .sum-card { position: static; }
+      .cr-grid { grid-template-columns: minmax(0, 1fr); }
+      .cr-aside { position: static; }
     }
     @media (max-width: 620px) {
-      .source-cards, .f-row { grid-template-columns: 1fr; }
+      .lp-form { grid-template-columns: 1fr; }
+      .story-src-row { flex-direction: column; }
       .ai-prompt-wrap { flex-direction: column; }
     }
   </style>
@@ -168,145 +236,165 @@
 
   <main class="launch-shell">
     <div class="create-wrap" id="createApp">
-      <div class="cr-head">
-        <div>
-          <div class="cr-title">创建代币</div>
-          <div class="cr-desc">给币一段叙事，curve 从第一笔开始。</div>
-        </div>
-        <a class="cr-link-back" href="launchpad.html">← 市场</a>
+      <div class="cr-topbar">
+        <a class="cr-link-back" href="launchpad.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          市场
+        </a>
+        <span class="cr-version">v2 · ETH pair</span>
       </div>
 
       <!-- 创建表单 -->
       <div class="cr-grid" id="crForm">
-        <!-- 主列：叙事 → 参数 → 费用 → 创建 -->
+        <!-- 主列 -->
         <div class="cr-main">
-
-          <!-- ① 叙事 -->
-          <section class="sec-card">
-            <div class="sec-head">
-              <span class="sec-num">1</span>
-              <div><div class="sec-title">叙事</div><div class="sec-sub">生成或选择一段视频，作为币的故事</div></div>
-            </div>
-            <div class="sec-body">
-              <div class="source-cards">
-                <div class="source-card on" id="srcAI" onclick="pickSource('ai')">
-                  <div class="source-ico">✦</div>
-                  <div class="source-name">AI 生成</div>
-                  <div class="source-sub">一句话生成 15s 叙事 · 生成费 0.02 ETH</div>
-                </div>
-                <div class="source-card" id="srcWork" onclick="pickSource('work')">
-                  <div class="source-ico">🎬</div>
-                  <div class="source-name">我的作品</div>
-                  <div class="source-sub">从已发布的短剧或视频中选择</div>
-                </div>
-              </div>
-
-              <div class="ai-panel show" id="aiPanel">
-                <div class="ai-prompt-wrap">
-                  <textarea class="input" id="aiPrompt" rows="2" placeholder="描述想生成的叙事，如：一只穿西装的猫在月球上打碟"></textarea>
-                  <button class="btn btn-primary gen-btn" id="genBtn" onclick="startGen()">生成</button>
-                </div>
-                <div class="style-row" id="styleRow">
-                  <button class="style-chip on" data-s="古风">古风</button>
-                  <button class="style-chip" data-s="赛博">赛博</button>
-                  <button class="style-chip" data-s="卡通">卡通</button>
-                  <button class="style-chip" data-s="黑白">黑白</button>
-                  <button class="style-chip" data-s="水彩">水彩</button>
-                </div>
-                <div class="gen-hint"><span>生成费 0.02 ETH</span><span id="ethHint"></span></div>
-                <div class="inline-warn danger" id="genErr"></div>
-                <div class="gen-stage" id="genStage">
-                  <div class="gen-kws" id="genKws"></div>
-                  <div class="gen-progress"><i id="genBar"></i></div>
-                  <div class="gen-row">
-                    <span class="gen-timer num" id="genTimer">15.0</span>
-                    <span class="gen-caption" id="genCaption">解析提示词…</span>
+          <!-- 关联叙事（选填） -->
+          <section class="pane">
+            <div class="pane-pad">
+              <button class="story-toggle" id="storyToggle" onclick="toggleStory()">
+                <span class="story-toggle-l">
+                  <span class="story-ico">✦</span>
+                  <span>
+                    <span style="display:block;font-size:15px;font-weight:800">关联叙事（选填）</span>
+                    <span style="display:block;font-size:12px;color:var(--text-2);margin-top:2px">给这个币一段 AI 或作品故事，自动带出名称与封面</span>
+                  </span>
+                </span>
+                <svg class="story-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="story-body" id="storyBody">
+                <div class="story-src-row">
+                  <div class="story-src on" id="srcAI" onclick="pickSource('ai')">
+                    <div class="story-src-name">✦ AI 生成</div>
+                    <div class="story-src-sub">一句话生成 15s 叙事 · 生成费 0.02 ETH</div>
+                  </div>
+                  <div class="story-src" id="srcWork" onclick="pickSource('work')">
+                    <div class="story-src-name">🎬 我的作品</div>
+                    <div class="story-src-sub">从已发布的短剧或视频中选择</div>
                   </div>
                 </div>
-                <div class="gen-poster" id="genPoster"></div>
-              </div>
 
-              <div class="work-panel" id="workPanel">
-                <div class="work-list" id="workList"></div>
+                <div class="ai-panel show" id="aiPanel">
+                  <div class="ai-prompt-wrap">
+                    <textarea class="input" id="aiPrompt" rows="2" placeholder="描述想生成的叙事，如：一只穿西装的猫在月球上打碟"></textarea>
+                    <button class="btn btn-primary gen-btn" id="genBtn" onclick="startGen()" style="height:42px;flex-shrink:0">生成</button>
+                  </div>
+                  <div class="style-row" id="styleRow">
+                    <button class="style-chip on" data-s="古风">古风</button>
+                    <button class="style-chip" data-s="赛博">赛博</button>
+                    <button class="style-chip" data-s="卡通">卡通</button>
+                    <button class="style-chip" data-s="黑白">黑白</button>
+                    <button class="style-chip" data-s="水彩">水彩</button>
+                  </div>
+                  <div class="gen-hint"><span>生成费 0.02 ETH</span><span id="ethHint"></span></div>
+                  <div class="inline-warn danger" id="genErr"></div>
+                  <div class="gen-stage" id="genStage">
+                    <div class="gen-kws" id="genKws"></div>
+                    <div class="gen-progress"><i id="genBar"></i></div>
+                    <div class="gen-row">
+                      <span class="gen-timer num" id="genTimer">15.0</span>
+                      <span class="gen-caption" id="genCaption">解析提示词…</span>
+                    </div>
+                  </div>
+                  <div class="gen-result" id="genResult"></div>
+                </div>
+
+                <div class="work-panel" id="workPanel">
+                  <div class="work-list" id="workList"></div>
+                </div>
               </div>
-              <div class="ready-banner" id="readyBanner"></div>
             </div>
           </section>
 
-          <!-- ② 参数 -->
-          <section class="sec-card">
-            <div class="sec-head">
-              <span class="sec-num">2</span>
-              <div><div class="sec-title">参数</div><div class="sec-sub">名称、简介、社交与币配置</div></div>
-            </div>
-            <div class="sec-body">
-              <div class="f-row">
+          <!-- 代币信息 -->
+          <section class="pane">
+            <div class="pane-pad">
+              <div class="lp-title-row">
+                <div class="lp-title">Launch token</div>
+                <span class="lp-step">固定总量 · 毕业上池</span>
+              </div>
+              <div class="lp-form">
                 <div class="field">
                   <div class="field-label">名称</div>
-                  <input class="input" id="pName" maxlength="24" placeholder="币名" />
+                  <input class="input" id="pName" maxlength="60" placeholder="币名（如：凤骨琉璃）" />
                 </div>
                 <div class="field">
                   <div class="field-label">代号</div>
                   <input class="input" id="pSymbol" maxlength="6" placeholder="TICKER" style="text-transform:uppercase" />
                   <div class="form-error" id="symErr"></div>
                 </div>
-              </div>
-              <div class="field">
-                <div class="field-label">简介</div>
-                <textarea class="input" id="pTag" rows="2" placeholder="一句话讲清这个币是什么"></textarea>
-                <div class="f-note"><span id="pTagCount">0</span> / 60</div>
-              </div>
-              <div class="field" style="margin-bottom:8px">
-                <div class="field-label">封面帧</div>
-                <div class="cover-row" id="coverPick"></div>
-              </div>
-              <div class="field">
-                <div class="field-label">社交链接 <span style="font-weight:400;color:var(--text-3)">选填</span></div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
-                  <div style="margin-bottom:10px;position:relative">
-                    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text-3);pointer-events:none;z-index:1">x.com/</span>
-                    <input class="input" id="pX" maxlength="40" style="padding-left:56px" placeholder="handle" />
+                <div class="field lp-wide">
+                  <div class="field-label">简介 <span class="num" id="pTagCount" style="color:var(--text-3);font-weight:400">0</span><span style="font-weight:400;color:var(--text-3)"> / 60</span></div>
+                  <textarea class="input" id="pTag" rows="2" placeholder="一句话讲清这个币是什么"></textarea>
+                </div>
+                <div class="field lp-wide">
+                  <div class="field-label">币图 <span class="opt">自定义图仅预览</span></div>
+                  <div class="upload">
+                    <label class="upload-box" id="uploadBox" title="选择封面图">
+                      <span class="up-plus" id="upPlus">＋</span>
+                      <img id="upImg" alt="" style="display:none" />
+                      <input type="file" id="upFile" accept="image/png,image/jpeg,image/webp,image/gif" />
+                    </label>
+                    <div>
+                      <span class="upload-copy" onclick="document.getElementById('upFile').click()">选择图片</span>
+                      <div class="upload-hint">PNG/JPG/WebP · 演示环境仅预览，创建后沿用叙事封面</div>
+                    </div>
                   </div>
-                  <div style="margin-bottom:10px;position:relative">
-                    <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text-3);pointer-events:none;z-index:1">t.me/</span>
-                    <input class="input" id="pTg" maxlength="40" style="padding-left:56px" placeholder="handle" />
+                </div>
+                <div class="field">
+                  <div class="field-label">X 链接 <span class="opt">选填</span></div>
+                  <div class="prefixed">
+                    <span>x.com/</span>
+                    <input class="input" id="pX" maxlength="40" placeholder="handle" autocomplete="off" />
                   </div>
+                </div>
+                <div class="field">
+                  <div class="field-label">Telegram <span class="opt">选填</span></div>
+                  <div class="prefixed">
+                    <span>t.me/</span>
+                    <input class="input" id="pTg" maxlength="40" placeholder="community" autocomplete="off" />
+                  </div>
+                </div>
+                <div class="field lp-wide">
+                  <div class="field-label">配对资产</div>
+                  <div class="pair-row">
+                    <span class="pair-token"><span class="eth-dot">Ξ</span>ETH</span>
+                  </div>
+                  <div class="f-note">曲线集满 4.2 ETH 自动毕业，流动性永久锁定。</div>
+                </div>
+                <div class="field lp-wide">
+                  <div class="field-label">开发者预买 <span class="opt">选填</span></div>
+                  <div class="buy-entry">
+                    <input class="input num" id="pDevBuy" type="number" min="0" step="0.01" value="0" placeholder="0.00" />
+                    <span class="buy-token">ETH</span>
+                  </div>
+                  <div class="f-note">发射时预买 · 0 为不预挖，保持公平发射</div>
                 </div>
               </div>
 
-              <!-- 开发者预买 -->
-              <div class="field">
-                <div class="field-label">开发者预买 <span style="font-weight:400;color:var(--text-3)">选填</span></div>
-                <div style="position:relative;max-width:280px">
-                  <input class="input num" id="pDevBuy" type="number" min="0" step="0.01" value="0" placeholder="0.00" />
-                  <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:600">ETH</span>
-                </div>
-                <div class="f-note">发射时预买 · 0 为不预挖，保持公平发射</div>
-              </div>
-
-              <!-- 高级设置（币配置的一部分，随参数） -->
               <hr class="adv-divider" />
               <button class="adv-toggle closed" id="advToggle" onclick="toggleAdv()">
                 <span>高级设置</span>
-                <svg id="advArrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="adv-body" id="advBody">
                 <div class="adv-row">
-                  <span class="lbl">创作者税<small>总交易费 1%，其中最多 10% 归你</small></span>
-                  <span class="ctrl">
-                    <span class="tax-val num" id="taxVal">0%</span>
-                    <input type="range" id="taxRange" min="0" max="10" step="1" value="0" oninput="onTax()" />
-                  </span>
-                </div>
-                <div class="adv-row">
-                  <span class="lbl">费共享给持有者<small>将创作者收益按持仓比例分给持币者</small></span>
+                  <span class="lbl">费共享给持有者<small>创作者收益按持仓比例分给持币者</small></span>
                   <span class="ctrl">
                     <label class="switch"><input type="checkbox" id="shareToHolders" /><i></i></label>
                   </span>
                 </div>
                 <div class="adv-row">
                   <span class="lbl" style="flex:1">创作者钱包<small>留空使用当前钱包</small></span>
-                  <span class="wallet-static" id="walletAddr">0x7A2b…3fD8</span>
+                  <span class="wallet-edit">
+                    <span class="wallet-static num" id="walletAddr">0x7A2b…3fD8</span>
+                  </span>
+                </div>
+                <div class="adv-row">
+                  <span class="lbl">创作者税<small>总交易费 1%，其中最多 10% 归你</small></span>
+                  <span class="ctrl">
+                    <span class="tax-val num" id="taxVal">0%</span>
+                    <input type="range" id="taxRange" min="0" max="10" step="1" value="0" oninput="onTax()" />
+                  </span>
                 </div>
                 <div class="adv-row" style="flex-direction:column;align-items:stretch">
                   <span class="lbl">狙击税豁免钱包<small>发射首 3 秒买入收取 99% 狙击税，3 秒后衰减至 0 · 白名单钱包免收</small></span>
@@ -317,34 +405,32 @@
             </div>
           </section>
 
-          <!-- ③ 创建 -->
-          <section>
-            <div class="due-line" id="dueLine">ETH pair · <b class="num" id="feeTotal">0.0205 ETH</b> due</div>
-            <button class="btn btn-primary create-cta" id="createBtn" onclick="doCreate()">创建</button>
-            <div class="inline-warn danger" id="createErr"></div>
-          </section>
+          <!-- 创建动作 -->
+          <div class="cr-actions">
+            <div>
+              <div class="cr-due">ETH pair, <b class="num" id="feeTotal">0.0005 ETH</b> due</div>
+              <div class="cr-gas">⛽ 网络费预估 —</div>
+            </div>
+            <button class="btn btn-primary create-cta" id="createBtn" onclick="doCreate()" disabled>填写名称</button>
+          </div>
+          <div class="inline-warn danger" id="createErr" style="margin-top:0"></div>
         </div>
 
-        <!-- 右列：汇总 -->
+        <!-- 右列：实时预览 -->
         <aside class="cr-aside">
-          <div class="sec-card sum-card">
-            <div class="sec-body">
-              <div class="sum-name">
-                <div class="sum-cover"><img id="sumCover" src="image/hero-bg-blur.jpg" alt=""></div>
-                <div>
-                  <div class="sum-ticker" id="sumName">新叙事</div>
-                  <div class="sum-sym num" id="sumSym">$TICKER</div>
-                </div>
-              </div>
-              <div class="sum-rows">
-                <div class="sum-row"><span>Launch fee</span><b class="num">0.0005 ETH</b></div>
-                <div class="sum-row"><span>Paired with</span><b>ETH (WETH)</b></div>
-                <div class="sum-row"><span>Trade fee</span><b class="num">1.00%</b></div>
-                <div class="sum-row"><span>Launch window</span><b>首 3s 99% → 0</b></div>
-                <div class="sum-row"><span>Graduation</span><b class="ok">4.2 ETH → 池</b></div>
-                <div class="sum-row"><span>Liquidity</span><b class="ok">永久锁定</b></div>
-              </div>
-              <div class="sum-tip">创建即部署：命名、符号、简介不可再改。费用以 ETH 结算。</div>
+          <div class="pane preview-card">
+            <div class="pv-img" id="pvImgBox"><span class="pv-ph" id="pvPh">＋</span><img id="pvImg" alt="" style="display:none" /></div>
+            <div class="pv-id">
+              <span class="pv-name" id="sumName">新叙事</span>
+              <span class="pv-ticker num" id="sumSym">$TICKER</span>
+            </div>
+            <div class="pv-rows">
+              <div class="pv-row"><span>Launch fee</span><b class="num">0.0005 ETH</b></div>
+              <div class="pv-row"><span>配对资产</span><b>ETH</b></div>
+              <div class="pv-row"><span>交易费</span><b class="num">1.00%</b></div>
+              <div class="pv-row"><span>发射窗口</span><b>首 3s 99% → 0</b></div>
+              <div class="pv-row"><span>毕业</span><b class="ok">4.2 ETH → 池</b></div>
+              <div class="pv-row"><span>流动性</span><b class="ok">永久锁定</b></div>
             </div>
           </div>
         </aside>
@@ -362,17 +448,19 @@
       </div>
     </div>
   </main>
+
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
   <script src="launch-shell.js"></script>
   <script>
     // ============================================================
-    //  创建（单页版）
+    //  创建（pons 骨架 · 全中文）
     // ============================================================
     var source = 'ai';
     var style = '古风';
-    var genState = null;   // {poster:{cover,video,prompt}, frame}
-    var pickedWork = null;
+    var genState = null;      // {poster:{cover,video,prompt,style}, frame, suggestName}
+    var pickedWork = null;    // 选中的作品
+    var uploadPreview = null; // 上传图（仅预览）
     var lastCoinId = null;
 
     var AI_COVERS = ['image/cover-zero-night.jpg','image/cover-pyramid.jpg','image/cover-survivor.jpg','image/cover-candle.jpg','image/cover-allin.jpg','image/hero-bg-blur.jpg'];
@@ -386,10 +474,13 @@
       if (el && window.Launch) el.textContent = '可用 ' + Launch.fmtEth(Launch.USER.eth);
     }
     function walletText() {
-      if (window.Launch) {
-        return Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
-      }
+      if (window.Launch) return Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
       return '0x7A2b…3fD8';
+    }
+
+    // ---- 叙事折叠 ----
+    function toggleStory() {
+      document.getElementById('storyToggle').classList.toggle('closed');
     }
 
     // ---- 来源切换 ----
@@ -399,7 +490,7 @@
       document.getElementById('srcWork').classList.toggle('on', s==='work');
       document.getElementById('aiPanel').classList.toggle('show', s==='ai');
       document.getElementById('workPanel').classList.toggle('show', s==='work');
-      document.getElementById('readyBanner').classList.remove('show');
+      if (s === 'work') renderWorks();
       syncReady();
     }
 
@@ -434,57 +525,15 @@
       document.querySelectorAll('.work-item').forEach(function(el){el.classList.remove('on');});
       var items = document.querySelectorAll('.work-item');
       if (items[i]) items[i].classList.add('on');
-      setReady(pickedWork.cover, pickedWork.title, '我的作品', '');
-      syncReady();
+      uploadPreview = null; refreshUpload();
+      // 自动带出名称/简介
+      if (!document.getElementById('pName').value) document.getElementById('pName').value = pickedWork.title || '';
+      if (!document.getElementById('pTag').value) document.getElementById('pTag').value = '';
+      syncAll();
+      Launch.toast('已关联作品：' + (pickedWork.title||''), 'ok');
     }
 
-    // ---- 就绪横幅 + 汇总联动 ----
-    function setReady(cover, name, tag, desc) {
-      var banner = document.getElementById('readyBanner');
-      banner.innerHTML = '<div class="ready-ico"><img src="'+esc(cover)+'" alt=""></div>'+
-        '<div><div class="ready-name">'+esc(name)+'</div><div class="ready-sub">'+esc(tag)+'</div></div>';
-      banner.classList.add('show');
-      // 带出建议名/简介（仅在用户尚未输入时）
-      if (!document.getElementById('pName').value) document.getElementById('pName').value = name;
-      if (!document.getElementById('pTag').value) document.getElementById('pTag').value = desc || '';
-      if (desc) syncCover(cover);
-      syncCover(cover);
-      syncSum();
-    }
-    function syncReady() {
-      if (source === 'work' && pickedWork) setReady(pickedWork.cover, pickedWork.title, '我的作品', '');
-      if (source === 'ai' && genState && genState.poster) setReady(genState.poster.cover, genState.suggestName, 'AI 叙事 · 15s · ' + genState.poster.style, genState.poster.prompt);
-    }
-    function syncCover(cover) {
-      if (!cover) return;
-      var cur = document.querySelector('#coverPick img.on');
-      // 若用户未自选帧，则更新汇总封面
-      if (!cur) {
-        genState = genState || {};
-        genState.frame = cover;
-        document.getElementById('sumCover').src = cover;
-      }
-      if (genState && !genState._userCover) genState.frame = cover;
-      if (!document.getElementById('sumCover').getAttribute('src')) document.getElementById('sumCover').src = cover;
-    }
-    function syncSum() {
-      var name = document.getElementById('pName').value.trim();
-      var sym = document.getElementById('pSymbol').value.trim().toUpperCase();
-      document.getElementById('sumName').textContent = name || '新叙事';
-      document.getElementById('sumSym').textContent = '$' + (sym || 'TICKER');
-      // 汇总封面：优先所选帧
-      var pick = genState && genState.frame;
-      if (pick) document.getElementById('sumCover').src = pick;
-      else if (pickedWork) document.getElementById('sumCover').src = pickedWork.cover;
-      var genFee = (source === 'ai' && genState && genState.poster) ? 0.02 : 0;
-      var total = 0.0005 + genFee;
-      document.getElementById('feeTotal').textContent = total.toFixed(4) + ' ETH';
-      // 创建按钮状态
-      var ok = source === 'work' ? !!pickedWork : (!!genState && !!genState.poster);
-      document.getElementById('createBtn').disabled = !ok;
-    }
-
-    // ---- AI 生成演出 ----
+    // ---- AI 生成演出（结束自动带出名称） ----
     function startGen() {
       if (!window.Launch) return;
       var prompt = document.getElementById('aiPrompt').value.trim();
@@ -497,7 +546,6 @@
       err.classList.remove('show');
       document.getElementById('genBtn').disabled = true;
       document.getElementById('genBtn').textContent = '生成中…';
-      // 关键词
       var all = prompt.replace(/\s+/g,'');
       var words = [];
       var size = Math.max(2, Math.ceil(all.length/4));
@@ -506,8 +554,7 @@
       kws.innerHTML = words.map(function(w){return '<span class="gen-kw">'+esc(w)+'</span>';}).join('');
       kws.querySelectorAll('.gen-kw').forEach(function(el,idx){ el.style.animationDelay=(idx*0.1)+'s'; });
       document.getElementById('genStage').classList.add('show');
-      document.getElementById('genPoster').classList.remove('show');
-      document.getElementById('readyBanner').classList.remove('show');
+      document.getElementById('genResult').classList.remove('show');
       document.getElementById('genBar').style.width = '0%';
 
       var t0 = performance.now(), dur = 4200;
@@ -522,76 +569,86 @@
     }
     function finishGen() {
       var cover = pickCover(), video = pickVideo();
-      var poster = document.getElementById('genPoster');
       var tag = document.getElementById('aiPrompt').value.trim();
       var suggestion = suggestName(tag);
-      poster.innerHTML =
-        '<div class="gen-poster-img"><img src="'+cover+'" alt=""></div>'+
-        '<div><div class="gen-poster-name">'+esc(suggestion)+'</div>'+
-        '<div class="gen-poster-tag">AI 叙事 · 15s · '+esc(style)+' · <a href="javascript:void(0)" onclick="previewGenVideo()" style="color:var(--accent);font-weight:600">试播 ▶</a></div>'+
-        '<div class="gen-poster-desc">'+esc(tag)+'</div></div>';
-      poster.classList.add('show');
+      var res = document.getElementById('genResult');
+      res.innerHTML =
+        '<div class="gen-result-thumb"><img src="'+cover+'" alt=""></div>'+
+        '<div><div class="gen-result-name">'+esc(suggestion)+'</div>'+
+        '<div class="gen-result-tag">AI 叙事 · 15s · '+esc(style)+'</div>'+
+        '<div class="gen-result-desc">'+esc(tag)+'</div></div>';
+      res.classList.add('show');
       document.getElementById('genStage').classList.remove('show');
       document.getElementById('genBtn').disabled = false;
       document.getElementById('genBtn').textContent = '重新生成';
       genState = { poster:{cover:cover,video:video,prompt:tag,style:style}, frame:cover, suggestName:suggestion };
-      setReady(cover, suggestion, 'AI 叙事 · 15s · ' + style, tag);
+      pickedWork = null;
+      // 自动带出名称/简介
+      if (!document.getElementById('pName').value) document.getElementById('pName').value = suggestion;
+      if (!document.getElementById('pTag').value) document.getElementById('pTag').value = tag;
+      uploadPreview = null; refreshUpload();
+      syncAll();
       Launch.toast('叙事已生成','ok');
     }
     function suggestName(tag) {
       var out = (tag||'').replace(/[，。,.!！?？\s]+/g,'').slice(0,8);
       return out || '新叙事币';
     }
-    function previewGenVideo() {
-      if (!genState || !genState.poster || !genState.poster.video) { Launch.toast('暂无视频','warn'); return; }
-      var v = document.createElement('video');
-      v.src = genState.poster.video; v.controls = true; v.autoplay = true; v.style.cssText = 'width:100%;border-radius:12px';
-      var prev = document.getElementById('genPoster');
-      // 简单替换为可播放视频，3 秒后还原
-      var old = prev.innerHTML;
-      prev.innerHTML = v.outerHTML;
-      setTimeout(function(){ if (genState) prev.innerHTML = old; }, 8000);
-      v.play().catch(function(){});
+
+    // ---- 上传（仅预览，不持久） ----
+    function refreshUpload() {
+      var img = document.getElementById('upImg');
+      var plus = document.getElementById('upPlus');
+      if (uploadPreview) { img.src = uploadPreview; img.style.display = 'block'; plus.style.display = 'none'; }
+      else { img.style.display = 'none'; plus.style.display = ''; }
+      // 预览卡图：上传 > 叙事封面 > 占位
+      var box = document.getElementById('pvImgBox');
+      var pv = document.getElementById('pvImg');
+      var ph = document.getElementById('pvPh');
+      var src = uploadPreview || currentCover();
+      if (src) { pv.src = src; pv.style.display='block'; ph.style.display='none'; }
+      else { pv.style.display='none'; ph.style.display=''; }
+    }
+    function currentCover() {
+      if (genState && genState.frame) return genState.frame;
+      if (pickedWork && pickedWork.cover) return pickedWork.cover;
+      return '';
+    }
+    function bindUpload() {
+      var file = document.getElementById('upFile');
+      file.addEventListener('change', function(){
+        var f = file.files && file.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function(){ uploadPreview = r.result; refreshUpload(); syncAll(); };
+        r.readAsDataURL(f);
+        file.value = '';
+      });
+    }
+
+    // ---- 预览/按钮联动 ----
+    function syncAll() {
+      var name = document.getElementById('pName').value.trim();
+      var sym = document.getElementById('pSymbol').value.trim().toUpperCase();
+      document.getElementById('sumName').textContent = name || '新叙事';
+      document.getElementById('sumSym').textContent = '$' + (sym || 'TICKER');
+      refreshUpload();
+      // 按钮状态文案
+      var btn = document.getElementById('createBtn');
+      var haveStory = !!(genState && genState.poster) || !!pickedWork || !!uploadPreview;
+      var symOk = /^[A-Z0-9]{2,6}$/.test(sym);
+      if (!name) { btn.textContent = '填写名称'; btn.disabled = true; }
+      else if (!symOk) { btn.textContent = '填写代号'; btn.disabled = true; }
+      else if (!haveStory && !uploadPreview) { btn.textContent = '选择币图或关联叙事'; btn.disabled = true; }
+      else { btn.textContent = '创建'; btn.disabled = false; }
     }
 
     // ---- 高级 ----
     function toggleAdv() {
-      var btn = document.getElementById('advToggle');
-      var body = document.getElementById('advBody');
-      btn.classList.toggle('closed');
-      var arrow = document.getElementById('advArrow');
-      if (arrow) arrow.style.transform = btn.classList.contains('closed') ? 'rotate(-90deg)' : '';
+      document.getElementById('advToggle').classList.toggle('closed');
     }
     function onTax() {
-      var v = document.getElementById('taxRange').value;
-      document.getElementById('taxVal').textContent = v + '%';
-      syncSum();
-    }
-    document.getElementById('shareToHolders').addEventListener('change', function(){ syncSum(); });
-
-    // ---- 封面帧 ----
-    function pickFrameEl(el) {
-      genState = genState || {};
-      genState.frame = el.getAttribute('data-s');
-      genState._userCover = true;
-      document.querySelectorAll('.cover-thumb').forEach(function(t){t.classList.remove('on');});
-      el.classList.add('on');
-      document.getElementById('sumCover').src = el.getAttribute('data-s');
-    }
-    function renderCoverRow() {
-      var host = document.getElementById('coverPick');
-      var frames = [];
-      if (genState && genState.poster) frames.push(genState.poster.cover);
-      if (pickedWork) frames.push(pickedWork.cover);
-      frames = frames.concat([pickCover(),pickCover()]);
-      frames = frames.filter(function(v,i,a){return a.indexOf(v)===i;}).slice(0,4);
-      genState = genState || {}; genState.frame = frames[0];
-      host.innerHTML = frames.map(function(f){
-        return '<div class="cover-thumb" data-s="'+esc(f)+'" onclick="pickFrameEl(this)"><img src="'+esc(f)+'" alt=""></div>';
-      }).join('');
-      var first = host.querySelector('.cover-thumb');
-      if (first) first.classList.add('on');
-      document.getElementById('sumCover').src = frames[0];
+      document.getElementById('taxVal').textContent = document.getElementById('taxRange').value + '%';
     }
 
     // ---- 创建 ----
@@ -602,23 +659,26 @@
       var sym = document.getElementById('pSymbol').value.trim().toUpperCase();
       var tag = document.getElementById('pTag').value.trim();
       var err = document.getElementById('createErr');
+      err.classList.remove('show');
       if (!name) { err.textContent = '请输入名称'; err.classList.add('show'); return; }
       if (!/^[A-Z0-9]{2,6}$/.test(sym)) { err.textContent = '代号需 2–6 位字母或数字'; err.classList.add('show'); return; }
       if ((Launch.coins||[]).some(function(c){return c.symbol===sym;})) { err.textContent = '代号已被使用'; err.classList.add('show'); return; }
-      if (!(genState && genState.poster) && !pickedWork) { err.textContent = '先生成或选择叙事'; err.classList.add('show'); return; }
+      var isAi = source === 'ai' && genState && genState.poster;
+      var isWork = !isAi && !!pickedWork;
+      if (!isAi && !isWork && !uploadPreview) { err.textContent = '先生成/选择叙事或上传币图'; err.classList.add('show'); return; }
 
       var btn = document.getElementById('createBtn');
       btn.disabled = true; btn.textContent = '创建中…';
-      var cover = (genState && genState.frame) || (pickedWork && pickedWork.cover) || (genState && genState.poster && genState.poster.cover);
+      // cover：叙事素材优先；演示上传图不持久化，用默认素材封面
+      var cover = currentCover() || (isWork ? pickedWork.cover : pickCover());
       var video = (genState && genState.poster && genState.poster.video) || '';
-      var isAi = source === 'ai' && genState && genState.poster;
 
       setTimeout(function(){
         var coin = Launch.createCoin({
           name:name, symbol:sym, tagline:tag,
           cover:cover, video:video,
-          sourceType:isAi?'ai':'work',
-          sourceTitle:isAi?'AI 叙事 · 15s':(pickedWork?pickedWork.title:''),
+          sourceType:isAi?'ai':(isWork?'work':'work'),
+          sourceTitle:isAi?'AI 叙事 · 15s':(isWork?(pickedWork.title||''):''),
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
           creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
           shareToHolders:document.getElementById('shareToHolders').checked,
@@ -640,33 +700,37 @@
       }, 900);
     }
 
-    // ---- 输入联动 ----
-    document.getElementById('pName').addEventListener('input', syncSum);
-    document.getElementById('pSymbol').addEventListener('input', function(){
-      document.getElementById('symErr').classList.remove('show');
-      syncSum();
-    });
-    document.getElementById('pTag').addEventListener('input', function(){
-      var n = this.value.length;
-      document.getElementById('pTagCount').textContent = n;
-      document.getElementById('createErr').classList.remove('show');
-      if (n>60) this.value = this.value.slice(0,60);
-    });
-    document.addEventListener('click', function(e){
-      var chip = e.target.closest('.style-chip');
-      if (chip) {
-        document.querySelectorAll('.style-chip').forEach(function(c){c.classList.remove('on');});
-        chip.classList.add('on'); style = chip.getAttribute('data-s');
-      }
-    });
+    // ---- 事件绑定 ----
+    function bind() {
+      bindUpload();
+      document.getElementById('pName').addEventListener('input', function(){ document.getElementById('createErr').classList.remove('show'); syncAll(); });
+      document.getElementById('pSymbol').addEventListener('input', function(){
+        document.getElementById('symErr').classList.remove('show');
+        document.getElementById('createErr').classList.remove('show');
+        syncAll();
+      });
+      document.getElementById('pTag').addEventListener('input', function(){
+        var n = this.value.length;
+        document.getElementById('pTagCount').textContent = n;
+        document.getElementById('createErr').classList.remove('show');
+        if (n>60) this.value = this.value.slice(0,60);
+      });
+      document.getElementById('shareToHolders').addEventListener('change', function(){});
+      document.addEventListener('click', function(e){
+        var chip = e.target.closest('.style-chip');
+        if (chip) {
+          document.querySelectorAll('.style-chip').forEach(function(c){c.classList.remove('on');});
+          chip.classList.add('on'); style = chip.getAttribute('data-s');
+        }
+      });
+    }
 
     window.onLaunchShellReady = function(){
-      renderWorks();
+      bind();
       refreshEthHint();
-      renderCoverRow();
       document.getElementById('walletAddr').textContent = walletText();
       document.getElementById('aiPrompt').addEventListener('input', function(){ document.getElementById('genErr').classList.remove('show'); });
-      // reuse 参数
+      // reuse 参数（从资产页“用它发币”进入）
       var q = new URLSearchParams(window.location.search);
       var reuseRaw = q.get('reuse');
       if (reuseRaw) {
@@ -676,19 +740,21 @@
             pickSource('ai');
             document.getElementById('aiPrompt').value = v.desc || v.title;
             genState = { poster:{cover:v.cover||pickCover(), video:v.video||'', prompt:v.desc||v.title, style:style}, frame:v.cover||pickCover(), suggestName:v.title };
-            document.getElementById('genPoster').innerHTML =
-              '<div class="gen-poster-img"><img src="'+esc(genState.poster.cover)+'" alt=""></div>'+
-              '<div><div class="gen-poster-name">'+esc(v.title)+'</div>'+
-              '<div class="gen-poster-tag">AI 叙事 · 15s · 复用</div>'+
-              '<div class="gen-poster-desc">'+esc(v.desc||'')+'</div></div>';
-            document.getElementById('genPoster').classList.add('show');
+            pickedWork = null;
+            document.getElementById('genResult').innerHTML =
+              '<div class="gen-result-thumb"><img src="'+esc(genState.poster.cover)+'" alt=""></div>'+
+              '<div><div class="gen-result-name">'+esc(v.title)+'</div>'+
+              '<div class="gen-result-tag">AI 叙事 · 15s · 复用</div>'+
+              '<div class="gen-result-desc">'+esc(v.desc||'')+'</div></div>';
+            document.getElementById('genResult').classList.add('show');
             document.getElementById('genBtn').textContent = '重新生成';
-            setReady(genState.poster.cover, v.title, 'AI 叙事 · 15s（复用）', v.desc||'');
-            syncSum();
+            if (!document.getElementById('pName').value) document.getElementById('pName').value = v.title;
+            if (!document.getElementById('pTag').value) document.getElementById('pTag').value = v.desc || '';
+            syncAll();
           }
         } catch(e){}
       }
-      syncSum();
+      syncAll();
     };
   </script>
 </body>
