@@ -454,7 +454,7 @@
                       <span class="hfs-body">Creator fees and the creator tax are paid to the wallet below.</span>
                       <span class="hfs-wallet">
                         <span class="hfs-wallet-lbl">收款钱包</span>
-                        <input class="input num" id="pCreatorWallet" placeholder="0x7A2b…3fD8（留空 = 我的钱包）" autocomplete="off" spellcheck="false" />
+                        <input class="input num" id="pCreatorWallet" placeholder="0x7A2b…3fD8" autocomplete="off" spellcheck="false" />
                         <span class="hfs-wallet-note">留空 = 使用当前连接钱包</span>
                       </span>
                     </button>
@@ -1095,7 +1095,7 @@
       startGradRead('ETH');
       renderDevBuy();
       setHfs(false);
-      document.getElementById('pCreatorWallet').placeholder = walletText() + '（留空 = 我的钱包）';
+      document.getElementById('pCreatorWallet').placeholder = walletText();
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
       var reuseRaw = q.get('reuse');
