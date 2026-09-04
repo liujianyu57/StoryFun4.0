@@ -46,6 +46,16 @@
   //  顺序必须与市场 Pair 筛选按钮一致（launchpad 动态注入同一列表）
   // ============================================================
   var PAIR_STOCKS = ['AAPL','AMD','AMZN','BB','COIN','COST','CRCL','DELL','DJT','FIG','GLD','GME','GOOGL','HIMS','JNJ','LLY','LULU','META','MRNA','MRVL','MSFT','MSTR','MU','NVDA','PFE','PLTR','QQQ','RBLX','RDDT','RIVN','SKHY','SNAP','SNDK','SPCX','SPY','TSLA','TSM','TTWO','USO','WYFI'];
+  // 演示美元价（≈真实价位）：用于毕业阈值换算 / 演示钱包余额与水龙头
+  var ASSET_PRICES = {
+    ETH: 3200, AAPL: 210, AMD: 160, AMZN: 205, BB: 4.2, COIN: 265, COST: 940,
+    CRCL: 150, DELL: 130, DJT: 30, FIG: 95, GLD: 255, GME: 26, GOOGL: 192,
+    HIMS: 62, JNJ: 148, LLY: 820, LULU: 245, META: 555, MRNA: 42, MRVL: 108,
+    MSFT: 462, MSTR: 420, MU: 132, NVDA: 175, PFE: 27, PLTR: 118, QQQ: 470,
+    RBLX: 78, RDDT: 245, RIVN: 21, SKHY: 145, SNAP: 12, SNDK: 128, SPCX: 340,
+    SPY: 560, TSLA: 350, TSM: 195, TTWO: 152, USO: 88, WYFI: 34
+  };
+  var ALL_PAIRS = ['ETH'].concat(PAIR_STOCKS);
   function hashStr(s) {
     var h = 0;
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
@@ -128,7 +138,9 @@
       social: o.social || null,          // {x, tg}
       creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
       shareToHolders: !!o.shareToHolders,  // 是否将 creator 费分给持有者
-      devBuyEth: o.devBuyEth || 0,       // 开发者预买（ETH）
+      devBuyEth: o.devBuyEth || 0,       // 开发者预买（ETH，兼容旧字段）
+      devBuyQty: o.devBuyQty || 0,       // 开发者预买数量（按配对资产单位）
+      devBuyPair: o.devBuyPair || 'ETH', // 开发者预买的计价资产
       snipeExempts: o.snipeExempts || [],  // 狙击税豁免钱包列表
       // 演示静态 K 线（svg 折线用 0..1 归一化）
       spark: o.spark || [0.3, 0.4, 0.35, 0.5, 0.6, 0.55, 0.7, 0.8, 0.9]
@@ -334,6 +346,34 @@
   // 旧存档迁移：补齐已实现盈亏字段
   USER.realizedPnl = USER.realizedPnl || 0;
   USER.realizedByCoin = USER.realizedByCoin || {};
+
+  // ============================================================
+  //  演示钱包：各配对资产余额（开发者预买/水龙头用）
+  // ============================================================
+  var DEFAULT_CREDIT_USD = 500; // 每个资产初始给等值 500 美元
+  var FAUCET_USD = 250;         // 每次领取等值 250 美元
+  function assetPrice(sym) { return ASSET_PRICES[sym] || null; }
+  function ensureBalances() {
+    if (!USER.balances) USER.balances = {};
+    for (var i = 0; i < ALL_PAIRS.length; i++) {
+      var s = ALL_PAIRS[i];
+      if (USER.balances[s] == null) {
+        var px = assetPrice(s);
+        USER.balances[s] = px ? DEFAULT_CREDIT_USD / px : 0;
+      }
+    }
+  }
+  ensureBalances();
+  function balanceOf(sym) { ensureBalances(); return USER.balances[sym] || 0; }
+  // 模拟水龙头：领取等值 FAUCET_USD 的指定资产，返回领取数量（单位）
+  function faucet(sym) {
+    ensureBalances();
+    var px = assetPrice(sym);
+    var amt = px ? FAUCET_USD / px : 0;
+    USER.balances[sym] = (USER.balances[sym] || 0) + amt;
+    persist();
+    return amt;
+  }
 
   function persist() {
     try {
@@ -656,8 +696,21 @@
       creatorTaxPct: data.creatorTaxPct || 0,
       shareToHolders: !!data.shareToHolders,
       devBuyEth: data.devBuyEth || 0,
+      devBuyQty: data.devBuyQty || 0,
+      devBuyPair: data.devBuyPair || 'ETH',
       snipeExempts: data.snipeExempts || []
     });
+    // 开发者预买：从演示钱包扣减配对资产（防御：超出部分按余额封顶）
+    ensureBalances();
+    var dbQty = Number(data.devBuyQty != null ? data.devBuyQty : 0) || 0;
+    var dbPair = data.devBuyPair || 'ETH';
+    if (dbQty > 0) {
+      var bal = USER.balances[dbPair] || 0;
+      var use = Math.min(dbQty, bal);
+      USER.balances[dbPair] = bal - use;
+      coin.devBuyQty = use;
+      if (dbPair === 'ETH') coin.devBuyEth = use;
+    }
     // 发行费
     USER.eth -= usdToEth(K.launchFeeUsd + (data.sourceType === 'ai' ? K.genFeeUsd : 0));
     SEED.unshift(coin);
@@ -902,6 +955,10 @@
     analytics: analytics,
     // 配对资产（quote 股票代币表，顺序=市场 Pair 按钮顺序）
     pairStocks: PAIR_STOCKS.slice(),
+    // 演示钱包：资产美元价 / 余额 / 水龙头
+    assetPrice: assetPrice,
+    balanceOf: balanceOf,
+    faucet: faucet,
     fmtDay: fmtDay,
     persist: persist,
     // 模拟活跃引擎

@@ -188,12 +188,25 @@
     .pair-dd-option.active .pair-dd-name { color: var(--accent); font-weight: 700; }
 
     /* 开发者预买 */
-    .buy-entry { position: relative; max-width: 260px; }
-    .buy-entry .input { padding-right: 52px; }
+    .buy-entry { position: relative; max-width: 300px; }
+    .buy-entry .input { padding-right: 60px; }
     .buy-token {
-      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
       font-size: 12.5px; font-weight: 700; color: var(--text-2);
     }
+    .devbuy-meta { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; color: var(--text-3); }
+    .devbuy-max {
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2);
+      border-radius: 999px; font-size: 11px; font-weight: 700; padding: 2px 10px; cursor: pointer;
+    }
+    .devbuy-max:hover { color: var(--text); border-color: var(--text-3); }
+    .devbuy-faucet { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 11.5px; color: var(--text-3); }
+    .devbuy-faucet-btn {
+      border: none; background: none; color: var(--accent); font-size: 11.5px; font-weight: 700; cursor: pointer; padding: 0;
+      text-decoration: underline; text-underline-offset: 3px;
+    }
+    .devbuy-faucet-btn:hover { color: var(--text); }
+    .devbuy-hint { font-size: 11.5px; color: var(--text-3); margin-top: 5px; }
 
     /* ===== 高级设置 ===== */
     .adv-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0 2px; }
@@ -376,10 +389,18 @@
                 <div class="field lp-wide">
                   <div class="field-label">开发者预买 <span class="opt">选填</span></div>
                   <div class="buy-entry">
-                    <input class="input num" id="pDevBuy" type="number" min="0" step="0.01" value="0" placeholder="0.00" />
-                    <span class="buy-token">ETH</span>
+                    <input class="input num" id="pDevBuy" type="number" min="0" step="any" value="0" placeholder="0.00" />
+                    <span class="buy-token" id="devBuyTok">ETH</span>
                   </div>
-                  <div class="f-note">发射时预买 · 0 为不预挖，保持公平发射</div>
+                  <div class="devbuy-meta">
+                    <span id="devBuyBal"></span>
+                    <button type="button" class="devbuy-max" id="devBuyMax" style="display:none" onclick="devBuyMax()">Max</button>
+                  </div>
+                  <div class="devbuy-faucet">
+                    <span>余额不足？这是演示钱包</span>
+                    <button type="button" class="devbuy-faucet-btn" id="faucetBtn" onclick="faucetTap()">领取 $250 等值 <b id="faucetSym">ETH</b></button>
+                  </div>
+                  <div class="f-note devbuy-hint">发射时预买 · 0 为不预挖，保持公平发射</div>
                 </div>
               </div>
 
@@ -877,9 +898,37 @@
       pairSel = p;
       renderPairTrigger();
       closePair();
+      document.getElementById('pDevBuy').value = '';   // 换资产清空预买金额（pons 同款）
       syncAll();
       startGradRead(p);
+      renderDevBuy();
     }
+    // ---- 开发者预买（pons 同款：余额行 + Max + 演示水龙头） ----
+    function assetBalance(sym) {
+      return (window.Launch && typeof Launch.balanceOf === 'function') ? Launch.balanceOf(sym) : 0;
+    }
+    function renderDevBuy() {
+      var bal = assetBalance(pairSel);
+      document.getElementById('devBuyTok').textContent = pairSel;
+      document.getElementById('devBuyBal').textContent =
+        fmtQty(bal) + ' ' + pairSel + ' available, bought in the launch transaction';
+      document.getElementById('devBuyMax').style.display = bal > 0 ? 'inline-flex' : 'none';
+      document.getElementById('faucetSym').textContent = pairSel;
+    }
+    function devBuyMax() {
+      var bal = assetBalance(pairSel);
+      document.getElementById('pDevBuy').value = String(Number(bal.toFixed(6)));
+    }
+    function faucetTap() {
+      if (!window.Launch || typeof Launch.faucet !== 'function') {
+        if (window.Launch && Launch.toast) Launch.toast('演示钱包不可用', 'warn');
+        return;
+      }
+      var amt = Launch.faucet(pairSel);
+      if (Launch.toast) Launch.toast('已领取 ' + fmtQty(amt) + ' ' + pairSel + '（模拟水龙头）', 'ok');
+      renderDevBuy();
+    }
+
     function syncAll() {
       var name = document.getElementById('pName').value.trim();
       var sym = document.getElementById('pSymbol').value.trim().toUpperCase();
@@ -921,6 +970,17 @@
       var isWork = !!attached;
       if (!isWork && !uploadPreview) { err.textContent = '请关联一部作品或上传币图'; err.classList.add('show'); return; }
 
+      // 开发者预买：数量须 ≥0 且不超过所选配对资产的演示余额
+      var dbQty = parseFloat(document.getElementById('pDevBuy').value);
+      if (isNaN(dbQty) || dbQty < 0) dbQty = 0;
+      var dbBal = assetBalance(pairSel);
+      if (dbQty > 0 && dbQty > dbBal) {
+        err.textContent = '开发者预买余额不足：当前 ' + fmtQty(dbBal) + ' ' + pairSel + ' available' +
+          '（可点「领取」补足演示余额）';
+        err.classList.add('show');
+        return;
+      }
+
       var btn = document.getElementById('createBtn');
       btn.disabled = true; btn.textContent = '创建中…';
       // cover：自定义上传图 > 已关联作品封面 > 默认素材
@@ -935,10 +995,11 @@
           sourceType: 'work',
           sourceTitle: sourceTitle,
           pair: pairSel,
+          devBuyQty: dbQty,
+          devBuyPair: pairSel,
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
           creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
           shareToHolders:document.getElementById('shareToHolders').checked,
-          devBuyEth:parseFloat(document.getElementById('pDevBuy').value)||0,
           snipeExempts:(document.getElementById('pSnipe').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean)
         });
         lastCoinId = coin.id;
@@ -983,6 +1044,7 @@
       bind();
       refreshEthHint();
       startGradRead('ETH');
+      renderDevBuy();
       document.getElementById('walletAddr').textContent = walletText();
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
