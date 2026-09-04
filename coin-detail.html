@@ -829,38 +829,49 @@ var holders = [];
     function renderMeta() {
       var host = document.getElementById('metaHost');
       if (!host) return;
-      // 参考：Creator fees / Holder fee sharing 卡仅在“费已路由给持有人”时出现
-      if (!coin || coin.graduated || !coin.shareToHolders) {
-        host.style.display = 'none'; host.innerHTML = ''; return;
-      }
+      // 未毕业一律展示两张费卡（参考：Creator fees + Holder fee sharing）；
+      // 已毕业不展示。文案按费路由分支（数据为确定性演示值）。
+      if (!coin || coin.graduated) { host.style.display = 'none'; host.innerHTML = ''; return; }
       var pair = coin.pair || 'ETH';
       var nm = coin.name || coin.symbol || 'Token';
+      var toHolders = !!coin.shareToHolders;
       var h6 = 0, ss = coin.id || 'x';
       for (var i6 = 0; i6 < ss.length; i6++) h6 = (h6 * 31 + ss.charCodeAt(i6)) >>> 0;
       var r6 = function (x) { return Math.round(x * 1e6) / 1e6; };
       var q6 = function (x) { return r6(x).toFixed(6).replace(/\.?0+$/, '') || '0'; };
       var earned = r6(1.2 + (h6 % 48000) / 1000);
       var sweeps = 12 + (h6 % 120);
-      var paidRatio = 0.6 + ((h6 >>> 5) % 35) / 100;
-      var paid = r6(earned * paidRatio);
-      var pot = r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100));
+      var paid = toHolders ? r6(earned * (0.6 + ((h6 >>> 5) % 35) / 100)) : 0;
+      var pot = toHolders ? r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100)) : 0;
       var dist = 1 + ((h6 >>> 7) % 10);
       function valHtml(u) { return '<span class="ff-value num">' + q6(u) + ' <small>' + esc(pair) + '</small></span>'; }
       var html = '';
+      // 卡 1：Creator fees
       html += '<div class="card fee-card">' +
         '<div class="ff-head"><span class="ff-title">Creator fees</span></div>' +
         '<div class="ff-assets">' + valHtml(earned) +
-          '<span class="ff-sub">Earned by ' + esc(nm) + ' across ' + sweeps + ' sweeps</span></div>' +
-        '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>' +
-        '</div>';
+          '<span class="ff-sub">Earned by ' + esc(nm) + ' across ' + sweeps + ' sweeps</span></div>';
+      if (toHolders) {
+        html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>';
+      } else {
+        html += '<p class="ff-hint">创作者费归创建者钱包（含 Creator tax），可在账户页领取。</p>';
+      }
+      html += '</div>';
+      // 卡 2：Holder fee sharing
       html += '<div class="card fee-card">' +
-        '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>' +
-        '<div class="ff-assets">' + valHtml(paid) +
+        '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>';
+      if (toHolders) {
+        html += '<div class="ff-assets">' + valHtml(paid) +
           '<span class="ff-sub">Paid to holders across ' + dist + ' distribution' + (dist === 1 ? '' : 's') + '</span></div>' +
-        '<div class="ff-assets">' + valHtml(pot) +
+          '<div class="ff-assets">' + valHtml(pot) +
           '<span class="ff-sub">In the pot for the next distribution</span></div>' +
-        '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>' +
-        '</div>';
+          '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>';
+      } else {
+        html += '<div class="ff-assets">' + valHtml(0) +
+          '<span class="ff-sub">Routing off · 费当前归创建者钱包</span></div>' +
+          '<p class="ff-hint">未开启费共享：创作者费不分发给持有人。</p>';
+      }
+      html += '</div>';
       host.innerHTML = html;
       host.style.display = 'grid';
     }
