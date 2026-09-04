@@ -111,6 +111,27 @@
     .px-empty { text-align: center; padding: 40px 12px; color: var(--text-3); }
     .px-empty b { color: var(--text-2); font-weight: 600; }
 
+    /* pons page-control 分页器 */
+    .px-pager { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; }
+    .px-pager-nav {
+      width: 30px; height: 30px; border-radius: 10px; display: inline-flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+      transition: border-color .15s, color .15s;
+    }
+    .px-pager-nav:hover:not(:disabled) { border-color: var(--border-strong); color: var(--text); }
+    .px-pager-nav:disabled { opacity: .35; cursor: default; }
+    .px-pager-list { display: inline-flex; gap: 5px; }
+    .px-pager-page, .px-pager-dots {
+      min-width: 30px; height: 30px; padding: 0 6px; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid transparent; background: none; cursor: pointer;
+      font-size: 12.5px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums;
+    }
+    .px-pager-page:hover { border-color: var(--border-strong); color: var(--text); }
+    .px-pager-page.is-active { background: var(--accent); color: #fff; }
+    .px-pager-dots { color: var(--text-3); cursor: default; }
+
     /* 模拟成交闪光 */
     .sim-flash { animation: pxFlash 1s ease; }
     @keyframes pxFlash {
@@ -231,6 +252,7 @@
       </div>
       <ul class="px-grid" id="gradGrid"></ul>
       <div class="px-empty" id="gradEmpty" style="display:none">暂无已毕业代币</div>
+      <nav class="px-pager" id="gradPager" aria-label="Graduated token pages"></nav>
     </section>
 
     <!-- Section 2: Explore（进行中） -->
@@ -260,6 +282,7 @@
       </div>
       <ul class="px-grid" id="exploreGrid"></ul>
       <div class="px-empty" id="exploreEmpty" style="display:none"><b>暂无符合条件的代币</b><br>换个排序或筛选试试</div>
+      <nav class="px-pager" id="expPager" aria-label="Explore token pages"></nav>
     </section>
   </main>
 
@@ -334,7 +357,7 @@
     // ============================================================
     //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + ⌘K 弹层
     // ============================================================
-    var state = { sort: 'recent', time: 'all' };
+    var state = { sort: 'recent', time: 'all', gradPage: 1, expPage: 1 };
     var spState = { sort: 'recent', time: 'all', q: '', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
 
     function esc(s) {
@@ -383,7 +406,7 @@
           '<span class="px-grad-pct">' + pctText(c.progress) + '</span>' +
         '</div>';
       var ago = grad
-        ? (c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前' : '—')
+        ? (c.launchedAt ? Launch.timeAgo(c.launchedAt) + ' 前发行' : '—')
         : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '—');
       var addr = c.creatorAddr || '—';
       var mcap2 = c.marketCap ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>'
@@ -436,19 +459,65 @@
       var list = gradCoins();
       var grid = document.getElementById('gradGrid');
       var empty = document.getElementById('gradEmpty');
+      var per = 10;
+      var pages = Math.max(1, Math.ceil(list.length / per));
+      if (state.gradPage > pages) state.gradPage = pages;
+      if (state.gradPage < 1) state.gradPage = 1;
+      var slice = list.slice((state.gradPage - 1) * per, state.gradPage * per);
       document.getElementById('gradCount').textContent = Launch.fmtNum(list.length);
-      grid.innerHTML = list.map(cardHTML).join('');
+      grid.innerHTML = slice.map(cardHTML).join('');
       empty.style.display = list.length ? 'none' : 'block';
+      renderPager('gradPager', state.gradPage, pages, function (p) { state.gradPage = p; renderGrad(); });
     }
     function renderExplore() {
       var list = exploreCoins();
       var grid = document.getElementById('exploreGrid');
       var empty = document.getElementById('exploreEmpty');
+      var per = 50;
+      var pages = Math.max(1, Math.ceil(list.length / per));
+      if (state.expPage > pages) state.expPage = pages;
+      if (state.expPage < 1) state.expPage = 1;
+      var slice = list.slice((state.expPage - 1) * per, state.expPage * per);
       document.getElementById('expCount').textContent = Launch.fmtNum(list.length) + ' climbing';
-      grid.innerHTML = list.map(cardHTML).join('');
+      grid.innerHTML = slice.map(cardHTML).join('');
       empty.style.display = list.length ? 'none' : 'block';
+      renderPager('expPager', state.expPage, pages, function (p) { state.expPage = p; renderExplore(); });
     }
     function render() { renderGrad(); renderExplore(); }
+
+    // 页码折叠（pons 风格：首 / 尾常显，当前页 ±1，间隔省略）
+    function pageItems(cur, total) {
+      var set = new Set();
+      set.add(1);
+      if (total > 1) set.add(total);
+      for (var d = -1; d <= 1; d++) { if (cur + d >= 1 && cur + d <= total) set.add(cur + d); }
+      var arr = Array.from(set).sort(function (a, b) { return a - b; });
+      var out = [];
+      for (var i = 0; i < arr.length; i++) {
+        if (i && arr[i] - arr[i - 1] > 1) out.push('…');
+        out.push(arr[i]);
+      }
+      return out;
+    }
+    function renderPager(hostId, cur, total, onGo) {
+      var host = document.getElementById(hostId);
+      if (!host) return;
+      if (total <= 1) { host.innerHTML = ''; return; }
+      var items = pageItems(cur, total);
+      var h = '<button class="px-pager-nav" data-p="' + (cur - 1) + '"' + (cur <= 1 ? ' disabled' : '') + ' aria-label="上一页">‹</button>' +
+        '<div class="px-pager-list" role="group">' + items.map(function (it) {
+          if (it === '…') return '<span class="px-pager-dots">…</span>';
+          return '<button class="px-pager-page' + (it === cur ? ' is-active' : '') + '" data-p="' + it + '" aria-label="第 ' + it + ' 页">' + it + '</button>';
+        }).join('') + '</div>' +
+        '<button class="px-pager-nav" data-p="' + (cur + 1) + '"' + (cur >= total ? ' disabled' : '') + ' aria-label="下一页">›</button>';
+      host.innerHTML = h;
+      host.onclick = function (e) {
+        var b = e.target.closest('button[data-p]');
+        if (!b || b.disabled) return;
+        var p = parseInt(b.getAttribute('data-p'), 10);
+        if (p >= 1 && p <= total) onGo(p);
+      };
+    }
 
     function openCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
     function copyAddr(a) {
@@ -600,6 +669,7 @@
         document.querySelectorAll('#sortSeg button').forEach(function (x) { x.classList.remove('on'); });
         b.classList.add('on');
         state.sort = b.getAttribute('data-s');
+        state.expPage = 1;
         renderExplore();
       });
       document.getElementById('timeSeg').addEventListener('click', function (e) {
@@ -608,6 +678,7 @@
         document.querySelectorAll('#timeSeg button').forEach(function (x) { x.classList.remove('on'); });
         b.classList.add('on');
         state.time = b.getAttribute('data-t');
+        state.expPage = 1;
         renderExplore();
       });
 

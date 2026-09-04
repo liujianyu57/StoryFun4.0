@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 6;
+  var SCHEMA_VERSION = 7;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -184,6 +184,69 @@
       poolUsd: 4800, change24h: -0.08, lastBuyAt: D(14), spark: [0.4, 0.6, 0.5, 0.55, 0.48, 0.45]
     })
   ];
+
+  // ============================================================
+  //  批量模拟数据：Explore 分页（50/页）与 Graduated（10/页）
+  //  为展示分页器生成足量确定性伪币，id/symbol/名称均唯一稳定
+  // ============================================================
+  (function () {
+    var NAMES = [
+      ['Quantum','Nebula','Turbo','Lunar','Cosmic','Neon','Crypto','Mega','Hyper','Rocket','Astro','Solar','Pixel','Cyber','Zen','Golden','Storm','Frost','Ember','Nova','Vapor','Orbit','Prism','Echo','Apex'],
+      ['Cat','Dog','Frog','Duck','Wolf','Fox','Panda','Whale','Dragon','Phoenix','Raven','Otter','Bunny','Koala','Yeti','Moose','Shark','Lynx','Hawk','Wombat','Mantis','Tiger','Owl','Crab','Lion']
+    ];
+    var COVERS = [IMG.feng, IMG.cheng, IMG.xie, IMG.allin, IMG.candle, IMG.names, IMG.pyramid, IMG.survivor, IMG.zero, IMG.hero];
+    var TAGLINES = ['故事开始前，价格先起步。','把名字写回历史。','天亮前的一笔。','一个人的孤勇。','梦醒之前的赌注。','守住最后的光。','风向变了。','曲线之上是新的曲线。','谁先燃尽，谁先封神。','没有人记得，不代表没有发生。'];
+    var usedSym = {};
+    SEED.forEach(function (c) { usedSym[c.symbol] = true; });
+    // 打散序号 → 唯一名组合：j 以 257 步进遍历 0..624（与 625 互质），A/B 双词表共 625 种组合
+    function nm(i0) {
+      var j = (257 * (i0 + 13)) % 625;
+      return { A: NAMES[0][j % 25], B: NAMES[1][Math.floor(j / 25) % 25] };
+    }
+    // gen 参数：count、毕业比例、ID 前缀
+    function gen(count, gradShare, i0) {
+      for (var n = 0; n < count; n++, i0++) {
+        var nb = nm(i0);
+        var A = nb.A, B = nb.B;
+        var baseSym = (A.slice(0, 3) + B.slice(0, 3)).toUpperCase();
+        var sym = baseSym;
+        var k = 1;
+        while (usedSym[sym]) sym = baseSym + k++;
+        usedSym[sym] = true;
+        var graduated = (i0 % 100) < gradShare;
+        var launchH = graduated ? (2 + (i0 * 13) % 2880) : (0.1 + (i0 * 7) % 720); // 发行于 N 小时前
+        var isNew = !graduated && launchH < 20;
+        // 毕业发生在发行之后（gradH < launchH）；池内最近成交在毕业之后（lastH < gradH）
+        var gradH = graduated ? Math.max(0.5, launchH * (0.4 + ((i0 * 11) % 50) / 100)) : null;
+        var lastH = graduated
+          ? Math.max(0.05, gradH * (0.1 + ((i0 * 7) % 80) / 100))
+          : Math.min((i0 % 48) * 0.05, Math.max(0.02, launchH * 0.9));
+        var mc = graduated
+          ? (2 + (i0 * 37) % 900) * 1e6           // 已毕业 $2M–$900M+
+          : (1 + (i0 * 53) % 900) * 1000;          // 活跃 $1K–$900K
+        var price = mc / K.totalSupply;
+        var pool = graduated
+          ? (K.gradThresholdUsd + (i0 * 29) % 400000)
+          : Math.max((K.gradThresholdUsd * (0.02 + (i0 * 11) % 90) / 100), 200);
+        SEED.push(seedCoin({
+          id: 'gen_' + i0, name: A + ' ' + B, symbol: sym,
+          tagline: TAGLINES[(i0 * 13 + 5) % TAGLINES.length],
+          creator: 'Creator' + (i0 % 97), creatorAddr: walletFrom('genc:' + i0),
+          cover: COVERS[i0 % COVERS.length], video: '', sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
+          sourceTitle: '', supply: K.totalSupply,
+          priceUsd: price, holders: graduated ? (200 + (i0 * 47) % 9000) : (2 + (i0 * 19) % 600),
+          volumeUsd: graduated ? (100000 + (i0 * 911) % 9000000) : (i0 * 97) % 50000,
+          launchedAt: D(launchH), graduated: graduated, gradAt: graduated ? D(gradH) : null,
+          poolUsd: pool, change24h: ((i0 * 7) % 100) / 100 - 0.3,
+          isNew: isNew, lastBuyAt: D(lastH),
+          spark: [0.3, 0.5, 0.4, 0.6, 0.5, 0.7, 0.6, 0.8, 0.9]
+        }));
+      }
+    }
+    // 名字组合上限 625（25×25）：Graduated 160（16 页 ×10）+ Explore 460（9.2 页 ×50）→ 全唯一
+    gen(160, 100, 9000);   // 160 个已毕业（9000–9159）
+    gen(460, 0, 9160);     // 460 个活跃（9160–9619），与上段连续 → 620 个唯一名
+  })();
 
   // ============================================================
   //  存储
