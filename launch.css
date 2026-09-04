@@ -21,7 +21,7 @@
   --shadow-lg: 0 16px 48px rgba(16, 24, 40, 0.12);
   --font: -apple-system, "PingFang SC", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: "SF Mono", ui-monospace, "Roboto Mono", Menlo, Consolas, monospace;
-  --header-h: 60px;
+  --header-h: 56px;
   --shell-max: 1200px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }

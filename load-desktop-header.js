@@ -58,6 +58,14 @@
             '.desktop-header .dh-usdc-badge .dh-avatar{width:30px;height:30px;border:none}',
             '.desktop-header .auth-login-btn{margin-left:auto}',
             '@media(min-width:769px){.desktop-header{left:160px;right:0}body{padding-top:56px}}',
+            '.dh-eth-wrap{position:relative;flex-shrink:0}',
+            '.dh-eth{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 6px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:rgba(0,0,0,.03);color:#13202e;font-size:12.5px;font-weight:700;cursor:pointer}',
+            '.dh-eth .dh-eth-coin{width:22px;height:22px;border-radius:50%;background:#627EEA;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}',
+            '.dh-eth-drop{position:absolute;top:calc(100% + 8px);right:0;min-width:200px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.1);padding:10px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .22s ease;z-index:300}',
+            '.dh-eth-wrap.open .dh-eth-drop{opacity:1;visibility:visible;transform:translateY(0)}',
+            '.dh-eth-row{display:flex;justify-content:space-between;gap:10px;padding:6px 4px;font-size:12.5px;color:#13202e}',
+            '.dh-eth-row span{color:#8896a8}',
+            '.dh-eth-give{margin-top:6px;width:100%;height:32px;border:none;border-radius:9px;background:#000;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer}',
             '@media(max-width:768px){.desktop-header{display:none}}',
             '/* ── 商店 hover 下拉（无遮罩）── */',
             '@media(min-width:769px){',
@@ -154,7 +162,7 @@
                     '</div>' +
                 '</div>' +
                 '<a href="launchpad.html" class="dh-launch-link">' +
-                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 2.5v11M3.5 2.5L14 6.5 3.5 10.5M3.5 7.5L11.5 10"/></svg>发射台' +
+                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 2.5v11M3.5 2.5L14 6.5 3.5 10.5M3.5 7.5L11.5 10"/></svg>市场' +
                 '</a>' +
                 '<div class="dh-publish-wrap">' +
                     '<button class="dh-publish-btn">' +
@@ -167,8 +175,22 @@
                         '<a class="dh-publish-item" href="publish-video.html">' +
                             '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><polygon points="7,5.5 7,10.5 11.5,8" fill="currentColor"/></svg>发布视频' +
                         '</a>' +
+                        '<a class="dh-publish-item" href="launch.html">' +
+                            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2.5v11M3.5 2.5L14 6.5 3.5 10.5M3.5 7.5L11.5 10"/></svg>发币' +
+                        '</a>' +
                     '</div>' +
                 '</div>' +
+                '<div class="dh-eth-wrap" id="dhEthWrap" style="display:none">' +
+                    '<div class="dh-eth" id="dhEthPill">' +
+                      '<span class="dh-eth-coin">Ξ</span>' +
+                      '<span class="num" id="dhEthAmount">0.0000</span>' +
+                    '</div>' +
+                    '<div class="dh-eth-drop">' +
+                      '<div class="dh-eth-row"><span>地址</span><b class="num" id="dhEthAddr">—</b></div>' +
+                      '<div class="dh-eth-row"><span>余额</span><b><span class="num" id="dhEthDropAmount">0</span> ETH</b></div>' +
+                      '<button class="dh-eth-give" id="dhEthGive">领取测试 ETH</button>' +
+                    '</div>' +
+                  '</div>' +
                 '<div class="auth-container" id="authContainer"></div>' +
             '</div>';
     }
@@ -424,6 +446,40 @@
         if (item) item.remove();
     };
 
+    // ── Launch 专属：ETH pill（发射台页） ──
+    function fillDhEth() {
+        var w = document.getElementById('dhEthWrap');
+        if (!w) return;
+        if (typeof window.Launch === 'undefined') { w.style.display = 'none'; return; }
+        w.style.display = '';
+        var el = document.getElementById('dhEthAmount');
+        if (el) el.textContent = (window.Launch.fmtEth ? window.Launch.fmtEth(window.Launch.USER.eth) : '0.0000');
+        var el2 = document.getElementById('dhEthDropAmount');
+        if (el2) el2.textContent = (window.Launch.fmtEth ? window.Launch.fmtEth(window.Launch.USER.eth).replace(' ETH', '') : '0');
+        var ad = document.getElementById('dhEthAddr');
+        if (ad) ad.textContent = window.Launch.walletText ? window.Launch.walletText() : '—';
+    }
+    function bindLaunchEth() {
+        var wrap = document.getElementById('dhEthWrap');
+        var pill = document.getElementById('dhEthPill');
+        if (!wrap || !pill) return;
+        fillDhEth();
+        pill.addEventListener('click', function (e) {
+            e.stopPropagation();
+            wrap.classList.toggle('open');
+        });
+        document.addEventListener('click', function () { wrap.classList.remove('open'); });
+        var give = document.getElementById('dhEthGive');
+        if (give) give.addEventListener('click', function () {
+            if (!window.Launch) return;
+            window.Launch.debug.setEth((window.Launch.USER.eth || 0) + 1);
+            if (window.Launch.toast) window.Launch.toast('已领取 1 ETH', 'ok');
+            fillDhEth();
+        });
+    }
+    // 供页面（launch-shell 等）交易后刷新
+    window.refreshDhEth = fillDhEth;
+
     // 主流程
     function init() {
         injectStyles();
@@ -442,6 +498,16 @@
                 if (typeof initAuth === 'function') initAuth();
             }, 50);
         });
+        // Launch ETH pill（可能在 auth 后可用，做一次带重试的绑定）
+        bindLaunchEth();
+        if (typeof window.Launch === 'undefined') {
+            var tries = 0;
+            var tmr = setInterval(function () {
+                tries++;
+                if (typeof window.Launch !== 'undefined' || tries > 10) { clearInterval(tmr); bindLaunchEth(); }
+            }, 120);
+        }
+        window.addEventListener('auth-ready', function () { fillDhEth(); });
     }
 
     if (document.readyState === 'loading') {

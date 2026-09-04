@@ -290,6 +290,12 @@
       placeholders.forEach(placeholder => {
         placeholder.outerHTML = wrappedHtml;
       });
+    } else if (!document.querySelector('.story-bottom-nav-wrapper')) {
+      // 无占位页（如发射台系页面）：直接追加到 body 末尾
+      const host = document.createElement('div');
+      host.innerHTML = wrappedHtml;
+      const node = host.firstChild;
+      if (node) document.body.appendChild(node);
     }
 
     activateCurrentTab();

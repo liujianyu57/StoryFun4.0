@@ -77,21 +77,12 @@
   //  渲染
   // ============================================================
   function refreshETH() {
-    var u = window.Launch && Launch.USER;
-    if (!u) return;
-    var el = document.getElementById('ethAmount');
-    if (el) el.textContent = Launch.fmtEth(u.eth);
-    var el2 = document.getElementById('ethDropAmount');
-    if (el2) el2.textContent = Launch.fmtEth(u.eth).replace(' ETH', '');
-    var el3 = document.getElementById('ethAddr');
-    if (el3) el3.textContent = Launch.walletText ? Launch.walletText() : '0x7A2b…3fD8';
+    // ETH 显示已迁移到通用顶栏（load-desktop-header 的 dhEth*）
+    if (typeof window.refreshDhEth === 'function') window.refreshDhEth();
   }
 
   function refreshBell() {
-    var el = document.getElementById('lpBell');
-    if (!el) return;
-    var n = (Launch.notifications || []).length;
-    el.classList.toggle('has', n > 0);
+    // 通知入口已由通用顶栏提供，无需旧 lpBell 红点
   }
 
   function initDebug() {
@@ -121,62 +112,10 @@
 
   function initHeader() {
     var host = document.getElementById('launch-header-host');
-    if (!host) return;
-    host.innerHTML = headerHTML();
-
-    // 顶栏样式
-    if (!document.getElementById('lp-header-styles')) {
-      var st = document.createElement('style');
-      st.id = 'lp-header-styles';
-      st.textContent =
-        '.lp-nav-link{font-size:14px;font-weight:600;color:var(--text-2);padding:6px 2px;margin:0 8px;border-bottom:2px solid transparent;transition:color .15s}' +
-        '.lp-nav-link:hover{color:var(--text)}' +
-        '.lp-nav-link.on{color:var(--text);border-bottom-color:var(--accent)}' +
-        '.lp-header .auth-avatar-trigger{width:36px;height:36px}' +
-        '.lp-header .auth-login-btn{background:var(--accent);color:#fff;border:none;border-radius:999px;padding:8px 18px}' +
-        '.auth-container{display:flex;align-items:center}';
-      document.head.appendChild(st);
-    }
-
-    // ETH pill 交互
-    var wrap = document.getElementById('ethWrap');
-    var pill = document.getElementById('ethPill');
-    if (wrap && pill) {
-      pill.addEventListener('click', function (e) {
-        e.stopPropagation();
-        wrap.classList.toggle('open');
-      });
-      document.addEventListener('click', function (e) {
-        if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
-      });
-    }
-    var give = document.getElementById('ethGiveBtn');
-    if (give) give.addEventListener('click', function () {
-      if (window.Launch) {
-        Launch.debug.setEth((Launch.USER.eth || 0) + 1);
-        Launch.toast('已领取 1 ETH', 'ok');
-        refreshETH();
-      }
-    });
-    var bell = document.getElementById('lpBell');
-    if (bell) bell.addEventListener('click', function () {
-      if (window.Launch) {
-        var n = Launch.notifications || [];
-        if (!n.length) { Launch.toast('暂无通知', 'ok'); return; }
-        var latest = n[0];
-        var txt = latest.kind === 'grad'
-          ? '🎓 ' + (latest.symbol || '') + ' 已毕业'
-          : (latest.symbol || '') + ' 出现大额成交';
-        Launch.toast(txt, 'ok');
-      }
-    });
-    refreshETH();
-    refreshBell();
-
-    // auth 渲染
-    if (typeof initAuth === 'function') {
-      try { initAuth(); } catch (e) {}
-    }
+    if (host) host.innerHTML = '';
+    // 通用顶栏已由 load-desktop-header 提供（ETH pill/通知/登录/发币）
+    if (typeof window.refreshDhEth === 'function') window.refreshDhEth();
+    if (typeof initAuth === 'function') { try { initAuth(); } catch (e) {} }
     if (typeof window.addEventListener === 'function') {
       window.addEventListener('auth-ready', function () {
         if (typeof initAuth === 'function') { try { initAuth(); } catch (e) {} }
