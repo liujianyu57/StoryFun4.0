@@ -117,6 +117,21 @@
             '.dh-notify-dropdown .delete-dropdown{position:absolute;top:100%;right:0;margin-top:3px;background:#fff;border:1px solid #eef0f4;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.08);padding:3px 0;min-width:64px;z-index:5;display:none;text-align:center}',
             '.dh-notify-dropdown .delete-dropdown.show{display:block}',
             '.dh-notify-dropdown .delete-btn{display:block;width:100%;padding:6px 12px;border:none;background:transparent;color:#f45b69;font-size:11px;font-weight:500;cursor:pointer}',
+            '/* ── 账户（头像+地址）── */',
+            '.dh-acct-wrap{position:relative;flex-shrink:0;z-index:500;pointer-events:auto}',
+            '.dh-acct-pill{display:inline-flex;align-items:center;gap:8px;height:38px;padding:2px 6px 2px 4px;border:1px solid rgba(0,0,0,.08);border-radius:999px;background:rgba(0,0,0,.03);cursor:pointer;transition:all .15s}',
+            '.dh-acct-pill:hover{border-color:rgba(0,0,0,.22)}',
+            '.dh-acct-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0}',
+            '.dh-acct-addr{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:600;color:#13202e;white-space:nowrap}',
+            '.dh-acct-drop{position:absolute;top:calc(100% + 8px);right:0;min-width:250px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.1);padding:8px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .2s ease;z-index:600}',
+            '.dh-acct-wrap.open .dh-acct-drop{opacity:1;visibility:visible;transform:translateY(0)}',
+            '.dh-acct-head{display:flex;align-items:center;gap:10px;padding:6px 6px 10px}',
+            '.dh-acct-head img{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0}',
+            '.dh-acct-head b{flex:1;min-width:0;font-size:13.5px;color:#13202e;font-family:ui-monospace,Menlo,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+            '.dh-acct-copy{width:30px;height:30px;border-radius:8px;border:none;background:rgba(0,0,0,.04);color:#5e6f83;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}',
+            '.dh-acct-copy:hover{background:rgba(0,0,0,.08);color:#13202e}',
+            '.dh-acct-item{display:flex;align-items:center;gap:8px;width:100%;padding:10px 8px;border:none;background:none;border-top:1px solid #f0f2f4;color:#13202e;font-size:13px;font-weight:500;cursor:pointer;text-align:left}',
+            '.dh-acct-item:hover{color:#f45b69}',
             '}'
         ].join('');
         document.head.appendChild(style);
@@ -161,18 +176,23 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<div class="dh-eth-wrap" id="dhEthWrap">' +
-                    '<div class="dh-eth" id="dhEthPill">' +
-                      '<span class="dh-eth-coin">Ξ</span>' +
-                      '<span class="num" id="dhEthAmount">0.0000</span>' +
-                    '</div>' +
-                    '<div class="dh-eth-drop">' +
-                      '<div class="dh-eth-row"><span>地址</span><b class="num" id="dhEthAddr">—</b></div>' +
-                      '<div class="dh-eth-row"><span>余额</span><b><span class="num" id="dhEthDropAmount">0</span> ETH</b></div>' +
-                      '<button class="dh-eth-give" id="dhEthGive">领取测试 ETH</button>' +
+                '<div class="dh-acct-wrap" id="dhAcct">' +
+                    '<button type="button" class="dh-acct-pill" id="dhAcctPill">' +
+                      '<img class="dh-acct-avatar" id="dhAcctAvatar" alt="" />' +
+                      '<span class="dh-acct-addr num" id="dhAcctAddr">0x…</span>' +
+                    '</button>' +
+                    '<div class="dh-acct-drop">' +
+                      '<div class="dh-acct-head">' +
+                        '<img id="dhAcctDropAvatar" alt="" />' +
+                        '<b id="dhAcctDropAddr">—</b>' +
+                        '<button type="button" class="dh-acct-copy" id="dhAcctCopy" title="复制地址">' +
+                          '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="9" height="9" rx="2"/><path d="M12 6h.5A1.5 1.5 0 0 1 14 7.5v5A1.5 1.5 0 0 1 12.5 14h-5A1.5 1.5 0 0 1 6 12.5V12"/></svg>' +
+                        '</button>' +
+                      '</div>' +
+                      '<button type="button" class="dh-acct-item" id="dhDisconnect">Disconnect</button>' +
                     '</div>' +
                   '</div>' +
-                '<div class="auth-container" id="authContainer"></div>' +
+                
             '</div>';
     }
 
@@ -427,68 +447,91 @@
         if (item) item.remove();
     };
 
-    // ── Launch 专属：ETH pill（发射台页） ──
-    function dhStoredEth() {
+    // ── 账户区：头像 + 脱敏地址（模拟钱包直连；无 Privy 登录） ──
+    var DH_FALLBACK_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+    function dhIsConnected() {
         try {
-            var raw = localStorage.getItem('storyfun_launch_v1');
-            if (raw) { var o = JSON.parse(raw); if (o && o.user && typeof o.user.eth === 'number') return o.user.eth; }
+            var saved = JSON.parse(localStorage.getItem('storyfun_user') || 'null');
+            if (saved && saved.isLoggedIn === false) return false;
         } catch (e) {}
-        return 0;
+        return true;   // 默认已连接模拟钱包
     }
-    function dhSaveEth(v) {
-        try {
-            var raw = localStorage.getItem('storyfun_launch_v1');
-            if (raw) { var o = JSON.parse(raw); if (o && o.user) { o.user.eth = v; localStorage.setItem('storyfun_launch_v1', JSON.stringify(o)); } }
-        } catch (e) {}
+    function dhMaskAddr(seed) {
+        var h = 2166136261, i = 0;
+        var src = seed || 'demo';
+        for (i = 0; i < src.length; i++) { h ^= src.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+        var hex = ('00000000' + (h >>> 0).toString(16)).slice(-8);
+        return '0x' + hex.slice(0, 2).toUpperCase() + hex.slice(2, 4) + '…' + hex.slice(4, 6) + hex.slice(6, 8).toUpperCase();
     }
-    function fillDhEth() {
-        var w = document.getElementById('dhEthWrap');
-        if (!w) return;
-        w.style.display = '';
-        var eth = (typeof window.Launch !== 'undefined' && window.Launch.USER) ? window.Launch.USER.eth : dhStoredEth();
-        var fmt = function (e) { return (e || 0).toFixed(4); };
-        var el = document.getElementById('dhEthAmount');
-        if (el) el.textContent = fmt(eth);
-        var el2 = document.getElementById('dhEthDropAmount');
-        if (el2) el2.textContent = String(eth === Math.floor(eth) ? eth : Math.floor(eth * 10000) / 10000);
-        var ad = document.getElementById('dhEthAddr');
-        if (ad) ad.textContent = window.Launch && Launch.walletText ? Launch.walletText() : '0x…';
+    function dhAvatar() {
+        if (typeof currentUser !== 'undefined' && currentUser && currentUser.avatar) return currentUser.avatar;
+        return DH_FALLBACK_AVATAR;
     }
-    function bindLaunchEth() {
-        var wrap = document.getElementById('dhEthWrap');
+    function dhWalletText() {
+        if (typeof window.Launch !== 'undefined' && Launch && Launch.walletText) return Launch.walletText();
+        if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) return dhMaskAddr(currentUser.id);
+        return '0xBD7e…bf0A';
+    }
+    function fillDhEth() {   // 兼容旧调用：渲染账户
+        var addr = dhWalletText();
+        var connected = dhIsConnected();
+        var av = dhAvatar();
+        var pillAv = document.getElementById('dhAcctAvatar');
+        var pillAddr = document.getElementById('dhAcctAddr');
+        var dropAv = document.getElementById('dhAcctDropAvatar');
+        var dropAddr = document.getElementById('dhAcctDropAddr');
+        if (!connected) {
+            if (pillAv) pillAv.style.display = 'none';
+            if (pillAddr) { pillAddr.textContent = '连接钱包'; pillAddr.classList.add('is-null'); }
+            if (dropAv) dropAv.src = av;
+            if (dropAddr) dropAddr.textContent = '—';
+            return;
+        }
+        if (pillAv) { pillAv.style.display = ''; pillAv.src = av; }
+        if (pillAddr) { pillAddr.textContent = addr; pillAddr.classList.remove('is-null'); }
+        if (dropAv) dropAv.src = av;
+        if (dropAddr) dropAddr.textContent = addr;
+    }
+    function bindLaunchEth() {   // 委托式账户交互（防重复）
+        var wrap = document.getElementById('dhAcct');
         if (!wrap) return;
         fillDhEth();
-        if (window.__dhEthBound) return;   // 防重复委托
-        window.__dhEthBound = true;
-        // 委托式交互：无论 header 何时注入/重复初始化都能响应
+        if (window.__dhAcctBound) return;
+        window.__dhAcctBound = true;
         document.addEventListener('click', function (e) {
             var t = e.target;
             if (!t || !t.closest) return;
-            var wrapNow = document.getElementById('dhEthWrap');
-            if (!wrapNow) return;
-            if (t.closest('#dhEthPill')) {
-                e.stopPropagation();
-                wrapNow.classList.toggle('open');
-                return;
-            }
-            if (t.id === 'dhEthGive') {
+            var w = document.getElementById('dhAcct');
+            if (!w) return;
+            if (t.closest('#dhAcctPill')) {
                 e.preventDefault();
                 e.stopPropagation();
-                if (window.Launch && Launch.debug && Launch.USER) {
-                    Launch.debug.setEth((Launch.USER.eth || 0) + 1);
-                    if (Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
-                } else {
-                    dhSaveEth(dhStoredEth() + 1);
-                    if (window.Launch && Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
+                if (!dhIsConnected()) {
+                    if (typeof window.simulateWalletConnect === 'function') window.simulateWalletConnect();
+                    fillDhEth();
+                    return;
                 }
-                fillDhEth();
-                wrapNow.classList.remove('open');
+                w.classList.toggle('open');
                 return;
             }
-            if (!t.closest('.dh-eth-wrap')) wrapNow.classList.remove('open');
+            if (t.id === 'dhAcctCopy') {
+                e.preventDefault();
+                e.stopPropagation();
+                var addr = dhWalletText();
+                if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).catch(function () {});
+                if (typeof showToast === 'function') showToast('地址已复制', '⧉');
+                return;
+            }
+            if (t.id === 'dhDisconnect') {
+                e.preventDefault();
+                e.stopPropagation();
+                try { localStorage.setItem('storyfun_user', JSON.stringify({ isLoggedIn: false, authMethod: null })); } catch (err) {}
+                setTimeout(function () { location.reload(); }, 120);
+                return;
+            }
+            if (!t.closest('.dh-acct-wrap')) w.classList.remove('open');
         }, true);
     }
-    // 供页面（launch-shell 等）交易后刷新
     window.refreshDhEth = fillDhEth;
 
     // 主流程

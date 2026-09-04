@@ -43,7 +43,7 @@ function clearUserFromStorage() {
 }
 
 const storedUser = loadUserFromStorage();
-let currentUser = storedUser && storedUser.isLoggedIn ? { ...PRIVY_MOCK_USER, ...storedUser } : { ...PRIVY_MOCK_USER, isLoggedIn: false };
+let currentUser = storedUser ? { ...PRIVY_MOCK_USER, ...storedUser } : { ...PRIVY_MOCK_USER, isLoggedIn: true };
 
 // ============================================================
 //  DOM 就绪后初始化
@@ -232,6 +232,22 @@ function closeLoginModal() {
       document.body.style.overflow = '';
     }, 300);
   }
+}
+
+// ============================================================
+//  模拟钱包直连（替代登录弹窗；无 Privy）
+// ============================================================
+function simulateWalletConnect() {
+  currentUser.isLoggedIn = true;
+  currentUser.authMethod = 'wallet';
+  currentUser.name = '故事玩家';
+  currentUser.avatar = PRIVY_MOCK_USER.avatar;
+  saveUserToStorage(currentUser);
+  const containers = document.querySelectorAll('.auth-container');
+  containers.forEach(container => { renderAuthUI(container); });
+  closeLoginModal();
+  if (typeof showToast === 'function') showToast('✅ 已连接模拟钱包', '🔗');
+  document.dispatchEvent(new CustomEvent('auth-ready'));
 }
 
 // ============================================================
@@ -431,3 +447,10 @@ if (document.readyState === 'loading') {
 } else {
   initAuth();
 }
+
+// ============================================================
+//  模拟钱包直连：任何“登录”入口不再弹 Privy/邮箱，直接连接模拟钱包
+// ============================================================
+window.openLoginModal = function () {
+  if (!currentUser || !currentUser.isLoggedIn) simulateWalletConnect();
+};
