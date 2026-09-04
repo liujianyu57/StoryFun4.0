@@ -210,9 +210,12 @@
     .spotlight-esc-hint { font-size: 11px; color: var(--text-3); border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; }
 
     .spotlight-filters { padding: 12px 18px 6px; display: flex; flex-direction: column; gap: 9px; }
-    .sp-fg { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .sp-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; width: 62px; flex-shrink: 0; }
-    .sp-pills { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+    .sp-fg { display: flex; align-items: flex-start; gap: 12px; }
+    .sp-label {
+      font-size: 11px; color: var(--text-3); font-weight: 600;
+      width: 56px; flex: 0 0 56px; flex-shrink: 0; padding-top: 8px; line-height: 1.2;
+    }
+    .sp-pills { display: inline-flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
     .sp-pills button {
       height: 26px; padding: 0 11px; border-radius: 999px; border: 1px solid transparent;
       background: var(--accent-soft); color: var(--text-2);
