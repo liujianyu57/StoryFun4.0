@@ -394,7 +394,7 @@
           <section class="pane">
             <div class="pane-pad">
               <div class="lp-title-row">
-                <div class="lp-title">Launch token</div>
+                <div class="lp-title">发行代币</div>
               </div>
               <div class="lp-form">
                 <div class="field">
@@ -453,7 +453,7 @@
                       <div class="pair-dd-scroll" id="pairScroll"></div>
                     </div>
                   </div>
-                  <div class="f-note" id="pairNote">Reading the graduation threshold.</div>
+                  <div class="f-note" id="pairNote">正在读取毕业阈值…</div>
                 </div>
                 <div class="field lp-wide">
                   <div class="field-label">开发者预买</div>
@@ -479,48 +479,48 @@
               </button>
               <div class="adv-body" id="advBody">
                 <div class="adv-row hfs-head">
-                  <span class="lbl">Holder fee sharing</span>
+                  <span class="lbl">创作者费分成</span>
                   <div class="hfs-cards">
                     <button type="button" class="hfs-card" id="hfsHolders" aria-pressed="false" onclick="setHfs(true)">
                       <span class="hfs-card-head">
                         <span class="hfs-radio" aria-hidden="true"></span>
-                        <span class="hfs-title">Creator fees go to holders</span>
+                        <span class="hfs-title">创作者费分给持有人</span>
                       </span>
-                      <span class="hfs-body">Two more confirmations after launch deploy the distributor and route every creator fee to holders. Permanent once routed.</span>
+                      <span class="hfs-body">发射后还需两次链上确认：部署分发合约，并把每一笔创作者费路由给持有人。路由一旦完成即永久生效。</span>
                     </button>
                     <button type="button" class="hfs-card on" id="hfsWallet" aria-pressed="true" onclick="setHfs(false)">
                       <span class="hfs-card-head">
                         <span class="hfs-radio" aria-hidden="true"></span>
-                        <span class="hfs-title">Creator fees go to the creator wallet</span>
+                        <span class="hfs-title">创作者费归创作者钱包</span>
                       </span>
-                      <span class="hfs-body">Creator fees and the creator tax are paid to the wallet below.</span>
+                      <span class="hfs-body">创作者费与创作者税均打入下方钱包。</span>
                       <span class="hfs-wallet">
-                        <span class="hfs-wallet-lbl">Creator wallet</span>
+                        <span class="hfs-wallet-lbl">创作者钱包</span>
                         <input class="input num" id="pCreatorWallet" placeholder="0x7A2b…3fD8" autocomplete="off" spellcheck="false" />
-                        <span class="hfs-wallet-note">Receives creator fees and the creator tax. Leave blank to use your connected wallet.</span>
+                        <span class="hfs-wallet-note">接收创作者费与创作者税；留空则使用当前连接的钱包。</span>
                       </span>
                     </button>
                   </div>
                   <input type="checkbox" id="shareToHolders" style="display:none" />
                 </div>
                 <div class="adv-row tax-col">
-                  <span class="lbl">Creator tax</span>
+                  <span class="lbl">创作者税</span>
                   <div class="tax-entry">
                     <input class="input num" id="pTaxPct" type="number" inputmode="decimal" min="0" max="10" step="0.01" value="0" placeholder="0" autocomplete="off" oninput="taxNoteLive()" />
                     <span class="tax-suffix" aria-hidden="true">%</span>
                   </div>
-                  <span class="f-note tax-note" id="taxNote">Traders pay 1.00% in total, up to 10% of it yours.</span>
+                  <span class="f-note tax-note" id="taxNote">交易者合计支付 1.00%（含基础费 1% 与创作者税 0%）</span>
                 </div>
                 <div class="adv-row snipe-col">
-                  <span class="lbl">Snipe tax exemptions</span>
+                  <span class="lbl">狙击税豁免</span>
                   <div class="snipe-entry">
-                    <input class="input num" id="snipeInput" placeholder="0x wallet address" autocomplete="off" spellcheck="false" />
+                    <input class="input num" id="snipeInput" placeholder="0x 钱包地址" autocomplete="off" spellcheck="false" />
                     <button type="button" class="snipe-add" id="snipeAddBtn" disabled aria-label="把钱包加入豁免名单" onclick="snipeAdd()">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                     </button>
                   </div>
                   <div class="snipe-list" id="snipeList"></div>
-                  <span class="f-note snipe-note" id="snipeNote">Buys in the launch second pay 99%, decaying to zero across 3s. Declare the wallets your team opens with.</span>
+                  <span class="f-note snipe-note" id="snipeNote">发射首秒内的买入收 99% 狙击税，3 秒内衰减至 0。请声明你团队开局使用的钱包。</span>
                 </div>
               </div>
               <div class="inline-warn danger" id="paramErr"></div>
@@ -530,7 +530,7 @@
           <!-- 创建动作 -->
           <div class="cr-actions">
             <div>
-              <div class="cr-due"><b class="num" id="duePair">ETH</b> pair, <b class="num" id="feeTotal">0.0005 ETH</b> due</div>
+              <div class="cr-due"><b class="num" id="duePair">ETH</b><span id="dueRest"> 配对 · 应付发行费 <b class="num">0.0005 ETH</b></span></div>
               <div class="cr-gas" id="gasEst">⛽ 网络费预估 —</div>
             </div>
             <button class="btn btn-primary create-cta" id="createBtn" onclick="doCreate()" disabled>填写名称</button>
@@ -547,12 +547,12 @@
               <span class="pv-ticker num" id="sumSym">$TICKER</span>
             </div>
             <div class="pv-rows">
-              <div class="pv-row"><span>Launch fee</span><b class="num">0.0005 ETH</b></div>
+              <div class="pv-row"><span>发行费</span><b class="num">0.0005 ETH</b></div>
               <div class="pv-row"><span>配对资产</span><b class="num" id="sumPair">ETH</b></div>
               <div class="pv-row"><span>交易费</span><b class="num" id="sumFee">1.00%</b></div>
-              <div class="pv-row"><span>发射窗口</span><b>99% snipe tax, 3s</b></div>
+              <div class="pv-row"><span>发射窗口</span><b>首 3 秒 99% 狙击税</b></div>
               <div class="pv-row"><span>毕业</span><b class="ok num" id="sumGrad">4.2 ETH</b></div>
-              <div class="pv-row"><span>流动性</span><b class="ok">Locked</b></div>
+              <div class="pv-row"><span>流动性</span><b class="ok">永久锁定</b></div>
             </div>
           </div>
         </aside>
@@ -562,7 +562,7 @@
       <div class="success-wrap" id="successWrap">
         <div class="success-ico">✓</div>
         <div class="success-title">已上架</div>
-        <div class="success-desc">叙事已在市场上线，curve 已就绪。</div>
+        <div class="success-desc">叙事已在市场发布，发射曲线已就绪。</div>
         <div class="success-actions">
           <button class="btn btn-primary btn-lg" onclick="location.href='launchpad.html'">查看市场</button>
           <button class="btn btn-ghost btn-lg" onclick="location.href='coin-detail.html?id='+lastCoinId">查看我的币</button>
@@ -618,6 +618,21 @@
       '名称': 'Name', '代号': 'Ticker', '简介': 'Description', '币图': 'Token image',
       'X 链接': 'X profile', '配对资产': 'Paired asset', '开发者预买': 'Developer buy',
       '选择图片': 'Choose image', '图片已就绪': 'Image ready',
+      '发行费': 'Launch fee',
+      '创作者费分成': 'Holder fee sharing',
+      '创作者费分给持有人': 'Creator fees go to holders',
+      '发射后还需两次链上确认：部署分发合约，并把每一笔创作者费路由给持有人。路由一旦完成即永久生效。': 'Two more confirmations after launch deploy the distributor and route every creator fee to holders. Permanent once routed.',
+      '创作者费归创作者钱包': 'Creator fees go to the creator wallet',
+      '创作者费与创作者税均打入下方钱包。': 'Creator fees and the creator tax are paid to the wallet below.',
+      '创作者钱包': 'Creator wallet',
+      '接收创作者费与创作者税；留空则使用当前连接的钱包。': 'Receives creator fees and the creator tax. Leave blank to use your connected wallet.',
+      '创作者税': 'Creator tax',
+      '狙击税豁免': 'Snipe tax exemptions',
+      '0x 钱包地址': '0x wallet address',
+      '首 3 秒 99% 狙击税': '99% snipe tax, 3s',
+      '永久锁定': 'Locked',
+      '正在读取毕业阈值…': 'Reading the graduation threshold.',
+      '发射首秒内的买入收 99% 狙击税，3 秒内衰减至 0。请声明你团队开局使用的钱包。': 'Buys in the launch second pay 99%, decaying to zero across 3s. Declare the wallets your team opens with.',
       '上传中': 'Uploading', '选择封面图': 'Choose a cover image',
       '余额不足？这是演示钱包': 'Low balance? This is a demo wallet',
       '领取 $250 等值': 'Claim $250 worth of',
@@ -637,7 +652,8 @@
       '选择币图或关联叙事': 'Add an image or link a work', '创建': 'Create',
       '交易费': 'Trade fee', '发射窗口': 'Snipe window', '毕业': 'Graduation', '流动性': 'Liquidity',
       'Launch fee': 'Launch fee',
-      '已上架': 'Listed', '叙事已在市场上线，curve 已就绪。': 'Your token is live on the market and the curve is ready.',
+      '已上架': 'Listed', '叙事已在市场发布，发射曲线已就绪。': 'Your token is live on the market and the curve is ready.',
+      '发行代币': 'Launch token',
       '查看市场': 'View market', '查看我的币': 'View my token',
       '创建中…': 'Working…', '已创建并上架': 'Token created and listed',
       // —— 配对下拉 ——
@@ -943,7 +959,7 @@
         // 上传中：图片尚未就绪，框/预览卡显示占位，状态交给文案
         img.style.display = 'none'; plus.style.display = '';
         pv.style.display = 'none'; ph.style.display = '';
-        copy.textContent = 'Uploading to ipfs…';
+        copy.textContent = langIsEn() ? 'Uploading to ipfs…' : '正在上传到 IPFS…';
         return;
       }
       var src = uploadPreview || currentCover();
@@ -951,7 +967,7 @@
       else { img.style.display = 'none'; plus.style.display = ''; }
       if (src) { pv.src = src; pv.style.display = 'block'; ph.style.display = 'none'; }
       else { pv.style.display = 'none'; ph.style.display = ''; }
-      copy.textContent = uploading ? 'Uploading to ipfs…' : (src ? tt('图片已就绪') : tt('选择图片'));
+      copy.textContent = uploading ? (langIsEn() ? 'Uploading to ipfs…' : '正在上传到 IPFS…') : (src ? tt('图片已就绪') : tt('选择图片'));
     }
     function currentCover() {
       if (attached && attached.cover) return attached.cover;
@@ -1037,6 +1053,15 @@
       ico.className = 'pair-dd-ico ' + pairIcoCls(pairSel);
     }
 
+    // 底部费用行：{pair} + 语言化后缀
+    function renderDueLang() {
+      var r = document.getElementById('dueRest');
+      if (!r) return;
+      r.innerHTML = langIsEn()
+        ? ' pair, <b class="num">0.0005 ETH</b> due'
+        : ' 配对 · 应付发行费 <b class="num">0.0005 ETH</b>';
+    }
+
     // ---- 毕业阈值（pons：先 Reading，再按资产单位显示） ----
     // 演示用资产美元价（≈真实价位），阈值统一 ≈$13,440（4.2 ETH @3200）
     var GRAD_USD = 13440;
@@ -1065,13 +1090,13 @@
       if (gradTimer) clearTimeout(gradTimer);
       var note = document.getElementById('pairNote');
       var row = document.getElementById('sumGrad');
-      note.textContent = 'Reading the graduation threshold.';
+      note.textContent = langIsEn() ? 'Reading the graduation threshold.' : '正在读取毕业阈值…';
       if (row) row.textContent = '—';
       gradTimer = setTimeout(function () {
         var q = gradQty(sym);
-        if (q == null) { note.textContent = 'Graduation threshold unavailable.'; return; }
+        if (q == null) { note.textContent = langIsEn() ? 'Graduation threshold unavailable.' : '毕业阈值读取失败。'; return; }
         var txt = fmtQty(q) + ' ' + sym;
-        note.textContent = 'Graduates once the curve raises ' + txt + '.';
+        note.textContent = langIsEn() ? ('Graduates once the curve raises ' + txt + '.') : ('曲线募满 ' + txt + ' 后自动毕业。');
         if (row) row.textContent = txt;
       }, 2000);
     }
@@ -1106,7 +1131,9 @@
       var bal = assetBalance(pairSel);
       document.getElementById('devBuyTok').textContent = pairSel;
       document.getElementById('devBuyBal').textContent =
-        fmtQty(bal) + ' ' + pairSel + ' available, bought in the launch transaction';
+        langIsEn()
+        ? fmtQty(bal) + ' ' + pairSel + ' available, bought in the launch transaction'
+        : '可用 ' + fmtQty(bal) + ' ' + pairSel + '，随发射交易一并完成预买';
       document.getElementById('devBuyMax').style.display = bal > 0 ? 'inline-flex' : 'none';
       document.getElementById('faucetSym').textContent = pairSel;
     }
@@ -1167,7 +1194,9 @@
       var v = parseFloat(document.getElementById('pTaxPct').value);
       if (isNaN(v) || v < 0) v = 0;
       if (v > 10) v = 10;
-      el.textContent = 'Traders pay ' + (1 + v).toFixed(2) + '% in total, up to 10% of it yours.';
+      el.textContent = langIsEn()
+        ? 'Traders pay ' + (1 + v).toFixed(2) + '% in total, up to 10% of it yours.'
+        : '交易者合计支付 ' + (1 + v).toFixed(2) + '%（含基础费 1% 与创作者税 ' + v.toFixed(2) + '%）';
       updTradeFee();
     }
     // 预览卡交易费：1% 基础 + 税 → 如 2% → 3.00% · 2.00% yours
@@ -1179,7 +1208,9 @@
       if (v > 10) v = 10;
       v = Math.round(v * 100) / 100;
       el.textContent = v > 0
-        ? (1 + v).toFixed(2) + '% · ' + v.toFixed(2) + '% yours'
+        ? (langIsEn()
+            ? (1 + v).toFixed(2) + '% · ' + v.toFixed(2) + '% yours'
+            : (1 + v).toFixed(2) + '%（创作者税 ' + v.toFixed(2) + '%）')
         : '1.00%';
     }
 
@@ -1207,11 +1238,15 @@
     // ---- Snipe tax exemptions：输入 + 添加 + 胶囊列表（上限 32，pons 工厂限制） ----
     var snipeList = [];
     var SNIPE_MAX = 32;
-    var SNIPE_HINT = 'Buys in the launch second pay 99%, decaying to zero across 3s. Declare the wallets your team opens with.';
+    function snipeHint() {
+      return langIsEn()
+        ? 'Buys in the launch second pay 99%, decaying to zero across 3s. Declare the wallets your team opens with.'
+        : '发射首秒内的买入收 99% 狙击税，3 秒内衰减至 0。请声明你团队开局使用的钱包。';
+    }
     function snipeNoteSet(msg, isErr) {
       var n = document.getElementById('snipeNote');
       if (!n) return;
-      n.textContent = msg || SNIPE_HINT;
+      n.textContent = msg || snipeHint();
       n.classList.toggle('is-err', !!isErr);
     }
     function snipeAddrShort(a) {
@@ -1364,6 +1399,7 @@
       setHfs(false);
       taxNoteLive();
       updGas();
+      renderDueLang();
       document.getElementById('pCreatorWallet').placeholder = walletText();
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
