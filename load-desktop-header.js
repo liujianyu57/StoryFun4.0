@@ -58,8 +58,8 @@
             '.desktop-header .dh-usdc-badge .dh-avatar{width:30px;height:30px;border:none}',
             '.desktop-header .auth-login-btn{margin-left:auto}',
             '@media(min-width:769px){.desktop-header{left:160px;right:0}body{padding-top:56px}}',
-            '.dh-eth-wrap{position:relative;flex-shrink:0}',
-            '.dh-eth{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 6px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:rgba(0,0,0,.03);color:#13202e;font-size:12.5px;font-weight:700;cursor:pointer}',
+            '.dh-eth-wrap{position:relative;flex-shrink:0;z-index:400;pointer-events:auto}',
+            '.dh-eth{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 6px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:rgba(0,0,0,.03);color:#13202e;font-size:12.5px;font-weight:700;cursor:pointer;user-select:none;-webkit-user-select:none}',
             '.dh-eth .dh-eth-coin{width:22px;height:22px;border-radius:50%;background:#627EEA;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}',
             '.dh-eth-drop{position:absolute;top:calc(100% + 8px);right:0;min-width:200px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.1);padding:10px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .22s ease;z-index:300}',
             '.dh-eth-wrap.open .dh-eth-drop{opacity:1;visibility:visible;transform:translateY(0)}',
@@ -456,25 +456,37 @@
     }
     function bindLaunchEth() {
         var wrap = document.getElementById('dhEthWrap');
-        var pill = document.getElementById('dhEthPill');
-        if (!wrap || !pill) return;
+        if (!wrap) return;
         fillDhEth();
-        pill.addEventListener('click', function (e) {
-            e.stopPropagation();
-            wrap.classList.toggle('open');
-        });
-        document.addEventListener('click', function () { wrap.classList.remove('open'); });
-        var give = document.getElementById('dhEthGive');
-        if (give) give.addEventListener('click', function () {
-            if (window.Launch && Launch.debug && Launch.USER) {
-                Launch.debug.setEth((Launch.USER.eth || 0) + 1);
-                if (Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
-            } else {
-                dhSaveEth(dhStoredEth() + 1);
-                if (window.Launch && Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
+        if (window.__dhEthBound) return;   // 防重复委托
+        window.__dhEthBound = true;
+        // 委托式交互：无论 header 何时注入/重复初始化都能响应
+        document.addEventListener('click', function (e) {
+            var t = e.target;
+            if (!t || !t.closest) return;
+            var wrapNow = document.getElementById('dhEthWrap');
+            if (!wrapNow) return;
+            if (t.closest('#dhEthPill')) {
+                e.stopPropagation();
+                wrapNow.classList.toggle('open');
+                return;
             }
-            fillDhEth();
-        });
+            if (t.id === 'dhEthGive') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (window.Launch && Launch.debug && Launch.USER) {
+                    Launch.debug.setEth((Launch.USER.eth || 0) + 1);
+                    if (Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
+                } else {
+                    dhSaveEth(dhStoredEth() + 1);
+                    if (window.Launch && Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
+                }
+                fillDhEth();
+                wrapNow.classList.remove('open');
+                return;
+            }
+            if (!t.closest('.dh-eth-wrap')) wrapNow.classList.remove('open');
+        }, true);
     }
     // 供页面（launch-shell 等）交易后刷新
     window.refreshDhEth = fillDhEth;
