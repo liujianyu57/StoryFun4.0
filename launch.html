@@ -27,78 +27,93 @@
     .pane-title { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
     .pane-sub { font-size: 12.5px; color: var(--text-2); margin-top: 3px; }
 
-    /* ===== 关联叙事（选填）折叠块 ===== */
-    .story-toggle {
-      display: flex; align-items: center; justify-content: space-between; width: 100%;
-      border: none; background: none; padding: 0; cursor: pointer; text-align: left;
-    }
-    .story-toggle-l { display: flex; align-items: center; gap: 10px; }
+    /* ===== 关联叙事（已选摘要卡） ===== */
     .story-ico {
-      width: 30px; height: 30px; border-radius: 10px; background: var(--accent-soft);
-      display: grid; place-items: center; font-size: 15px; color: var(--text-2); flex-shrink: 0;
+      width: 40px; height: 40px; border-radius: 12px; background: var(--accent-soft);
+      display: grid; place-items: center; font-size: 17px; flex-shrink: 0;
     }
-    .story-chev { color: var(--text-3); transition: transform .18s; flex-shrink: 0; }
-    .story-toggle:not(.closed) .story-chev { transform: rotate(180deg); }
-    .story-body { display: none; margin-top: 14px; }
-    .story-toggle:not(.closed) + .story-body { display: block; }
+    .attach {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2);
+    }
+    .attach-thumb { width: 62px; height: 46px; border-radius: 9px; overflow: hidden; background: var(--surface); flex-shrink: 0; }
+    .attach-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .attach-info { flex: 1; min-width: 0; }
+    .attach-name { font-size: 14px; font-weight: 700; }
+    .attach-meta { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+    .attach-act { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+    .attach-change { font-size: 12.5px; color: var(--text-2); border: none; background: none; cursor: pointer; padding: 6px; }
+    .attach-change:hover { color: var(--text); }
+    .attach-x {
+      width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-3); cursor: pointer; display: inline-flex;
+      align-items: center; justify-content: center;
+    }
+    .attach-x:hover { color: var(--text); border-color: var(--border-strong); }
 
-    .story-src-row { display: flex; gap: 10px; }
-    .story-src {
-      flex: 1; border: 1.5px solid var(--border); border-radius: 13px; padding: 12px 14px;
-      background: var(--surface); cursor: pointer; text-align: left; transition: all .15s;
+    /* ===== 作品选择弹层 ===== */
+    .picker-backdrop {
+      position: fixed; inset: 0; z-index: 300; background: rgba(10,11,13,.45);
+      backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center;
     }
-    .story-src:hover { border-color: var(--border-strong); }
-    .story-src.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10,11,13,.05); }
-    .story-src-name { font-size: 13.5px; font-weight: 700; }
-    .story-src-sub { font-size: 11.5px; color: var(--text-2); margin-top: 3px; line-height: 1.45; }
-
-    /* AI 生成子面板 */
-    .ai-panel { display: none; margin-top: 12px; }
-    .ai-panel.show { display: block; }
-    .ai-prompt-wrap { display: flex; gap: 8px; }
-    .style-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 4px; }
-    .style-chip {
-      height: 27px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
-      border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer;
+    .picker-panel {
+      width: min(560px, calc(100vw - 28px)); max-height: 82vh; display: flex; flex-direction: column;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(10,11,13,.25); overflow: hidden;
     }
-    .style-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .gen-hint { font-size: 11.5px; color: var(--text-3); margin-top: 6px; display: flex; justify-content: space-between; }
-    .gen-stage { display: none; margin-top: 12px; border-radius: 12px; background: var(--text); color: #fff; overflow: hidden; }
-    .gen-stage.show { display: block; }
-    .gen-kws { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 16px 4px; }
-    .gen-kw { font-size: 12px; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 3px 10px; opacity: 0; animation: kwIn .4s forwards; }
-    @keyframes kwIn { from { opacity: 0; transform: scale(.9);} to { opacity: 1; } }
-    .gen-progress { margin: 8px 16px 2px; height: 3px; background: rgba(255,255,255,.15); border-radius: 3px; overflow: hidden; }
-    .gen-progress i { display: block; height: 100%; background: #fff; width: 0%; transition: width .2s; }
-    .gen-row { display: flex; align-items: baseline; justify-content: space-between; padding: 6px 16px 12px; }
-    .gen-timer { font-family: var(--mono); font-size: 24px; font-weight: 800; }
-    .gen-caption { font-size: 12px; color: rgba(255,255,255,.6); }
-    .gen-result {
-      display: none; grid-template-columns: 64px 1fr; gap: 12px; margin-top: 12px; padding: 11px;
-      border: 1px solid var(--border); border-radius: 13px; background: var(--surface-2);
+    .picker-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px 0;
     }
-    .gen-result.show { display: grid; }
-    .gen-result-thumb { width: 64px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--surface); position: relative; }
-    .gen-result-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .gen-result-name { font-size: 13.5px; font-weight: 700; }
-    .gen-result-tag { font-size: 11px; color: var(--text-2); margin: 2px 0 4px; }
-    .gen-result-desc { font-size: 11.5px; color: var(--text-2); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-    /* 作品选择子面板 */
-    .work-panel { display: none; margin-top: 12px; }
-    .work-panel.show { display: block; }
-    .work-list { border: 1px solid var(--border); border-radius: 13px; overflow: hidden; max-height: 210px; overflow-y: auto; }
-    .work-item { display: flex; align-items: center; gap: 11px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border); }
-    .work-item:last-child { border-bottom: none; }
-    .work-item:hover { background: var(--surface-2); }
-    .work-item.on { background: rgba(10,11,13,.04); }
-    .work-cover { width: 46px; height: 36px; border-radius: 8px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; }
-    .work-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .work-info { flex: 1; min-width: 0; }
-    .work-title { font-size: 12.5px; font-weight: 600; }
-    .work-meta { font-size: 11px; color: var(--text-2); margin-top: 2px; }
-    .work-check { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: grid; place-items: center; flex-shrink: 0; color: transparent; }
-    .work-item.on .work-check { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .picker-title { font-size: 16px; font-weight: 800; }
+    .picker-close {
+      width: 30px; height: 30px; border-radius: 9px; border: none; background: none;
+      color: var(--text-3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .picker-close:hover { background: var(--accent-soft); color: var(--text); }
+    .picker-search {
+      display: flex; align-items: center; gap: 9px; margin: 12px 18px 0;
+      border: 1px solid var(--border); border-radius: 12px; padding: 0 12px; height: 40px;
+      background: var(--surface-2);
+    }
+    .picker-search:focus-within { border-color: var(--accent); }
+    .picker-input { flex: 1; border: none; outline: none; background: transparent; font-size: 13.5px; color: var(--text); }
+    .picker-tabs { display: flex; gap: 4px; padding: 12px 18px 0; }
+    .picker-tab {
+      height: 32px; padding: 0 16px; border-radius: 999px; border: 1px solid transparent;
+      background: none; color: var(--text-2); font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .picker-tab.on { background: var(--accent); color: #fff; }
+    .picker-tab:not(.on):hover { background: var(--accent-soft); color: var(--text); }
+    .picker-list { flex: 1; overflow-y: auto; padding: 10px 10px 6px; min-height: 180px; }
+    .picker-item {
+      display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px;
+      border: none; background: none; border-radius: 12px; cursor: pointer; text-align: left;
+    }
+    .picker-item:hover { background: var(--accent-soft); }
+    .picker-item.on { background: var(--accent-soft); }
+    .picker-thumb {
+      width: 52px; height: 40px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+      background: var(--surface-2); border: 1px solid var(--border);
+      display: grid; place-items: center; font-size: 12px; color: var(--text-3);
+    }
+    .picker-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .picker-info { flex: 1; min-width: 0; }
+    .picker-name { font-size: 13.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .picker-meta { font-size: 11.5px; color: var(--text-2); margin-top: 2px; }
+    .picker-check {
+      width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-strong);
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      color: transparent; font-size: 11px;
+    }
+    .picker-item.on .picker-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .picker-empty { text-align: center; padding: 40px 10px; color: var(--text-3); font-size: 13px; }
+    .picker-foot {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 18px; border-top: 1px solid var(--border);
+    }
+    .picker-sum { font-size: 12.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .picker-foot .btn { flex-shrink: 0; }
 
     /* ===== 表单 ===== */
     .lp-title-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
@@ -251,57 +266,17 @@
           <!-- 关联叙事（选填） -->
           <section class="pane">
             <div class="pane-pad">
-              <button class="story-toggle" id="storyToggle" onclick="toggleStory()">
-                <span class="story-toggle-l">
-                  <span class="story-ico">✦</span>
-                  <span>
-                    <span style="display:block;font-size:15px;font-weight:800">关联叙事（选填）</span>
-                    <span style="display:block;font-size:12px;color:var(--text-2);margin-top:2px">给这个币一段 AI 或作品故事，自动带出名称与封面</span>
-                  </span>
-                </span>
-                <svg class="story-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-              </button>
-              <div class="story-body" id="storyBody">
-                <div class="story-src-row">
-                  <div class="story-src on" id="srcAI" onclick="pickSource('ai')">
-                    <div class="story-src-name">✦ AI 生成</div>
-                    <div class="story-src-sub">一句话生成 15s 叙事 · 生成费 0.02 ETH</div>
-                  </div>
-                  <div class="story-src" id="srcWork" onclick="pickSource('work')">
-                    <div class="story-src-name">🎬 我的作品</div>
-                    <div class="story-src-sub">从已发布的短剧或视频中选择</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                  <span class="story-ico">🎬</span>
+                  <div style="min-width:0">
+                    <div style="font-size:15px;font-weight:800">关联叙事（选填）</div>
+                    <div style="font-size:12px;color:var(--text-2);margin-top:2px">从你的短剧或视频里挑一个作为币的故事</div>
                   </div>
                 </div>
-
-                <div class="ai-panel show" id="aiPanel">
-                  <div class="ai-prompt-wrap">
-                    <textarea class="input" id="aiPrompt" rows="2" placeholder="描述想生成的叙事，如：一只穿西装的猫在月球上打碟"></textarea>
-                    <button class="btn btn-primary gen-btn" id="genBtn" onclick="startGen()" style="height:42px;flex-shrink:0">生成</button>
-                  </div>
-                  <div class="style-row" id="styleRow">
-                    <button class="style-chip on" data-s="古风">古风</button>
-                    <button class="style-chip" data-s="赛博">赛博</button>
-                    <button class="style-chip" data-s="卡通">卡通</button>
-                    <button class="style-chip" data-s="黑白">黑白</button>
-                    <button class="style-chip" data-s="水彩">水彩</button>
-                  </div>
-                  <div class="gen-hint"><span>生成费 0.02 ETH</span><span id="ethHint"></span></div>
-                  <div class="inline-warn danger" id="genErr"></div>
-                  <div class="gen-stage" id="genStage">
-                    <div class="gen-kws" id="genKws"></div>
-                    <div class="gen-progress"><i id="genBar"></i></div>
-                    <div class="gen-row">
-                      <span class="gen-timer num" id="genTimer">15.0</span>
-                      <span class="gen-caption" id="genCaption">解析提示词…</span>
-                    </div>
-                  </div>
-                  <div class="gen-result" id="genResult"></div>
-                </div>
-
-                <div class="work-panel" id="workPanel">
-                  <div class="work-list" id="workList"></div>
-                </div>
+                <button class="btn btn-primary" id="pickStoryBtn" onclick="openStoryPicker()" style="flex-shrink:0;height:38px">选择作品</button>
               </div>
+              <div id="storyAttached" style="display:none;margin-top:14px"></div>
             </div>
           </section>
 
@@ -440,7 +415,7 @@
       <div class="success-wrap" id="successWrap">
         <div class="success-ico">✓</div>
         <div class="success-title">已上架</div>
-        <div class="success-desc">叙事已在市场上线，curve 已就绪。AI 视频已同步为作品。</div>
+        <div class="success-desc">叙事已在市场上线，curve 已就绪。</div>
         <div class="success-actions">
           <button class="btn btn-primary btn-lg" onclick="location.href='launchpad.html'">查看市场</button>
           <button class="btn btn-ghost btn-lg" onclick="location.href='coin-detail.html?id='+lastCoinId">查看我的币</button>
@@ -449,6 +424,31 @@
     </div>
   </main>
 
+  <!-- 作品选择弹层 -->
+  <div class="picker-backdrop" id="pickerBackdrop" style="display:none">
+    <div class="picker-panel" role="dialog" aria-modal="true" aria-label="选择要关联的作品">
+      <div class="picker-head">
+        <div class="picker-title">选择要关联的作品</div>
+        <button class="picker-close" onclick="closeStoryPicker()" aria-label="关闭">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="picker-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
+        <input class="picker-input" id="pickerSearch" placeholder="搜索作品名称…" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="picker-tabs">
+        <button class="picker-tab on" data-tab="drama" onclick="pickerTab('drama')">短剧</button>
+        <button class="picker-tab" data-tab="video" onclick="pickerTab('video')">视频</button>
+      </div>
+      <div class="picker-list" id="pickerList"></div>
+      <div class="picker-foot">
+        <span class="picker-sum" id="pickerSum">未选择</span>
+        <button class="btn btn-primary" id="pickerOk" onclick="confirmStoryPick()" disabled>关联</button>
+      </div>
+    </div>
+  </div>
+
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
   <script src="launch-shell.js"></script>
@@ -456,11 +456,10 @@
     // ============================================================
     //  创建（pons 骨架 · 全中文）
     // ============================================================
-    var source = 'ai';
-    var style = '古风';
-    var genState = null;      // {poster:{cover,video,prompt,style}, frame, suggestName}
-    var pickedWork = null;    // 选中的作品
     var uploadPreview = null; // 上传图（仅预览）
+    var attached = null;      // 已关联作品 {type:'drama'|'clip'|'video', title, meta, cover, name, desc, video}
+    var pkTab = 'drama';      // 弹层当前 Tab
+    var pickerSel = null;     // 弹层内当前选中 {type,title,meta,cover,name,desc,video}
     var lastCoinId = null;
 
     var AI_COVERS = ['image/cover-zero-night.jpg','image/cover-pyramid.jpg','image/cover-survivor.jpg','image/cover-candle.jpg','image/cover-allin.jpg','image/hero-bg-blur.jpg'];
@@ -469,131 +468,204 @@
     function pickVideo() { return AI_VIDEOS[Math.floor(Math.random()*AI_VIDEOS.length)]; }
     function esc(s) { return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 
-    function refreshEthHint() {
-      var el = document.getElementById('ethHint');
-      if (el && window.Launch) el.textContent = '可用 ' + Launch.fmtEth(Launch.USER.eth);
+    function refreshEthHint() { // 余额提示已随 AI 生成移除，保留占位
     }
     function walletText() {
       if (window.Launch) return Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
       return '0x7A2b…3fD8';
     }
 
-    // ---- 叙事折叠 ----
-    function toggleStory() {
-      document.getElementById('storyToggle').classList.toggle('closed');
-    }
-
-    // ---- 来源切换 ----
-    function pickSource(s) {
-      source = s;
-      document.getElementById('srcAI').classList.toggle('on', s==='ai');
-      document.getElementById('srcWork').classList.toggle('on', s==='work');
-      document.getElementById('aiPanel').classList.toggle('show', s==='ai');
-      document.getElementById('workPanel').classList.toggle('show', s==='work');
-      if (s === 'work') renderWorks();
-      syncReady();
-    }
-
-    // ---- 我的作品 ----
-    function myWorks() {
+    // ============ 作品数据源 ============
+    // 短剧：storyfun_my_dramas（演示内置 3 部 + localStorage）；整部剧可关联
+    function myDramas() {
       var out = [];
-      try {
-        out = (JSON.parse(localStorage.getItem('storyfun_my_dramas')||'[]')).concat(JSON.parse(localStorage.getItem('storyfun_my_videos')||'[]'));
-      } catch (e) {}
+      try { out = JSON.parse(localStorage.getItem('storyfun_my_dramas') || '[]') || []; } catch (e) {}
       if (!out.length) out = [
-        { title:'凤骨琉璃', cover:'image/fenggu_cover.jpg', kind:'drama', views:'22.3万' },
-        { title:'我卸甲后天下大乱了', cover:'image/xiejia_cover.jpg', kind:'drama', views:'18.6万' },
-        { title:'丞相府今日开饭', cover:'image/chengxiangfu_cover.jpg', kind:'video', views:'9.4万' }
+        { id:'d_feng', title:'凤骨琉璃', cover:'image/fenggu_cover.jpg', video:'video/凤骨琉璃.mp4', desc:'一曲凤骨琉璃，半世浮华若梦。', kind:'drama', episodes:'全44集', eps:5 },
+        { id:'d_xie', title:'我卸甲后天下大乱了', cover:'image/xiejia_cover.jpg', video:'video/我卸甲后天下大乱了.mp4', desc:'卸下铠甲那一刻，天下风云骤变。', kind:'drama', episodes:'全12集', eps:4 },
+        { id:'d_cheng', title:'丞相府今日开饭', cover:'image/chengxiangfu_cover.jpg', video:'video/丞相府今日开饭.mp4', desc:'丞相府的厨房里藏着天下大势。', kind:'drama', episodes:'全24集', eps:3 }
       ];
       return out;
     }
-    function renderWorks() {
-      var host = document.getElementById('workList');
-      var works = myWorks();
-      if (!works.length) { host.innerHTML = '<div style="padding:22px;text-align:center;font-size:13px;color:var(--text-2)">还没有作品 · 改用 AI 生成</div>'; return; }
-      host.innerHTML = works.map(function(w,i){
-        return '<div class="work-item" data-i="'+i+'" onclick="pickWork('+i+')">'+
-          '<div class="work-cover"><img src="'+esc(w.cover||'image/hero-bg-blur.jpg')+'" alt=""></div>'+
-          '<div class="work-info"><div class="work-title">'+esc(w.title||'未命名')+'</div>'+
-          '<div class="work-meta">'+(w.kind==='drama'?'短剧':'视频')+(w.views?' · '+esc(w.views)+' 播放':'')+'</div></div>'+
-          '<div class="work-check">✓</div></div>';
+    // 短视频：storyfun_my_videos（AI/作品历史）
+    function myVideos() {
+      var out = [];
+      try { out = JSON.parse(localStorage.getItem('storyfun_my_videos') || '[]') || []; } catch (e) {}
+      if (!out.length) out = [
+        { id:'v_1', title:'月球打碟的猫', cover:'image/cover-zero-night.jpg', video:'video/打斗视频.mp4', desc:'一只穿西装的猫在月球上打碟', kind:'ai', dur:'0:15' },
+        { id:'v_2', title:'烛火与王冠 · 高光', cover:'image/cover-candle.jpg', video:'', desc:'权力的烛光里谁先燃尽', kind:'clip', dur:'0:58' },
+        { id:'v_3', title:'零点计划 · 预告', cover:'image/cover-pyramid.jpg', video:'', desc:'世界重置前最后一分钟', kind:'clip', dur:'0:30' }
+      ];
+      return out;
+    }
+    // 单集：从每部剧派生 episodes（演示 3~5 集，视频复用整剧示例）
+    function dramaEpisodes(d, i) {
+      var list = [];
+      var n = d.eps || 3;
+      for (var k = 1; k <= n; k++) {
+        list.push({
+          type: 'clip', dramaId: d.id, dramaTitle: d.title,
+          title: d.title + ' · 第 ' + k + ' 集',
+          cover: d.cover, video: d.video || '',
+          meta: '短剧单集 · 第 ' + k + ' 集',
+          name: d.title + ' 第' + k + '集', desc: d.desc || ''
+        });
+      }
+      return list;
+    }
+    function allClips() {
+      var out = [];
+      myDramas().forEach(function (d, i) {
+        dramaEpisodes(d, i).forEach(function (e) { out.push(e); });
+      });
+      return out;
+    }
+    // 视频大类 = 短视频 + 全部剧集单集
+    function videoItems() {
+      var items = [];
+      myVideos().forEach(function (v) {
+        items.push({
+          type: 'video', title: v.title, cover: v.cover || 'image/hero-bg-blur.jpg',
+          video: v.video || '', meta: (v.kind === 'ai' ? 'AI 视频' : '短视频') + (v.dur ? ' · ' + v.dur : ''),
+          name: v.title, desc: v.desc || ''
+        });
+      });
+      allClips().forEach(function (e) { items.push(e); });
+      return items;
+    }
+
+    // ============ 弹层 ============
+    function openStoryPicker() {
+      pickerSel = attached ? attached : null;
+      pkTab = 'drama';
+      document.getElementById('pickerBackdrop').style.display = 'flex';
+      var t = document.querySelector('#pickerSearch');
+      if (t) t.value = '';
+      pickerTabUI();
+      renderPicker();
+      renderPickerSum();
+    }
+    function closeStoryPicker() {
+      document.getElementById('pickerBackdrop').style.display = 'none';
+    }
+    function pickerTab(t) {
+      pkTab = t;
+      document.querySelectorAll('.picker-tab').forEach(function (b) {
+        b.classList.toggle('on', b.getAttribute('data-tab') === t);
+      });
+      renderPicker();
+      renderPickerSum();
+    }
+    function pickerTabUI() {
+      document.querySelectorAll('.picker-tab').forEach(function (b) {
+        b.classList.toggle('on', b.getAttribute('data-tab') === pkTab);
+      });
+    }
+    function pickerSearchQ() {
+      var el = document.getElementById('pickerSearch');
+      return (el && el.value ? el.value.trim().toLowerCase() : '');
+    }
+    // 匹配：跨 Tab 全局搜；无词时只显示当前 Tab
+    function pickerItems() {
+      var q = pickerSearchQ();
+      var dramas = myDramas().map(function (d) {
+        return { type: 'drama', title: d.title, cover: d.cover || 'image/hero-bg-blur.jpg', video: d.video || '',
+                 meta: '短剧 · ' + (d.episodes || ''), name: d.title, desc: d.desc || '' };
+      });
+      var items = pkTab === 'drama' ? dramas : videoItems();
+      if (q) {
+        // 跨 Tab：两侧都搜，按命中合并；有视频命中则跳到 video
+        var both = dramas.concat(videoItems());
+        both = both.filter(function (it) {
+          return (it.title || '').toLowerCase().indexOf(q) !== -1;
+        });
+        if (both.length) {
+          var hasVid = both.some(function (x) { return x.type !== 'drama'; });
+          if (hasVid && pkTab === 'drama' && !items.some(function (x) { return (x.title || '').toLowerCase().indexOf(q) !== -1; })) {
+            pkTab = 'video'; pickerTabUI();
+            items = videoItems();
+          }
+          items = items.filter(function (x) { return (x.title || '').toLowerCase().indexOf(q) !== -1; });
+        } else items = [];
+      }
+      return items;
+    }
+    function renderPicker() {
+      var host = document.getElementById('pickerList');
+      var items = pickerItems();
+      if (!items.length) {
+        host.innerHTML = '<div class="picker-empty">' +
+          (pickerSearchQ() ? '没有匹配的作品' : (pkTab === 'drama' ? '还没有短剧 · 先去发布一部' : '还没有视频 · 先去发布一条')) +
+          '</div>';
+        return;
+      }
+      host.innerHTML = items.map(function (it) {
+        var on = pickerSel && pickerSel.name === it.name && pickerSel.type === it.type ? ' on' : '';
+        var thumb = it.cover
+          ? '<img src="' + esc(it.cover) + '" alt="">'
+          : '<span>🎬</span>';
+        return '<button class="picker-item' + on + '" onclick="pickerSelect(\'' + esc(it.name) + '\')">' +
+          '<span class="picker-thumb">' + thumb + '</span>' +
+          '<span class="picker-info"><span class="picker-name">' + esc(it.title) + '</span>' +
+          '<span class="picker-meta">' + esc(it.meta) + '</span></span>' +
+          '<span class="picker-check">✓</span>' +
+        '</button>';
       }).join('');
     }
-    function pickWork(i) {
-      var works = myWorks();
-      pickedWork = works[i];
-      document.querySelectorAll('.work-item').forEach(function(el){el.classList.remove('on');});
-      var items = document.querySelectorAll('.work-item');
-      if (items[i]) items[i].classList.add('on');
-      uploadPreview = null; refreshUpload();
-      // 自动带出名称/简介
-      if (!document.getElementById('pName').value) document.getElementById('pName').value = pickedWork.title || '';
-      if (!document.getElementById('pTag').value) document.getElementById('pTag').value = '';
-      syncAll();
-      Launch.toast('已关联作品：' + (pickedWork.title||''), 'ok');
+    function pickerSelect(name) {
+      var q = pickerSearchQ();
+      var item = pickerItems().filter(function (x) { return x.name === name; })[0];
+      if (item) pickerSel = item;
+      renderPicker();
+      renderPickerSum();
     }
-
-    // ---- AI 生成演出（结束自动带出名称） ----
-    function startGen() {
-      if (!window.Launch) return;
-      var prompt = document.getElementById('aiPrompt').value.trim();
-      var err = document.getElementById('genErr');
-      if (!prompt) { err.textContent = '先描述一段叙事'; err.classList.add('show'); return; }
-      if (Launch.USER.eth < 0.02) {
-        err.textContent = '余额不足 · 点右上角 ETH 领取测试币';
-        err.classList.add('show'); Launch.toast('余额不足','err'); return;
-      }
-      err.classList.remove('show');
-      document.getElementById('genBtn').disabled = true;
-      document.getElementById('genBtn').textContent = '生成中…';
-      var all = prompt.replace(/\s+/g,'');
-      var words = [];
-      var size = Math.max(2, Math.ceil(all.length/4));
-      for (var i=0;i<all.length && words.length<6;i+=size) words.push(all.slice(i,i+size));
-      var kws = document.getElementById('genKws');
-      kws.innerHTML = words.map(function(w){return '<span class="gen-kw">'+esc(w)+'</span>';}).join('');
-      kws.querySelectorAll('.gen-kw').forEach(function(el,idx){ el.style.animationDelay=(idx*0.1)+'s'; });
-      document.getElementById('genStage').classList.add('show');
-      document.getElementById('genResult').classList.remove('show');
-      document.getElementById('genBar').style.width = '0%';
-
-      var t0 = performance.now(), dur = 4200;
-      function frame(now) {
-        var p = Math.min(1,(now-t0)/dur);
-        document.getElementById('genBar').style.width = (p*100)+'%';
-        document.getElementById('genTimer').textContent = (Math.max(0,15*(1-p))).toFixed(1);
-        document.getElementById('genCaption').textContent = p<0.4?'解析提示词…':p<0.75?'渲染关键帧…':'合成片段…';
-        if (p<1) requestAnimationFrame(frame); else finishGen();
-      }
-      requestAnimationFrame(frame);
+    function renderPickerSum() {
+      var ok = document.getElementById('pickerOk');
+      var sum = document.getElementById('pickerSum');
+      if (!pickerSel) { ok.disabled = true; sum.textContent = '未选择'; return; }
+      ok.disabled = false;
+      sum.textContent = '已选：' + pickerSel.title;
     }
-    function finishGen() {
-      var cover = pickCover(), video = pickVideo();
-      var tag = document.getElementById('aiPrompt').value.trim();
-      var suggestion = suggestName(tag);
-      var res = document.getElementById('genResult');
-      res.innerHTML =
-        '<div class="gen-result-thumb"><img src="'+cover+'" alt=""></div>'+
-        '<div><div class="gen-result-name">'+esc(suggestion)+'</div>'+
-        '<div class="gen-result-tag">AI 叙事 · 15s · '+esc(style)+'</div>'+
-        '<div class="gen-result-desc">'+esc(tag)+'</div></div>';
-      res.classList.add('show');
-      document.getElementById('genStage').classList.remove('show');
-      document.getElementById('genBtn').disabled = false;
-      document.getElementById('genBtn').textContent = '重新生成';
-      genState = { poster:{cover:cover,video:video,prompt:tag,style:style}, frame:cover, suggestName:suggestion };
-      pickedWork = null;
-      // 自动带出名称/简介
-      if (!document.getElementById('pName').value) document.getElementById('pName').value = suggestion;
-      if (!document.getElementById('pTag').value) document.getElementById('pTag').value = tag;
+    function confirmStoryPick() {
+      if (!pickerSel) return;
+      attached = pickerSel;
+      closeStoryPicker();
+      renderAttached();
+      // 自动回填名称/简介（仅用户未输入时）
+      if (!document.getElementById('pName').value) document.getElementById('pName').value = pickerSel.name || pickerSel.title;
+      if (!document.getElementById('pTag').value) document.getElementById('pTag').value = pickerSel.desc || '';
       uploadPreview = null; refreshUpload();
       syncAll();
-      Launch.toast('叙事已生成','ok');
+      Launch.toast('已关联：' + pickerSel.title, 'ok');
     }
-    function suggestName(tag) {
-      var out = (tag||'').replace(/[，。,.!！?？\s]+/g,'').slice(0,8);
-      return out || '新叙事币';
+    function clearAttached() {
+      attached = null; pickerSel = null;
+      renderAttached();
+      syncAll();
     }
+    function renderAttached() {
+      var box = document.getElementById('storyAttached');
+      if (!attached) { box.style.display = 'none'; box.innerHTML = ''; return; }
+      box.style.display = 'block';
+      var thumb = attached.cover
+        ? '<img src="' + esc(attached.cover) + '" alt="">'
+        : '<span>🎬</span>';
+      box.innerHTML =
+        '<div class="attach">' +
+          '<div class="attach-thumb">' + thumb + '</div>' +
+          '<div class="attach-info">' +
+            '<div class="attach-name">' + esc(attached.title) + '</div>' +
+            '<div class="attach-meta">' + esc(attached.meta) + '</div>' +
+          '</div>' +
+          '<div class="attach-act">' +
+            '<button class="attach-change" onclick="openStoryPicker()">更换</button>' +
+            '<button class="attach-x" onclick="clearAttached()" title="移除">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+    }
+    function attachName() { return attached ? (attached.name || attached.title) : ''; }
 
     // ---- 上传（仅预览，不持久） ----
     function refreshUpload() {
@@ -610,8 +682,7 @@
       else { pv.style.display='none'; ph.style.display=''; }
     }
     function currentCover() {
-      if (genState && genState.frame) return genState.frame;
-      if (pickedWork && pickedWork.cover) return pickedWork.cover;
+      if (attached && attached.cover) return attached.cover;
       return '';
     }
     function bindUpload() {
@@ -635,7 +706,7 @@
       refreshUpload();
       // 按钮状态文案
       var btn = document.getElementById('createBtn');
-      var haveStory = !!(genState && genState.poster) || !!pickedWork || !!uploadPreview;
+      var haveStory = !!attached || !!uploadPreview;
       var symOk = /^[A-Z0-9]{2,6}$/.test(sym);
       if (!name) { btn.textContent = '填写名称'; btn.disabled = true; }
       else if (!symOk) { btn.textContent = '填写代号'; btn.disabled = true; }
@@ -663,35 +734,29 @@
       if (!name) { err.textContent = '请输入名称'; err.classList.add('show'); return; }
       if (!/^[A-Z0-9]{2,6}$/.test(sym)) { err.textContent = '代号需 2–6 位字母或数字'; err.classList.add('show'); return; }
       if ((Launch.coins||[]).some(function(c){return c.symbol===sym;})) { err.textContent = '代号已被使用'; err.classList.add('show'); return; }
-      var isAi = source === 'ai' && genState && genState.poster;
-      var isWork = !isAi && !!pickedWork;
-      if (!isAi && !isWork && !uploadPreview) { err.textContent = '先生成/选择叙事或上传币图'; err.classList.add('show'); return; }
+      var isAi = false;
+      var isWork = !!attached;
+      if (!isWork && !uploadPreview) { err.textContent = '请关联一部作品或上传币图'; err.classList.add('show'); return; }
 
       var btn = document.getElementById('createBtn');
       btn.disabled = true; btn.textContent = '创建中…';
-      // cover：叙事素材优先；演示上传图不持久化，用默认素材封面
-      var cover = currentCover() || (isWork ? pickedWork.cover : pickCover());
-      var video = (genState && genState.poster && genState.poster.video) || '';
+      // cover：已关联作品封面优先；演示上传图不持久化则回退默认素材
+      var cover = currentCover() || pickCover();
+      var video = (attached && attached.video) || '';
+      var sourceTitle = attached ? attached.title : '';
 
       setTimeout(function(){
         var coin = Launch.createCoin({
           name:name, symbol:sym, tagline:tag,
           cover:cover, video:video,
-          sourceType:isAi?'ai':(isWork?'work':'work'),
-          sourceTitle:isAi?'AI 叙事 · 15s':(isWork?(pickedWork.title||''):''),
+          sourceType: 'work',
+          sourceTitle: sourceTitle,
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
           creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
           shareToHolders:document.getElementById('shareToHolders').checked,
           devBuyEth:parseFloat(document.getElementById('pDevBuy').value)||0,
           snipeExempts:(document.getElementById('pSnipe').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean)
         });
-        if (isAi) {
-          try {
-            var vids = JSON.parse(localStorage.getItem('storyfun_my_videos')||'[]');
-            vids.unshift({ id:coin.id, title:name, cover:genState.poster.cover, video:genState.poster.video, kind:'ai', desc:tag, coinId:coin.id, symbol:sym });
-            localStorage.setItem('storyfun_my_videos', JSON.stringify(vids.slice(0,40)));
-          } catch(e){}
-        }
         lastCoinId = coin.id;
         document.getElementById('crForm').style.display = 'none';
         document.getElementById('successWrap').style.display = 'block';
@@ -715,13 +780,13 @@
         document.getElementById('createErr').classList.remove('show');
         if (n>60) this.value = this.value.slice(0,60);
       });
-      document.getElementById('shareToHolders').addEventListener('change', function(){});
-      document.addEventListener('click', function(e){
-        var chip = e.target.closest('.style-chip');
-        if (chip) {
-          document.querySelectorAll('.style-chip').forEach(function(c){c.classList.remove('on');});
-          chip.classList.add('on'); style = chip.getAttribute('data-s');
-        }
+      // 弹层：搜索实时过滤；点遮罩关闭
+      document.getElementById('pickerSearch').addEventListener('input', function(){ renderPicker(); renderPickerSum(); });
+      document.getElementById('pickerBackdrop').addEventListener('click', function(e){
+        if (e.target === this) closeStoryPicker();
+      });
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape' && document.getElementById('pickerBackdrop').style.display === 'flex') closeStoryPicker();
       });
     }
 
@@ -729,28 +794,22 @@
       bind();
       refreshEthHint();
       document.getElementById('walletAddr').textContent = walletText();
-      document.getElementById('aiPrompt').addEventListener('input', function(){ document.getElementById('genErr').classList.remove('show'); });
-      // reuse 参数（从资产页“用它发币”进入）
+      // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
       var reuseRaw = q.get('reuse');
       if (reuseRaw) {
         try {
           var v = JSON.parse(decodeURIComponent(reuseRaw));
           if (v && v.title) {
-            pickSource('ai');
-            document.getElementById('aiPrompt').value = v.desc || v.title;
-            genState = { poster:{cover:v.cover||pickCover(), video:v.video||'', prompt:v.desc||v.title, style:style}, frame:v.cover||pickCover(), suggestName:v.title };
-            pickedWork = null;
-            document.getElementById('genResult').innerHTML =
-              '<div class="gen-result-thumb"><img src="'+esc(genState.poster.cover)+'" alt=""></div>'+
-              '<div><div class="gen-result-name">'+esc(v.title)+'</div>'+
-              '<div class="gen-result-tag">AI 叙事 · 15s · 复用</div>'+
-              '<div class="gen-result-desc">'+esc(v.desc||'')+'</div></div>';
-            document.getElementById('genResult').classList.add('show');
-            document.getElementById('genBtn').textContent = '重新生成';
+            attached = {
+              type: 'video', title: v.title,
+              cover: v.cover || 'image/hero-bg-blur.jpg', video: v.video || '',
+              meta: (v.kind === 'ai' ? 'AI 视频' : '视频') + (v.dur ? ' · ' + v.dur : ''),
+              name: v.title, desc: v.desc || ''
+            };
             if (!document.getElementById('pName').value) document.getElementById('pName').value = v.title;
             if (!document.getElementById('pTag').value) document.getElementById('pTag').value = v.desc || '';
-            syncAll();
+            renderAttached();
           }
         } catch(e){}
       }
