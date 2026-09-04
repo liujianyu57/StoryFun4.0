@@ -178,8 +178,14 @@
     }
     .pair-dd-option:hover { background: var(--accent-soft); }
     .pair-dd-option.active { background: var(--accent-soft); }
-    .pair-dd-opt { font-weight: 600; flex: 1; }
-    .pair-dd-tick { color: var(--accent); font-size: 12px; font-weight: 800; }
+    .pair-dd-opt { font-weight: 600; flex: none; }
+    .pair-dd-name {
+      margin-left: auto; min-width: 0; padding-left: 14px;
+      color: var(--text-3); font-size: 12px; font-weight: 500;
+      text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 58%;
+    }
+    .pair-dd-option.active .pair-dd-name { color: var(--accent); font-weight: 700; }
 
     /* 开发者预买 */
     .buy-entry { position: relative; max-width: 260px; }
@@ -774,6 +780,22 @@
 
     // ---- 配对资产（pons 同款自绘下拉：触发按钮 + 浮层选项） ----
     var pairSel = 'ETH';
+    // 资产名称（与 pons 页面一致；选项行右侧展示）
+    var PAIR_NAMES = {
+      ETH: 'Ether', AAPL: 'Apple', AMD: 'Advanced Micro Devices', AMZN: 'Amazon',
+      BB: 'BlackBerry', COIN: 'Coinbase', COST: 'Costco', CRCL: 'Circle Internet Group',
+      DELL: 'Dell Technologies', DJT: 'Trump Media & Technology Group', FIG: 'Figma',
+      GLD: 'SPDR Gold Shares', GME: 'GameStop', GOOGL: 'Alphabet Class A',
+      HIMS: 'Hims & Hers Health', JNJ: 'Johnson & Johnson', LLY: 'Eli Lilly',
+      LULU: 'Lululemon Athletica', META: 'Meta Platforms', MRNA: 'Moderna',
+      MRVL: 'Marvell Technology', MSFT: 'Microsoft', MSTR: 'Strategy',
+      MU: 'Micron Technology', NVDA: 'NVIDIA', PFE: 'Pfizer', PLTR: 'Palantir Technologies',
+      QQQ: 'Invesco QQQ', RBLX: 'Roblox', RDDT: 'Reddit', RIVN: 'Rivian Automotive',
+      SKHY: 'SK hynix', SNAP: 'Snap', SNDK: 'SanDisk', SPCX: 'SpaceX Class A',
+      SPY: 'SPDR S&P 500 ETF', TSLA: 'Tesla', TSM: 'Taiwan Semiconductor Manufacturing',
+      TTWO: 'Take-Two Interactive', USO: 'United States Oil Fund', WYFI: 'WhiteFiber'
+    };
+    function pairName(p) { return PAIR_NAMES[p] || p; }
     function pairIcoTxt(p) { return p === 'ETH' ? 'Ξ' : String(p).charAt(0); }
     function pairIcoCls(p) { return p === 'ETH' ? 'eth' : 'stk'; }
     function pairOptionHTML(p) {
@@ -781,7 +803,7 @@
       return '<button type="button" role="option" class="pair-dd-option' + (on ? ' active' : '') + '" data-pair="' + esc(p) + '" aria-selected="' + on + '" onclick="pickPair(\'' + esc(p) + '\')">' +
         '<span class="pair-dd-ico ' + pairIcoCls(p) + '">' + pairIcoTxt(p) + '</span>' +
         '<span class="pair-dd-opt">' + esc(p) + '</span>' +
-        (on ? '<span class="pair-dd-tick">✓</span>' : '') +
+        '<span class="pair-dd-name">' + esc(pairName(p)) + '</span>' +
       '</button>';
     }
     function renderPairMenu() {
