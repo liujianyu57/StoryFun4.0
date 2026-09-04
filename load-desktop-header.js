@@ -161,26 +161,7 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
-                '<a href="launchpad.html" class="dh-launch-link">' +
-                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 2.5v11M3.5 2.5L14 6.5 3.5 10.5M3.5 7.5L11.5 10"/></svg>市场' +
-                '</a>' +
-                '<div class="dh-publish-wrap">' +
-                    '<button class="dh-publish-btn">' +
-                        '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/></svg>发布' +
-                    '</button>' +
-                    '<div class="dh-publish-dropdown">' +
-                        '<a class="dh-publish-item" href="publish.html">' +
-                            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="3"/><path d="M2 6h12M6 14V6"/></svg>发布短剧' +
-                        '</a>' +
-                        '<a class="dh-publish-item" href="publish-video.html">' +
-                            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><polygon points="7,5.5 7,10.5 11.5,8" fill="currentColor"/></svg>发布视频' +
-                        '</a>' +
-                        '<a class="dh-publish-item" href="launch.html">' +
-                            '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 2.5v11M3.5 2.5L14 6.5 3.5 10.5M3.5 7.5L11.5 10"/></svg>发币' +
-                        '</a>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="dh-eth-wrap" id="dhEthWrap" style="display:none">' +
+                '<div class="dh-eth-wrap" id="dhEthWrap">' +
                     '<div class="dh-eth" id="dhEthPill">' +
                       '<span class="dh-eth-coin">Ξ</span>' +
                       '<span class="num" id="dhEthAmount">0.0000</span>' +
@@ -447,17 +428,31 @@
     };
 
     // ── Launch 专属：ETH pill（发射台页） ──
+    function dhStoredEth() {
+        try {
+            var raw = localStorage.getItem('storyfun_launch_v1');
+            if (raw) { var o = JSON.parse(raw); if (o && o.user && typeof o.user.eth === 'number') return o.user.eth; }
+        } catch (e) {}
+        return 0;
+    }
+    function dhSaveEth(v) {
+        try {
+            var raw = localStorage.getItem('storyfun_launch_v1');
+            if (raw) { var o = JSON.parse(raw); if (o && o.user) { o.user.eth = v; localStorage.setItem('storyfun_launch_v1', JSON.stringify(o)); } }
+        } catch (e) {}
+    }
     function fillDhEth() {
         var w = document.getElementById('dhEthWrap');
         if (!w) return;
-        if (typeof window.Launch === 'undefined') { w.style.display = 'none'; return; }
         w.style.display = '';
+        var eth = (typeof window.Launch !== 'undefined' && window.Launch.USER) ? window.Launch.USER.eth : dhStoredEth();
+        var fmt = function (e) { return (e || 0).toFixed(4); };
         var el = document.getElementById('dhEthAmount');
-        if (el) el.textContent = (window.Launch.fmtEth ? window.Launch.fmtEth(window.Launch.USER.eth) : '0.0000');
+        if (el) el.textContent = fmt(eth);
         var el2 = document.getElementById('dhEthDropAmount');
-        if (el2) el2.textContent = (window.Launch.fmtEth ? window.Launch.fmtEth(window.Launch.USER.eth).replace(' ETH', '') : '0');
+        if (el2) el2.textContent = String(eth === Math.floor(eth) ? eth : Math.floor(eth * 10000) / 10000);
         var ad = document.getElementById('dhEthAddr');
-        if (ad) ad.textContent = window.Launch.walletText ? window.Launch.walletText() : '—';
+        if (ad) ad.textContent = window.Launch && Launch.walletText ? Launch.walletText() : '0x…';
     }
     function bindLaunchEth() {
         var wrap = document.getElementById('dhEthWrap');
@@ -471,9 +466,13 @@
         document.addEventListener('click', function () { wrap.classList.remove('open'); });
         var give = document.getElementById('dhEthGive');
         if (give) give.addEventListener('click', function () {
-            if (!window.Launch) return;
-            window.Launch.debug.setEth((window.Launch.USER.eth || 0) + 1);
-            if (window.Launch.toast) window.Launch.toast('已领取 1 ETH', 'ok');
+            if (window.Launch && Launch.debug && Launch.USER) {
+                Launch.debug.setEth((Launch.USER.eth || 0) + 1);
+                if (Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
+            } else {
+                dhSaveEth(dhStoredEth() + 1);
+                if (window.Launch && Launch.toast) Launch.toast('已领取 1 ETH', 'ok');
+            }
             fillDhEth();
         });
     }
