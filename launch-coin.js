@@ -34,7 +34,9 @@
     watch: [],                 // 关注列表
     claimable: {},             // coinId -> usd 可领取创作者收益
     claimed: {},               // coinId -> 已领取 usd
-    tx: []                     // 我的交易历史
+    tx: [],                    // 我的交易历史
+    realizedPnl: 0,            // 账户级已实现盈亏（USD，卖出时结算）
+    realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
   var SCHEMA_VERSION = 6;
@@ -201,6 +203,9 @@
       SEED = persisted.coins;
     }
   }
+  // 旧存档迁移：补齐已实现盈亏字段
+  USER.realizedPnl = USER.realizedPnl || 0;
+  USER.realizedByCoin = USER.realizedByCoin || {};
 
   function persist() {
     try {
@@ -357,37 +362,51 @@
     persist();
     return { ok: true, coins: coins, fee: fee, net: net, avgP: avgP, graduated: grad, impact: net / Math.max((c.poolUsd - net) || 100, 100) };
   }
-  // 卖出：卖出 coins → 得到 usd
+  // 卖出：卖出 coins → 得到 usd（curve 与毕业池统一：扣持仓 + 结算已实现盈亏）
   function sell(coinId, coins) {
     var c = coinById(coinId);
     if (!c) return { ok: false, msg: '币不存在' };
-    if (c.graduated) return { ok: false, msg: '已毕业，请在池中交易' };
     var h = USER.holdings[coinId];
     if (!h || h.amount < 1) return { ok: false, msg: '无持仓' };
     if (coins > h.amount) coins = h.amount;
-    var pNow = priceAt(c);
-    var p0 = c.p0 || (pNow / (1 + K.curveK * progressOf(c)));
+    var graduated = !!c.graduated;
+    var pNow = graduated ? c.priceUsd : priceAt(c);
     var gross = coins * pNow;
-    if (gross > (c.poolUsd || 0)) { // 不能取走超过池内资金（防归零超卖）
-      coins = (c.poolUsd || 0) / pNow;
-      gross = coins * pNow;
-    }
     var fee = gross * K.feeRate;
     var net = gross - fee;
-    // 更新
-    c.poolUsd = Math.max(0, (c.poolUsd || 0) - gross);
-    c.progress = progressOf(c);
-    c.priceUsd = priceAt(c);
+    if (!graduated) {
+      // curve：池内资金防线（防归零超卖）
+      if (gross > (c.poolUsd || 0)) {
+        coins = (c.poolUsd || 0) / Math.max(pNow, 1e-12);
+        gross = coins * pNow;
+        fee = gross * K.feeRate;
+        net = gross - fee;
+      }
+      c.poolUsd = Math.max(0, (c.poolUsd || 0) - gross);
+      c.progress = progressOf(c);
+      c.priceUsd = priceAt(c);
+    } else {
+      // 池内：价格微幅下行 + 噪声
+      var wiggle = -(0.004 + Math.random() * 0.02);
+      c.priceUsd = Math.max(c.priceUsd * (1 + wiggle), 1e-10);
+    }
     c.marketCap = c.priceUsd * c.supply;
+    c.volumeUsd = (c.volumeUsd || 0) + gross;
     if (typeof c.spark === 'undefined') c.spark = [];
-    c.spark.push(c.progress);
+    c.spark.push(graduated ? 1 : c.progress);
     if (c.spark.length > 40) c.spark.shift();
+    // 已实现盈亏 = 卖出净得 − 卖出币数 × 平均成本（成本含费口径）
+    var realized = net - coins * (h.avgUsd || 0);
+    USER.realizedPnl = (USER.realizedPnl || 0) + realized;
+    USER.realizedByCoin[coinId] = (USER.realizedByCoin[coinId] || 0) + realized;
+    // 扣持仓
     h.amount -= coins;
     if (h.amount < 0.000001) delete USER.holdings[coinId];
     addFee(c, fee);
     addTx(c, 'sell', gross, net, coins, '我');
+    if (USER.tx.length) USER.tx[0].realizedUsd = realized; // 供资产页逐笔标记
     persist();
-    return { ok: true, proceedsUsd: net, fee: fee, coins: coins };
+    return { ok: true, proceedsUsd: net, fee: fee, coins: coins, realizedUsd: realized };
   }
   function addFee(coin, feeUsd) {
     if (USER.created.indexOf(coin.id) !== -1) {
@@ -475,12 +494,12 @@
       }
       return r;
     } else {
-      // 卖出：传币数 = usd 按现价折算
+      // 卖出：传币数 = usd 按现价折算；统一走 sell()（curve 与池内都扣持仓 + 记已实现）
       var coinsToSell = usd / Math.max(c.priceUsd, 1e-9);
       var h = USER.holdings[coinId];
       if (!h || h.amount < coinsToSell) coinsToSell = h ? h.amount : 0;
       if (coinsToSell <= 0) return { ok: false, msg: '无持仓' };
-      var r2 = c.graduated ? tradePool(coinId, 'sell', coinsToSell * c.priceUsd) : sell(coinId, coinsToSell);
+      var r2 = sell(coinId, coinsToSell);
       if (r2.ok) {
         USER.eth += usdToEth(r2.proceedsUsd || (coinsToSell * c.priceUsd - fee));
         persist();

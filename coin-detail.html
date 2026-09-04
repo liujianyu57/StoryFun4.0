@@ -697,10 +697,8 @@
         var coinsAmt = usd / Math.max(coin.priceUsd, 1e-9);
         var h = Launch.USER.holdings[coin.id];
         if (h) coinsAmt = Math.min(coinsAmt, h.amount);
-        // 直接用 coin 引擎 sell
-        r = coin.graduated
-          ? Launch.tradePool(coin.id, 'sell', coinsAmt * coin.priceUsd)
-          : Launch.sell(coin.id, coinsAmt);
+        // 统一引擎 sell：curve 与毕业池都会扣持仓 + 结算已实现盈亏
+        r = Launch.sell(coin.id, coinsAmt);
         if (r.ok) {
           Launch.USER.eth += Launch.usdToEth(r.proceedsUsd || coinsAmt * coin.priceUsd);
           Launch.persist();
@@ -711,8 +709,7 @@
         Launch.toast(side === 'buy' ? ('已买入 ' + fmtBig(r.coins)) : ('已卖出 ' + fmtBig(gained)), 'ok');
         if (r.graduated) fireGradFx();
         // 刷新
-        var h = Launch.USER.holdings[coin.id];
-        coin.holders = (coin.holders || 0) + 1;
+        if (side === 'buy') coin.holders = (coin.holders || 0) + 1;
         refreshAllAfterTx();
       } else if (r && r.msg === 'need_login') {
         openLoginModal();

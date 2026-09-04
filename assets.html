@@ -16,6 +16,14 @@
     .as-stat .k { font-size: 12px; color: var(--text-2); }
     .as-stat .v { font-size: 20px; font-weight: 800; margin-top: 4px; letter-spacing: -0.01em; }
     .as-stat .s { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .as-stat.total { background: var(--text); color: #fff; }
+    .as-stat.total .k { color: rgba(255,255,255,.6); }
+    .as-stat.total .s { color: rgba(255,255,255,.6); }
+    .as-stat.total .v { font-size: 24px; }
+    .as-stat.total .v.up { color: #3BE08A; }
+    .as-stat.total .v.down { color: #FF7B8A; }
+    .as-stat.total .s span.up { color: #3BE08A; }
+    .as-stat.total .s span.down { color: #FF7B8A; }
 
     .as-tabs { display: flex; gap: 4px; margin: 24px 0 16px; border-bottom: 1px solid var(--border); }
     .as-tab {
@@ -51,6 +59,7 @@
     .his-side.buy { color: var(--up); }
     .his-side.sell { color: var(--down); }
     .his-coin { font-weight: 600; width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .his-pnl { font-size: 11.5px; font-weight: 700; width: 76px; text-align: right; flex-shrink: 0; }
     .his-mid { flex: 1; color: var(--text-2); text-align: right; }
     .his-time { color: var(--text-3); font-size: 11.5px; width: 40px; text-align: right; }
 
@@ -140,15 +149,25 @@
       var made = myCreated();
       var totalValUsd = holds.reduce(function (s, h) { return s + h.hold.amount * h.coin.priceUsd; }, 0);
       var costUsd = holds.reduce(function (s, h) { return s + h.hold.amount * h.hold.avgUsd; }, 0);
-      var pnl = totalValUsd - costUsd;
-      var pnlPct = costUsd > 0 ? pnl / costUsd : 0;
+      var unrealized = totalValUsd - costUsd;                                   // 未实现（含费成本口径）
+      var realized = Launch.USER.realizedPnl || 0;                              // 已实现（卖出结算）
+      var totalPnl = unrealized + realized;
       var claimedTotal = Object.keys(Launch.USER.claimed || {}).reduce(function (s, k) { return s + Launch.USER.claimed[k]; }, 0);
       var claimable = Object.keys(Launch.USER.claimable || {}).reduce(function (s, k) { return s + Launch.USER.claimable[k]; }, 0);
+      var fmtSigned = function (n) {
+        if (Math.abs(n) < 0.005) return Launch.fmtUsd(0);
+        return (n >= 0 ? '+' : '−') + Launch.fmtUsd(Math.abs(n));
+      };
       document.getElementById('asSummary').innerHTML =
-        '<div class="card as-stat"><div class="k">持仓估值</div><div class="v num">' + Launch.fmtUsd(totalValUsd) + '</div><div class="s">' + holds.length + ' 个币</div></div>' +
-        '<div class="card as-stat"><div class="k">未实现盈亏</div><div class="v num ' + (pnl >= 0 ? 'up' : 'down') + '">' + (pnl >= 0 ? '+' : '') + Launch.fmtUsd(pnl) + '</div><div class="s num ' + (pnl >= 0 ? 'up' : 'down') + '">' + Launch.pct(pnlPct) + '</div></div>' +
-        '<div class="card as-stat"><div class="k">创建</div><div class="v num">' + made.length + '</div><div class="s">' + (claimable > 0 ? '可领取 ' + Launch.fmtUsd(claimable) : '暂无待领取收益') + '</div></div>' +
-        '<div class="card as-stat"><div class="k">累计领取</div><div class="v num">' + Launch.fmtUsd(claimedTotal) + '</div><div class="s">创作者收益</div></div>';
+        '<div class="card as-stat total">' +
+          '<div class="k">总盈亏 <span style="font-weight:500">(含已实现)</span></div>' +
+          '<div class="v num ' + (totalPnl >= 0 ? 'up' : 'down') + '">' + fmtSigned(totalPnl) + '</div>' +
+          '<div class="s">已实现 <span class="num ' + (realized >= 0 ? 'up' : 'down') + '">' + fmtSigned(realized) + '</span>' +
+          ' · 未实现 <span class="num ' + (unrealized >= 0 ? 'up' : 'down') + '">' + fmtSigned(unrealized) + '</span></div>' +
+        '</div>' +
+        '<div class="card as-stat"><div class="k">持仓估值</div><div class="v num">' + Launch.fmtUsd(totalValUsd) + '</div><div class="s">' + holds.length + ' 持仓 · 创建 ' + made.length + '</div></div>' +
+        '<div class="card as-stat"><div class="k">已实现盈亏</div><div class="v num ' + (realized >= 0 ? 'up' : 'down') + '">' + fmtSigned(realized) + '</div><div class="s">卖出落袋</div></div>' +
+        '<div class="card as-stat"><div class="k">累计领取</div><div class="v num">' + Launch.fmtUsd(claimedTotal) + '</div><div class="s">' + (claimable > 0 ? '可再领 ' + Launch.fmtUsd(claimable) : '创作者收益') + '</div></div>';
     }
 
     function renderHold() {
@@ -158,19 +177,25 @@
         host.innerHTML = '<div class="empty"><div class="empty-icon">◎</div><div class="empty-title">还没有持仓</div><div class="empty-desc">发现一个叙事，从第一笔开始</div><button class="btn btn-primary" onclick="location.href=\'launchpad.html\'">去市场看看</button></div>';
         return;
       }
+      var rbc = (Launch.USER.realizedByCoin) || {};
       host.innerHTML = '<div class="asset-grid">' + holds.map(function (h) {
         var c = h.coin;
+        var cost = h.hold.amount * h.hold.avgUsd;
         var val = h.hold.amount * c.priceUsd;
-        var pnl = val - h.hold.amount * h.hold.avgUsd;
+        var pnl = val - cost;
+        var pnlPct = cost > 0 ? (pnl / cost) : 0;
+        var realized = rbc[c.id] || 0;
         return '<div class="card asset-card">' +
           '<div class="asset-cover" onclick="goCoin(\'' + c.id + '\')"><img src="' + esc(c.cover) + '" alt=""></div>' +
           '<div class="asset-body">' +
             '<div class="asset-name" onclick="goCoin(\'' + c.id + '\')">' + esc(c.name) + '<span class="faint num">$' + esc(c.symbol) + '</span></div>' +
             '<div class="asset-sub">持仓 <span class="num">' + fmtAmt(h.hold.amount) + '</span> · 均价 ' + Launch.fmtPrice(h.hold.avgUsd) + '</div>' +
+            '<div class="asset-sub">未实现 <span class="num ' + Launch.dirClass(pnl) + '">' + (pnl >= 0 ? '+' : '−') + Launch.fmtUsd(Math.abs(pnl)) + ' (' + (pnlPct >= 0 ? '+' : '−') + Math.abs((pnlPct * 100)).toFixed(1) + '%)</span>' +
+              (realized !== 0 ? ' · 已实现 <span class="num ' + Launch.dirClass(realized) + '">' + (realized >= 0 ? '+' : '−') + Launch.fmtUsd(Math.abs(realized)) + '</span>' : '') + '</div>' +
           '</div>' +
           '<div class="asset-right">' +
             '<div class="v num">' + Launch.fmtUsd(val) + '</div>' +
-            '<div class="s num ' + Launch.dirClass(pnl) + '">' + (pnl >= 0 ? '+' : '') + Launch.fmtUsd(pnl) + '</div>' +
+            '<div class="s num ' + Launch.dirClass(pnl) + '">' + (pnl >= 0 ? '+' : '−') + Launch.fmtUsd(Math.abs(pnl)) + '</div>' +
             '<button class="asset-btn ghost" onclick="goCoin(\'' + c.id + '\')">交易</button>' +
           '</div></div>';
       }).join('') + '</div>';
@@ -209,10 +234,16 @@
       }
       host.innerHTML = '<div class="card history-card">' + txs.slice(0, 40).map(function (t) {
         var c = coinById(t.coinId);
+        var pnlMark = '';
+        if (t.side === 'sell' && t.realizedUsd != null) {
+          pnlMark = '<span class="his-pnl num ' + (t.realizedUsd >= 0 ? 'up' : 'down') + '">' +
+            (t.realizedUsd >= 0 ? '+' : '−') + Launch.fmtUsd(Math.abs(t.realizedUsd)) + '</span>';
+        }
         return '<div class="his-row">' +
           '<span class="his-side ' + t.side + '">' + (t.side === 'buy' ? '买入' : '卖出') + '</span>' +
           '<span class="his-coin">' + esc(c ? c.name : t.symbol) + '</span>' +
           '<span class="his-mid num">' + (t.amount ? fmtAmt(t.amount) + ' · ' : '') + Launch.fmtUsd(t.grossUsd) + '</span>' +
+          pnlMark +
           '<span class="his-time">' + Launch.timeAgo(t.at || Date.now()) + '</span></div>';
       }).join('') + '</div>';
     }
