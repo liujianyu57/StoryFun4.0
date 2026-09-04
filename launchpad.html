@@ -12,6 +12,12 @@
        ============================================================ */
     .px-shell { padding: 18px 0 90px; }
     .px-toolbar { display: flex; align-items: center; gap: 12px; margin: 10px 0 26px; }
+    .px-lang-btn {
+      height: 34px; padding: 0 14px; border-radius: 999px; cursor: pointer; flex-shrink: 0;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+      font-size: 12.5px; font-weight: 700;
+    }
+    .px-lang-btn:hover { color: var(--text); border-color: var(--text-3); }
     .px-tool-spacer { flex: 1; }
     .sim-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .sim-wrap .sim-label { font-size: 12px; color: var(--text-3); font-weight: 600; }
@@ -335,16 +341,17 @@
       </div>
       <a class="px-create-btn" href="launch.html">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Create
+        创建
       </a>
+      <button type="button" class="px-lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
     </div>
 
     <!-- Section 1: Graduated（已毕业） -->
-    <section class="px-section" id="secGrad" aria-label="Graduated">
+    <section class="px-section" id="secGrad" aria-label="已毕业">
       <div class="px-section-head">
         <div class="px-head-main">
           <div class="px-title-row">
-            <h2 class="px-title" id="gradTitle">Graduated</h2>
+            <h2 class="px-title" id="gradTitle">已毕业</h2>
             <span class="px-count num" id="gradCount">0</span>
           </div>
           <p class="px-copy">已越过毕业阈值的代币，流动性已上池并永久锁定。</p>
@@ -352,29 +359,29 @@
       </div>
       <ul class="px-grid" id="gradGrid"></ul>
       <div class="px-empty" id="gradEmpty" style="display:none">暂无已毕业代币</div>
-      <nav class="px-pager" id="gradPager" aria-label="Graduated token pages"></nav>
+      <nav class="px-pager" id="gradPager" aria-label="已毕业代币分页"></nav>
     </section>
 
     <!-- Section 2: Explore（进行中） -->
-    <section class="px-section" id="secExplore" aria-label="Explore">
+    <section class="px-section" id="secExplore" aria-label="进行中">
       <div class="px-section-head">
         <div class="px-head-main">
           <div class="px-title-row">
-            <h1 class="px-title" id="expTitle">Explore</h1>
+            <h1 class="px-title" id="expTitle">进行中</h1>
             <span class="px-count num" id="expCount">0</span>
           </div>
           <p class="px-copy">仍在向毕业攀登的代币 · 曲线售罄后自动上池。</p>
         </div>
         <div class="px-filters">
           <div class="pill-seg" id="sortSeg">
-            <button data-s="recent" class="on">Recent buys</button>
-            <button data-s="newest">Newest</button>
-            <button data-s="oldest">Oldest</button>
-            <button data-s="marketcap">Market cap</button>
-            <button data-s="volume">Volume</button>
+            <button data-s="recent" class="on">最近买入</button>
+            <button data-s="newest">最新</button>
+            <button data-s="oldest">最早</button>
+            <button data-s="marketcap">市值</button>
+            <button data-s="volume">成交量</button>
           </div>
           <div class="pill-seg" id="timeSeg">
-            <button data-t="all" class="on">All</button>
+            <button data-t="all" class="on">全部</button>
             <button data-t="24h">24h</button>
             <button data-t="7d">7d</button>
           </div>
@@ -382,7 +389,7 @@
       </div>
       <ul class="px-grid" id="exploreGrid"></ul>
       <div class="px-empty" id="exploreEmpty" style="display:none"><b>暂无符合条件的代币</b><br>换个排序或筛选试试</div>
-      <nav class="px-pager" id="expPager" aria-label="Explore token pages"></nav>
+      <nav class="px-pager" id="expPager" aria-label="进行中代币分页"></nav>
     </section>
   </main>
 
@@ -391,7 +398,7 @@
     <div class="spotlight-panel" role="dialog" aria-modal="true" aria-label="搜索代币">
       <div class="spotlight-input-row">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
-        <input class="spotlight-input" id="spInput" placeholder="Search name, ticker, or address" autocomplete="off" spellcheck="false" />
+        <input class="spotlight-input" id="spInput" placeholder="搜索名称 / 代号 / 地址" autocomplete="off" spellcheck="false" />
         <span class="spotlight-esc-hint" id="spEscHint">Esc</span>
         <button class="spotlight-clear" id="spClear" type="button" aria-label="Close search" style="display:none">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -400,28 +407,28 @@
 
       <div class="spotlight-filters">
         <div class="sp-fg">
-          <span class="sp-label">Sort by</span>
+          <span class="sp-label">排序</span>
           <div class="sp-pills" id="spSortSeg">
-            <button data-s="recent" class="on">Recent buys</button>
-            <button data-s="newest">Newest</button>
-            <button data-s="oldest">Oldest</button>
-            <button data-s="marketcap">Market cap</button>
-            <button data-s="volume">Volume</button>
+            <button data-s="recent" class="on">最近买入</button>
+            <button data-s="newest">最新</button>
+            <button data-s="oldest">最早</button>
+            <button data-s="marketcap">市值</button>
+            <button data-s="volume">成交量</button>
           </div>
         </div>
         <div class="sp-fg">
-          <span class="sp-label" id="spTimeLabel">Age</span>
+          <span class="sp-label" id="spTimeLabel">币龄</span>
           <div class="sp-pills" id="spTimeSeg">
-            <button data-t="all" class="on">All</button>
+            <button data-t="all" class="on">全部</button>
             <button data-t="24h">24h</button>
             <button data-t="7d">7d</button>
           </div>
         </div>
         <div class="sp-fg">
-          <span class="sp-label">Pair</span>
+          <span class="sp-label">配对</span>
           <div class="sp-pills sp-quotes" id="spPairSeg">
-            <button data-p="all" class="on">All</button>
-            <button data-p="Stocks">Stocks</button>
+            <button data-p="all" class="on">全部</button>
+            <button data-p="Stocks">股票</button>
             <!-- 股票代币按钮由 JS 依据 Launch.pairStocks 注入，与币数据一一对应 -->
           </div>
         </div>
@@ -444,6 +451,67 @@
   <script src="launch-shell.js"></script>
   <script>
     // ============================================================
+    //  中英切换：zh = 中文基准；en = 英文（pons 措辞）
+    // ============================================================
+    var UI_LANG = 'zh';
+    try { UI_LANG = localStorage.getItem('storyfun_lang') === 'en' ? 'en' : 'zh'; } catch (e) {}
+    function langIsEn() { return UI_LANG === 'en'; }
+    var I18N_EN = {
+      '已毕业': 'Graduated', '进行中': 'Explore',
+      '最近买入': 'Recent buys', '最新': 'Newest', '最早': 'Oldest',
+      '市值': 'Market cap', '成交量': 'Volume',
+      '排序': 'Sort by', '币龄': 'Age', '窗口': 'Window', '配对': 'Pair',
+      '全部': 'All', '股票': 'Stocks', '创建': 'Create',
+      '搜索代币': 'Search tokens',
+      '已越过毕业阈值的代币，流动性已上池并永久锁定。': 'Tokens that passed the graduation threshold; liquidity is pooled and locked forever.',
+      '仍在向毕业攀登的代币 · 曲线售罄后自动上池。': 'Tokens still climbing to graduation; when the curve sells out, liquidity goes to the pool.',
+      '暂无已毕业代币': 'No graduated tokens yet',
+      '暂无符合条件的代币': 'No tokens match your filters',
+      '换个排序或筛选试试': 'Try a different sort or filter',
+      '已毕业代币分页': 'Graduated token pages',
+      '进行中代币分页': 'Explore token pages',
+      '搜索名称 / 代号 / 地址': 'Search name, ticker, or address',
+      '模拟': 'Simulation', '平静': 'Calm', '活跃': 'Live', '热闹': 'Hot',
+      '演示：模拟买卖活跃度（平静=关闭）': 'Demo: simulate buy/sell activity (Calm = off)',
+      '本币名与代号首次发行': "First launch of this name & ticker",
+      '发行者': 'Deployer',
+      '创作者收益归该币持有者': "Creator rewards go to this token's holders.",
+      '创作者收益归该币的持有者领取': "Creator rewards go to this token's holders.",
+      '已毕业代币': 'Graduated token',
+      '上一页': 'Previous page', '下一页': 'Next page',
+      '关闭搜索': 'Close search', '清空搜索': 'Clear search',
+      '第 ': 'Page '
+    };
+    function tt(zh) {
+      if (!langIsEn() || zh == null) return zh;
+      return (I18N_EN[zh] != null) ? I18N_EN[zh] : zh;
+    }
+    function setLang(l) { try { localStorage.setItem('storyfun_lang', l); } catch (e) {} location.reload(); }
+    function toggleLang() { setLang(langIsEn() ? 'zh' : 'en'); }
+    // 静态文案整页替换（文本节点 + placeholder/title/aria）
+    function langApplyStatic() {
+      if (!langIsEn()) return;
+      if (!document || typeof document.createTreeWalker !== 'function' || typeof NodeFilter === 'undefined') return;
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      var n;
+      while ((n = walker.nextNode())) {
+        var v = n.nodeValue.replace(/\s+/g, ' ').trim();
+        if (!v) continue;
+        var mapped = I18N_EN[v];
+        if (mapped != null) n.nodeValue = mapped;
+      }
+      var els = document.querySelectorAll('input,textarea,button,[title],[aria-label]');
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        ['placeholder', 'title', 'aria-label'].forEach(function (attr) {
+          var v = el.getAttribute && el.getAttribute(attr);
+          if (v && I18N_EN[v] != null) el.setAttribute(attr, I18N_EN[v]);
+        });
+      }
+      var bt = document.getElementById('langBtn');
+      if (bt) bt.textContent = '中文';
+    }
+    // ============================================================
     //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + ⌘K 弹层
     // ============================================================
     var state = { sort: 'recent', time: 'all', gradPage: 1, expPage: 1 };
@@ -459,6 +527,12 @@
       if (p == null) return '—';
       var v = (p * 100).toFixed(2);
       return v.replace(/\.?0+$/, '') + '%';
+    }
+    function warnTip(c) {
+      var p = Math.round(c.creatorHoldsPct);
+      return langIsEn()
+        ? 'Creator holds ' + p + '% of the token — creator holdings are high, watch for sell pressure'
+        : '创建者持仓 ' + p + '% —— 谨防抛压';
     }
 
     // ---- 占位风控/徽章元数据（原型：确定性生成，无链上数据） ----
@@ -485,10 +559,10 @@
       // 徽章（用户实测 pons）：已毕业卡=Graduated；Explore 活跃卡=OG → !（V2 排除）
       var badge = '';
       if (grad) {
-        badge += '<span class="px-badge grad">Graduated</span>';
+        badge += '<span class="px-badge grad">' + (langIsEn() ? 'Graduated' : '已毕业') + '</span>';
       } else {
-        if (c.isOriginal) badge += '<span class="px-badge og" title="本币名与代号首次发行">OG</span>';
-        if (warn) badge += '<span class="px-warn-badge" role="img" data-tip="Creator holds ' + Math.round(c.creatorHoldsPct) + '% of the token — 创建者持仓过高，谨防抛压">' +
+        if (c.isOriginal) badge += '<span class="px-badge og" title="' + tt('本币名与代号首次发行') + '">OG</span>';
+        if (warn) badge += '<span class="px-warn-badge" role="img" data-tip="' + warnTip(c) + '">' +
           '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" color="currentColor" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path d="M13.9248 21H10.0752C5.44476 21 3.12955 21 2.27636 19.4939C1.42317 17.9879 2.60736 15.9914 4.97574 11.9985L6.90057 8.75333C9.17559 4.91778 10.3131 3 12 3C13.6869 3 14.8244 4.91777 17.0994 8.75332L19.0243 11.9985C21.3926 15.9914 22.5768 17.9879 21.7236 19.4939C20.8704 21 18.5552 21 13.9248 21Z"/><path d="M12 9V13"/><path d="M12.125 16.75H12M12.25 16.75C12.25 16.8881 12.1381 17 12 17C11.8619 17 11.75 16.8881 11.75 16.75C11.75 16.6119 11.8619 16.5 12 16.5C12.1381 16.5 12.25 16.6119 12.25 16.75Z"/></svg>' +
           '</span>';
       }
@@ -501,8 +575,8 @@
           '<span class="px-grad-pct">' + pctText(c.progress) + '</span>' +
         '</div>';
       var ago = grad
-        ? (c.launchedAt ? Launch.timeAgo(c.launchedAt) + ' 前发行' : '—')
-        : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '—');
+        ? (c.launchedAt ? Launch.timeAgo(c.launchedAt) + (langIsEn() ? ' ago' : ' 前发行') : '—')
+        : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + (langIsEn() ? ' ago' : ' 前') : '—');
       var addr = c.creatorAddr || '—';
       // MC = 流通市值；有锁定(lockedPct>0)时 FDV 不同 → 显示 MC / FDV（pons 语义）
       var mcLine = c.marketCap
@@ -519,7 +593,7 @@
             '<span class="px-name-row">' +
               '<strong class="px-name">' + esc(c.name) + '</strong>' +
               (c.shareToHolders
-                ? '<span class="px-share-badge" role="img" title="创作者收益归该币持有者" data-tip="Creator rewards go to this token\'s holders.">' +
+                ? '<span class="px-share-badge" role="img" title="' + tt('创作者收益归该币持有者') + '" data-tip="' + tt('创作者收益归该币的持有者领取') + '">' +
                     '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" color="currentColor" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path d="M15.5 11C15.5 9.067 13.933 7.5 12 7.5C10.067 7.5 8.5 9.067 8.5 11C8.5 12.933 10.067 14.5 12 14.5C13.933 14.5 15.5 12.933 15.5 11Z"/><path d="M15.4827 11.3499C15.8047 11.4475 16.1462 11.5 16.5 11.5C18.433 11.5 20 9.933 20 8C20 6.067 18.433 4.5 16.5 4.5C14.6851 4.5 13.1928 5.8814 13.0173 7.65013"/><path d="M10.9827 7.65013C10.8072 5.8814 9.31492 4.5 7.5 4.5C5.567 4.5 4 6.067 4 8C4 9.933 5.567 11.5 7.5 11.5C7.8538 11.5 8.1953 11.4475 8.5173 11.3499"/><path d="M12 14.5V20.5M8.5 17.5H15.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
                   '</span>'
                 : '') +
@@ -530,7 +604,7 @@
             '<span class="px-mcap">' + mcLine + '</span>' +
             mid +
             '<span class="px-meta">' +
-              '<button class="px-deployer" title="发行者" onclick="event.stopPropagation();copyAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
+              '<button class="px-deployer" title="' + tt('发行者') + '" onclick="event.stopPropagation();copyAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
               '<time class="px-time">' + ago + '</time>' +
             '</span>' +
           '</span>' +
@@ -585,7 +659,9 @@
       if (state.expPage > pages) state.expPage = pages;
       if (state.expPage < 1) state.expPage = 1;
       var slice = list.slice((state.expPage - 1) * per, state.expPage * per);
-      document.getElementById('expCount').textContent = Launch.fmtNum(list.length) + ' launched';
+      document.getElementById('expCount').textContent = langIsEn()
+        ? Launch.fmtNum(list.length) + ' launched'
+        : '已发射 ' + Launch.fmtNum(list.length);
       grid.innerHTML = slice.map(cardHTML).join('');
       empty.style.display = list.length ? 'none' : 'block';
       renderPager('expPager', state.expPage, pages, function (p) { state.expPage = p; renderExplore(); });
@@ -611,12 +687,12 @@
       if (!host) return;
       if (total <= 1) { host.innerHTML = ''; return; }
       var items = pageItems(cur, total);
-      var h = '<button class="px-pager-nav" data-p="' + (cur - 1) + '"' + (cur <= 1 ? ' disabled' : '') + ' aria-label="上一页">‹</button>' +
+      var h = '<button class="px-pager-nav" data-p="' + (cur - 1) + '"' + (cur <= 1 ? ' disabled' : '') + ' aria-label="' + tt('上一页') + '">‹</button>' +
         '<div class="px-pager-list" role="group">' + items.map(function (it) {
           if (it === '…') return '<span class="px-pager-dots">…</span>';
-          return '<button class="px-pager-page' + (it === cur ? ' is-active' : '') + '" data-p="' + it + '" aria-label="第 ' + it + ' 页">' + it + '</button>';
+          return '<button class="px-pager-page' + (it === cur ? ' is-active' : '') + '" data-p="' + it + '" aria-label="' + (langIsEn() ? 'Page ' + it : '第 ' + it + ' 页') + '">' + it + '</button>';
         }).join('') + '</div>' +
-        '<button class="px-pager-nav" data-p="' + (cur + 1) + '"' + (cur >= total ? ' disabled' : '') + ' aria-label="下一页">›</button>';
+        '<button class="px-pager-nav" data-p="' + (cur + 1) + '"' + (cur >= total ? ' disabled' : '') + ' aria-label="' + tt('下一页') + '">›</button>';
       host.innerHTML = h;
       host.onclick = function (e) {
         var b = e.target.closest('button[data-p]');
@@ -644,7 +720,7 @@
       resetSpFilters();
       renderSpotlight();
       var clear = document.getElementById('spClear');
-      if (clear) { clear.style.display = 'none'; clear.setAttribute('aria-label', 'Close search'); }
+      if (clear) { clear.style.display = 'none'; clear.setAttribute('aria-label', tt('关闭搜索')); }
       var hint = document.getElementById('spEscHint');
       if (hint) hint.style.display = '';
       setTimeout(function () { document.getElementById('spInput').focus(); }, 40);
@@ -657,7 +733,7 @@
       syncSeg('#spSortSeg button', 'recent', 's');
       syncSeg('#spTimeSeg button', 'all', 't');
       var tl = document.getElementById('spTimeLabel');
-      if (tl) tl.textContent = 'Age';
+      if (tl) tl.textContent = langIsEn() ? 'Age' : '币龄';
       syncSeg('#spPairSeg button', 'all', 'p');
     }
     function syncSeg(sel, val, attr) {
@@ -715,17 +791,17 @@
       var host = document.getElementById('spResults');
       if (!list.length) {
         host.innerHTML = '<div class="sp-empty">' +
-          (spState.q ? 'No matching tokens' : 'No launches yet') + '</div>';
+          (spState.q ? (langIsEn() ? 'No matching tokens' : '没有匹配的代币') : (langIsEn() ? 'No launches yet' : '暂无发射记录')) + '</div>';
       } else {
         host.innerHTML = list.map(function (c) {
           var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
           // desc：配对资产 · $SYM 市值/量 · 时间（pons 搜索结果不带徽章）
           var descParts = [];
           if (c.pair && c.pair !== 'ETH') descParts.push(esc(c.pair));
-          if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + ' volume');
-          else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + ' MC');
-          if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + ' ago' : 'Graduated');
-          else descParts.push(c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' ago' : '');
+          if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + (langIsEn() ? ' volume' : ' 成交量'));
+          else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + (langIsEn() ? ' MC' : ' 市值'));
+          if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + (langIsEn() ? ' ago' : ' 前') : (langIsEn() ? 'Graduated' : '已毕业'));
+          else descParts.push(c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + (langIsEn() ? ' ago' : ' 前') : '');
           return '<button class="sp-result" onclick="openCoin(\'' + esc(c.id) + '\')">' +
             '<span class="sp-logo">' + logo + '</span>' +
             '<span class="sp-copy">' +
@@ -742,8 +818,10 @@
       var from = total ? (spPage - 1) * SP_PER + 1 : 0;
       var to = Math.min(spPage * SP_PER, total);
       document.getElementById('spCount').textContent = total
-        ? Launch.fmtNum(from) + ' to ' + Launch.fmtNum(to) + ' of ' + Launch.fmtNum(total)
-        : 'No results';
+        ? (langIsEn()
+            ? Launch.fmtNum(from) + ' to ' + Launch.fmtNum(to) + ' of ' + Launch.fmtNum(total)
+            : Launch.fmtNum(from) + '–' + Launch.fmtNum(to) + '，共 ' + Launch.fmtNum(total))
+        : (langIsEn() ? 'No results' : '无结果');
       var denom = Math.ceil(total / SP_PER) || 1;
       document.getElementById('spPageNum').textContent = (total ? spPage : 0) + ' / ' + (total ? denom : '');
       var prev = document.getElementById('spPrev');
@@ -785,7 +863,7 @@
         spPage = 1;
         var clear = document.getElementById('spClear');
         clear.style.display = spState.q ? 'inline-flex' : 'none';
-        clear.setAttribute('aria-label', spState.q ? 'Clear search' : 'Close search');
+        clear.setAttribute('aria-label', spState.q ? tt('清空搜索') : tt('关闭搜索'));
         document.getElementById('spEscHint').style.display = spState.q ? 'none' : '';
         renderSpotlight();
       });
@@ -805,7 +883,7 @@
       };
       segClick('spSortSeg', 'sort', 's', function () {
         // pons：选中 Volume 时该组标签 Age → Window，其余为 Age
-        document.getElementById('spTimeLabel').textContent = spState.sort === 'volume' ? 'Window' : 'Age';
+        document.getElementById('spTimeLabel').textContent = langIsEn() ? (spState.sort === 'volume' ? 'Window' : 'Age') : (spState.sort === 'volume' ? '窗口' : '币龄');
       });
       segClick('spTimeSeg', 'time', 't');
       segClick('spPairSeg', 'pair', 'p');
@@ -815,7 +893,7 @@
         if (inp.value) {
           inp.value = ''; spState.q = '';
           this.style.display = 'none';
-          this.setAttribute('aria-label', 'Close search');
+          this.setAttribute('aria-label', tt('关闭搜索'));
           document.getElementById('spEscHint').style.display = '';
           renderSpotlight();
           inp.focus();
@@ -857,7 +935,11 @@
         var lv = b.getAttribute('data-sim');
         Launch.setSimLevel(lv);
         syncSimSeg(lv);
-        Launch.toast(lv === 'calm' ? '模拟已关闭' : '模拟活跃：' + (lv === 'live' ? '低频' : '高频'), 'ok');
+        Launch.toast(lv === 'calm'
+          ? (langIsEn() ? 'Simulation off' : '模拟已关闭')
+          : (langIsEn()
+              ? 'Simulation live: ' + (lv === 'live' ? 'low frequency' : 'high frequency')
+              : '模拟活跃：' + (lv === 'live' ? '低频' : '高频')), 'ok');
       });
       // 模拟成交 → 全量轻刷新（Explore 卡按 recent 跳动）
       Launch.simSubscribe(function (c) {
@@ -872,6 +954,7 @@
           el.classList.add('sim-flash');
         }
       });
+      langApplyStatic();   // en 模式：整页静态文案收尾翻译
     };
   </script>
 </body>
