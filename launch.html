@@ -135,10 +135,6 @@
     .upload-box .up-plus { font-size: 22px; }
     .upload-copy { font-size: 13px; color: var(--text-2); font-weight: 600; cursor: pointer; }
     .upload input[type=file] { display: none; }
-    .upload-box .up-busy {
-      display: none; font-size: 10.5px; font-weight: 600; color: var(--text-2);
-      text-align: center; line-height: 1.35; padding: 0 4px;
-    }
 
     /* 前缀输入 */
     .prefixed { position: relative; }
@@ -305,12 +301,11 @@
                   <div class="upload">
                     <label class="upload-box" id="uploadBox" title="选择封面图">
                       <span class="up-plus" id="upPlus">＋</span>
-                      <span class="up-busy" id="upBusy">Uploading to ipfs…</span>
                       <img id="upImg" alt="" style="display:none" />
                       <input type="file" id="upFile" accept="image/png,image/jpeg,image/webp,image/gif" />
                     </label>
                     <div>
-                      <span class="upload-copy" onclick="document.getElementById('upFile').click()">选择图片</span>
+                      <span class="upload-copy" id="upCopy" onclick="document.getElementById('upFile').click()">选择图片</span>
                     </div>
                   </div>
                 </div>
@@ -672,28 +667,23 @@
     }
     function attachName() { return attached ? (attached.name || attached.title) : ''; }
 
-    // ---- 币图上传：模拟 IPFS（Uploading to ipfs… → 就绪填图） ----
+    // ---- 币图上传：模拟 IPFS（选择图片 → Uploading to ipfs… → 图片已就绪） ----
     var uploading = false;     // 上传中
     var uploadTimer = null;    // 模拟上传完成定时器
     // 币图来源：自定义上传 > 已关联作品封面 > 空占位；左侧上传框与右侧预览卡同步展示
     function refreshUpload() {
       var img = document.getElementById('upImg');
       var plus = document.getElementById('upPlus');
-      var busy = document.getElementById('upBusy');
       var pv = document.getElementById('pvImg');
       var ph = document.getElementById('pvPh');
-      if (uploading) {
-        // 上传中：框内显示 Uploading to ipfs…，预览卡保持原状
-        img.style.display = 'none'; plus.style.display = 'none';
-        busy.style.display = 'block';
-        return;
-      }
-      busy.style.display = 'none';
       var src = uploadPreview || currentCover();
       if (src) { img.src = src; img.style.display = 'block'; plus.style.display = 'none'; }
       else { img.style.display = 'none'; plus.style.display = ''; }
       if (src) { pv.src = src; pv.style.display = 'block'; ph.style.display = 'none'; }
       else { pv.style.display = 'none'; ph.style.display = ''; }
+      // 状态文案：未传=选择图片｜上传中=Uploading to ipfs…｜就绪=图片已就绪
+      var copy = document.getElementById('upCopy');
+      copy.textContent = uploading ? 'Uploading to ipfs…' : (src ? '图片已就绪' : '选择图片');
     }
     function currentCover() {
       if (attached && attached.cover) return attached.cover;
