@@ -403,12 +403,12 @@
                 </div>
                 <div class="field">
                   <div class="field-label">代号</div>
-                  <input class="input" id="pSymbol" maxlength="20" placeholder="symbol" style="text-transform:uppercase" />
+                  <input class="input" id="pSymbol" maxlength="20" placeholder="代号" style="text-transform:uppercase" />
                   <div class="form-error" id="symErr"></div>
                 </div>
                 <div class="field lp-wide">
                   <div class="field-label">简介</div>
-                  <textarea class="input" id="pTag" rows="2" maxlength="250" placeholder="A short description of the token"></textarea>
+                  <textarea class="input" id="pTag" rows="2" maxlength="250" placeholder="代币的一句话简介"></textarea>
                 </div>
                 <div class="field lp-wide">
                   <div class="field-label">币图</div>
@@ -690,6 +690,8 @@
     }
     function toggleLang() { setLang(langIsEn() ? 'zh' : 'en'); }
     // 静态文案整页替换（文案内容节点除外；表单占位/属性一并处理）
+    // 占位词独立映射（与同名标签互不冲突）
+    var PH_EN = { '币名': 'Token name', '代号': 'symbol', '代币的一句话简介': 'A short description of the token', '0x 钱包地址': '0x wallet address' };
     function langApplyStatic() {
       if (!langIsEn()) return;
       if (!document || typeof document.createTreeWalker !== 'function' || typeof NodeFilter === 'undefined') return;
@@ -706,7 +708,8 @@
         var el = els[i];
         ['placeholder', 'title', 'aria-label'].forEach(function (attr) {
           var v = el.getAttribute && el.getAttribute(attr);
-          if (v && I18N_EN[v] != null) el.setAttribute(attr, I18N_EN[v]);
+          var map = attr === 'placeholder' ? PH_EN : I18N_EN;
+          if (v && map[v] != null) el.setAttribute(attr, map[v]);
         });
       }
       var bt = document.getElementById('langBtn');
