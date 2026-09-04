@@ -227,10 +227,6 @@
         <div class="card">
           <div class="card-head-row">
             <div class="section-title">成交记录</div>
-            <div class="tab-seg" id="txTab">
-              <button class="tab-btn on" data-tx="all">全部</button>
-              <button class="tab-btn" data-tx="me">我的交易</button>
-            </div>
           </div>
           <div class="card-pad tx-list" id="txList"></div>
         </div>
@@ -310,7 +306,6 @@
     var coin = null;
     var side = 'buy';
     var range = '1d';
-    var txTab = 'all';
     var esc = function (s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -359,7 +354,7 @@ var holders = [];
           at: Date.now()
         });
         if (txHistory.length > 30) txHistory.pop();
-        if (txTab === 'all') renderTx();
+        renderTx();
       }
     }
 
@@ -574,10 +569,7 @@ var holders = [];
     }
     var txHistory = [];
     function renderTx() {
-      var show = txTab === 'me'
-        ? (Launch.USER.tx || []).filter(function (t) { return t.coinId === coin.id; })
-        : txHistory;
-      if (!show.length) show = txTab === 'me' ? [] : fakeTrades();
+      var show = txHistory.length ? txHistory : fakeTrades();
       var list = document.getElementById('txList');
       if (!show.length) {
         list.innerHTML = '<div class="empty" style="padding:30px 10px"><div class="empty-title" style="font-size:14px">还没有交易</div><div class="empty-desc">买入第一笔后展示</div></div>';
@@ -756,12 +748,6 @@ var holders = [];
         range = kb.getAttribute('data-k');
         document.querySelectorAll('#kSeg button').forEach(function (b) { b.classList.toggle('on', b === kb); });
         renderChart();
-      }
-      var tb = e.target.closest('#txTab button');
-      if (tb) {
-        txTab = tb.getAttribute('data-tx');
-        document.querySelectorAll('#txTab button').forEach(function (b) { b.classList.toggle('on', b === tb); });
-        renderTx();
       }
       var qb = e.target.closest('#quickRow button');
       if (qb) {
