@@ -674,18 +674,17 @@
     function attachName() { return attached ? (attached.name || attached.title) : ''; }
 
     // ---- 上传（仅预览，不持久） ----
+    // 币图来源：自定义上传 > 已关联作品封面 > 空占位；左侧上传框与右侧预览卡同步展示
     function refreshUpload() {
+      var src = uploadPreview || currentCover();
       var img = document.getElementById('upImg');
       var plus = document.getElementById('upPlus');
-      if (uploadPreview) { img.src = uploadPreview; img.style.display = 'block'; plus.style.display = 'none'; }
+      if (src) { img.src = src; img.style.display = 'block'; plus.style.display = 'none'; }
       else { img.style.display = 'none'; plus.style.display = ''; }
-      // 预览卡图：上传 > 叙事封面 > 占位
-      var box = document.getElementById('pvImgBox');
       var pv = document.getElementById('pvImg');
       var ph = document.getElementById('pvPh');
-      var src = uploadPreview || currentCover();
-      if (src) { pv.src = src; pv.style.display='block'; ph.style.display='none'; }
-      else { pv.style.display='none'; ph.style.display=''; }
+      if (src) { pv.src = src; pv.style.display = 'block'; ph.style.display = 'none'; }
+      else { pv.style.display = 'none'; ph.style.display = ''; }
     }
     function currentCover() {
       if (attached && attached.cover) return attached.cover;
