@@ -542,10 +542,10 @@
             <div class="pv-rows">
               <div class="pv-row"><span>Launch fee</span><b class="num">0.0005 ETH</b></div>
               <div class="pv-row"><span>配对资产</span><b class="num" id="sumPair">ETH</b></div>
-              <div class="pv-row"><span>交易费</span><b class="num">1.00%</b></div>
-              <div class="pv-row"><span>发射窗口</span><b>首 3s 99% → 0</b></div>
-              <div class="pv-row"><span>毕业</span><b class="ok num" id="sumGrad">4.2 ETH → 池</b></div>
-              <div class="pv-row"><span>流动性</span><b class="ok">永久锁定</b></div>
+              <div class="pv-row"><span>交易费</span><b class="num" id="sumFee">1.00%</b></div>
+              <div class="pv-row"><span>发射窗口</span><b>99% snipe tax, 3s</b></div>
+              <div class="pv-row"><span>毕业</span><b class="ok num" id="sumGrad">4.2 ETH</b></div>
+              <div class="pv-row"><span>流动性</span><b class="ok">Locked</b></div>
             </div>
           </div>
         </aside>
@@ -969,7 +969,7 @@
         if (q == null) { note.textContent = 'Graduation threshold unavailable.'; return; }
         var txt = fmtQty(q) + ' ' + sym;
         note.textContent = 'Graduates once the curve raises ' + txt + '.';
-        if (row) row.textContent = txt + ' → 池';
+        if (row) row.textContent = txt;
       }, 2000);
     }
     function openPair() {
@@ -1063,6 +1063,19 @@
       if (isNaN(v) || v < 0) v = 0;
       if (v > 10) v = 10;
       el.textContent = 'Traders pay ' + (1 + v).toFixed(2) + '% in total, up to 10% of it yours.';
+      updTradeFee();
+    }
+    // 预览卡交易费：1% 基础 + 税 → 如 2% → 3.00% · 2.00% yours
+    function updTradeFee() {
+      var el = document.getElementById('sumFee');
+      if (!el) return;
+      var v = parseFloat(document.getElementById('pTaxPct').value);
+      if (isNaN(v) || v < 0) v = 0;
+      if (v > 10) v = 10;
+      v = Math.round(v * 100) / 100;
+      el.textContent = v > 0
+        ? (1 + v).toFixed(2) + '% · ' + v.toFixed(2) + '% yours'
+        : '1.00%';
     }
 
     // ---- 网络费预估（模拟）：基础发射 1 笔；分给持有者再 +2 笔链上确认 ----
@@ -1241,6 +1254,7 @@
       startGradRead('ETH');
       renderDevBuy();
       setHfs(false);
+      taxNoteLive();
       updGas();
       document.getElementById('pCreatorWallet').placeholder = walletText();
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
