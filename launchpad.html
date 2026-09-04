@@ -386,9 +386,7 @@
         <div class="sp-fg">
           <span class="sp-label">Sort by</span>
           <div class="sp-pills" id="spSortSeg">
-            <button data-s="recent" class="on">Recent buys</button>
-            <button data-s="burned">Burned %</button>
-            <button data-s="realmcap">Real mcap</button>
+            <button data-s="relevance" class="on">Relevance</button>
             <button data-s="marketcap">Market cap</button>
             <button data-s="volume">Volume</button>
             <button data-s="newest">Newest</button>
@@ -464,7 +462,7 @@
     //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + ⌘K 弹层
     // ============================================================
     var state = { sort: 'recent', time: 'all', gradPage: 1, expPage: 1 };
-    var spState = { sort: 'recent', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
+    var spState = { sort: 'relevance', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -669,9 +667,9 @@
       document.getElementById('spotlight').classList.remove('open');
     }
     function resetSpFilters() {
-      spState = { sort: 'recent', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
+      spState = { sort: 'relevance', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
       ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) { document.getElementById(id).value = ''; });
-      syncSeg('#spSortSeg button', 'recent', 's');
+      syncSeg('#spSortSeg button', 'relevance', 's');
       syncSeg('#spTimeSeg button', 'all', 't');
       syncSeg('#spStatusSeg button', 'either', 'st');
       syncSeg('#spBadgeSeg button', 'all', 'b');
@@ -708,14 +706,21 @@
         return true;
       });
       list.sort(function (a, b) {
-        if (spState.sort === 'newest') return b.launchedAt - a.launchedAt;
-        if (spState.sort === 'oldest') return a.launchedAt - b.launchedAt;
         if (spState.sort === 'marketcap') return b.marketCap - a.marketCap;
         if (spState.sort === 'volume') return (b.volumeUsd || 0) - (a.volumeUsd || 0);
-        if (spState.sort === 'realmcap') return (b.marketCap || 0) - (a.marketCap || 0);
-        if (spState.sort === 'burned') {
-          var ba = metaOf(a).burnPct, bb = metaOf(b).burnPct;
-          return bb - ba;
+        if (spState.sort === 'newest') return b.launchedAt - a.launchedAt;
+        if (spState.sort === 'oldest') return a.launchedAt - b.launchedAt;
+        // relevance：有查询词时前缀/名称命中优先，否则按最近买入
+        if (spState.sort === 'relevance' && spState.q) {
+          var ql = spState.q.toLowerCase();
+          function score(x) {
+            var nm = x.name.toLowerCase(), sym = x.symbol.toLowerCase();
+            if (nm === ql || sym === ql) return 3;
+            if (nm.indexOf(ql) === 0 || sym.indexOf(ql) === 0) return 2;
+            if (nm.indexOf(ql) !== -1 || sym.indexOf(ql) !== -1) return 1;
+            return 0;
+          }
+          return score(b) - score(a);
         }
         return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
       });
