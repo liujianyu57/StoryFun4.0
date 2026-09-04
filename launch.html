@@ -634,12 +634,16 @@
       // 自动回填：名称用 fillName（单集=剧名；整剧/视频=标题）；简介用描述
       if (!document.getElementById('pName').value) document.getElementById('pName').value = pickerSel.fillName || pickerSel.title;
       if (!document.getElementById('pTag').value) document.getElementById('pTag').value = pickerSel.desc || '';
-      cancelUpload(); uploadPreview = null; refreshUpload();
+      // 让自定义上传图让位：作品封面也走一遍模拟上传（Uploading to ipfs… → 图片已就绪）
+      cancelUpload();
+      uploadPreview = null;
+      beginCoverUpload();
       syncAll();
       Launch.toast('已关联：' + itemLabel(pickerSel), 'ok');
     }
     function clearAttached() {
       attached = null; pickerSel = null;
+      cancelUpload();               // 若封面仍在上传中则中止
       renderAttached();
       syncAll();
     }
@@ -667,7 +671,7 @@
     }
     function attachName() { return attached ? (attached.name || attached.title) : ''; }
 
-    // ---- 币图上传：模拟 IPFS（选择图片 → Uploading to ipfs… → 图片已就绪） ----
+    // ---- 币图模拟上传：选择图片/关联作品 → Uploading to ipfs… → 图片已就绪 ----
     var uploading = false;     // 上传中
     var uploadTimer = null;    // 模拟上传完成定时器
     // 币图来源：自定义上传 > 已关联作品封面 > 空占位；左侧上传框与右侧预览卡同步展示
@@ -676,29 +680,44 @@
       var plus = document.getElementById('upPlus');
       var pv = document.getElementById('pvImg');
       var ph = document.getElementById('pvPh');
+      var copy = document.getElementById('upCopy');
+      if (uploading) {
+        // 上传中：图片尚未就绪，框/预览卡显示占位，状态交给文案
+        img.style.display = 'none'; plus.style.display = '';
+        pv.style.display = 'none'; ph.style.display = '';
+        copy.textContent = 'Uploading to ipfs…';
+        return;
+      }
       var src = uploadPreview || currentCover();
       if (src) { img.src = src; img.style.display = 'block'; plus.style.display = 'none'; }
       else { img.style.display = 'none'; plus.style.display = ''; }
       if (src) { pv.src = src; pv.style.display = 'block'; ph.style.display = 'none'; }
       else { pv.style.display = 'none'; ph.style.display = ''; }
-      // 状态文案：未传=选择图片｜上传中=Uploading to ipfs…｜就绪=图片已就绪
-      var copy = document.getElementById('upCopy');
-      copy.textContent = uploading ? 'Uploading to ipfs…' : (src ? '图片已就绪' : '选择图片');
+      copy.textContent = src ? '图片已就绪' : '选择图片';
     }
     function currentCover() {
       if (attached && attached.cover) return attached.cover;
       return '';
     }
-    function queueUpload(dataUrl) {
+    // 通用模拟上传：先进入 uploading，onDone 就绪后回调，随后刷新界面
+    function simulateUpload(onDone) {
       uploading = true;
       refreshUpload();
       if (uploadTimer) clearTimeout(uploadTimer);
       uploadTimer = setTimeout(function () {
         uploading = false;
-        uploadPreview = dataUrl;
+        if (onDone) onDone();
         refreshUpload();
         syncAll();
       }, 900);
+    }
+    // 自定义上传图：就绪时写入 uploadPreview
+    function queueUpload(dataUrl) {
+      simulateUpload(function () { uploadPreview = dataUrl; });
+    }
+    // 关联作品带入封面：同样走一遍模拟上传（封面来自 currentCover()）
+    function beginCoverUpload() {
+      simulateUpload(null);
     }
     function cancelUpload() {
       if (uploadTimer) { clearTimeout(uploadTimer); uploadTimer = null; }
@@ -827,6 +846,7 @@
             if (!document.getElementById('pName').value) document.getElementById('pName').value = v.title;
             if (!document.getElementById('pTag').value) document.getElementById('pTag').value = v.desc || '';
             renderAttached();
+            beginCoverUpload();   // 带入封面同样走模拟上传
           }
         } catch(e){}
       }
