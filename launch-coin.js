@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 11;
+  var SCHEMA_VERSION = 12;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -80,6 +80,18 @@
       fdv: fdv,                               // 完全稀释 FDV
       holders: o.holders,
       volumeUsd: o.volumeUsd,
+      // 成交量时间窗（Volume 排序语义用）：无真实分窗时派生；冷门币（总量 0）约 1/4 24h 无量
+      vol24hUsd: (function () {
+        if (o.vol24hUsd != null) return o.vol24hUsd;
+        var seed = ((o.id || '').length * 7919 + ((o.id || '').charCodeAt(0) || 0) * 131) % 100;
+        if (!o.volumeUsd && seed < 25) return 0;   // 冷门币 24h 无成交 → 会被 volume+24h 过滤
+        return Math.max((o.volumeUsd || 0) * (0.12 + ((o.id || '').length % 4) * 0.09), 300 + seed * 137);
+      })(),
+      vol7dUsd: (function () {
+        if (o.vol7dUsd != null) return o.vol7dUsd;
+        var seed = ((o.id || '').length * 104729 + ((o.id || '').charCodeAt(0) || 0) * 233) % 97;
+        return Math.max((o.volumeUsd || 0) * 0.85, 900 + seed * 620);
+      })(),
       launchedAt: o.launchedAt,
       graduated: graduated,
       gradAt: o.gradAt || null,
@@ -264,6 +276,8 @@
           buybackLockedPct: buybackLockedPct,
           priceUsd: price, holders: graduated ? (200 + (i0 * 47) % 9000) : (2 + (i0 * 19) % 600),
           volumeUsd: graduated ? (100000 + (i0 * 911) % 9000000) : (i0 * 97) % 50000,
+          // 部分冷门活跃币近 24h 无成交（演示 Volume+24h 窗口过滤）
+          vol24hUsd: (!graduated && (i0 * 29) % 8 === 0) ? 0 : undefined,
           launchedAt: D(launchH), graduated: graduated, gradAt: graduated ? D(gradH) : null,
           poolUsd: pool, change24h: ((i0 * 7) % 100) / 100 - 0.3,
           isNew: isNew, lastBuyAt: D(lastH),

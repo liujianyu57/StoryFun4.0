@@ -679,15 +679,27 @@
     function syncSeg(sel, val, attr) {
       document.querySelectorAll(sel).forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-' + attr) === val); });
     }
+    // 弹窗当前成交量窗口值：volume 排序 + 时间窗 = 看哪个窗口的量（pons Window 语义）
+    function spVolField(c) {
+      if (spState.sort !== 'volume') return c.volumeUsd || 0;
+      if (spState.time === '24h') return c.vol24hUsd || 0;
+      if (spState.time === '7d') return c.vol7dUsd || 0;
+      return c.volumeUsd || 0;
+    }
     function spotlightCandidates() {
       var q = (spState.q || '').toLowerCase();
-      var cutoff = spState.time === '24h' ? Date.now() - 86400000
-        : spState.time === '7d' ? Date.now() - 7 * 86400000 : 0;
+      // 时间窗仅非 volume 排序时做"币龄"过滤（Age 语义）；
+      // sort=volume 时它是成交量窗口（Window 语义），由 spVolField 承担
+      var cutoff = (spState.sort !== 'volume') &&
+        (spState.time === '24h' ? Date.now() - 86400000
+          : spState.time === '7d' ? Date.now() - 7 * 86400000 : 0);
       var list = (Launch.coins || []).filter(function (c) {
         if (q) {
           var hay = (c.name + ' ' + c.symbol + ' ' + c.creatorAddr + ' ' + c.buyerAddr + ' ' + c.id).toLowerCase();
           if (hay.indexOf(q) === -1) return false;
         }
+        // volume 窗口语义：该窗口无量则不出现在结果
+        if (spState.sort === 'volume' && spState.time !== 'all' && !spVolField(c)) return false;
         if (cutoff) {
           var ref = c.graduated ? (c.gradAt || c.launchedAt) : (c.lastBuyAt || c.launchedAt);
           if (!ref || ref < cutoff) return false;
@@ -710,7 +722,7 @@
         if (spState.sort === 'newest') return b.launchedAt - a.launchedAt;
         if (spState.sort === 'oldest') return a.launchedAt - b.launchedAt;
         if (spState.sort === 'marketcap') return b.marketCap - a.marketCap;
-        if (spState.sort === 'volume') return (b.volumeUsd || 0) - (a.volumeUsd || 0);
+        if (spState.sort === 'volume') return spVolField(b) - spVolField(a);
         return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
       });
       return list;
@@ -740,7 +752,7 @@
           var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
           // desc：$SYM · 市值/量 · 时间（pons：$TICKER · MC/volume · age）
           var descParts = [];
-          if (spState.sort === 'volume' && c.volumeUsd) descParts.push(mcTxt(c.volumeUsd) + ' volume');
+          if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + ' volume');
           else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + ' MC');
           if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + ' ago' : 'Graduated');
           else descParts.push(c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' ago' : '');
