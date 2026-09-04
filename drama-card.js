@@ -181,7 +181,8 @@
           statsHTML +
         '</div>' +
       '</article>' +
-      '<div class="card-caption"><h3>' + title + '</h3>' +
+      '<div class="card-caption">' + (window.CoinLink ? window.CoinLink.chip(data.title, { light: true, size: 'sm' }) : '') +
+      '<h3>' + title + '</h3>' +
         '<div class="caption-row">' +
           '<div class="caption-left">' + captionLeft + '</div>' +
           creatorHTML +
