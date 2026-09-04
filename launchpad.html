@@ -3,284 +3,413 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>发射台 · Story.fun</title>
+  <title>Explore · 发射台 Story.fun</title>
   <link rel="stylesheet" href="launch.css" />
   <style>
-    /* ===== 页面特有：市场 ===== */
-    .market-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
-    .toolbar-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
-    .sim-label { font-size: 12px; color: var(--text-3); font-weight: 600; }
+    /* ============================================================
+       Explore — 结构对齐 pons（Graduated 上 / Explore 下）
+       配色沿用本产品浅色设计系统
+       ============================================================ */
+    .px-shell { padding: 18px 0 90px; }
+    .px-toolbar { display: flex; align-items: center; gap: 10px; margin: 8px 0 26px; }
+    .px-tool-spacer { flex: 1; }
+    .sim-wrap { display: flex; align-items: center; gap: 8px; }
+    .sim-wrap .sim-label { font-size: 12px; color: var(--text-3); font-weight: 600; }
 
-    /* 阶段大字下划线页签：字 + 滑动粗线，无容器无填充（顶部呼吸带承托） */
-    .stage-tabs {
-      position: relative; display: flex; align-items: baseline; gap: 34px;
-      margin: 30px 0 20px; border-bottom: 1px solid var(--border);
+    .px-search-btn, .px-create-btn {
+      display: inline-flex; align-items: center; gap: 7px; height: 36px;
+      border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+      transition: border-color .15s, color .15s;
     }
-    .stage-tab {
-      display: inline-flex; align-items: center; gap: 9px; padding: 6px 2px 16px;
-      border: none; background: none; cursor: pointer;
-      font-size: 20px; font-weight: 800; letter-spacing: -0.02em;
-      color: var(--text-2); margin-bottom: -1px;
-      transition: color .15s;
+    .px-search-btn { padding: 0 12px 0 14px; }
+    .px-search-btn:hover, .px-create-btn:hover { border-color: var(--border-strong); color: var(--text); }
+    .px-kbd {
+      font-family: var(--mono); font-size: 11px; color: var(--text-3);
+      border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; margin-left: 14px;
     }
-    .stage-tab:hover { color: var(--text); }
-    .stage-tab.on { color: var(--text); }
-    .st-cnt {
-      min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px;
-      background: var(--accent-soft); color: var(--text-2);
-      font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
-      transition: background .15s, color .15s;
+    .px-create-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .px-create-btn:hover { opacity: .9; color: #fff; }
+
+    /* ---- Section ---- */
+    .px-section { margin-bottom: 34px; }
+    .px-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .px-head-main { min-width: 0; }
+    .px-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .px-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+    .px-count { font-size: 13px; color: var(--text-2); font-weight: 600; }
+    .px-copy { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+
+    /* Explore 筛选行（pons: Recent buys | Newest | Oldest | Market cap | Volume · All|24h|7d） */
+    .px-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    /* ---- Grid / Card（pons 同款字段顺序） ---- */
+    .px-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+      gap: 14px; list-style: none;
     }
-    .stage-tab.on .st-cnt { background: var(--accent); color: #fff; }
-    .stage-underline { position: absolute; bottom: -1px; height: 3px; background: var(--accent); border-radius: 3px; transition: left .22s cubic-bezier(.2,.8,.2,1), width .22s; }
-
-    .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-    .search-input {
-      width: 240px; height: 36px; padding: 0 12px 0 34px;
-      border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
-      font-size: 13px; outline: none; color: var(--text);
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: 11px center; background-size: 15px;
+    .px-card {
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 12px; border-radius: 18px; cursor: pointer; text-decoration: none;
+      background: var(--surface); border: 1px solid var(--border);
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
     }
-    .search-input:focus { border-color: var(--accent); }
-
-    .coin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 18px; }
-    .coin-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
-      overflow: hidden; cursor: pointer; position: relative;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    .px-card:hover { transform: translateY(-2px); border-color: var(--border-strong); box-shadow: 0 8px 24px rgba(16,24,40,.07); }
+    .px-media { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .px-logo {
+      width: 52px; height: 52px; border-radius: 50%; overflow: hidden;
+      background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0;
+      display: grid; place-items: center; font-size: 20px; color: var(--text-2);
     }
-    .coin-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(16,24,40,.08); border-color: var(--border-strong); }
-
-    /* 封面：内嵌圆角，hover 微放大 */
-    .coin-cover-wrap { padding: 8px 8px 0; }
-    .coin-cover { position: relative; aspect-ratio: 16 / 10; border-radius: 13px; background: var(--surface-2); overflow: hidden; }
-    .coin-cover img, .coin-cover video { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
-    .coin-card:hover .coin-cover img, .coin-card:hover .coin-cover video { transform: scale(1.04); }
-    .coin-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,11,13,0) 55%, rgba(10,11,13,.05)); pointer-events: none; }
-    .play-veil { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(10,11,13,0); transition: background .2s; }
-    .coin-card:hover .play-veil { background: rgba(10,11,13,.14); }
-    .play-veil .play-ico {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: rgba(10,11,13,.55); backdrop-filter: blur(3px);
-      display: grid; place-items: center; opacity: 0; transition: opacity .2s;
+    .px-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .px-badges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+    .px-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .02em;
+      padding: 3px 8px; border-radius: 999px;
     }
-    .coin-card:hover .play-ico { opacity: 1; }
+    .px-badge.grad { background: rgba(14,159,110,.12); color: #0E9F6E; }
+    .px-badge.og { background: rgba(10,11,13,.08); color: var(--text); }
+    .px-badge.warn { background: rgba(246,70,93,.1); color: var(--down); }
+    .px-badge.new { background: var(--text); color: #fff; }
 
-    /* 徽章：左上悬浮 */
-    .coin-badge {
-      position: absolute; top: 12px; left: 12px; z-index: 2;
-      height: 22px; padding: 0 10px; border-radius: 999px;
-      font-size: 11px; font-weight: 700; letter-spacing: .01em;
-      display: inline-flex; align-items: center;
-      background: rgba(255,255,255,.9); color: var(--text); backdrop-filter: blur(8px);
-      box-shadow: 0 1px 4px rgba(16,24,40,.08);
+    .px-card-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .px-name-row { display: flex; align-items: baseline; min-width: 0; }
+    .px-name { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .px-sym { display: block; font-size: 11px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
+    .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 3px; }
+    .px-mcap-value { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+    .px-mcap-label { font-size: 10px; font-weight: 800; color: var(--text-3); letter-spacing: .05em; }
+
+    .px-grad { display: flex; align-items: center; gap: 8px; }
+    .px-grad-track { flex: 1; height: 4px; border-radius: 4px; background: var(--accent-soft); overflow: hidden; }
+    .px-grad-fill { display: block; height: 100%; background: var(--text); border-radius: 4px; }
+    .px-grad-pct { font-size: 11px; font-weight: 800; color: var(--text-2); font-variant-numeric: tabular-nums; }
+
+    .px-meta {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      border-top: 1px solid var(--border); padding-top: 9px;
     }
-    .coin-badge.new { background: rgba(10,11,13,.85); color: #fff; }
-    .coin-badge.grad { background: #0E9F6E; color: #fff; }
-
-    /* 信息区：pons 信号语言 = 币名 + MC + 曲线进度 + 最近买家（无价格/涨跌/量/持有） */
-    .coin-info { padding: 13px 15px 14px; }
-    .coin-name { display: flex; align-items: baseline; gap: 7px; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
-    .coin-sym { font-size: 11px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
-
-    /* 市值：大号等宽 + MC 单位 */
-    .coin-mc-row { display: flex; align-items: baseline; gap: 6px; margin-top: 9px; }
-    .coin-mc { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
-    .coin-mc-unit { font-size: 10px; font-weight: 800; color: var(--text-3); letter-spacing: .06em; }
-
-    /* 曲线进度：细条 + 右侧精确百分比 */
-    .coin-progress-row { display: flex; align-items: center; gap: 10px; margin-top: 11px; min-height: 15px; }
-    .coin-progress { flex: 1; height: 4px; border-radius: 4px; background: var(--accent-soft); overflow: hidden; }
-    .coin-progress i { display: block; height: 100%; background: var(--text); border-radius: 4px; }
-    .coin-progress.grad i { background: #0E9F6E; }
-    .coin-pct { font-size: 11px; font-weight: 800; color: var(--text-2); font-variant-numeric: tabular-nums; min-width: 52px; text-align: right; letter-spacing: -0.01em; }
-
-    /* 已毕业状态行（占位与进度行等高） */
-    .coin-state { display: flex; align-items: center; gap: 5px; margin-top: 11px; min-height: 15px; font-size: 11.5px; font-weight: 700; color: #0E9F6E; }
-    .coin-state svg { flex-shrink: 0; }
-    .coin-state-sub { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--text-3); }
-
-    /* 最近买家：钱包 + 相对时间 */
-    .coin-buyer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); }
-    .coin-wallet { font-family: var(--mono); font-size: 11px; color: var(--text-2); letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .coin-ago { font-variant-numeric: tabular-nums; flex-shrink: 0; }
-
-    .toolbar-create {
-      height: 36px; padding: 0 16px; border-radius: 999px; background: var(--accent);
-      color: #fff; border: none; font-size: 13px; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 6px;
+    .px-deployer {
+      font-family: var(--mono); font-size: 11px; color: var(--text-2);
+      background: none; border: none; padding: 0; cursor: pointer; text-align: left;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .toolbar-create:hover { opacity: .9; }
+    .px-deployer:hover { color: var(--text); }
+    .px-time { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
-    /* 模拟成交后的卡片高亮 */
-    .sim-flash { animation: simFlash 1s ease; }
-    @keyframes simFlash {
-      0% { box-shadow: 0 0 0 2px rgba(10,11,13,.28); background: rgba(10,11,13,.05); }
+    .px-empty { text-align: center; padding: 40px 12px; color: var(--text-3); }
+    .px-empty b { color: var(--text-2); font-weight: 600; }
+
+    /* 模拟成交闪光 */
+    .sim-flash { animation: pxFlash 1s ease; }
+    @keyframes pxFlash {
+      0% { box-shadow: 0 0 0 2px rgba(10,11,13,.25); background: rgba(10,11,13,.05); }
       100% { box-shadow: 0 0 0 0 rgba(10,11,13,0); background: var(--surface); }
     }
 
-    @media (max-width: 900px) {
-      .search-input { width: 100%; margin-top: 4px; }
-      .toolbar-right { width: 100%; margin-left: 0; }
-      .coin-grid { grid-template-columns: repeat(2, 1fr); }
+    /* ============================================================
+       Spotlight ⌘K 弹层（pons 同款：搜索 + 排序 + 时间 + 高级筛选）
+       ============================================================ */
+    .spotlight-backdrop {
+      position: fixed; inset: 0; z-index: 200; background: rgba(10,11,13,.4);
+      backdrop-filter: blur(3px); display: none;
     }
-    @media (max-width: 520px) {
-      .stage-tabs { gap: 22px; margin-top: 22px; }
-      .stage-tab { gap: 7px; padding: 5px 2px 13px; font-size: 17px; }
-      .st-cnt { min-width: 20px; height: 20px; padding: 0 6px; font-size: 10.5px; }
-      .coin-grid { grid-template-columns: 1fr; }
+    .spotlight-backdrop.open { display: block; }
+    .spotlight-panel {
+      position: absolute; top: 9vh; left: 50%; transform: translateX(-50%);
+      width: min(660px, calc(100vw - 28px)); max-height: 78vh; overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(10,11,13,.22);
+      display: flex; flex-direction: column;
+    }
+    .spotlight-input-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 15px 18px; border-bottom: 1px solid var(--border);
+    }
+    .spotlight-input {
+      flex: 1; border: none; outline: none; background: transparent;
+      font-size: 15px; color: var(--text); font-weight: 500;
+    }
+    .spotlight-esc-hint { font-size: 11px; color: var(--text-3); border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; }
+
+    .spotlight-filters { padding: 12px 18px 4px; display: flex; flex-direction: column; gap: 12px; }
+    .sp-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .sp-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; width: 84px; flex-shrink: 0; }
+    .sp-advanced { display: flex; flex-direction: column; gap: 12px; }
+    .sp-adv-toggle {
+      display: inline-flex; align-items: center; gap: 6px; width: fit-content;
+      border: none; background: none; color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; padding: 0;
+    }
+    .sp-adv-toggle:hover { color: var(--text); }
+    .sp-num-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 14px; }
+    .sp-field { display: flex; flex-direction: column; gap: 4px; }
+    .sp-field > span { font-size: 11px; color: var(--text-3); }
+    .sp-input {
+      height: 32px; padding: 0 10px; border-radius: 9px; font-size: 12.5px;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--text); outline: none;
+    }
+    .sp-input:focus { border-color: var(--accent); }
+
+    .spotlight-results { overflow-y: auto; padding: 6px 8px 10px; }
+    .sp-result {
+      display: flex; align-items: center; gap: 12px; width: 100%;
+      padding: 9px 10px; border-radius: 12px; border: none; background: none; cursor: pointer; text-align: left;
+    }
+    .sp-result:hover { background: var(--accent-soft); }
+    .sp-logo {
+      width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+      background: var(--surface-2); border: 1px solid var(--border);
+      display: grid; place-items: center; font-size: 15px; color: var(--text-2);
+    }
+    .sp-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .sp-copy { flex: 1; min-width: 0; }
+    .sp-title-row { display: flex; align-items: baseline; gap: 8px; }
+    .sp-name { font-weight: 700; font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sp-ticker { font-size: 11px; color: var(--text-3); font-weight: 700; }
+    .sp-badges { display: flex; gap: 4px; margin-top: 2px; }
+    .sp-badges .px-badge { padding: 1px 6px; font-size: 9.5px; }
+    .sp-right { text-align: right; flex-shrink: 0; }
+    .sp-mcap { font-size: 13px; font-weight: 700; color: var(--text); }
+    .sp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .sp-empty { text-align: center; padding: 28px 10px; color: var(--text-3); font-size: 13px; }
+
+    @media (max-width: 640px) {
+      .px-grid { grid-template-columns: repeat(2, 1fr); }
+      .sp-label { width: auto; }
+    }
+    @media (max-width: 420px) {
+      .px-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div id="launch-header-host"></div>
 
-  <main class="launch-shell" id="marketApp">
-    <!-- 阶段 Tab -->
-    <div class="stage-tabs" id="stageTabs">
-      <button class="stage-tab on" data-tab="live">
-        <span class="st-name">进行中</span>
-        <span class="st-cnt num" id="cntLive">0</span>
+  <main class="launch-shell px-shell">
+    <!-- 顶部工具行：Search ⌘K / Create（对齐 pons toolbar） -->
+    <div class="px-toolbar">
+      <button class="px-search-btn" id="pxSearchBtn" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
+        <span>搜索代币</span><kbd class="px-kbd">⌘K</kbd>
       </button>
-      <button class="stage-tab" data-tab="near">
-        <span class="st-name">临近毕业</span>
-        <span class="st-cnt num" id="cntNear">0</span>
-      </button>
-      <button class="stage-tab" data-tab="grad">
-        <span class="st-name">已毕业</span>
-        <span class="st-cnt num" id="cntGrad">0</span>
-      </button>
-      <span class="stage-underline" id="stageUnderline"></span>
+      <div class="px-tool-spacer"></div>
+      <div class="sim-wrap">
+        <span class="sim-label">模拟</span>
+        <div class="pill-seg" id="simSeg" title="演示：模拟买卖活跃度（平静=关闭）">
+          <button data-sim="calm" class="on">平静</button>
+          <button data-sim="live">活跃</button>
+          <button data-sim="hot">热闹</button>
+        </div>
+      </div>
+      <a class="px-create-btn" href="launch.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Create
+      </a>
     </div>
 
-    <!-- 工具栏 -->
-    <div class="market-toolbar">
-      <div class="pill-seg" id="sortSeg">
-        <button data-s="recent" class="on">最近买入</button>
-        <button data-s="newest">最新</button>
-        <button data-s="oldest">最旧</button>
-        <button data-s="marketcap">市值</button>
-        <button data-s="volume">成交量</button>
+    <!-- Section 1: Graduated（已毕业） -->
+    <section class="px-section" id="secGrad" aria-label="Graduated">
+      <div class="px-section-head">
+        <div class="px-head-main">
+          <div class="px-title-row">
+            <h2 class="px-title" id="gradTitle">Graduated</h2>
+            <span class="px-count num" id="gradCount">0</span>
+          </div>
+          <p class="px-copy">已越过毕业阈值的代币，流动性已上池并永久锁定。</p>
+        </div>
       </div>
-      <span class="toolbar-sep" id="toolbarSep"></span>
-      <div class="pill-seg" id="timeSeg">
-        <button data-t="all" class="on">全部</button>
-        <button data-t="24h">24h</button>
-        <button data-t="7d">7d</button>
-      </div>
-      <span class="toolbar-sep"></span>
-      <span class="sim-label">模拟</span>
-      <div class="pill-seg" id="simSeg" title="演示：模拟买卖活跃度（平静=关闭）">
-        <button data-sim="calm" class="on">平静</button>
-        <button data-sim="live">活跃</button>
-        <button data-sim="hot">热闹</button>
-      </div>
-      <div class="toolbar-right">
-        <input class="search-input" id="coinSearch" placeholder="搜索币名、符号" autocomplete="off" />
-        <button class="toolbar-create" onclick="location.href='launch.html'">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          创建
-        </button>
-      </div>
-    </div>
+      <ul class="px-grid" id="gradGrid"></ul>
+      <div class="px-empty" id="gradEmpty" style="display:none">暂无已毕业代币</div>
+    </section>
 
-    <!-- 币网格 -->
-    <div class="coin-grid" id="coinGrid"></div>
-
-    <div class="empty" id="emptyState" style="display:none">
-      <div class="empty-icon">◎</div>
-      <div class="empty-title" id="emptyTitle">未找到匹配的币</div>
-      <div class="empty-desc" id="emptyDesc">换个关键词，或看看全部</div>
-      <button class="btn btn-ghost" onclick="resetFilters()">查看全部</button>
-    </div>
+    <!-- Section 2: Explore（进行中） -->
+    <section class="px-section" id="secExplore" aria-label="Explore">
+      <div class="px-section-head">
+        <div class="px-head-main">
+          <div class="px-title-row">
+            <h1 class="px-title" id="expTitle">Explore</h1>
+            <span class="px-count num" id="expCount">0</span>
+          </div>
+          <p class="px-copy">仍在向毕业攀登的代币 · 曲线售罄后自动上池。</p>
+        </div>
+        <div class="px-filters">
+          <div class="pill-seg" id="sortSeg">
+            <button data-s="recent" class="on">Recent buys</button>
+            <button data-s="newest">Newest</button>
+            <button data-s="oldest">Oldest</button>
+            <button data-s="marketcap">Market cap</button>
+            <button data-s="volume">Volume</button>
+          </div>
+          <div class="pill-seg" id="timeSeg">
+            <button data-t="all" class="on">All</button>
+            <button data-t="24h">24h</button>
+            <button data-t="7d">7d</button>
+          </div>
+        </div>
+      </div>
+      <ul class="px-grid" id="exploreGrid"></ul>
+      <div class="px-empty" id="exploreEmpty" style="display:none"><b>暂无符合条件的代币</b><br>换个排序或筛选试试</div>
+    </section>
   </main>
+
+  <!-- ================= Spotlight ⌘K 弹层 ================= -->
+  <div class="spotlight-backdrop" id="spotlight">
+    <div class="spotlight-panel" role="dialog" aria-modal="true" aria-label="搜索代币">
+      <div class="spotlight-input-row">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
+        <input class="spotlight-input" id="spInput" placeholder="搜索名称、符号或地址" autocomplete="off" spellcheck="false" />
+        <span class="spotlight-esc-hint">Esc</span>
+      </div>
+
+      <div class="spotlight-filters">
+        <div class="sp-row">
+          <span class="sp-label">Sort by</span>
+          <div class="pill-seg" id="spSortSeg">
+            <button data-s="recent" class="on">Recent buys</button>
+            <button data-s="marketcap">Market cap</button>
+            <button data-s="volume">Volume</button>
+            <button data-s="newest">Newest</button>
+            <button data-s="oldest">Oldest</button>
+          </div>
+        </div>
+        <div class="sp-row">
+          <span class="sp-label">Window</span>
+          <div class="pill-seg" id="spTimeSeg">
+            <button data-t="all" class="on">All</button>
+            <button data-t="24h">24h</button>
+            <button data-t="7d">7d</button>
+          </div>
+        </div>
+        <button class="sp-adv-toggle" id="spAdvToggle" type="button">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          高级筛选
+        </button>
+        <div class="sp-advanced" id="spAdvanced" style="display:none">
+          <div class="sp-num-fields">
+            <label class="sp-field"><span>Min mcap</span><input class="sp-input num" id="spMcMin" type="number" min="0" placeholder="Any" /></label>
+            <label class="sp-field"><span>Max mcap</span><input class="sp-input num" id="spMcMax" type="number" min="0" placeholder="Any" /></label>
+            <label class="sp-field"><span>Min volume</span><input class="sp-input num" id="spVolMin" type="number" min="0" placeholder="Any" /></label>
+            <label class="sp-field"><span>Min burned %</span><input class="sp-input num" id="spBurnMin" type="number" min="0" max="100" placeholder="Any" /></label>
+            <label class="sp-field"><span>Min age (h)</span><input class="sp-input num" id="spAgeMin" type="number" min="0" placeholder="Any" /></label>
+            <label class="sp-field"><span>Max age (h)</span><input class="sp-input num" id="spAgeMax" type="number" min="0" placeholder="Any" /></label>
+          </div>
+          <div class="sp-row">
+            <span class="sp-label">Graduation status</span>
+            <div class="pill-seg" id="spStatusSeg">
+              <button data-st="either" class="on">Either</button>
+              <button data-st="active">Active</button>
+              <button data-st="grad">Graduated</button>
+            </div>
+          </div>
+          <div class="sp-row">
+            <span class="sp-label">徽章</span>
+            <div class="pill-seg" id="spBadgeSeg">
+              <button data-b="all" class="on">Any</button>
+              <button data-b="og">OG 首发</button>
+              <button data-b="official">Official</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spotlight-results" id="spResults"></div>
+    </div>
+  </div>
 
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
   <script src="launch-shell.js"></script>
   <script>
     // ============================================================
-    //  市场页
+    //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + ⌘K 弹层
     // ============================================================
-    var state = { tab: 'live', sort: 'recent', time: 'all', q: '' };
+    var state = { sort: 'recent', time: 'all' };
+    var spState = { sort: 'recent', time: 'all', q: '', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
       });
     }
-
-    // pons 信号语言卡片：币名 + $TICKER + MC + 曲线进度% + 最近买家（无价格/涨跌/量/持有数）
-    function mcTxt(u) { return Launch.fmtUsd(u).replace(/\.0(K|M)$/, '$1'); } // $900.0K → $900K
+    function mcTxt(u) { return Launch.fmtUsd(u).replace(/\.0(K|M)$/, '$1'); }
     function pctText(p) {
       if (p == null) return '—';
       var v = (p * 100).toFixed(2);
-      return v.replace(/\.?0+$/, '') + '%';   // 94.12% / 66.66% / 5%
-    }
-    function ponsCard(c) {
-      var grad = !!c.graduated;
-      var badge = c.isNew
-        ? '<span class="coin-badge new">NEW</span>'
-        : grad ? '<span class="coin-badge grad">已毕业</span>' : '';
-      var media = '<img src="' + esc(c.cover) + '" alt="' + esc(c.name) + '" loading="lazy" />';
-      var veil = c.video
-        ? '<div class="play-veil"><div class="play-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div></div>'
-        : '';
-      var mid;
-      if (grad) {
-        var gradTxt = c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前' : '';
-        mid = '<div class="coin-state">' +
-                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0E9F6E" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>' +
-                '<span>公开池</span>' +
-                (gradTxt ? '<span class="coin-state-sub">' + gradTxt + '</span>' : '') +
-              '</div>';
-      } else {
-        var wp = Math.min(100, Math.max(0, (c.progress || 0) * 100)).toFixed(2);
-        mid = '<div class="coin-progress-row">' +
-                '<div class="coin-progress"><i style="width:' + wp + '%"></i></div>' +
-                '<span class="coin-pct num">' + pctText(c.progress) + '</span>' +
-              '</div>';
-      }
-      var buyer = c.buyerAddr
-        ? '<span class="coin-wallet" title="最近买家">' + esc(c.buyerAddr) + '</span>'
-        : '<span class="coin-wallet">—</span>';
-      var ago = c.lastBuyAt ? '<span class="coin-ago">' + Launch.timeAgo(c.lastBuyAt) + ' 前</span>' : '';
-      return '' +
-        '<div class="coin-card' + (state.tab === 'near' ? ' is-near' : '') + '" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
-          '<div class="coin-cover-wrap">' +
-            '<div class="coin-cover" data-video="' + esc(c.video || '') + '">' + media + veil + badge + '</div>' +
-          '</div>' +
-          '<div class="coin-info">' +
-            '<div class="coin-name">' + esc(c.name) + '<span class="coin-sym">$' + esc(c.symbol) + '</span></div>' +
-            '<div class="coin-mc-row"><span class="coin-mc num">' + mcTxt(c.marketCap) + '</span>' +
-              '<span class="coin-mc-unit">MC</span></div>' +
-            mid +
-            '<div class="coin-buyer">' + buyer + ago + '</div>' +
-          '</div>' +
-        '</div>';
+      return v.replace(/\.?0+$/, '') + '%';
     }
 
-    function filtered() {
+    // ---- 占位风控/徽章元数据（原型：确定性生成，无链上数据） ----
+    function metaOf(c) {
+      if (c._meta) return c._meta;
+      var h = 0, s = c.id || 'x';
+      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      var m = {
+        og: (h % 10) < 3,               // 30% 视为首发名
+        official: (h % 10) < 2,          // 20% 视为官方
+        warn: (h % 10) < 1,              // 10% 触发创建者持有>20% 警示
+        burnPct: Math.round((h % 1000) / 100) / 10  // 0–9.9% 假 burn
+      };
+      c._meta = m;
+      return m;
+    }
+
+    // ============================================================
+    //  卡片（pons 结构：头像 + 徽章 + 名 + $TICKER + MC + 进度% + deployer + ago）
+    // ============================================================
+    function cardHTML(c) {
+      var meta = metaOf(c);
+      var grad = !!c.graduated;
+      var badge = '';
+      if (grad) badge += '<span class="px-badge grad">Graduated</span>';
+      if (meta.og && !grad) badge += '<span class="px-badge og">OG</span>';
+      if (meta.official && !meta.og) badge += '<span class="px-badge new">Official</span>';
+      var logo = c.cover
+        ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />'
+        : (c.symbol || '?').charAt(0);
+      var mid = grad ? '' :
+        '<div class="px-grad">' +
+          '<div class="px-grad-track"><i class="px-grad-fill" style="width:' + Math.min(100, Math.max(0, (c.progress || 0) * 100)).toFixed(2) + '%"></i></div>' +
+          '<span class="px-grad-pct">' + pctText(c.progress) + '</span>' +
+        '</div>';
+      var ago = grad
+        ? (c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前' : '—')
+        : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '—');
+      var addr = c.creatorAddr || '—';
+      return '' +
+        '<li class="px-grid-item"><a class="px-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
+          '<span class="px-media">' +
+            '<span class="px-logo">' + logo + '</span>' +
+            '<span class="px-badges">' + badge + '</span>' +
+          '</span>' +
+          '<span class="px-card-body">' +
+            '<span class="px-name-row"><strong class="px-name">' + esc(c.name) + '</strong></span>' +
+            '<small class="px-sym">$' + esc(c.symbol) + '</small>' +
+            '<span class="px-mcap"><span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span></span>' +
+            mid +
+            '<span class="px-meta">' +
+              '<button class="px-deployer" title="发行者" onclick="event.stopPropagation();copyAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
+              '<time class="px-time">' + ago + '</time>' +
+            '</span>' +
+          '</span>' +
+        '</a></li>';
+    }
+
+    function gradCoins() {
+      return (Launch.coins || []).filter(function (c) { return c.graduated; })
+        .sort(function (a, b) { return (b.gradAt || 0) - (a.gradAt || 0); });
+    }
+    function exploreCoins() {
       var cutoff = state.time === '24h' ? Date.now() - 86400000
         : state.time === '7d' ? Date.now() - 7 * 86400000 : 0;
       var list = (Launch.coins || []).filter(function (c) {
-        if (state.tab === 'grad') { if (!c.graduated) return false; }
-        else { if (c.graduated) return false; }
-        if (state.tab === 'near' && c.progress <= 0.7) return false;
-        // 时间窗仅对 live/near 生效
-        if (state.tab !== 'grad' && cutoff) {
+        if (c.graduated) return false;
+        if (cutoff) {
           if (!c.lastBuyAt) return false;
           if (c.lastBuyAt < cutoff && c.launchedAt < cutoff) return false;
-        }
-        if (state.q) {
-          var hay = (c.name + ' ' + c.symbol).toLowerCase();
-          if (hay.indexOf(state.q.toLowerCase()) === -1) return false;
         }
         return true;
       });
       list.sort(function (a, b) {
-        if (state.tab === 'grad') return (b.gradAt || 0) - (a.gradAt || 0);
         if (state.sort === 'newest') return b.launchedAt - a.launchedAt;
         if (state.sort === 'oldest') return a.launchedAt - b.launchedAt;
         if (state.sort === 'marketcap') return b.marketCap - a.marketCap;
@@ -290,100 +419,185 @@
       return list;
     }
 
-    function tabCounts() {
-      var coins = Launch.coins || [];
-      var live = coins.filter(function (c) { return !c.graduated; }).length;
-      var near = coins.filter(function (c) { return !c.graduated && c.progress > 0.7; }).length;
-      var grad = coins.filter(function (c) { return c.graduated; }).length;
-      document.getElementById('cntLive').textContent = live;
-      document.getElementById('cntNear').textContent = near;
-      document.getElementById('cntGrad').textContent = grad;
+    function renderGrad() {
+      var list = gradCoins();
+      var grid = document.getElementById('gradGrid');
+      var empty = document.getElementById('gradEmpty');
+      document.getElementById('gradCount').textContent = Launch.fmtNum(list.length);
+      grid.innerHTML = list.map(cardHTML).join('');
+      empty.style.display = list.length ? 'none' : 'block';
+    }
+    function renderExplore() {
+      var list = exploreCoins();
+      var grid = document.getElementById('exploreGrid');
+      var empty = document.getElementById('exploreEmpty');
+      document.getElementById('expCount').textContent = Launch.fmtNum(list.length) + ' climbing';
+      grid.innerHTML = list.map(cardHTML).join('');
+      empty.style.display = list.length ? 'none' : 'block';
+    }
+    function render() { renderGrad(); renderExplore(); }
+
+    function openCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
+    function copyAddr(a) {
+      if (!a) return;
+      if (navigator.clipboard) navigator.clipboard.writeText(a).catch(function () {});
+      Launch.toast('地址已复制', 'ok');
     }
 
-    function moveUnderline(btn) {
-      var ul = document.getElementById('stageUnderline');
-      if (ul && btn) {
-        ul.style.left = btn.offsetLeft + 'px';
-        ul.style.width = btn.offsetWidth + 'px';
-      }
+    // ============================================================
+    //  Spotlight ⌘K
+    // ============================================================
+    function spotlightOpen() {
+      document.getElementById('spotlight').classList.add('open');
+      document.getElementById('spInput').value = '';
+      spState.q = '';
+      resetSpFilters();
+      renderSpotlight();
+      setTimeout(function () { document.getElementById('spInput').focus(); }, 40);
     }
-
-    function setTab(t) {
-      state.tab = t;
-      document.querySelectorAll('.stage-tab').forEach(function (x) { x.classList.remove('on'); });
-      var btn = document.querySelector('.stage-tab[data-tab="' + t + '"]');
-      if (btn) btn.classList.add('on');
-      // 工具栏可见性：grad tab 时间窗无意义，隐藏 time seg
-      var hideTime = t === 'grad';
-      document.getElementById('timeSeg').style.display = hideTime ? 'none' : '';
-      document.getElementById('toolbarSep').style.display = hideTime ? 'none' : '';
-      render();
-      requestAnimationFrame(function () { moveUnderline(btn); });
+    function spotlightClose() {
+      document.getElementById('spotlight').classList.remove('open');
     }
-
-    function render() {
-      var list = filtered();
-      var grid = document.getElementById('coinGrid');
-      var empty = document.getElementById('emptyState');
+    function resetSpFilters() {
+      spState = { sort: 'recent', time: 'all', q: '', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
+      ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) { document.getElementById(id).value = ''; });
+      syncSeg('#spSortSeg button', 'recent', 's');
+      syncSeg('#spTimeSeg button', 'all', 't');
+      syncSeg('#spStatusSeg button', 'either', 'st');
+      syncSeg('#spBadgeSeg button', 'all', 'b');
+    }
+    function syncSeg(sel, val, attr) {
+      document.querySelectorAll(sel).forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-' + attr) === val); });
+    }
+    function spotlightCandidates() {
+      var q = (spState.q || '').toLowerCase();
+      var cutoff = spState.time === '24h' ? Date.now() - 86400000
+        : spState.time === '7d' ? Date.now() - 7 * 86400000 : 0;
+      var list = (Launch.coins || []).filter(function (c) {
+        if (q) {
+          var hay = (c.name + ' ' + c.symbol + ' ' + c.creatorAddr + ' ' + c.buyerAddr + ' ' + c.id).toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        if (cutoff) {
+          var ref = c.graduated ? (c.gradAt || c.launchedAt) : (c.lastBuyAt || c.launchedAt);
+          if (!ref || ref < cutoff) return false;
+        }
+        if (spState.status === 'active' && c.graduated) return false;
+        if (spState.status === 'grad' && !c.graduated) return false;
+        var m = metaOf(c);
+        if (spState.badge === 'og' && !m.og) return false;
+        if (spState.badge === 'official' && !m.official) return false;
+        var mc = c.marketCap || 0;
+        if (spState.mcMin != null && mc < spState.mcMin) return false;
+        if (spState.mcMax != null && mc > spState.mcMax) return false;
+        if (spState.volMin != null && (c.volumeUsd || 0) < spState.volMin) return false;
+        if (spState.burnMin != null && m.burnPct < spState.burnMin) return false;
+        var ageH = (Date.now() - (c.launchedAt || Date.now())) / 3600000;
+        if (spState.ageMin != null && ageH < spState.ageMin) return false;
+        if (spState.ageMax != null && ageH > spState.ageMax) return false;
+        return true;
+      });
+      list.sort(function (a, b) {
+        if (spState.sort === 'newest') return b.launchedAt - a.launchedAt;
+        if (spState.sort === 'oldest') return a.launchedAt - b.launchedAt;
+        if (spState.sort === 'marketcap') return b.marketCap - a.marketCap;
+        if (spState.sort === 'volume') return (b.volumeUsd || 0) - (a.volumeUsd || 0);
+        return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
+      });
+      return list;
+    }
+    function renderSpotlight() {
+      var list = spotlightCandidates().slice(0, 16);
+      var host = document.getElementById('spResults');
       if (!list.length) {
-        grid.innerHTML = '';
-        empty.style.display = 'block';
-        var labels = { live: '还没有进行中的币', near: '暂无临近毕业的币', grad: '还没有币毕业' };
-        document.getElementById('emptyTitle').textContent = labels[state.tab] || '未找到匹配的币';
-        document.getElementById('emptyDesc').textContent = state.q ? '换个关键词试试' : '晚点再来看看';
+        host.innerHTML = '<div class="sp-empty">没有匹配的代币 — 试试名称、符号或放宽筛选</div>';
         return;
       }
-      empty.style.display = 'none';
-      grid.innerHTML = list.map(ponsCard).join('');
+      host.innerHTML = list.map(function (c) {
+        var m = metaOf(c);
+        var badges = '';
+        if (c.graduated) badges += '<span class="px-badge grad">Graduated</span>';
+        if (m.og && !c.graduated) badges += '<span class="px-badge og">OG</span>';
+        if (m.official && !c.graduated && !m.og) badges += '<span class="px-badge new">Official</span>';
+        var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
+        var sub = c.graduated
+          ? (c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前毕业' : 'Graduated')
+          : pctText(c.progress) + ' · ' + (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '');
+        return '<button class="sp-result" onclick="openCoin(\'' + esc(c.id) + '\')">' +
+          '<span class="sp-logo">' + logo + '</span>' +
+          '<span class="sp-copy">' +
+            '<span class="sp-title-row"><span class="sp-name">' + esc(c.name) + '</span><span class="sp-ticker">$' + esc(c.symbol) + '</span></span>' +
+            (badges ? '<span class="sp-badges">' + badges + '</span>' : '') +
+          '</span>' +
+          '<span class="sp-right"><div class="sp-mcap num">' + mcTxt(c.marketCap) + '</div><div class="sp-sub num">' + sub + '</div></span>' +
+        '</button>';
+      }).join('');
+    }
+    function readSpNums() {
+      var v = function (id) { var x = parseFloat(document.getElementById(id).value); return isNaN(x) ? null : x; };
+      spState.mcMin = v('spMcMin'); spState.mcMax = v('spMcMax');
+      spState.volMin = v('spVolMin'); spState.burnMin = v('spBurnMin');
+      spState.ageMin = v('spAgeMin'); spState.ageMax = v('spAgeMax');
     }
 
-    function openCoin(id) {
-      location.href = 'coin-detail.html?id=' + encodeURIComponent(id);
-    }
-    function resetFilters() {
-      state.sort = 'recent'; state.time = 'all'; state.q = '';
-      document.querySelectorAll('#sortSeg button, #timeSeg button').forEach(function (b) { b.classList.remove('on'); });
-      document.querySelector('#sortSeg button[data-s="recent"]').classList.add('on');
-      document.querySelector('#timeSeg button[data-t="all"]').classList.add('on');
-      document.getElementById('coinSearch').value = '';
-      render();
-    }
-
-    // hover 视频预览（封面 → 播放）
-    function bindCoverHover() {
-      document.getElementById('coinGrid').addEventListener('mouseover', function (e) {
-        var cover = e.target.closest('.coin-cover');
-        if (!cover || cover._v) return;
-        var vid = cover.getAttribute('data-video');
-        var img = cover.querySelector('img');
-        if (!vid || !img) return;
-        var v = document.createElement('video');
-        v.src = vid; v.muted = true; v.loop = true; v.playsInline = true;
-        v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
-        cover.appendChild(v); cover._v = true;
-        v.play().catch(function () {});
-      });
-    }
-
+    // ============================================================
+    //  交互绑定
+    // ============================================================
     window.onLaunchShellReady = function () {
-      tabCounts();
-      // 阶段 tab 切换
-      document.getElementById('stageTabs').addEventListener('click', function (e) {
-        var b = e.target.closest('.stage-tab');
-        if (!b) return;
-        setTab(b.getAttribute('data-tab'));
-      });
-      window.addEventListener('resize', function () {
-        var btn = document.querySelector('.stage-tab.on');
-        moveUnderline(btn);
-      });
       render();
-      bindCoverHover();
-      // 初始下划线
-      requestAnimationFrame(function () {
-        var btn = document.querySelector('.stage-tab.on');
-        moveUnderline(btn);
+
+      // 搜索 / ⌘K
+      document.getElementById('pxSearchBtn').addEventListener('click', spotlightOpen);
+      document.getElementById('spotlight').addEventListener('click', function (e) { if (e.target === this) spotlightClose(); });
+      document.addEventListener('keydown', function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); spotlightOpen(); }
+        if (e.key === 'Escape') spotlightClose();
       });
+      document.getElementById('spInput').addEventListener('input', function (e) { spState.q = e.target.value.trim(); renderSpotlight(); });
+
+      // 弹层筛选
+      var segClick = function (segId, stateKey, attr) {
+        document.getElementById(segId).addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-' + attr + ']');
+          if (!b) return;
+          document.querySelectorAll('#' + segId + ' button').forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          spState[stateKey] = b.getAttribute('data-' + attr);
+          renderSpotlight();
+        });
+      };
+      segClick('spSortSeg', 'sort', 's');
+      segClick('spTimeSeg', 'time', 't');
+      segClick('spStatusSeg', 'status', 'st');
+      segClick('spBadgeSeg', 'badge', 'b');
+      ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', function () { readSpNums(); renderSpotlight(); });
+      });
+      document.getElementById('spAdvToggle').addEventListener('click', function () {
+        var el = document.getElementById('spAdvanced');
+        var open = el.style.display === 'none';
+        el.style.display = open ? 'flex' : 'none';
+        this.querySelector('svg').style.transform = open ? 'rotate(45deg)' : '';
+      });
+
+      // Explore 工具栏（页面级）
+      document.getElementById('sortSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-s]');
+        if (!b) return;
+        document.querySelectorAll('#sortSeg button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        state.sort = b.getAttribute('data-s');
+        renderExplore();
+      });
+      document.getElementById('timeSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-t]');
+        if (!b) return;
+        document.querySelectorAll('#timeSeg button').forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        state.time = b.getAttribute('data-t');
+        renderExplore();
+      });
+
       // 模拟活跃开关
       var simSeg = document.getElementById('simSeg');
       var syncSimSeg = function (lv) {
@@ -398,51 +612,18 @@
         syncSimSeg(lv);
         Launch.toast(lv === 'calm' ? '模拟已关闭' : '模拟活跃：' + (lv === 'live' ? '低频' : '高频'), 'ok');
       });
-      // 模拟成交 → 定向刷新该卡片并按排序归位（GMGN 式跳动，不整页重建）
+      // 模拟成交 → 全量轻刷新（Explore 卡按 recent 跳动）
       Launch.simSubscribe(function (c) {
-        var grid = document.getElementById('coinGrid');
-        if (!grid) return;
-        var list = filtered();
-        tabCounts();
-        var visible = list.some(function (x) { return x.id === c.id; });
-        var old = grid.querySelector('.coin-card[data-id="' + c.id + '"]');
-        if (visible && old) {
-          var tmp = document.createElement('div');
-          tmp.innerHTML = ponsCard(c);
-          var fresh = tmp.firstChild;
-          fresh.classList.add('sim-flash');
-          old.replaceWith(fresh);
-        } else if (visible) {
-          render(); // 原来被过滤、模拟后进入视野（少见）
-        } else {
-          return;  // 成交币不在当前筛选视野，无需动 DOM
+        var exp = document.getElementById('exploreGrid');
+        if (!exp) return;
+        renderGrad();
+        renderExplore();
+        var el = document.querySelector('#exploreGrid .px-card[data-id="' + c.id + '"]');
+        if (el) {
+          el.classList.remove('sim-flash');
+          void el.offsetWidth;
+          el.classList.add('sim-flash');
         }
-        // 按 filtered 排序把现有卡片归位（appendChild 移动节点，不重建）
-        var nodes = {};
-        grid.querySelectorAll('.coin-card').forEach(function (n) { nodes[n.getAttribute('data-id')] = n; });
-        var frag = document.createDocumentFragment();
-        list.forEach(function (x) { if (nodes[x.id]) frag.appendChild(nodes[x.id]); });
-        grid.appendChild(frag);
-      });
-      document.getElementById('coinSearch').addEventListener('input', function (e) {
-        state.q = e.target.value.trim();
-        render();
-      });
-      document.getElementById('sortSeg').addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-s]');
-        if (!b) return;
-        document.querySelectorAll('#sortSeg button').forEach(function (x) { x.classList.remove('on'); });
-        b.classList.add('on');
-        state.sort = b.getAttribute('data-s');
-        render();
-      });
-      document.getElementById('timeSeg').addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-t]');
-        if (!b) return;
-        document.querySelectorAll('#timeSeg button').forEach(function (x) { x.classList.remove('on'); });
-        b.classList.add('on');
-        state.time = b.getAttribute('data-t');
-        render();
       });
     };
   </script>
