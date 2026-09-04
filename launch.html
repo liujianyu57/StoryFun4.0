@@ -509,7 +509,7 @@
         list.push({
           type: 'clip', dramaId: d.id,
           title: d.title, cover: d.cover, video: d.video || '',
-          meta: '第 ' + k + ' 集 · ' + tag,
+          meta: '第' + k + '集｜' + tag,
           name: d.title + ' 第' + k + '集',
           fillName: d.title,
           desc: tag
@@ -594,7 +594,8 @@
       }
       return items;
     }
-    function itemLabel(it) { return it.type === 'clip' ? it.name : it.title; }
+    function itemLabel(it) { return it.type === 'clip' ? it.name : it.title; } // 列表行/摘要：单集显示"剧名 第N集"
+    function itemTitle(it) { return it.title || it.name || ''; }               // 纯标题（去掉集号重复）
     function renderPicker() {
       var host = document.getElementById('pickerList');
       var items = pickerItems();
@@ -611,7 +612,7 @@
           : '<span>🎬</span>';
         return '<button class="picker-item' + on + '" onclick="pickerSelect(\'' + esc(it.name) + '\')">' +
           '<span class="picker-thumb">' + thumb + '</span>' +
-          '<span class="picker-info"><span class="picker-name">' + esc(itemLabel(it)) + '</span>' +
+          '<span class="picker-info"><span class="picker-name">' + esc(itemTitle(it)) + '</span>' +
           (it.meta ? '<span class="picker-meta">' + esc(it.meta) + '</span>' : '') +
           '</span>' +
           '<span class="picker-check">✓</span>' +
@@ -659,7 +660,7 @@
         '<div class="attach">' +
           '<div class="attach-thumb">' + thumb + '</div>' +
           '<div class="attach-info">' +
-            '<div class="attach-name">' + esc(itemLabel(attached)) + '</div>' +
+            '<div class="attach-name">' + esc(itemTitle(attached)) + '</div>' +
             '<div class="attach-meta">' + esc(attached.meta) + '</div>' +
           '</div>' +
           '<div class="attach-act">' +
