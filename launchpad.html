@@ -43,59 +43,70 @@
     /* Explore 筛选行（pons: Recent buys | Newest | Oldest | Market cap | Volume · All|24h|7d） */
     .px-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
-    /* ---- Grid / Card（pons 同款字段顺序） ---- */
+    /* ---- Grid / Card（pons 规格：minmax 168 + gap 12，全宽方形封面竖卡） ---- */
     .px-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
-      gap: 14px; list-style: none;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 12px; margin: 0; padding: 0; list-style: none;
     }
+    .px-grid>li { content-visibility: auto; }
     .px-card {
-      display: flex; flex-direction: column; gap: 10px;
-      padding: 12px; border-radius: 18px; cursor: pointer; text-decoration: none;
+      display: grid; grid-template-rows: auto 1fr; gap: 10px;
+      padding: 10px; border-radius: 20px; cursor: pointer; text-decoration: none;
       background: var(--surface); border: 1px solid var(--border);
-      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+      color: inherit;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
     }
-    .px-card:hover { transform: translateY(-2px); border-color: var(--border-strong); box-shadow: 0 8px 24px rgba(16,24,40,.07); }
-    .px-media { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .px-card:hover { transform: translateY(-2px); border-color: var(--border-strong); background: var(--surface-2); }
+    .px-media { position: relative; }
     .px-logo {
-      width: 52px; height: 52px; border-radius: 50%; overflow: hidden;
-      background: var(--surface-2); border: 1px solid var(--border); flex-shrink: 0;
-      display: grid; place-items: center; font-size: 20px; color: var(--text-2);
+      aspect-ratio: 1; width: 100%; border-radius: 14px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      display: grid; place-items: center; overflow: hidden;
+      color: var(--text-3); font-size: 26px; font-weight: 700;
     }
-    .px-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .px-badges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+    .px-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .px-badges {
+      position: absolute; top: 8px; left: 8px; right: 8px; z-index: 1;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+    }
     .px-badge {
-      font-size: 10px; font-weight: 700; letter-spacing: .02em;
-      padding: 3px 8px; border-radius: 999px;
+      font-size: 10px; font-weight: 600; letter-spacing: .02em; line-height: 1.2;
+      padding: 4px 8px; border-radius: 999px;
     }
-    .px-badge.grad { background: rgba(14,159,110,.12); color: #0E9F6E; }
-    .px-badge.og { background: rgba(10,11,13,.08); color: var(--text); }
-    .px-badge.warn { background: rgba(246,70,93,.1); color: var(--down); }
-    .px-badge.new { background: var(--text); color: #fff; }
+    .px-badge.grad { background: rgba(14,159,110,.9); color: #fff; }
+    .px-badge.og { background: rgba(10,11,13,.82); color: #fff; }
+    .px-badge.warn { background: rgba(246,70,93,.9); color: #fff; }
+    .px-badge.new { background: rgba(10,11,13,.82); color: #fff; }
 
-    .px-card-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-    .px-name-row { display: flex; align-items: baseline; min-width: 0; }
-    .px-name { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .px-sym { display: block; font-size: 11px; color: var(--text-3); font-weight: 700; letter-spacing: .04em; }
-    .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 3px; }
-    .px-mcap-value { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
-    .px-mcap-label { font-size: 10px; font-weight: 800; color: var(--text-3); letter-spacing: .05em; }
+    .px-card-body { display: grid; gap: 3px; min-width: 0; padding: 0 2px 2px; }
+    .px-card-body strong, .px-card-body>small {
+      display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: 100%;
+    }
+    .px-name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .px-name { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
+    .px-sym { color: var(--text-2); font-size: 12px; font-weight: 600; }
+    .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .px-mcap-value { color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+    .px-mcap-label { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
 
-    .px-grad { display: flex; align-items: center; gap: 8px; }
-    .px-grad-track { flex: 1; height: 4px; border-radius: 4px; background: var(--accent-soft); overflow: hidden; }
-    .px-grad-fill { display: block; height: 100%; background: var(--text); border-radius: 4px; }
-    .px-grad-pct { font-size: 11px; font-weight: 800; color: var(--text-2); font-variant-numeric: tabular-nums; }
+    .px-grad { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 4px; }
+    .px-grad-track { flex: auto; height: 4px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+    .px-grad-fill { display: block; height: 100%; border-radius: inherit; background: var(--text); }
+    .px-grad-pct { flex: none; font-size: 11px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
 
     .px-meta {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      border-top: 1px solid var(--border); padding-top: 9px;
+      margin-top: 4px; font-size: 11px; color: var(--text-3);
+      font-variant-numeric: tabular-nums;
     }
     .px-deployer {
-      font-family: var(--mono); font-size: 11px; color: var(--text-2);
-      background: none; border: none; padding: 0; cursor: pointer; text-align: left;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      color: inherit; font: inherit; background: none; border: 0; padding: 0;
+      cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-family: var(--mono);
     }
     .px-deployer:hover { color: var(--text); }
-    .px-time { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+    .px-time { color: var(--text-3); flex-shrink: 0; }
 
     .px-empty { text-align: center; padding: 40px 12px; color: var(--text-3); }
     .px-empty b { color: var(--text-2); font-weight: 600; }
@@ -157,9 +168,9 @@
     }
     .sp-result:hover { background: var(--accent-soft); }
     .sp-logo {
-      width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 12px; overflow: hidden; flex-shrink: 0;
       background: var(--surface-2); border: 1px solid var(--border);
-      display: grid; place-items: center; font-size: 15px; color: var(--text-2);
+      display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--text-2);
     }
     .sp-logo img { width: 100%; height: 100%; object-fit: cover; }
     .sp-copy { flex: 1; min-width: 0; }
@@ -375,6 +386,8 @@
         ? (c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前' : '—')
         : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '—');
       var addr = c.creatorAddr || '—';
+      var mcap2 = c.marketCap ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>'
+        : '<span class="px-mcap-label">—</span>';
       return '' +
         '<li class="px-grid-item"><a class="px-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
           '<span class="px-media">' +
@@ -384,7 +397,7 @@
           '<span class="px-card-body">' +
             '<span class="px-name-row"><strong class="px-name">' + esc(c.name) + '</strong></span>' +
             '<small class="px-sym">$' + esc(c.symbol) + '</small>' +
-            '<span class="px-mcap"><span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span></span>' +
+            '<span class="px-mcap">' + mcap2 + '</span>' +
             mid +
             '<span class="px-meta">' +
               '<button class="px-deployer" title="发行者" onclick="event.stopPropagation();copyAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
