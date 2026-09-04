@@ -39,7 +39,25 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 12;
+  var SCHEMA_VERSION = 13;
+
+  // ============================================================
+  //  配对资产（quote）：ETH + 股票代币
+  //  顺序必须与市场 Pair 筛选按钮一致（launchpad 动态注入同一列表）
+  // ============================================================
+  var PAIR_STOCKS = ['AAPL','AMD','AMZN','BB','COIN','COST','CRCL','DELL','DJT','FIG','GLD','GME','GOOGL','HIMS','JNJ','LLY','LULU','META','MRNA','MRVL','MSFT','MSTR','MU','NVDA','PFE','PLTR','QQQ','RBLX','RDDT','RIVN','SKHY','SNAP','SNDK','SPCX','SPY','TSLA','TSM','TTWO','USO','WYFI'];
+  function hashStr(s) {
+    var h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  }
+  // 确定性随机配对：同一 id 永远得到同一 pair（演示数据稳定）
+  // ETH 判定与股票取模互质（%7 与 %40）→ 40 个股票桶均会被覆盖，筛选不会出现空桶
+  function pairOf(id) {
+    var h = hashStr(id || '');
+    if (h % 7 === 0) return 'ETH';
+    return PAIR_STOCKS[Math.floor(h / 7) % PAIR_STOCKS.length];
+  }
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -71,6 +89,7 @@
       video: o.video || '',
       sourceType: o.sourceType || 'ai',   // ai | work
       sourceTitle: o.sourceTitle || '',
+      pair: o.pair || 'ETH',           // 配对资产：ETH 或股票代币（由创建时选择/演示分配）
       supply: K.totalSupply,
       circulating: circulating,               // 流通供应量
       lockedPct: lockedPct,                   // 锁定/预留比例 0–1
@@ -164,6 +183,7 @@
       priceUsd: 0.000042, holders: 318, volumeUsd: 12000, launchedAt: D(3), graduated: false, progress: 0.12,
       poolUsd: 890, change24h: 2.31, isNew: true, lastBuyAt: D(0.3), spark: [0.4, 0.6, 0.5, 0.8, 0.7, 1],
       social: { x: 'mooncat_eth', tg: '' },
+      pair: 'NVDA',
       creatorTaxPct: 1,
       shareToHolders: true,
     }),
@@ -171,7 +191,8 @@
       id: 'c_candle', name: '烛火与王冠', symbol: 'CANDLE', tagline: '在权力的烛光里，谁先燃尽。',
       creator: 'Sylvan', creatorAddr: '0xB20f…9e01', cover: IMG.candle, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.0001, holders: 1206, volumeUsd: 22000, launchedAt: D(10), graduated: false, progress: 0.28,
-      poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45]
+      poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45],
+      pair: 'GLD'
     }),
     seedCoin({
       id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。', lockedPct: 0.18, creatorHoldsPct: 29,
@@ -185,7 +206,8 @@
       id: 'c_zero', name: '零点计划', symbol: 'ZERO', tagline: '世界重置前的最后一分钟。',
       creator: 'Kai', creatorAddr: '0x08eD…31b6', cover: IMG.zero, video: VID.xie, sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.00032, holders: 884, volumeUsd: 31200, launchedAt: D(2), graduated: false, progress: 0.06,
-      poolUsd: 420, change24h: 0.84, isNew: true, lastBuyAt: D(0.6), spark: [0.5, 0.6, 0.55, 0.7]
+      poolUsd: 420, change24h: 0.84, isNew: true, lastBuyAt: D(0.6), spark: [0.5, 0.6, 0.55, 0.7],
+      pair: 'SPY'
     }),
     seedCoin({
       id: 'c_names', name: '无名者档案', symbol: 'NAMES', tagline: '名字被夺走的人，自己写回自己的名字。', shareToHolders: true,
@@ -269,6 +291,7 @@
           creator: 'Creator' + (i0 % 97), creatorAddr: walletFrom('genc:' + i0),
           cover: COVERS[i0 % COVERS.length], video: '', sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
           sourceTitle: '', supply: K.totalSupply,
+          pair: pairOf('gen_' + i0),   // 确定性随机配对资产（含约 1/5 ETH）
           lockedPct: lockedPct,
           shareToHolders: shareToHolders,
           creatorHoldsPct: creatorHoldsPct,
@@ -628,6 +651,7 @@
       priceUsd: data.priceUsd || 0.0001, holders: 1, volumeUsd: 0,
       launchedAt: Date.now(), graduated: false, progress: 0.001, poolUsd: 0,
       change24h: 0, isNew: true, spark: [0.05],
+      pair: data.pair || 'ETH',
       social: data.social || null,
       creatorTaxPct: data.creatorTaxPct || 0,
       shareToHolders: !!data.shareToHolders,
@@ -876,6 +900,8 @@
     notifications: notifications,
     watchNotifCount: watchNotifCount,
     analytics: analytics,
+    // 配对资产（quote 股票代币表，顺序=市场 Pair 按钮顺序）
+    pairStocks: PAIR_STOCKS.slice(),
     fmtDay: fmtDay,
     persist: persist,
     // 模拟活跃引擎

@@ -148,6 +148,7 @@
       width: 8px; height: 8px; background: #1c1c1c; transform: rotate(45deg);
     }
     .px-sym { color: var(--text-2); font-size: 12px; font-weight: 600; }
+    .px-sym .px-pair { font-style: normal; color: var(--text-3); font-weight: 600; font-size: 11px; }
     .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
     .px-mcap-value { color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
     .px-mcap-label { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
@@ -421,46 +422,7 @@
           <div class="sp-pills sp-quotes" id="spPairSeg">
             <button data-p="all" class="on">All</button>
             <button data-p="Stocks">Stocks</button>
-            <button data-p="AAPL">AAPL</button>
-            <button data-p="AMD">AMD</button>
-            <button data-p="AMZN">AMZN</button>
-            <button data-p="BB">BB</button>
-            <button data-p="COIN">COIN</button>
-            <button data-p="COST">COST</button>
-            <button data-p="CRCL">CRCL</button>
-            <button data-p="DELL">DELL</button>
-            <button data-p="DJT">DJT</button>
-            <button data-p="FIG">FIG</button>
-            <button data-p="GLD">GLD</button>
-            <button data-p="GME">GME</button>
-            <button data-p="GOOGL">GOOGL</button>
-            <button data-p="HIMS">HIMS</button>
-            <button data-p="JNJ">JNJ</button>
-            <button data-p="LLY">LLY</button>
-            <button data-p="LULU">LULU</button>
-            <button data-p="META">META</button>
-            <button data-p="MRNA">MRNA</button>
-            <button data-p="MRVL">MRVL</button>
-            <button data-p="MSFT">MSFT</button>
-            <button data-p="MSTR">MSTR</button>
-            <button data-p="MU">MU</button>
-            <button data-p="NVDA">NVDA</button>
-            <button data-p="PFE">PFE</button>
-            <button data-p="PLTR">PLTR</button>
-            <button data-p="QQQ">QQQ</button>
-            <button data-p="RBLX">RBLX</button>
-            <button data-p="RDDT">RDDT</button>
-            <button data-p="RIVN">RIVN</button>
-            <button data-p="SKHY">SKHY</button>
-            <button data-p="SNAP">SNAP</button>
-            <button data-p="SNDK">SNDK</button>
-            <button data-p="SPCX">SPCX</button>
-            <button data-p="SPY">SPY</button>
-            <button data-p="TSLA">TSLA</button>
-            <button data-p="TSM">TSM</button>
-            <button data-p="TTWO">TTWO</button>
-            <button data-p="USO">USO</button>
-            <button data-p="WYFI">WYFI</button>
+            <!-- 股票代币按钮由 JS 依据 Launch.pairStocks 注入，与币数据一一对应 -->
           </div>
         </div>
       </div>
@@ -562,7 +524,9 @@
                   '</span>'
                 : '') +
             '</span>' +
-            '<small class="px-sym">$' + esc(c.symbol) + '</small>' +
+            '<small class="px-sym">$' + esc(c.symbol) +
+              (c.pair && c.pair !== 'ETH' ? ' <span class="px-pair">· ' + esc(c.pair) + '</span>' : '') +
+            '</small>' +
             '<span class="px-mcap">' + mcLine + '</span>' +
             mid +
             '<span class="px-meta">' +
@@ -718,6 +682,10 @@
           var hay = (c.name + ' ' + c.symbol + ' ' + c.creatorAddr + ' ' + c.buyerAddr + ' ' + c.id).toLowerCase();
           if (hay.indexOf(q) === -1) return false;
         }
+        // Pair 筛选：All=全部；Stocks=非 ETH 配对；其余=精确配对资产
+        var cPair = c.pair || 'ETH';
+        if (spState.pair === 'Stocks') { if (cPair === 'ETH') return false; }
+        else if (spState.pair !== 'all' && cPair !== spState.pair) return false;
         // volume 窗口语义：该窗口无量则不出现在结果
         if (spState.sort === 'volume' && spState.time !== 'all' && !spVolField(c)) return false;
         if (cutoff) {
@@ -751,8 +719,9 @@
       } else {
         host.innerHTML = list.map(function (c) {
           var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
-          // desc：$SYM · 市值/量 · 时间（pons 搜索结果不带徽章）
+          // desc：配对资产 · $SYM 市值/量 · 时间（pons 搜索结果不带徽章）
           var descParts = [];
+          if (c.pair && c.pair !== 'ETH') descParts.push(esc(c.pair));
           if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + ' volume');
           else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + ' MC');
           if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + ' ago' : 'Graduated');
@@ -792,6 +761,18 @@
     window.onLaunchShellReady = function () {
       render();
 
+      // Pair 股票代币按钮：从引擎同一列表注入（与币数据一一对应）
+      if (Launch.pairStocks) {
+        var pairSeg = document.getElementById('spPairSeg');
+        Launch.pairStocks.forEach(function (t) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('data-p', t);
+          b.textContent = t;
+          pairSeg.appendChild(b);
+        });
+      }
+
       // 搜索 / ⌘K
       document.getElementById('pxSearchBtn').addEventListener('click', spotlightOpen);
       document.getElementById('spotlight').addEventListener('click', function (e) { if (e.target === this) spotlightClose(); });
@@ -827,9 +808,7 @@
         document.getElementById('spTimeLabel').textContent = spState.sort === 'volume' ? 'Window' : 'Age';
       });
       segClick('spTimeSeg', 'time', 't');
-      segClick('spPairSeg', 'pair', 'p', function () {
-        if (spState.pair !== 'all') Launch.toast('Pair 筛选为占位：当前演示仅代币', 'ok');
-      });
+      segClick('spPairSeg', 'pair', 'p');
       // 清空按钮：有内容清空，无内容关闭
       document.getElementById('spClear').addEventListener('click', function () {
         var inp = document.getElementById('spInput');
