@@ -222,11 +222,39 @@
     .adv-row:first-child { border-top: none; }
     .adv-row .lbl { font-size: 13px; font-weight: 500; }
     .adv-row .lbl small { display: block; font-size: 11px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
-    /* Holder fee sharing（pons：状态文案 + 说明随开关变化） */
-    .adv-row.hfs { flex-direction: column; align-items: stretch; }
-    .adv-row.hfs .hfs-state { margin-top: 8px; font-size: 13px; font-weight: 700; line-height: 1.45; }
-    .adv-row.wallet-col { flex-direction: column; align-items: stretch; }
-    .adv-row.wallet-col .input { font-variant-numeric: tabular-nums; }
+    /* Holder fee sharing（单选卡片：选项自带说明，钱包输入随 B 卡出现） */
+    .hfs-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; width: 100%; }
+    .hfs-card {
+      display: block; width: 100%; text-align: left; cursor: pointer;
+      border: 1px solid var(--border); border-radius: 14px;
+      background: var(--surface-2); padding: 12px 14px; color: var(--text);
+    }
+    .hfs-card:hover { border-color: var(--text-3); }
+    .hfs-card.on {
+      border-color: var(--accent); background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(10, 11, 13, 0.05);
+    }
+    .hfs-card-head { display: flex; align-items: center; gap: 9px; }
+    .hfs-radio {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      border: 1.5px solid var(--border-strong); position: relative;
+    }
+    .hfs-card.on .hfs-radio { border-color: var(--accent); }
+    .hfs-card.on .hfs-radio::after {
+      content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--accent);
+    }
+    .hfs-title { font-size: 13.5px; font-weight: 700; }
+    .hfs-chip {
+      margin-left: auto; flex-shrink: 0; font-size: 10.5px; font-weight: 700;
+      color: #B45309; background: #FEF3C7; border-radius: 999px; padding: 2px 8px;
+      letter-spacing: 0.02em;
+    }
+    .hfs-body { display: block; font-size: 12px; color: var(--text-2); line-height: 1.55; margin-top: 7px; padding-left: 25px; }
+    .hfs-wallet { display: block; margin-top: 10px; padding: 10px 0 2px; }
+    .hfs-card:not(.on) .hfs-wallet { display: none; }
+    .hfs-wallet-lbl { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-2); margin-bottom: 6px; }
+    .hfs-wallet input { width: 100%; font-variant-numeric: tabular-nums; }
+    .hfs-wallet-note { display: block; font-size: 11px; color: var(--text-3); margin-top: 5px; }
     .adv-row .ctrl { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
     .tax-val { font-size: 12px; font-weight: 700; width: 30px; text-align: right; }
     input[type=range] { width: 110px; accent-color: var(--accent); }
@@ -413,17 +441,31 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="adv-body" id="advBody">
-                <div class="adv-row hfs">
+                <div class="adv-row">
                   <span class="lbl">Holder fee sharing</span>
-                  <span class="ctrl">
-                    <label class="switch"><input type="checkbox" id="shareToHolders" onchange="syncHfs()" /><i></i></label>
-                  </span>
-                  <span class="hfs-state" id="hfsState">Creator fees go to the creator wallet</span>
-                  <span class="f-note" id="hfsNote" style="margin-top:8px">Route this launch's creator fees to its holders, split pro-rata for each holder to claim from their profile menu.</span>
-                </div>
-                <div class="adv-row wallet-col" id="creatorWalletRow">
-                  <span class="lbl">Creator wallet<small>Receives creator fees and the creator tax. Leave blank to use your connected wallet.</small></span>
-                  <input class="input num" id="pCreatorWallet" placeholder="0x7A2b…3fD8（留空 = 我的钱包）" autocomplete="off" spellcheck="false" />
+                  <div class="hfs-cards">
+                    <button type="button" class="hfs-card" id="hfsHolders" aria-pressed="false" onclick="setHfs(true)">
+                      <span class="hfs-card-head">
+                        <span class="hfs-radio" aria-hidden="true"></span>
+                        <span class="hfs-title">Creator fees go to holders</span>
+                        <span class="hfs-chip">永久生效</span>
+                      </span>
+                      <span class="hfs-body">Two more confirmations after launch deploy the distributor and route every creator fee to holders. Permanent once routed.</span>
+                    </button>
+                    <button type="button" class="hfs-card on" id="hfsWallet" aria-pressed="true" onclick="setHfs(false)">
+                      <span class="hfs-card-head">
+                        <span class="hfs-radio" aria-hidden="true"></span>
+                        <span class="hfs-title">Creator fees go to the creator wallet</span>
+                      </span>
+                      <span class="hfs-body">Creator fees and the creator tax are paid to the wallet below.</span>
+                      <span class="hfs-wallet">
+                        <span class="hfs-wallet-lbl">收款钱包</span>
+                        <input class="input num" id="pCreatorWallet" placeholder="0x7A2b…3fD8（留空 = 我的钱包）" autocomplete="off" spellcheck="false" />
+                        <span class="hfs-wallet-note">留空 = 使用当前连接钱包</span>
+                      </span>
+                    </button>
+                  </div>
+                  <input type="checkbox" id="shareToHolders" style="display:none" />
                 </div>
                 <div class="adv-row">
                   <span class="lbl">创作者税<small>总交易费 1%，其中最多 10% 归你</small></span>
@@ -531,17 +573,14 @@
 
     function refreshEthHint() { // 余额提示已随 AI 生成移除，保留占位
     }
-    /* ---- 高级设置文案联动 ----
-       pons：Holder fee sharing ON → 分给持有者（隐藏钱包输入）；
-       OFF → 分给创建者钱包（显示输入，留空 = 连接的钱包） */
-    function syncHfs() {
-      var on = document.getElementById('shareToHolders').checked;
-      document.getElementById('hfsState').textContent =
-        on ? 'Creator fees go to holders' : 'Creator fees go to the creator wallet';
-      document.getElementById('hfsNote').textContent = on
-        ? 'Two more confirmations after launch deploy the distributor and route every creator fee to holders. Permanent once routed.'
-        : "Route this launch's creator fees to its holders, split pro-rata for each holder to claim from their profile menu.";
-      document.getElementById('creatorWalletRow').style.display = on ? 'none' : 'flex';
+    /* ---- Holder fee sharing：单选卡片 ----
+       A=分给持有者（永久，隐藏钱包输入）；B=分给创建者钱包（内嵌收款钱包输入） */
+    function setHfs(v) {
+      document.getElementById('shareToHolders').checked = !!v;
+      var a = document.getElementById('hfsHolders');
+      var b = document.getElementById('hfsWallet');
+      a.classList.toggle('on', !!v); a.setAttribute('aria-pressed', String(!!v));
+      b.classList.toggle('on', !v); b.setAttribute('aria-pressed', String(!v));
     }
     function walletText() {
       if (window.Launch) return Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
@@ -1061,7 +1100,7 @@
       refreshEthHint();
       startGradRead('ETH');
       renderDevBuy();
-      syncHfs();
+      setHfs(false);
       document.getElementById('pCreatorWallet').placeholder = walletText() + '（留空 = 我的钱包）';
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
