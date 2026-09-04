@@ -223,7 +223,8 @@
     .adv-row .lbl { font-size: 13px; font-weight: 500; }
     .adv-row .lbl small { display: block; font-size: 11px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
     /* Holder fee sharing（单选卡片：选项自带说明，钱包输入随 B 卡出现） */
-    .hfs-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; width: 100%; }
+    .adv-row.hfs-head { flex-direction: column; align-items: stretch; }
+    .hfs-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; width: 100%; }
     .hfs-card {
       display: block; width: 100%; text-align: left; cursor: pointer;
       border: 1px solid var(--border); border-radius: 14px;
@@ -446,7 +447,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="adv-body" id="advBody">
-                <div class="adv-row">
+                <div class="adv-row hfs-head">
                   <span class="lbl">Holder fee sharing</span>
                   <div class="hfs-cards">
                     <button type="button" class="hfs-card" id="hfsHolders" aria-pressed="false" onclick="setHfs(true)">
