@@ -186,6 +186,16 @@
   .mi-row b { color: var(--text); font-weight: 700; text-align: right; }
   .mi-title { font-size: 13.5px; font-weight: 800; margin: 10px 0 4px; }
   .mi-note { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
+  /* About 卡（参考 token-about-card） */
+  .about-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 12px 24px; padding: 20px 22px; }
+  .ab-title { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+  .ab-desc { margin-top: 7px; font-size: 13px; color: var(--text-2); line-height: 1.6; max-width: 640px; }
+  .ab-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+  .ab-meta .tag { font-weight: 600; }
+  .ab-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .ab-link { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .ab-link:hover { color: var(--text); border-color: var(--text-3); }
+  @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -238,6 +248,16 @@
         <div class="cd-stat"><div class="v num" id="cdChg">—</div><div class="k">24h</div></div>
       </div>
 
+    </div>
+
+    <!-- About 卡（参考 token-about-card） -->
+    <div class="card about-card" id="aboutCard">
+      <div>
+        <div class="ab-title">About</div>
+        <p class="ab-desc" id="abDesc">—</p>
+        <div class="ab-meta" id="abMeta"></div>
+      </div>
+      <div class="ab-links" id="abLinks"></div>
     </div>
 
         <div class="cd-grid">
@@ -477,6 +497,22 @@ var holders = [];
         (coin.creatorTaxPct ? '<span class="tag">Creator tax ' + coin.creatorTaxPct + '%</span>' : '') +
         (coin.shareToHolders ? '<span class="tag tag-gold">费共享</span>' : '') +
         (coin.social && (coin.social.x || coin.social.tg) ? '<span class="tag" style="cursor:pointer" onclick="openSocial()">↗ 社区</span>' : '');
+      // About 卡
+      document.getElementById('abDesc').textContent = coin.tagline || (coin.sourceType === 'work' ? '一部短剧的叙事币。' : '一个 AI 叙事币。');
+      var meta = [];
+      meta.push('<span class="tag">配对 ' + esc(coin.pair || 'ETH') + '</span>');
+      meta.push('<span class="tag">Creator tax ' + (((coin.creatorTaxPct || 0) * 1).toFixed(2)) + '%</span>');
+      meta.push('<span class="tag">Supply 1,000,000,000</span>');
+      meta.push(coin.graduated
+        ? '<span class="tag tag-up">已毕业 · 流动性永久锁定</span>'
+        : '<span class="tag">curve 进行中</span>');
+      if (coin.sourceTitle) meta.push('<span class="tag">源自 ' + esc(coin.sourceTitle) + '</span>');
+      document.getElementById('abMeta').innerHTML = meta.join('');
+      var links = '';
+      links += '<a class="ab-link" href="javascript:void(0)" onclick="goSource()">▶ 叙事</a>';
+      if (coin.social && (coin.social.x || coin.social.tg)) links += '<a class="ab-link" href="javascript:void(0)" onclick="openSocial()">↗ 社区</a>';
+      links += '<a class="ab-link" href="javascript:void(0)" onclick="copyText(coin.creatorAddr)">⧉ 合约</a>';
+      document.getElementById('abLinks').innerHTML = links;
       // 叙事文案
       document.getElementById('storyDesc').textContent = coin.tagline || '这个币还没有简介';
       var src = '';
