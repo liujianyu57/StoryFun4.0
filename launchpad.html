@@ -209,13 +209,23 @@
     }
     .spotlight-esc-hint { font-size: 11px; color: var(--text-3); border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; }
 
-    .spotlight-filters { padding: 12px 18px 4px; display: flex; flex-direction: column; gap: 12px; }
+    .spotlight-filters { padding: 12px 18px 6px; display: flex; flex-direction: column; gap: 9px; }
+    .sp-fg { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .sp-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; width: 62px; flex-shrink: 0; }
+    .sp-pills { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+    .sp-pills button {
+      height: 26px; padding: 0 11px; border-radius: 999px; border: 1px solid transparent;
+      background: var(--accent-soft); color: var(--text-2);
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all .14s;
+    }
+    .sp-pills button:hover { border-color: var(--border-strong); color: var(--text); }
+    .sp-pills button.on { background: var(--accent); color: #fff; }
+    .sp-quotes button { font-variant-numeric: tabular-nums; }
+    .sp-advanced { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; padding-top: 10px; border-top: 1px solid var(--border); }
     .sp-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .sp-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; width: 84px; flex-shrink: 0; }
-    .sp-advanced { display: flex; flex-direction: column; gap: 12px; }
     .sp-adv-toggle {
       display: inline-flex; align-items: center; gap: 6px; width: fit-content;
-      border: none; background: none; color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; padding: 0;
+      border: none; background: none; color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; padding: 2px 0;
     }
     .sp-adv-toggle:hover { color: var(--text); }
     .sp-num-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 14px; }
@@ -226,11 +236,16 @@
       border: 1px solid var(--border); background: var(--surface-2); color: var(--text); outline: none;
     }
     .sp-input:focus { border-color: var(--accent); }
+    .spotlight-clear {
+      width: 28px; height: 28px; border-radius: 9px; display: inline-flex; align-items: center;
+      justify-content: center; border: none; background: none; color: var(--text-3); cursor: pointer; flex-shrink: 0;
+    }
+    .spotlight-clear:hover { background: var(--accent-soft); color: var(--text); }
 
-    .spotlight-results { overflow-y: auto; padding: 6px 8px 10px; }
+    .spotlight-results { overflow-y: auto; padding: 6px 8px 4px; flex: 1; min-height: 120px; }
     .sp-result {
       display: flex; align-items: center; gap: 12px; width: 100%;
-      padding: 9px 10px; border-radius: 12px; border: none; background: none; cursor: pointer; text-align: left;
+      padding: 8px 10px; border-radius: 12px; border: none; background: none; cursor: pointer; text-align: left;
     }
     .sp-result:hover { background: var(--accent-soft); }
     .sp-logo {
@@ -249,7 +264,24 @@
     .sp-mcap { font-size: 13px; font-weight: 700; color: var(--text); }
     .sp-mcap .sp-fdv { font-size: 11px; font-weight: 500; color: var(--text-3); }
     .sp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .sp-arrow { color: var(--text-3); flex-shrink: 0; margin-left: 2px; }
+    .sp-result:hover .sp-arrow { color: var(--text); transform: translateX(2px); }
     .sp-empty { text-align: center; padding: 28px 10px; color: var(--text-3); font-size: 13px; }
+
+    .sp-footer {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 9px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .sp-count { font-size: 11.5px; color: var(--text-3); }
+    .sp-page-actions { display: inline-flex; align-items: center; gap: 8px; }
+    .sp-page-btn {
+      width: 26px; height: 26px; border-radius: 9px; display: inline-flex; align-items: center;
+      justify-content: center; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-2); cursor: pointer; font-size: 14px;
+    }
+    .sp-page-btn:hover:not(:disabled) { border-color: var(--border-strong); color: var(--text); }
+    .sp-page-btn:disabled { opacity: .35; cursor: default; }
+    .sp-page-num { font-size: 12px; color: var(--text-2); min-width: 34px; text-align: center; }
 
     @media (max-width: 1080px) {
       .px-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -343,27 +375,42 @@
     <div class="spotlight-panel" role="dialog" aria-modal="true" aria-label="搜索代币">
       <div class="spotlight-input-row">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
-        <input class="spotlight-input" id="spInput" placeholder="搜索名称、符号或地址" autocomplete="off" spellcheck="false" />
-        <span class="spotlight-esc-hint">Esc</span>
+        <input class="spotlight-input" id="spInput" placeholder="Search name, ticker, or address" autocomplete="off" spellcheck="false" />
+        <span class="spotlight-esc-hint" id="spEscHint">Esc</span>
+        <button class="spotlight-clear" id="spClear" type="button" aria-label="Close search" style="display:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
 
       <div class="spotlight-filters">
-        <div class="sp-row">
+        <div class="sp-fg">
           <span class="sp-label">Sort by</span>
-          <div class="pill-seg" id="spSortSeg">
+          <div class="sp-pills" id="spSortSeg">
             <button data-s="recent" class="on">Recent buys</button>
+            <button data-s="burned">Burned %</button>
+            <button data-s="realmcap">Real mcap</button>
             <button data-s="marketcap">Market cap</button>
             <button data-s="volume">Volume</button>
             <button data-s="newest">Newest</button>
             <button data-s="oldest">Oldest</button>
           </div>
         </div>
-        <div class="sp-row">
-          <span class="sp-label">Window</span>
-          <div class="pill-seg" id="spTimeSeg">
+        <div class="sp-fg">
+          <span class="sp-label" id="spTimeLabel">Window</span>
+          <div class="sp-pills" id="spTimeSeg">
             <button data-t="all" class="on">All</button>
             <button data-t="24h">24h</button>
             <button data-t="7d">7d</button>
+          </div>
+        </div>
+        <div class="sp-fg">
+          <span class="sp-label">Pair</span>
+          <div class="sp-pills sp-quotes" id="spPairSeg">
+            <button data-p="all" class="on">All</button>
+            <button data-p="stocks">Stocks</button>
+            <button data-p="NVDA">NVDA</button>
+            <button data-p="TSLA">TSLA</button>
+            <button data-p="AAPL">AAPL</button>
           </div>
         </div>
         <button class="sp-adv-toggle" id="spAdvToggle" type="button">
@@ -392,13 +439,20 @@
             <div class="pill-seg" id="spBadgeSeg">
               <button data-b="all" class="on">Any</button>
               <button data-b="og">OG 首发</button>
-              <button data-b="official">Official</button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="spotlight-results" id="spResults"></div>
+      <div class="spotlight-results" id="spResults" role="listbox" aria-label="Token results"></div>
+      <footer class="sp-footer" id="spFooter" style="display:none">
+        <span class="sp-count num" id="spCount">1 to 24 of 0</span>
+        <div class="sp-page-actions">
+          <button class="sp-page-btn" id="spPrev" type="button" disabled>‹</button>
+          <span class="sp-page-num num" id="spPageNum">1</span>
+          <button class="sp-page-btn" id="spNext" type="button">›</button>
+        </div>
+      </footer>
     </div>
   </div>
 
@@ -410,7 +464,7 @@
     //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + ⌘K 弹层
     // ============================================================
     var state = { sort: 'recent', time: 'all', gradPage: 1, expPage: 1 };
-    var spState = { sort: 'recent', time: 'all', q: '', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
+    var spState = { sort: 'recent', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -601,20 +655,27 @@
       document.getElementById('spotlight').classList.add('open');
       document.getElementById('spInput').value = '';
       spState.q = '';
+      spPage = 1;
       resetSpFilters();
       renderSpotlight();
+      var clear = document.getElementById('spClear');
+      if (clear) { clear.style.display = 'none'; clear.setAttribute('aria-label', 'Close search'); }
+      var hint = document.getElementById('spEscHint');
+      if (hint) hint.style.display = '';
+      document.getElementById('spTimeLabel').textContent = 'Window';
       setTimeout(function () { document.getElementById('spInput').focus(); }, 40);
     }
     function spotlightClose() {
       document.getElementById('spotlight').classList.remove('open');
     }
     function resetSpFilters() {
-      spState = { sort: 'recent', time: 'all', q: '', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
+      spState = { sort: 'recent', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
       ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) { document.getElementById(id).value = ''; });
       syncSeg('#spSortSeg button', 'recent', 's');
       syncSeg('#spTimeSeg button', 'all', 't');
       syncSeg('#spStatusSeg button', 'either', 'st');
       syncSeg('#spBadgeSeg button', 'all', 'b');
+      syncSeg('#spPairSeg button', 'all', 'p');
     }
     function syncSeg(sel, val, attr) {
       document.querySelectorAll(sel).forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-' + attr) === val); });
@@ -651,40 +712,71 @@
         if (spState.sort === 'oldest') return a.launchedAt - b.launchedAt;
         if (spState.sort === 'marketcap') return b.marketCap - a.marketCap;
         if (spState.sort === 'volume') return (b.volumeUsd || 0) - (a.volumeUsd || 0);
+        if (spState.sort === 'realmcap') return (b.marketCap || 0) - (a.marketCap || 0);
+        if (spState.sort === 'burned') {
+          var ba = metaOf(a).burnPct, bb = metaOf(b).burnPct;
+          return bb - ba;
+        }
         return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
       });
       return list;
     }
+    var spPage = 1;
+    var SP_PER = 24;
     function renderSpotlight() {
-      var list = spotlightCandidates().slice(0, 16);
+      var all = spotlightCandidates();
+      var total = all.length;
+      var pages = Math.max(1, Math.ceil(total / SP_PER));
+      if (spPage > pages) spPage = pages;
+      if (spPage < 1) spPage = 1;
+      var list = all.slice((spPage - 1) * SP_PER, spPage * SP_PER);
       var host = document.getElementById('spResults');
       if (!list.length) {
-        host.innerHTML = '<div class="sp-empty">没有匹配的代币 — 试试名称、符号或放宽筛选</div>';
-        return;
+        host.innerHTML = '<div class="sp-empty">' +
+          (spState.q ? 'No matching tokens' : 'No launches yet') + '</div>';
+      } else {
+        host.innerHTML = list.map(function (c) {
+          var badges = '';
+          if (c.graduated) {
+            badges += '<span class="px-badge grad">Graduated</span>';
+          } else {
+            if (c.isOriginal) badges += '<span class="px-badge og" title="本币名与代号首次发行">OG</span>';
+            if ((c.creatorHoldsPct || 0) > 20) badges += '<span class="px-badge warn" title="创建者持仓 >20%">!</span>';
+          }
+          var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
+          // desc：$SYM · 市值/量 · 时间（pons：$TICKER · MC/volume · age）
+          var descParts = [];
+          if (spState.sort === 'volume' && c.volumeUsd) descParts.push(mcTxt(c.volumeUsd) + ' volume');
+          else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + ' MC');
+          if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + ' ago' : 'Graduated');
+          else descParts.push(c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' ago' : '');
+          return '<button class="sp-result" onclick="openCoin(\'' + esc(c.id) + '\')">' +
+            '<span class="sp-logo">' + logo + '</span>' +
+            '<span class="sp-copy">' +
+              '<span class="sp-title-row"><span class="sp-name">' + esc(c.name) + '</span>' +
+                '<span class="sp-ticker">$' + esc(c.symbol) + '</span></span>' +
+              (badges ? '<span class="sp-badges">' + badges + '</span>' : '') +
+              '<span class="sp-sub num">' + descParts.join(' · ') + '</span>' +
+            '</span>' +
+            '<span class="sp-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>' +
+          '</button>';
+        }).join('');
       }
-      host.innerHTML = list.map(function (c) {
-        var badges = '';
-        if (c.graduated) {
-          badges += '<span class="px-badge grad">Graduated</span>';
-        } else {
-          if (c.isOriginal) badges += '<span class="px-badge og" title="本币名与代号首次发行">OG</span>';
-          if ((c.creatorHoldsPct || 0) > 20) badges += '<span class="px-badge warn" title="创建者持仓 >20%">!</span>';
-        }
-        var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
-        var sub = c.graduated
-          ? (c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前毕业' : 'Graduated')
-          : pctText(c.progress) + ' · ' + (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '');
-        return '<button class="sp-result" onclick="openCoin(\'' + esc(c.id) + '\')">' +
-          '<span class="sp-logo">' + logo + '</span>' +
-          '<span class="sp-copy">' +
-            '<span class="sp-title-row"><span class="sp-name">' + esc(c.name) + '</span><span class="sp-ticker">$' + esc(c.symbol) + '</span></span>' +
-            (badges ? '<span class="sp-badges">' + badges + '</span>' : '') +
-          '</span>' +
-          '<span class="sp-right"><div class="sp-mcap num">' + mcTxt(c.marketCap) +
-            (c.lockedPct > 0 ? ' <span class="sp-fdv">/ ' + mcTxt(c.fdv || c.marketCap) + ' FDV</span>' : '') +
-            '</div><div class="sp-sub num">' + sub + '</div></span>' +
-        '</button>';
-      }).join('');
+      // footer 计数/分页
+      var footer = document.getElementById('spFooter');
+      var from = total ? (spPage - 1) * SP_PER + 1 : 0;
+      var to = Math.min(spPage * SP_PER, total);
+      document.getElementById('spCount').textContent = total
+        ? Launch.fmtNum(from) + ' to ' + Launch.fmtNum(to) + ' of ' + Launch.fmtNum(total)
+        : 'No results';
+      var denom = Math.ceil(total / SP_PER) || 1;
+      document.getElementById('spPageNum').textContent = (total ? spPage : 0) + ' / ' + (total ? denom : '');
+      var prev = document.getElementById('spPrev');
+      var next = document.getElementById('spNext');
+      prev.disabled = spPage <= 1;
+      next.disabled = spPage >= pages;
+      footer.style.display = total ? 'flex' : 'none';
+      window._spTotal = total;
     }
     function readSpNums() {
       var v = function (id) { var x = parseFloat(document.getElementById(id).value); return isNaN(x) ? null : x; };
@@ -706,23 +798,54 @@
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); spotlightOpen(); }
         if (e.key === 'Escape') spotlightClose();
       });
-      document.getElementById('spInput').addEventListener('input', function (e) { spState.q = e.target.value.trim(); renderSpotlight(); });
+      document.getElementById('spInput').addEventListener('input', function (e) {
+        spState.q = e.target.value.trim();
+        spPage = 1;
+        var clear = document.getElementById('spClear');
+        clear.style.display = spState.q ? 'inline-flex' : 'none';
+        clear.setAttribute('aria-label', spState.q ? 'Clear search' : 'Close search');
+        document.getElementById('spEscHint').style.display = spState.q ? 'none' : '';
+        renderSpotlight();
+      });
 
       // 弹层筛选
-      var segClick = function (segId, stateKey, attr) {
+      var segClick = function (segId, stateKey, attr, onSet) {
         document.getElementById(segId).addEventListener('click', function (e) {
           var b = e.target.closest('button[data-' + attr + ']');
           if (!b) return;
           document.querySelectorAll('#' + segId + ' button').forEach(function (x) { x.classList.remove('on'); });
           b.classList.add('on');
           spState[stateKey] = b.getAttribute('data-' + attr);
+          spPage = 1;
+          if (onSet) onSet();
           renderSpotlight();
         });
       };
-      segClick('spSortSeg', 'sort', 's');
+      segClick('spSortSeg', 'sort', 's', function () {
+        // pons：sort=volume 时该组标签 Window→Age
+        document.getElementById('spTimeLabel').textContent = spState.sort === 'volume' ? 'Age' : 'Window';
+      });
       segClick('spTimeSeg', 'time', 't');
       segClick('spStatusSeg', 'status', 'st');
       segClick('spBadgeSeg', 'badge', 'b');
+      segClick('spPairSeg', 'pair', 'p', function () {
+        if (spState.pair !== 'all') Launch.toast('Pair 筛选为占位：当前演示仅代币', 'ok');
+      });
+      // 清空按钮：有内容清空，无内容关闭
+      document.getElementById('spClear').addEventListener('click', function () {
+        var inp = document.getElementById('spInput');
+        if (inp.value) {
+          inp.value = ''; spState.q = '';
+          this.style.display = 'none';
+          this.setAttribute('aria-label', 'Close search');
+          document.getElementById('spEscHint').style.display = '';
+          renderSpotlight();
+          inp.focus();
+        } else spotlightClose();
+      });
+      // 弹窗分页
+      document.getElementById('spPrev').addEventListener('click', function () { spPage = Math.max(1, spPage - 1); renderSpotlight(); });
+      document.getElementById('spNext').addEventListener('click', function () { spPage = spPage + 1; renderSpotlight(); });
       ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) {
         document.getElementById(id).addEventListener('input', function () { readSpNums(); renderSpotlight(); });
       });
