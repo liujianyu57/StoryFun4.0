@@ -524,7 +524,7 @@
           <div class="cr-actions">
             <div>
               <div class="cr-due"><b class="num" id="duePair">ETH</b> pair, <b class="num" id="feeTotal">0.0005 ETH</b> due</div>
-              <div class="cr-gas">⛽ 网络费预估 —</div>
+              <div class="cr-gas" id="gasEst">⛽ 网络费预估 —</div>
             </div>
             <button class="btn btn-primary create-cta" id="createBtn" onclick="doCreate()" disabled>填写名称</button>
           </div>
@@ -618,6 +618,7 @@
       var b = document.getElementById('hfsWallet');
       a.classList.toggle('on', !!v); a.setAttribute('aria-pressed', String(!!v));
       b.classList.toggle('on', !v); b.setAttribute('aria-pressed', String(!v));
+      updGas();
     }
     function walletText() {
       return (window.Launch && Launch.walletText) ? Launch.walletText() : '0x7A2b…3fD8';
@@ -1035,6 +1036,7 @@
       else if (!symOk) { btn.textContent = '填写代号'; btn.disabled = true; }
       else if (!haveStory && !uploadPreview) { btn.textContent = '选择币图或关联叙事'; btn.disabled = true; }
       else { btn.textContent = '创建'; btn.disabled = false; }
+      updGas();
     }
 
     // ---- 高级 ----
@@ -1061,6 +1063,27 @@
       if (isNaN(v) || v < 0) v = 0;
       if (v > 10) v = 10;
       el.textContent = 'Traders pay ' + (1 + v).toFixed(2) + '% in total, up to 10% of it yours.';
+    }
+
+    // ---- 网络费预估（模拟）：基础发射 1 笔；分给持有者再 +2 笔链上确认 ----
+    var GAS_PER_TX_ETH = 0.00004;   // L2 单笔 gas 演示量级
+    function gasEthUsd() {
+      var L = window.Launch;
+      return (L && L.CONFIG && L.CONFIG.ETH_USD) ? L.CONFIG.ETH_USD : 3200;
+    }
+    function fmtSmallEth(v) {
+      var s = v.toFixed(6).replace(/0+$/, '');
+      return s.replace(/\.$/, '');
+    }
+    function updGas() {
+      var el = document.getElementById('gasEst');
+      if (!el) return;
+      var n = 1;
+      if (document.getElementById('shareToHolders').checked) n += 2; // deploy distributor + route
+      var eth = GAS_PER_TX_ETH * n;
+      el.textContent = '⛽ 网络费预估 ≈ ' + fmtSmallEth(eth) + ' ETH' +
+        (n > 1 ? '（' + n + ' 笔链上确认）' : '') +
+        ' · ≈ $' + (eth * gasEthUsd()).toFixed(2);
     }
 
     // ---- Snipe tax exemptions：输入 + 添加 + 胶囊列表（上限 32，pons 工厂限制） ----
@@ -1173,6 +1196,7 @@
     // ---- 事件绑定 ----
     function bind() {
       bindUpload();
+      document.getElementById('pDevBuy').addEventListener('input', updGas);
       document.getElementById('pName').addEventListener('input', function(){ document.getElementById('createErr').classList.remove('show'); syncAll(); });
       document.getElementById('pSymbol').addEventListener('input', function(){
         document.getElementById('symErr').classList.remove('show');
@@ -1217,6 +1241,7 @@
       startGradRead('ETH');
       renderDevBuy();
       setHfs(false);
+      updGas();
       document.getElementById('pCreatorWallet').placeholder = walletText();
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
