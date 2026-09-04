@@ -474,10 +474,10 @@
                 <div class="adv-row tax-col">
                   <span class="lbl">Creator tax</span>
                   <div class="tax-entry">
-                    <input class="input num" id="pTaxPct" type="number" inputmode="decimal" min="0" max="11" step="0.01" value="0" placeholder="0" autocomplete="off" />
+                    <input class="input num" id="pTaxPct" type="number" inputmode="decimal" min="0" max="10" step="0.01" value="0" placeholder="0" autocomplete="off" oninput="taxNoteLive()" />
                     <span class="tax-suffix" aria-hidden="true">%</span>
                   </div>
-                  <span class="f-note tax-note">Traders pay 1.00% in total, up to 10% of it yours.</span>
+                  <span class="f-note tax-note" id="taxNote">Traders pay 1.00% in total, up to 10% of it yours.</span>
                 </div>
                 <div class="adv-row" style="flex-direction:column;align-items:stretch">
                   <span class="lbl">狙击税豁免钱包<small>发射首 3 秒买入收取 99% 狙击税，3 秒后衰减至 0 · 白名单钱包免收</small></span>
@@ -1012,12 +1012,22 @@
       var el = document.getElementById('pTaxPct');
       var v = parseFloat(el.value);
       if (isNaN(v)) v = 0;
-      v = Math.min(11, Math.max(0, v));
+      v = Math.min(10, Math.max(0, v));   // 创作者税：0–10%（叠加在 1% 基础费上）
       el.value = String(Math.round(v * 100) / 100);
+      taxNoteLive();
     }
     function taxPct() {
       clampTax();
       return parseFloat(document.getElementById('pTaxPct').value) || 0;
+    }
+    // 灰字总费率 = 1% 基础费 + 输入税，随输入实时变化（pons 模板）
+    function taxNoteLive() {
+      var el = document.getElementById('taxNote');
+      if (!el) return;
+      var v = parseFloat(document.getElementById('pTaxPct').value);
+      if (isNaN(v) || v < 0) v = 0;
+      if (v > 10) v = 10;
+      el.textContent = 'Traders pay ' + (1 + v).toFixed(2) + '% in total, up to 10% of it yours.';
     }
 
     // ---- 创建 ----

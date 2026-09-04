@@ -137,7 +137,7 @@
       buybackLockedPct: o.buybackLockedPct || null, // 锁入创建者回购的比例
       // 创建页扩展字段
       social: o.social || null,          // {x, tg}
-      creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
+      creatorTaxPct: o.creatorTaxPct || 0, // 创作者税：1% 基础费之上叠加的额外百分比（0–10，2 位小数；演示经济仍按基础费计）
       shareToHolders: !!o.shareToHolders,  // 是否将 creator 费分给持有者
       devBuyEth: o.devBuyEth || 0,       // 开发者预买（ETH，兼容旧字段）
       devBuyQty: o.devBuyQty || 0,       // 开发者预买数量（按配对资产单位）
