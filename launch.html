@@ -487,28 +487,32 @@
       ];
       return out;
     }
-    // 短视频：storyfun_my_videos（AI/作品历史）
+    // 短视频：storyfun_my_videos —— 列表行精简：只留标题（描述），无类型词/时长
     function myVideos() {
       var out = [];
       try { out = JSON.parse(localStorage.getItem('storyfun_my_videos') || '[]') || []; } catch (e) {}
       if (!out.length) out = [
-        { id:'v_1', title:'月球打碟的猫', cover:'image/cover-zero-night.jpg', video:'video/打斗视频.mp4', desc:'一只穿西装的猫在月球上打碟', kind:'ai', dur:'0:15' },
-        { id:'v_2', title:'烛火与王冠 · 高光', cover:'image/cover-candle.jpg', video:'', desc:'权力的烛光里谁先燃尽', kind:'clip', dur:'0:58' },
-        { id:'v_3', title:'零点计划 · 预告', cover:'image/cover-pyramid.jpg', video:'', desc:'世界重置前最后一分钟', kind:'clip', dur:'0:30' }
+        { id:'v_1', title:'一只小狗吃玉米', cover:'image/cover-zero-night.jpg', video:'video/打斗视频.mp4', desc:'一只小狗吃玉米', kind:'ai' },
+        { id:'v_2', title:'烛火与王冠 · 高光', cover:'image/cover-candle.jpg', video:'', desc:'权力的烛光里谁先燃尽', kind:'clip' },
+        { id:'v_3', title:'零点计划 · 预告', cover:'image/cover-pyramid.jpg', video:'', desc:'世界重置前最后一分钟', kind:'clip' }
       ];
       return out;
     }
-    // 单集：从每部剧派生 episodes（演示 3~5 集，视频复用整剧示例）
-    function dramaEpisodes(d, i) {
+    // 单集看点池：确定性轮换给每集一句描述
+    var CLIP_TAGS = ['琉璃初现，凤骨隐现','卸甲之后，暗流涌起','一饭之间，风云变色','命运在此转折','真相只露出一个角','黎明前的最后对峙','谁先亮出底牌','结局之前，另有玄机'];
+    // 单集：主标题=剧名，副行=「第 N 集 · 看点描述」
+    function dramaEpisodes(d, di) {
       var list = [];
       var n = d.eps || 3;
       for (var k = 1; k <= n; k++) {
+        var tag = CLIP_TAGS[(di * 3 + k) % CLIP_TAGS.length];
         list.push({
-          type: 'clip', dramaId: d.id, dramaTitle: d.title,
-          title: d.title + ' · 第 ' + k + ' 集',
-          cover: d.cover, video: d.video || '',
-          meta: '短剧单集 · 第 ' + k + ' 集',
-          name: d.title + ' 第' + k + '集', desc: d.desc || ''
+          type: 'clip', dramaId: d.id,
+          title: d.title, cover: d.cover, video: d.video || '',
+          meta: '第 ' + k + ' 集 · ' + tag,
+          name: d.title + ' 第' + k + '集',
+          fillName: d.title,
+          desc: tag
         });
       }
       return list;
@@ -520,14 +524,14 @@
       });
       return out;
     }
-    // 视频大类 = 短视频 + 全部剧集单集
+    // 视频大类 = 短视频 + 全部剧集单集（短视频不带副行；单集副行=集号·看点）
     function videoItems() {
       var items = [];
       myVideos().forEach(function (v) {
         items.push({
           type: 'video', title: v.title, cover: v.cover || 'image/hero-bg-blur.jpg',
-          video: v.video || '', meta: (v.kind === 'ai' ? 'AI 视频' : '短视频') + (v.dur ? ' · ' + v.dur : ''),
-          name: v.title, desc: v.desc || ''
+          video: v.video || '', meta: '',
+          name: v.title, fillName: v.title, desc: v.desc || ''
         });
       });
       allClips().forEach(function (e) { items.push(e); });
@@ -570,7 +574,7 @@
       var q = pickerSearchQ();
       var dramas = myDramas().map(function (d) {
         return { type: 'drama', title: d.title, cover: d.cover || 'image/hero-bg-blur.jpg', video: d.video || '',
-                 meta: '短剧 · ' + (d.episodes || ''), name: d.title, desc: d.desc || '' };
+                 meta: '短剧 · ' + (d.episodes || ''), name: d.title, fillName: d.title, desc: d.desc || '' };
       });
       var items = pkTab === 'drama' ? dramas : videoItems();
       if (q) {
@@ -590,6 +594,7 @@
       }
       return items;
     }
+    function itemLabel(it) { return it.type === 'clip' ? it.name : it.title; }
     function renderPicker() {
       var host = document.getElementById('pickerList');
       var items = pickerItems();
@@ -606,14 +611,14 @@
           : '<span>🎬</span>';
         return '<button class="picker-item' + on + '" onclick="pickerSelect(\'' + esc(it.name) + '\')">' +
           '<span class="picker-thumb">' + thumb + '</span>' +
-          '<span class="picker-info"><span class="picker-name">' + esc(it.title) + '</span>' +
-          '<span class="picker-meta">' + esc(it.meta) + '</span></span>' +
+          '<span class="picker-info"><span class="picker-name">' + esc(itemLabel(it)) + '</span>' +
+          (it.meta ? '<span class="picker-meta">' + esc(it.meta) + '</span>' : '') +
+          '</span>' +
           '<span class="picker-check">✓</span>' +
         '</button>';
       }).join('');
     }
     function pickerSelect(name) {
-      var q = pickerSearchQ();
       var item = pickerItems().filter(function (x) { return x.name === name; })[0];
       if (item) pickerSel = item;
       renderPicker();
@@ -624,19 +629,19 @@
       var sum = document.getElementById('pickerSum');
       if (!pickerSel) { ok.disabled = true; sum.textContent = '未选择'; return; }
       ok.disabled = false;
-      sum.textContent = '已选：' + pickerSel.title;
+      sum.textContent = '已选：' + itemLabel(pickerSel);
     }
     function confirmStoryPick() {
       if (!pickerSel) return;
       attached = pickerSel;
       closeStoryPicker();
       renderAttached();
-      // 自动回填名称/简介（仅用户未输入时）
-      if (!document.getElementById('pName').value) document.getElementById('pName').value = pickerSel.name || pickerSel.title;
+      // 自动回填：名称用 fillName（单集=剧名；整剧/视频=标题）；简介用描述
+      if (!document.getElementById('pName').value) document.getElementById('pName').value = pickerSel.fillName || pickerSel.title;
       if (!document.getElementById('pTag').value) document.getElementById('pTag').value = pickerSel.desc || '';
       uploadPreview = null; refreshUpload();
       syncAll();
-      Launch.toast('已关联：' + pickerSel.title, 'ok');
+      Launch.toast('已关联：' + itemLabel(pickerSel), 'ok');
     }
     function clearAttached() {
       attached = null; pickerSel = null;
@@ -654,7 +659,7 @@
         '<div class="attach">' +
           '<div class="attach-thumb">' + thumb + '</div>' +
           '<div class="attach-info">' +
-            '<div class="attach-name">' + esc(attached.title) + '</div>' +
+            '<div class="attach-name">' + esc(itemLabel(attached)) + '</div>' +
             '<div class="attach-meta">' + esc(attached.meta) + '</div>' +
           '</div>' +
           '<div class="attach-act">' +
