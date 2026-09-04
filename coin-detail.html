@@ -51,7 +51,26 @@
     .grad-band.done .grad-progress i { background: #0E9F6E; width: 100% !important; }
 
     /* 主布局 */
-    .cd-grid { display: grid; grid-template-columns: 1fr 380px; gap: 18px; margin-top: 4px; }
+    .cd-grid { display: grid; grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); gap: 18px; margin-top: 4px; align-items: start; }
+    .cd-trade { min-width: 0; }
+    .cd-market { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .cd-bottom { display: grid; gap: 18px; margin-top: 18px; }
+    /* 交易卡（pons convert 双面板） */
+    .convert-stack { display: flex; flex-direction: column; gap: 6px; position: relative; }
+    .convert-panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; }
+    .convert-panel-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-2); margin-bottom: 8px; }
+    .convert-row { display: flex; align-items: center; gap: 8px; }
+    .convert-row input { flex: 1; min-width: 0; }
+    .convert-amount { flex: 1; min-width: 0; text-align: right; font-size: 20px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+    .convert-asset { height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; color: var(--text); flex-shrink: 0; }
+    .convert-asset i { font-style: normal; }
+    .convert-swap-wrap {
+      align-self: center; margin: -12px 0; position: relative; z-index: 2;
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-strong);
+      background: var(--surface); color: var(--text-2); cursor: pointer; display: grid; place-items: center;
+    }
+    .convert-swap-wrap:hover { color: var(--text); border-color: var(--text-3); }
+    .cp-bal { font-weight: 600; color: var(--text-3); font-size: 11.5px; }
     .cd-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 
     /* K线 */
@@ -219,14 +238,57 @@
         <div class="cd-stat"><div class="v num" id="cdChg">—</div><div class="k">24h</div></div>
       </div>
 
-      <!-- 毕业状态条 -->
-      <div class="grad-band" id="gradBand"></div>
     </div>
 
-    <div class="cd-grid">
-      <!-- 左列 -->
-      <div class="cd-col">
-        <!-- K线 -->
+        <div class="cd-grid">
+      <div class="cd-col cd-trade">
+      <div class="card swap-card" id="swapCard">
+        <div id="tkState">
+          <div class="ord-bar" id="ordBar" style="display:none">
+            <button type="button" class="on" data-o="market" onclick="ordMode('market')">Market</button>
+            <button type="button" data-o="limit" onclick="ordMode('limit')">Limit</button>
+            <button type="button" data-o="orders" onclick="ordMode('orders')">Orders</button>
+          </div>
+          <div class="grad-band" id="gradBand" style="display:none"></div>
+        </div>
+        <div id="mktPanel">
+          <div class="convert-stack">
+            <div class="convert-panel">
+              <span class="convert-panel-label"><span id="paySideLabel">支付</span><b class="cp-bal num" id="payBalance">—</b></span>
+              <div class="convert-row">
+                <input class="swap-input num" id="swapIn" type="number" min="0" step="any" placeholder="0.00" autocomplete="off" />
+                <span class="convert-asset" id="payToken"><i>Ξ</i> ETH</span>
+              </div>
+              <div class="quick-row" id="quickRow"></div>
+            </div>
+            <button type="button" class="convert-swap-wrap" id="swapArrow" title="对调方向" aria-label="对调方向">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5-5 5 5M17 14l-5 5-5-5"/></svg>
+            </button>
+            <div class="convert-panel">
+              <span class="convert-panel-label"><span id="outLabel">预计获得</span></span>
+              <div class="convert-row">
+                <div class="convert-amount num" id="swapOut">0</div>
+                <span class="convert-asset" id="outToken"><i>$</i> —</span>
+              </div>
+            </div>
+          </div>
+          <div class="swap-details" style="margin-top:8px">
+            <div class="sd-row"><span>价格</span><b class="num" id="sdPrice">—</b></div>
+            <div class="sd-row"><span>滑点</span><b class="num">0.5%</b></div>
+            <div class="sd-row"><span>价格影响</span><b class="num" id="sdImpact">—</b></div>
+            <div class="sd-row"><span>手续费</span><b class="num" id="sdFee">1%</b></div>
+          </div>
+          <div class="inline-warn danger" id="swapErr"></div>
+          <div class="inline-warn warn" id="swapWarn"></div>
+          <button class="btn btn-primary btn-lg swap-submit" id="swapBtn" onclick="doSwap()">买入</button>
+        </div>
+        <div class="ord-panel" id="limPanel" style="display:none"><div class="card-pad"><div class="empty" style="padding:22px 8px"><div class="empty-title" style="font-size:13px">Limit</div><div class="empty-desc" style="font-size:12px">原型：限价单面板待按参考细化</div></div></div></div>
+        <div class="ord-panel" id="ordListPanel" style="display:none"><div class="card-pad"><div class="empty" style="padding:22px 8px"><div class="empty-title" style="font-size:13px">Orders</div><div class="empty-desc" style="font-size:12px">暂无挂单（原型）</div></div></div></div>
+      </div>
+
+      </div>
+      <div class="cd-col cd-market">
+<!-- K线 -->
         <div class="card kcard">
           <div class="kcard-head">
             <div class="kcard-title" id="kTitle">价格</div>
@@ -240,7 +302,8 @@
           <div class="klegend"><span id="kLeft">—</span><span id="kMid">—</span><span id="kRight">—</span></div>
         </div>
 
-        <!-- 成交记录 / 持有者（页签） -->
+        
+<!-- 成交记录 / 持有者（页签） -->
         <div class="card">
           <div class="card-head-row">
             <div class="tab-seg" id="recSeg">
@@ -258,7 +321,12 @@
           </div>
         </div>
 
-        <!-- 叙事 -->
+        
+      </div>
+    </div>
+
+    <div class="cd-bottom">
+<!-- 叙事 -->
         <div class="card story-card">
           <div class="story-video" id="storyPreview">
             <div class="play-big" onclick="playStory()">
@@ -271,81 +339,12 @@
             <div class="story-src" id="storySrc"></div>
           </div>
         </div>
-        <!-- 原型：参数信息（对齐参考的 About/Creator fees/Holder fee sharing） -->
+        
+<!-- 原型：参数信息（对齐参考的 About/Creator fees/Holder fee sharing） -->
         <div class="card" id="metaCard" style="display:none"></div>
       </div>
 
-      <!-- 右列 Swap -->
-      <div>
-        <div class="card swap-card" id="swapCard">
-          <div class="swap-seg" id="swapSeg">
-            <button data-s="buy" class="on">买入</button>
-            <button data-s="sell">卖出</button>
-          </div>
-          <!-- 原型：已毕业显示 Market | Limit | Orders -->
-          <div class="ord-bar" id="ordBar" style="display:none">
-            <button type="button" class="on" data-o="market" onclick="ordMode('market')">Market</button>
-            <button type="button" data-o="limit" onclick="ordMode('limit')">Limit</button>
-            <button type="button" data-o="orders" onclick="ordMode('orders')">Orders</button>
-          </div>
-          <div id="mktPanel">
-          <div class="swap-box">
-            <div class="swap-box-label"><span>支付</span><b id="payBalance">—</b></div>
-            <div class="swap-input-row">
-              <input class="swap-input num" id="swapIn" type="number" min="0" step="any" placeholder="0.00" />
-              <span class="swap-token" id="payToken"><i>Ξ</i> ETH</span>
-            </div>
-            <div class="quick-row" id="quickRow"></div>
-          </div>
-          <div class="swap-arrow" id="swapArrow" title="对调买卖方向">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5-5 5 5M17 14l-5 5-5-5"/></svg>
-          </div>
-          <div class="swap-box">
-            <div class="swap-box-label"><span>获得</span><b id="outLabel">—</b></div>
-            <div class="swap-input-row">
-              <div class="swap-input num" id="swapOut">0</div>
-              <span class="swap-token" id="outToken"><i>$</i> —</span>
-            </div>
-          </div>
-          <div class="swap-details">
-            <div class="sd-row"><span>价格</span><b class="num" id="sdPrice">—</b></div>
-            <div class="sd-row"><span>滑点</span><b class="num">0.5%</b></div>
-            <div class="sd-row"><span>价格影响</span><b class="num" id="sdImpact">—</b></div>
-            <div class="sd-row"><span>手续费</span><b class="num" id="sdFee">1%</b></div>
-          </div>
-          <div class="inline-warn danger" id="swapErr"></div>
-          <div class="inline-warn warn" id="swapWarn"></div>
-          <button class="btn btn-primary btn-lg swap-submit" id="swapBtn" onclick="doSwap()">买入</button>
-          </div>
-          <!-- 原型：限价单面板 -->
-          <div class="ord-panel" id="limPanel" style="display:none">
-            <div class="swap-box">
-              <div class="swap-box-label"><span>限价（每个币的价格）</span><b class="num" id="limHint">—</b></div>
-              <div class="swap-input-row">
-                <input id="limPriceIn" class="swap-input num" type="number" min="0" step="any" placeholder="0.00" />
-                <span class="swap-token" id="limTok">$</span>
-              </div>
-            </div>
-            <div class="swap-box">
-              <div class="swap-box-label"><span>数量</span></div>
-              <div class="swap-input-row">
-                <input id="limQtyIn" class="swap-input num" type="number" min="0" step="any" placeholder="0.00" />
-                <span class="swap-token" id="limQtyTok">SYM</span>
-              </div>
-            </div>
-            <div class="sd-row"><span>说明</span><b>本地演示 · 不真实撮合</b></div>
-            <button class="btn btn-primary btn-lg swap-submit" style="margin-top:10px" onclick="placeLimit()">挂限价单</button>
-            <div class="f-note">原型：仅把订单加入下方 Orders 列表展示。</div>
-          </div>
-          <!-- 原型：挂单列表 -->
-          <div class="ord-panel" id="ordListPanel" style="display:none">
-            <div class="card-pad" id="ordRows"></div>
-            <div class="f-note" style="padding:0 16px 12px">模拟挂单仅供原型展示。</div>
-          </div>
-        </div>
-
-
-      </div>
+      
     </div>
   </main>
 
@@ -521,6 +520,8 @@ var holders = [];
 
     function renderGrad() {
       var band = document.getElementById('gradBand');
+      if (!band) return;
+      band.style.display = 'block';
       if (coin.graduated) {
         band.className = 'grad-band done';
         band.innerHTML =
@@ -664,7 +665,9 @@ var holders = [];
     function ordShow() {
       if (!coin) return;
       var bar = document.getElementById('ordBar');
+      var band = document.getElementById('gradBand');
       bar.style.display = coin.graduated ? 'flex' : 'none';
+      if (band) band.style.display = coin.graduated ? 'none' : 'block';
       if (coin.graduated) {
         document.getElementById('limHint').textContent = '当前 ' + Launch.fmtPrice(coin.priceUsd);
         var lp = document.getElementById('limPriceIn');
@@ -676,6 +679,7 @@ var holders = [];
     }
     function renderOrders() {
       var host = document.getElementById('ordRows');
+      if (!host) return;
       if (!orderRows.length) {
         host.innerHTML = '<div class="empty" style="padding:26px 10px"><div class="empty-title" style="font-size:13px">暂无挂单</div><div class="empty-desc" style="font-size:12px">切到 Limit 挂一笔试试</div></div>';
         return;
@@ -688,7 +692,9 @@ var holders = [];
       }).join('');
     }
     function placeLimit() {
-      var price = parseFloat(document.getElementById('limPriceIn').value);
+      var pin = document.getElementById('limPriceIn');
+      if (!pin) { Launch.toast('限价面板为原型占位', 'warn'); return; }
+      var price = parseFloat(pin.value);
       var qty = parseFloat(document.getElementById('limQtyIn').value);
       if (!(price > 0) || !(qty > 0)) { Launch.toast('请填写限价与数量', 'err'); return; }
       orderRows.push({ side: side, price: price, qty: qty, at: Date.now() });
@@ -749,6 +755,8 @@ var holders = [];
         ? '<i>Ξ</i> ETH' : '<i>$</i> ' + esc(coin.symbol);
       document.getElementById('outToken').innerHTML = side === 'buy'
         ? '<i>$</i> ' + esc(coin.symbol) : '<i>Ξ</i> ETH';
+      var pl = document.getElementById('paySideLabel');
+      if (pl) pl.textContent = side === 'buy' ? '支付' : '卖出';
       document.getElementById('outLabel').textContent = side === 'buy' ? '预计获得' : '预计获得 (ETH)';
       document.getElementById('swapBtn').textContent = side === 'buy' ? ('买入 ' + coin.symbol) : ('卖出 ' + coin.symbol);
       document.getElementById('sdPrice').textContent = Launch.fmtPrice(coin.priceUsd);
