@@ -371,7 +371,7 @@
                       <div class="pair-dd-scroll" id="pairScroll"></div>
                     </div>
                   </div>
-                  <div class="f-note" id="pairNote">曲线以 ETH 计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。</div>
+                  <div class="f-note" id="pairNote">Reading the graduation threshold.</div>
                 </div>
                 <div class="field lp-wide">
                   <div class="field-label">开发者预买 <span class="opt">选填</span></div>
@@ -441,7 +441,7 @@
               <div class="pv-row"><span>配对资产</span><b class="num" id="sumPair">ETH</b></div>
               <div class="pv-row"><span>交易费</span><b class="num">1.00%</b></div>
               <div class="pv-row"><span>发射窗口</span><b>首 3s 99% → 0</b></div>
-              <div class="pv-row"><span>毕业</span><b class="ok">4.2 ETH → 池</b></div>
+              <div class="pv-row"><span>毕业</span><b class="ok num" id="sumGrad">4.2 ETH → 池</b></div>
               <div class="pv-row"><span>流动性</span><b class="ok">永久锁定</b></div>
             </div>
           </div>
@@ -819,9 +819,45 @@
       var ico = document.getElementById('pairIco');
       ico.textContent = pairIcoTxt(pairSel);
       ico.className = 'pair-dd-ico ' + pairIcoCls(pairSel);
-      document.getElementById('pairNote').textContent = pairSel === 'ETH'
-        ? '曲线以 ETH 计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。'
-        : 'curve 以 ' + pairSel + ' 计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。';
+    }
+
+    // ---- 毕业阈值（pons：先 Reading，再按资产单位显示） ----
+    // 演示用资产美元价（≈真实价位），阈值统一 ≈$13,440（4.2 ETH @3200）
+    var GRAD_USD = 13440;
+    var ASSET_PRICES = {
+      ETH: 3200, AAPL: 210, AMD: 160, AMZN: 205, BB: 4.2, COIN: 265, COST: 940,
+      CRCL: 150, DELL: 130, DJT: 30, FIG: 95, GLD: 255, GME: 26, GOOGL: 192,
+      HIMS: 62, JNJ: 148, LLY: 820, LULU: 245, META: 555, MRNA: 42, MRVL: 108,
+      MSFT: 462, MSTR: 420, MU: 132, NVDA: 175, PFE: 27, PLTR: 118, QQQ: 470,
+      RBLX: 78, RDDT: 245, RIVN: 21, SKHY: 145, SNAP: 12, SNDK: 128, SPCX: 340,
+      SPY: 560, TSLA: 350, TSM: 195, TTWO: 152, USO: 88, WYFI: 34
+    };
+    var gradTimer = null;
+    function gradQty(sym) {
+      var px = ASSET_PRICES[sym];
+      return px ? GRAD_USD / px : null;
+    }
+    function fmtQty(v) {
+      if (v == null || !isFinite(v)) return '—';
+      var s = v >= 100 ? v.toFixed(0)
+        : v >= 1 ? v.toFixed(2)
+        : v.toFixed(4);
+      return s.replace(/\.?0+$/, '');
+    }
+    // 选中资产后：先显示 Reading the graduation threshold.（2s），再给出该资产单位的毕业阈值
+    function startGradRead(sym) {
+      if (gradTimer) clearTimeout(gradTimer);
+      var note = document.getElementById('pairNote');
+      var row = document.getElementById('sumGrad');
+      note.textContent = 'Reading the graduation threshold.';
+      if (row) row.textContent = '—';
+      gradTimer = setTimeout(function () {
+        var q = gradQty(sym);
+        if (q == null) { note.textContent = 'Graduation threshold unavailable.'; return; }
+        var txt = fmtQty(q) + ' ' + sym;
+        note.textContent = 'Graduates once the curve raises ' + txt + '.';
+        if (row) row.textContent = txt + ' → 池';
+      }, 2000);
     }
     function openPair() {
       renderPairMenu();
@@ -842,6 +878,7 @@
       renderPairTrigger();
       closePair();
       syncAll();
+      startGradRead(p);
     }
     function syncAll() {
       var name = document.getElementById('pName').value.trim();
@@ -945,6 +982,7 @@
     window.onLaunchShellReady = function(){
       bind();
       refreshEthHint();
+      startGradRead('ETH');
       document.getElementById('walletAddr').textContent = walletText();
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
