@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 9;
+  var SCHEMA_VERSION = 10;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -90,6 +90,7 @@
       isNew: o.isNew || false,
       lastBuyAt: o.lastBuyAt || o.launchedAt || Date.now(),  // 最近一次买入时间（市场排序用）
       buyerAddr: o.buyerAddr || walletFrom('seed:' + o.id),       // 最近买入钱包（展示用，确定性模拟）
+      creatorHoldsPct: o.creatorHoldsPct == null ? 0 : o.creatorHoldsPct, // 创建者持仓占比 %（>20 触发警示）
       // 创建页扩展字段
       social: o.social || null,          // {x, tg}
       creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
@@ -124,7 +125,7 @@
 
   var SEED = [
     seedCoin({
-      id: 'c_feng', name: '凤骨琉璃', symbol: 'FENGGU', tagline: '琉璃易碎，凤骨不折。', shareToHolders: true,
+      id: 'c_feng', name: '凤骨琉璃', symbol: 'FENGGU', tagline: '琉璃易碎，凤骨不折。', shareToHolders: true, creatorHoldsPct: 12,
       creator: '林晚棠', creatorAddr: '0x7A2b…fD81', cover: IMG.feng, video: VID.feng, sourceType: 'work', sourceTitle: '短剧《凤骨琉璃》',
       priceUsd: 0.0009, holders: 2841, volumeUsd: 124000, launchedAt: D(52), graduated: false, progress: 0.94,
       poolUsd: 12650, change24h: 0.42, lastBuyAt: D(1.2), spark: [0.2, 0.35, 0.3, 0.45, 0.6, 0.72, 0.8, 0.94],
@@ -138,7 +139,7 @@
       poolUsd: 61200, change24h: 0.68, lastBuyAt: D(26), spark: [0.1, 0.2, 0.5, 0.45, 0.7, 0.85, 0.9, 1]
     }),
     seedCoin({
-      id: 'c_xie', name: '我卸甲后天下大乱了', symbol: 'XIEJIA', tagline: '卸甲归田，天下却需要我。',
+      id: 'c_xie', name: '我卸甲后天下大乱了', symbol: 'XIEJIA', tagline: '卸甲归田，天下却需要我。', creatorHoldsPct: 38,
       creator: '慕容战', creatorAddr: '0x1D8a…b40e', cover: IMG.xie, video: VID.xie, sourceType: 'work', sourceTitle: '短剧《我卸甲后天下大乱了》',
       priceUsd: 0.0014, holders: 1976, volumeUsd: 156000, launchedAt: D(30), graduated: false, progress: 0.71,
       poolUsd: 9660, change24h: -0.12, lastBuyAt: D(5), spark: [0.3, 0.5, 0.62, 0.55, 0.7, 0.66, 0.74, 0.71]
@@ -159,7 +160,7 @@
       poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45]
     }),
     seedCoin({
-      id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。', lockedPct: 0.18,
+      id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。', lockedPct: 0.18, creatorHoldsPct: 29,
       creator: 'Noah', creatorAddr: '0x57C9…f1a3', cover: IMG.survivor, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.00018, holders: 2304, volumeUsd: 88000, launchedAt: D(40), graduated: true, gradAt: D(21),
       poolUsd: 15400, change24h: -0.24, lastBuyAt: D(12), spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5],
@@ -237,6 +238,10 @@
           : ((i0 * 11) % 9 === 0 ? (5 + (i0 % 15)) / 100 : 0);  // 约 1/9 活跃带 5–19% 锁
         // 收益共享（Creator rewards → holders）：毕业/活跃都会出现（pons 两区均有该徽章）
         var shareToHolders = ((i0 * 13) % 7) < 2;               // 约 2/7 开启费共享
+        // 创建者持仓占比：约 1/8 币 >20%（触发左上角警示）
+        var creatorHoldsPct = ((i0 * 17) % 8) === 0
+          ? 22 + (i0 % 45)                                       // 22–66%
+          : 1 + (i0 % 18);                                       // 1–18%（正常区间）
         var price = mc / K.totalSupply;
         var pool = graduated
           ? (K.gradThresholdUsd + (i0 * 29) % 400000)
@@ -249,6 +254,7 @@
           sourceTitle: '', supply: K.totalSupply,
           lockedPct: lockedPct,
           shareToHolders: shareToHolders,
+          creatorHoldsPct: creatorHoldsPct,
           priceUsd: price, holders: graduated ? (200 + (i0 * 47) % 9000) : (2 + (i0 * 19) % 600),
           volumeUsd: graduated ? (100000 + (i0 * 911) % 9000000) : (i0 * 97) % 50000,
           launchedAt: D(launchH), graduated: graduated, gradAt: graduated ? D(gradH) : null,
