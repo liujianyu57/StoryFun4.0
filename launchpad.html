@@ -255,8 +255,6 @@
     .sp-title-row { display: flex; align-items: baseline; gap: 8px; }
     .sp-name { font-weight: 700; font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .sp-ticker { font-size: 11px; color: var(--text-3); font-weight: 700; }
-    .sp-badges { display: flex; gap: 4px; margin-top: 2px; }
-    .sp-badges .px-badge { padding: 1px 6px; font-size: 9.5px; }
     .sp-right { text-align: right; flex-shrink: 0; }
     .sp-mcap { font-size: 13px; font-weight: 700; color: var(--text); }
     .sp-mcap .sp-fdv { font-size: 11px; font-weight: 500; color: var(--text-3); }
@@ -732,15 +730,8 @@
           (spState.q ? 'No matching tokens' : 'No launches yet') + '</div>';
       } else {
         host.innerHTML = list.map(function (c) {
-          var badges = '';
-          if (c.graduated) {
-            badges += '<span class="px-badge grad">Graduated</span>';
-          } else {
-            if (c.isOriginal) badges += '<span class="px-badge og" title="本币名与代号首次发行">OG</span>';
-            if ((c.creatorHoldsPct || 0) > 20) badges += '<span class="px-badge warn" title="创建者持仓 >20%">!</span>';
-          }
           var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
-          // desc：$SYM · 市值/量 · 时间（pons：$TICKER · MC/volume · age）
+          // desc：$SYM · 市值/量 · 时间（pons 搜索结果不带徽章）
           var descParts = [];
           if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + ' volume');
           else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + ' MC');
@@ -751,7 +742,6 @@
             '<span class="sp-copy">' +
               '<span class="sp-title-row"><span class="sp-name">' + esc(c.name) + '</span>' +
                 '<span class="sp-ticker">$' + esc(c.symbol) + '</span></span>' +
-              (badges ? '<span class="sp-badges">' + badges + '</span>' : '') +
               '<span class="sp-sub num">' + descParts.join(' · ') + '</span>' +
             '</span>' +
             '<span class="sp-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>' +
