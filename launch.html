@@ -250,6 +250,16 @@
     .hfs-wallet-lbl { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-2); margin-bottom: 6px; }
     .hfs-wallet input { width: 100%; font-variant-numeric: tabular-nums; }
     .hfs-wallet-note { display: block; font-size: 11px; color: var(--text-3); margin-top: 5px; }
+
+    /* Creator tax：数字输入（% 后缀），0–11 支持 2 位小数 */
+    .adv-row.tax-col { flex-direction: column; align-items: stretch; }
+    .tax-entry { position: relative; max-width: 240px; }
+    .tax-entry .input { padding-right: 42px; }
+    .tax-suffix {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; font-weight: 700; color: var(--text-2); pointer-events: none;
+    }
+    .tax-note { margin-top: 7px; }
     .adv-row .ctrl { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
     .tax-val { font-size: 12px; font-weight: 700; width: 30px; text-align: right; }
     input[type=range] { width: 110px; accent-color: var(--accent); }
@@ -461,12 +471,13 @@
                   </div>
                   <input type="checkbox" id="shareToHolders" style="display:none" />
                 </div>
-                <div class="adv-row">
-                  <span class="lbl">创作者税<small>总交易费 1%，其中最多 10% 归你</small></span>
-                  <span class="ctrl">
-                    <span class="tax-val num" id="taxVal">0%</span>
-                    <input type="range" id="taxRange" min="0" max="10" step="1" value="0" oninput="onTax()" />
-                  </span>
+                <div class="adv-row tax-col">
+                  <span class="lbl">Creator tax</span>
+                  <div class="tax-entry">
+                    <input class="input num" id="pTaxPct" type="number" inputmode="decimal" min="0" max="11" step="0.01" value="0" placeholder="0" autocomplete="off" />
+                    <span class="tax-suffix" aria-hidden="true">%</span>
+                  </div>
+                  <span class="f-note tax-note">Traders pay 1.00% in total, up to 10% of it yours.</span>
                 </div>
                 <div class="adv-row" style="flex-direction:column;align-items:stretch">
                   <span class="lbl">狙击税豁免钱包<small>发射首 3 秒买入收取 99% 狙击税，3 秒后衰减至 0 · 白名单钱包免收</small></span>
@@ -997,8 +1008,16 @@
     function toggleAdv() {
       document.getElementById('advToggle').classList.toggle('closed');
     }
-    function onTax() {
-      document.getElementById('taxVal').textContent = document.getElementById('taxRange').value + '%';
+    function clampTax() {
+      var el = document.getElementById('pTaxPct');
+      var v = parseFloat(el.value);
+      if (isNaN(v)) v = 0;
+      v = Math.min(11, Math.max(0, v));
+      el.value = String(Math.round(v * 100) / 100);
+    }
+    function taxPct() {
+      clampTax();
+      return parseFloat(document.getElementById('pTaxPct').value) || 0;
     }
 
     // ---- 创建 ----
@@ -1045,7 +1064,7 @@
           devBuyQty: dbQty,
           devBuyPair: pairSel,
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
-          creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
+          creatorTaxPct: taxPct(),
           shareToHolders:document.getElementById('shareToHolders').checked,
           creatorWallet:document.getElementById('pCreatorWallet').value.trim(),
           snipeExempts:(document.getElementById('pSnipe').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean)
@@ -1071,6 +1090,9 @@
         document.getElementById('createErr').classList.remove('show');
         if (this.value.length > 250) this.value = this.value.slice(0,250);
       });
+      // Creator tax：输入失焦/回车时钳制 0–11（2 位小数）
+      document.getElementById('pTaxPct').addEventListener('blur', clampTax);
+      document.getElementById('pTaxPct').addEventListener('change', clampTax);
       // 配对资产：触发按钮开合 + 点击外部/Esc 关闭
       document.getElementById('pairTrigger').addEventListener('click', togglePair);
       document.addEventListener('mousedown', function (e) {
