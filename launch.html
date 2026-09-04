@@ -523,7 +523,7 @@
           <!-- 创建动作 -->
           <div class="cr-actions">
             <div>
-              <div class="cr-due">ETH pair, <b class="num" id="feeTotal">0.0005 ETH</b> due</div>
+              <div class="cr-due"><b class="num" id="duePair">ETH</b> pair, <b class="num" id="feeTotal">0.0005 ETH</b> due</div>
               <div class="cr-gas">⛽ 网络费预估 —</div>
             </div>
             <button class="btn btn-primary create-cta" id="createBtn" onclick="doCreate()" disabled>填写名称</button>
@@ -927,6 +927,7 @@
     }
     function renderPairTrigger() {
       document.getElementById('pairCur').textContent = pairSel;
+      document.getElementById('duePair').textContent = pairSel;
       var ico = document.getElementById('pairIco');
       ico.textContent = pairIcoTxt(pairSel);
       ico.className = 'pair-dd-ico ' + pairIcoCls(pairSel);
