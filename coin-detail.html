@@ -205,8 +205,22 @@
   .ab-burn-meta { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
   .ab-links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
   @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } .ab-links { grid-column: auto; } }
-  .fee-card { display: grid; gap: 6px; padding: 16px 18px; }
-  #metaHost { display: grid; gap: 14px; }
+  /* 费卡（对齐 token-creator-fees-card.float） */
+  #metaHost { display: grid; gap: 14px; margin-top: 4px; }
+  .fee-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+    padding: 20px 22px; display: grid; gap: 14px;
+  }
+  .ff-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .ff-title { font-size: 14.5px; font-weight: 800; }
+  .ff-tag { font-size: 11px; color: var(--text-3); font-weight: 600; }
+  .ff-assets { display: grid; gap: 4px; justify-items: start; }
+  .ff-assets + .ff-assets { border-top: 1px dashed #F0F1F3; padding-top: 12px; }
+  .ff-value { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+  .ff-value small { font-size: 13px; color: var(--text-2); font-weight: 700; margin-left: 4px; }
+  .ff-sub { font-size: 12.5px; color: var(--text-2); }
+  .ff-hint { font-size: 12px; color: var(--text-3); line-height: 1.55; margin: 0; }
+  .ff-act { justify-self: start; }
   </style>
 </head>
 <body>
@@ -271,6 +285,8 @@
       <div class="ab-side" id="abBurn" style="display:none"></div>
       <div class="ab-links" id="abLinks"></div>
     </div>
+
+    <div id="metaHost" style="display:none"></div>
 
         <div class="cd-grid">
       <div class="cd-col cd-trade">
@@ -373,7 +389,6 @@
         </div>
         
 <!-- 原型：参数信息（对齐参考的 About/Creator fees/Holder fee sharing） -->
-        <div id="metaHost" style="display:none"></div>
       </div>
 
       
@@ -816,45 +831,56 @@ var holders = [];
       if (!host) return;
       if (!coin || coin.graduated) { host.style.display = 'none'; host.innerHTML = ''; return; }
       var pair = coin.pair || 'ETH';
+      var sym = coin.symbol || pair;
       var px = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 3200) : 3200;
-      var qty = function (usd) { var v = usd / px; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toFixed(6).replace(/\.?0+$/, ''); };
+      var qty = function (usd) {
+        var v = usd / px;
+        var s2 = v.toFixed(6).replace(/\.?0+$/, '');
+        return s2 === '' ? '0' : s2;
+      };
       var progress = Math.min(1, (coin.progress || 0));
       var sweeps = Math.max(1, Math.round(progress * 6));
       var earnedUsd = (coin.poolUsd || 0) * 0.05;
       var paidUsd = earnedUsd * 0.55, potUsd = earnedUsd - paidUsd;
-      var dist = Math.max(0, sweeps - 1);
+      var dist = Math.max(1, sweeps - 1);
+      function valHtml(u) { return '<span class="ff-value num">' + qty(u) + ' <small>' + esc(pair) + '</small></span>'; }
       var html = '';
       // 卡 1：Creator fees
       html += '<div class="card fee-card">' +
-        '<div class="mi-title">Creator fees</div>';
+        '<div class="ff-head"><span class="ff-title">Creator fees</span>' +
+        (coin.shareToHolders ? '<span class="ff-tag">Routed to holders</span>' : '<span class="ff-tag">Creator wallet</span>') + '</div>';
       if (coin.shareToHolders) {
-        html += '<div class="mi-row"><span>Earned</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + '</b></div>' +
-          '<div class="mi-row"><span>Across</span><b>' + sweeps + ' sweeps</b></div>' +
-          '<div class="mi-note">创作者费已通过分发合约路由给持有人 · 不存在创作者认领。</div>';
+        html += '<div class="ff-assets">' + valHtml(earnedUsd) +
+          '<span class="ff-sub">Earned by ' + esc(sym) + ' across ' + sweeps + ' sweeps</span></div>' +
+          '<p class="ff-hint">Creator fees route to ' + esc(sym) + ' holders through the fee distributor. There is no creator claim.</p>';
       } else {
-        html += '<div class="mi-row"><span>可领取</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + '</b></div>' +
-          '<div class="mi-row"><span>Creator wallet</span><b>' + esc((window.Launch && Launch.walletText) ? Launch.walletText() : '—') + '</b></div>' +
-          '<div class="mi-note">创作者费归创建者钱包，可随时领取。</div>' +
-          '<button class="asset-btn" id="claimMeta" onclick="doClaim(\'' + esc(coin.id) + '\')" ' + (earnedUsd > 0 ? '' : 'disabled') + '>领取</button>';
+        html += '<div class="ff-assets">' + valHtml(earnedUsd) +
+          '<span class="ff-sub">可领取 · 由创建者钱包收取（含 Creator tax）</span></div>' +
+          '<p class="ff-hint">创作者费直接归创建者钱包，可随时领取。</p>' +
+          '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')"' + (earnedUsd > 0 ? '' : ' disabled') + '>领取</button>';
       }
       html += '</div>';
-      // 卡 2：Holder fee sharing（持有人路由形态参考；创建者形态也展示以演示结构）
+      // 卡 2：Holder fee sharing
       html += '<div class="card fee-card">' +
-        '<div class="mi-title">Holder fee sharing</div>';
+        '<div class="ff-head"><span class="ff-title">Holder fee sharing</span>' +
+        (coin.shareToHolders ? '<span class="ff-tag">Active</span>' : '<span class="ff-tag">Off</span>') + '</div>';
       if (coin.shareToHolders) {
-        html += '<div class="mi-row"><span>Paid to holders</span><b>' + qty(paidUsd) + ' ' + esc(pair) + '</b></div>' +
-          '<div class="mi-row"><span>Across</span><b>' + Math.max(1, dist) + ' distributions</b></div>' +
-          '<div class="mi-row"><span>In the pot</span><b>' + qty(potUsd) + ' ' + esc(pair) + '</b></div>' +
-          '<div class="mi-note">每一期分发后持有人可从个人页领取其份额。</div>';
+        html += '<div class="ff-assets">' + valHtml(paidUsd) +
+          '<span class="ff-sub">Paid to holders across ' + dist + ' distribution' + (dist === 1 ? '' : 's') + '</span></div>' +
+          '<div class="ff-assets">' + valHtml(potUsd) +
+          '<span class="ff-sub">In the pot for the next distribution</span></div>' +
+          '<p class="ff-hint">Creator fees route to ' + esc(sym) + ' holders. Each holder claims their share from their profile menu.</p>';
       } else {
-        html += '<div class="mi-row"><span>Routing</span><b>Off · fees to creator</b></div>' +
-          '<div class="mi-note">关闭该开关即可把创作者费路由给持有人（分发合约 + 两次确认）。</div>' +
-          '<button class="asset-btn" style="margin-top:8px" onclick="Launch.toast(\'原型：开启费共享需两次链上确认\',\'ok\')">开启费共享（原型）</button>';
+        html += '<div class="ff-assets">' + valHtml(0) +
+          '<span class="ff-sub">Routing off · 费当前归创建者钱包</span></div>' +
+          '<p class="ff-hint">开启后：部署分发合约并把每笔创作者费路由给持有人（两次链上确认，永久生效）。</p>' +
+          '<button class="btn btn-ghost ff-act" onclick="Launch.toast(\'原型：需两次链上确认开启费共享\',\'ok\')">开启费共享（原型）</button>';
       }
       html += '</div>';
       host.innerHTML = html;
-      host.style.display = coin.graduated ? 'none' : 'grid';
+      host.style.display = 'grid';
     }
+
 
     // ============ Swap ============
     function refreshSwap() {
