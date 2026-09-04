@@ -223,12 +223,22 @@
           <div class="klegend"><span id="kLeft">—</span><span id="kMid">—</span><span id="kRight">—</span></div>
         </div>
 
-        <!-- 成交记录 -->
+        <!-- 成交记录 / 持有者（页签） -->
         <div class="card">
           <div class="card-head-row">
-            <div class="section-title">成交记录</div>
+            <div class="tab-seg" id="recSeg">
+              <button class="tab-btn on" data-v="tx">成交记录</button>
+              <button class="tab-btn" data-v="holders">持有者</button>
+            </div>
           </div>
           <div class="card-pad tx-list" id="txList"></div>
+          <div class="card-pad holder-pad" id="holdersPane" style="display:none">
+            <div class="holder-top">
+              <div class="ht-num num" id="holdersTotal">—</div>
+              <div class="ht-txt">持有者<br /><span style="font-size:11px" id="top10">—</span></div>
+            </div>
+            <div id="holderList"></div>
+          </div>
         </div>
 
         <!-- 叙事 -->
@@ -280,15 +290,6 @@
           <div class="inline-warn danger" id="swapErr"></div>
           <div class="inline-warn warn" id="swapWarn"></div>
           <button class="btn btn-primary btn-lg swap-submit" id="swapBtn" onclick="doSwap()">买入</button>
-        </div>
-
-        <!-- 持有者 -->
-        <div class="card" style="margin-top:18px">
-          <div class="holder-top">
-            <div class="ht-num num" id="holdersTotal">—</div>
-            <div class="ht-txt">持有者<br /><span style="font-size:11px" id="top10">—</span></div>
-          </div>
-          <div id="holderList"></div>
         </div>
 
 
@@ -748,6 +749,14 @@ var holders = [];
         range = kb.getAttribute('data-k');
         document.querySelectorAll('#kSeg button').forEach(function (b) { b.classList.toggle('on', b === kb); });
         renderChart();
+      }
+      var rb = e.target.closest('#recSeg button');
+      if (rb) {
+        var v = rb.getAttribute('data-v');
+        document.querySelectorAll('#recSeg button').forEach(function (b) { b.classList.toggle('on', b === rb); });
+        document.getElementById('txList').style.display = v === 'tx' ? '' : 'none';
+        document.getElementById('holdersPane').style.display = v === 'holders' ? '' : 'none';
+        if (v === 'holders') renderHolders();
       }
       var qb = e.target.closest('#quickRow button');
       if (qb) {
