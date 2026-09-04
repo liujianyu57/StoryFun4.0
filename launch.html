@@ -144,14 +144,42 @@
     }
     .prefixed .input { padding-left: 58px; }
 
-    /* 配对资产 */
-    select.input.pair-select {
-      appearance: none; -webkit-appearance: none; cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%239299a1' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 13px center; padding-right: 34px;
-      font-weight: 600;
+    /* 配对资产（pons 同款：触发按钮 + 浮层 listbox，非原生 select） */
+    .pair-dd { position: relative; }
+    .pair-dd-trigger {
+      width: 100%; height: 44px; padding: 0 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+      color: var(--text); font-size: 14px; cursor: pointer; text-align: left;
+      transition: border-color .15s, box-shadow .15s;
     }
-    select.input.pair-select option { font-weight: 400; color: var(--text); background: #fff; }
+    .pair-dd-trigger:hover { border-color: var(--text-3); }
+    .pair-dd-trigger[aria-expanded="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(10, 11, 13, 0.06); }
+    .pair-dd-current { display: flex; align-items: center; gap: 9px; min-width: 0; font-weight: 700; }
+    .pair-dd-ico {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      display: inline-grid; place-items: center; font-size: 9px; font-weight: 800;
+    }
+    .pair-dd-ico.eth { background: #627EEA; color: #fff; }
+    .pair-dd-ico.stk { background: var(--accent); color: #fff; }
+    .pair-dd-chevron { color: var(--text-3); display: inline-flex; transition: transform .18s ease; }
+    .pair-dd-trigger[aria-expanded="true"] .pair-dd-chevron { transform: rotate(180deg); }
+    .pair-dd-menu {
+      position: absolute; z-index: 80; top: calc(100% + 6px); left: 0; right: 0;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      box-shadow: 0 20px 48px rgba(10, 11, 13, 0.16); padding: 6px;
+    }
+    .pair-dd-scroll { max-height: 272px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .pair-dd-group { font-size: 11px; color: var(--text-3); font-weight: 700; padding: 7px 10px 3px; }
+    .pair-dd-option {
+      display: flex; align-items: center; gap: 9px; width: 100%;
+      padding: 7px 10px; border: none; background: none; border-radius: 10px;
+      font-size: 13.5px; color: var(--text); cursor: pointer; text-align: left;
+    }
+    .pair-dd-option:hover { background: var(--accent-soft); }
+    .pair-dd-option.active { background: var(--accent-soft); }
+    .pair-dd-opt { font-weight: 600; flex: 1; }
+    .pair-dd-tick { color: var(--accent); font-size: 12px; font-weight: 800; }
 
     /* 开发者预买 */
     .buy-entry { position: relative; max-width: 260px; }
@@ -323,8 +351,21 @@
                 </div>
                 <div class="field lp-wide">
                   <div class="field-label">配对资产</div>
-                  <select class="input pair-select" id="pPair" title="选择 curve 的计价资产"></select>
-                  <div class="f-note">curve 以所选资产计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。</div>
+                  <div class="pair-dd" id="pairDD">
+                    <button type="button" class="pair-dd-trigger" id="pairTrigger" aria-haspopup="listbox" aria-expanded="false">
+                      <span class="pair-dd-current">
+                        <span class="pair-dd-ico eth" id="pairIco">Ξ</span>
+                        <span id="pairCur">ETH</span>
+                      </span>
+                      <span class="pair-dd-chevron" aria-hidden="true">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </span>
+                    </button>
+                    <div class="pair-dd-menu" id="pairMenu" role="listbox" aria-label="配对资产" style="display:none">
+                      <div class="pair-dd-scroll" id="pairScroll"></div>
+                    </div>
+                  </div>
+                  <div class="f-note" id="pairNote">曲线以 ETH 计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。</div>
                 </div>
                 <div class="field lp-wide">
                   <div class="field-label">开发者预买 <span class="opt">选填</span></div>
@@ -731,36 +772,61 @@
       });
     }
 
-    // ---- 预览/按钮联动 ----
-    function fillPairSelect() {
-      var sel = document.getElementById('pPair');
-      if (!sel || sel.querySelectorAll('option').length) return;
-      var eth = document.createElement('option');
-      eth.value = 'ETH'; eth.textContent = 'Ξ ETH';
-      sel.appendChild(eth);
-      var stocks = (window.Launch && Launch.pairStocks) ? Launch.pairStocks : [];
-      if (stocks.length) {
-        var g = document.createElement('optgroup');
-        g.label = '股票代币';
-        stocks.forEach(function (t) {
-          var o = document.createElement('option');
-          o.value = t; o.textContent = t;
-          g.appendChild(o);
-        });
-        sel.appendChild(g);
-      }
-      sel.value = 'ETH';
+    // ---- 配对资产（pons 同款自绘下拉：触发按钮 + 浮层选项） ----
+    var pairSel = 'ETH';
+    function pairIcoTxt(p) { return p === 'ETH' ? 'Ξ' : String(p).charAt(0); }
+    function pairIcoCls(p) { return p === 'ETH' ? 'eth' : 'stk'; }
+    function pairOptionHTML(p) {
+      var on = p === pairSel;
+      return '<button type="button" role="option" class="pair-dd-option' + (on ? ' active' : '') + '" data-pair="' + esc(p) + '" aria-selected="' + on + '" onclick="pickPair(\'' + esc(p) + '\')">' +
+        '<span class="pair-dd-ico ' + pairIcoCls(p) + '">' + pairIcoTxt(p) + '</span>' +
+        '<span class="pair-dd-opt">' + esc(p) + '</span>' +
+        (on ? '<span class="pair-dd-tick">✓</span>' : '') +
+      '</button>';
     }
-    function selPair() {
-      var el = document.getElementById('pPair');
-      return (el && el.value) ? el.value : 'ETH';
+    function renderPairMenu() {
+      var stocks = (window.Launch && Launch.pairStocks) ? Launch.pairStocks : [];
+      var html = '<div class="pair-dd-group">主资产</div>' + pairOptionHTML('ETH');
+      if (stocks.length) {
+        html += '<div class="pair-dd-group">股票代币</div>' + stocks.map(pairOptionHTML).join('');
+      }
+      document.getElementById('pairScroll').innerHTML = html;
+    }
+    function renderPairTrigger() {
+      document.getElementById('pairCur').textContent = pairSel;
+      var ico = document.getElementById('pairIco');
+      ico.textContent = pairIcoTxt(pairSel);
+      ico.className = 'pair-dd-ico ' + pairIcoCls(pairSel);
+      document.getElementById('pairNote').textContent = pairSel === 'ETH'
+        ? '曲线以 ETH 计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。'
+        : 'curve 以 ' + pairSel + ' 计价 · 集满等值约 4.2 ETH 自动毕业，流动性永久锁定。';
+    }
+    function openPair() {
+      renderPairMenu();
+      var menu = document.getElementById('pairMenu');
+      menu.style.display = 'block';
+      document.getElementById('pairTrigger').setAttribute('aria-expanded', 'true');
+    }
+    function closePair() {
+      document.getElementById('pairMenu').style.display = 'none';
+      document.getElementById('pairTrigger').setAttribute('aria-expanded', 'false');
+    }
+    function togglePair() {
+      if (document.getElementById('pairMenu').style.display === 'block') closePair(); else openPair();
+    }
+    function pickPair(p) {
+      if (!p) return;
+      pairSel = p;
+      renderPairTrigger();
+      closePair();
+      syncAll();
     }
     function syncAll() {
       var name = document.getElementById('pName').value.trim();
       var sym = document.getElementById('pSymbol').value.trim().toUpperCase();
       document.getElementById('sumName').textContent = name || '新叙事';
       document.getElementById('sumSym').textContent = '$' + (sym || 'TICKER');
-      document.getElementById('sumPair').textContent = selPair();
+      document.getElementById('sumPair').textContent = pairSel;
       refreshUpload();
       // 按钮状态文案
       var btn = document.getElementById('createBtn');
@@ -809,7 +875,7 @@
           cover:cover, video:video,
           sourceType: 'work',
           sourceTitle: sourceTitle,
-          pair: selPair(),
+          pair: pairSel,
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
           creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
           shareToHolders:document.getElementById('shareToHolders').checked,
@@ -837,8 +903,12 @@
         document.getElementById('createErr').classList.remove('show');
         if (this.value.length > 250) this.value = this.value.slice(0,250);
       });
-      // 配对资产切换 → 预览卡同步
-      document.getElementById('pPair').addEventListener('change', syncAll);
+      // 配对资产：触发按钮开合 + 点击外部/Esc 关闭
+      document.getElementById('pairTrigger').addEventListener('click', togglePair);
+      document.addEventListener('mousedown', function (e) {
+        var dd = document.getElementById('pairDD');
+        if (dd && !dd.contains(e.target)) closePair();
+      });
       // 弹层：搜索实时过滤；点遮罩关闭
       document.getElementById('pickerSearch').addEventListener('input', function(){ renderPicker(); renderPickerSum(); });
       document.getElementById('pickerBackdrop').addEventListener('click', function(e){
@@ -846,11 +916,11 @@
       });
       document.addEventListener('keydown', function(e){
         if (e.key === 'Escape' && document.getElementById('pickerBackdrop').style.display === 'flex') closeStoryPicker();
+        if (e.key === 'Escape' && document.getElementById('pairMenu').style.display === 'block') closePair();
       });
     }
 
     window.onLaunchShellReady = function(){
-      fillPairSelect();
       bind();
       refreshEthHint();
       document.getElementById('walletAddr').textContent = walletText();
