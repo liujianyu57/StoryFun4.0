@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 7;
+  var SCHEMA_VERSION = 8;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -55,7 +55,11 @@
     // 固定初始价：由种子价倒推（毕业币的 p0 视为毕业价基准，买卖在其附近波动）
     var p0 = graduated ? o.priceUsd : (o.priceUsd / (1 + K.curveK * prog0));
     var price = graduated ? o.priceUsd : (p0 * (1 + K.curveK * prog0));
-    var marketCap = price * K.totalSupply;
+    // 锁仓：部分币有一定比例供应锁定/预留 → FDV > MC；流通供应 = 总量 × (1−lockedPct)
+    var lockedPct = o.lockedPct || 0;
+    var circulating = K.totalSupply * (1 - lockedPct);
+    var fdv = price * K.totalSupply;          // 总市值（完全稀释）
+    var marketCap = price * circulating;      // 流通市值 MC
     return {
       id: o.id,
       name: o.name,
@@ -68,9 +72,12 @@
       sourceType: o.sourceType || 'ai',   // ai | work
       sourceTitle: o.sourceTitle || '',
       supply: K.totalSupply,
+      circulating: circulating,               // 流通供应量
+      lockedPct: lockedPct,                   // 锁定/预留比例 0–1
       p0: p0,
       priceUsd: price,
-      marketCap: marketCap,
+      marketCap: marketCap,                   // 流通市值 MC
+      fdv: fdv,                               // 完全稀释 FDV
       holders: o.holders,
       volumeUsd: o.volumeUsd,
       launchedAt: o.launchedAt,
@@ -125,7 +132,7 @@
       creatorTaxPct: 2,
     }),
     seedCoin({
-      id: 'c_cheng', name: '丞相府今日开饭', symbol: 'XIANG', tagline: '天下粮仓，开饭为敬。',
+      id: 'c_cheng', name: '丞相府今日开饭', symbol: 'XIANG', tagline: '天下粮仓，开饭为敬。', lockedPct: 0.30,
       creator: '厨子老王', creatorAddr: '0x9F3c…aa12', cover: IMG.cheng, video: VID.cheng, sourceType: 'work', sourceTitle: '短剧《丞相府今日开饭》',
       priceUsd: 0.0021, holders: 5210, volumeUsd: 389000, launchedAt: D(120), graduated: true, gradAt: D(88),
       poolUsd: 61200, change24h: 0.68, lastBuyAt: D(26), spark: [0.1, 0.2, 0.5, 0.45, 0.7, 0.85, 0.9, 1]
@@ -137,7 +144,7 @@
       poolUsd: 9660, change24h: -0.12, lastBuyAt: D(5), spark: [0.3, 0.5, 0.62, 0.55, 0.7, 0.66, 0.74, 0.71]
     }),
     seedCoin({
-      id: 'c_mooncat', name: '月球打碟猫', symbol: 'MOONCAT', tagline: '一只穿西装的猫，在月球打碟。',
+      id: 'c_mooncat', name: '月球打碟猫', symbol: 'MOONCAT', tagline: '一只穿西装的猫，在月球打碟。', lockedPct: 0.12,
       creator: 'Astra', creatorAddr: '0xE45b…77c9', cover: IMG.zero, video: VID.fight, sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.000042, holders: 318, volumeUsd: 12000, launchedAt: D(3), graduated: false, progress: 0.12,
       poolUsd: 890, change24h: 2.31, isNew: true, lastBuyAt: D(0.3), spark: [0.4, 0.6, 0.5, 0.8, 0.7, 1],
@@ -152,7 +159,7 @@
       poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45]
     }),
     seedCoin({
-      id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。',
+      id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。', lockedPct: 0.18,
       creator: 'Noah', creatorAddr: '0x57C9…f1a3', cover: IMG.survivor, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.00018, holders: 2304, volumeUsd: 88000, launchedAt: D(40), graduated: true, gradAt: D(21),
       poolUsd: 15400, change24h: -0.24, lastBuyAt: D(12), spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5],
@@ -222,8 +229,12 @@
           ? Math.max(0.05, gradH * (0.1 + ((i0 * 7) % 80) / 100))
           : Math.min((i0 % 48) * 0.05, Math.max(0.02, launchH * 0.9));
         var mc = graduated
-          ? (2 + (i0 * 37) % 900) * 1e6           // 已毕业 $2M–$900M+
-          : (1 + (i0 * 53) % 900) * 1000;          // 活跃 $1K–$900K
+          ? (2 + (i0 * 37) % 900) * 1e6           // FDV 目标 $2M–$900M+
+          : (1 + (i0 * 53) % 900) * 1000;          // FDV 目标 $1K–$900K
+        // 锁定比例：已毕业更常见锁仓（团队/预留），活跃币少数带锁
+        var lockedPct = graduated
+          ? ((i0 * 7) % 5 === 0 ? (10 + (i0 % 26)) / 100 : 0)   // 约 1/5 已毕业带 10–35% 锁
+          : ((i0 * 11) % 9 === 0 ? (5 + (i0 % 15)) / 100 : 0);  // 约 1/9 活跃带 5–19% 锁
         var price = mc / K.totalSupply;
         var pool = graduated
           ? (K.gradThresholdUsd + (i0 * 29) % 400000)
@@ -234,6 +245,7 @@
           creator: 'Creator' + (i0 % 97), creatorAddr: walletFrom('genc:' + i0),
           cover: COVERS[i0 % COVERS.length], video: '', sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
           sourceTitle: '', supply: K.totalSupply,
+          lockedPct: lockedPct,
           priceUsd: price, holders: graduated ? (200 + (i0 * 47) % 9000) : (2 + (i0 * 19) % 600),
           volumeUsd: graduated ? (100000 + (i0 * 911) % 9000000) : (i0 * 97) % 50000,
           launchedAt: D(launchH), graduated: graduated, gradAt: graduated ? D(gradH) : null,
@@ -409,7 +421,8 @@
     c.poolUsd = poolAfter;
     c.progress = progressOf(c);
     c.priceUsd = priceAt(c);
-    c.marketCap = c.priceUsd * c.supply;
+    c.marketCap = c.priceUsd * (c.circulating || c.supply);
+    c.fdv = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + net;
     c.lastBuyAt = Date.now();
     c.buyerAddr = walletFrom(USER.id);
@@ -453,7 +466,8 @@
       var wiggle = -(0.004 + Math.random() * 0.02);
       c.priceUsd = Math.max(c.priceUsd * (1 + wiggle), 1e-10);
     }
-    c.marketCap = c.priceUsd * c.supply;
+    c.marketCap = c.priceUsd * (c.circulating || c.supply);
+    c.fdv = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + gross;
     if (typeof c.spark === 'undefined') c.spark = [];
     c.spark.push(graduated ? 1 : c.progress);
@@ -516,7 +530,8 @@
     var dir = side === 'buy' ? 1 : -1;
     var wiggle = dir * (0.004 + Math.random() * 0.02);
     c.priceUsd = Math.max(c.priceUsd * (1 + wiggle), 1e-10);
-    c.marketCap = c.priceUsd * c.supply;
+    c.marketCap = c.priceUsd * (c.circulating || c.supply);
+    c.fdv = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + net;
     if (side === 'buy') { c.lastBuyAt = Date.now(); c.buyerAddr = walletFrom(USER.id); }
     c.holders = (c.holders || 1) + Math.floor(Math.random() * 2);

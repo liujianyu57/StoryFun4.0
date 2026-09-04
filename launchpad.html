@@ -89,6 +89,7 @@
     .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
     .px-mcap-value { color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
     .px-mcap-label { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
+    .px-mcap-fdv { color: var(--text-3); font-size: 11px; font-weight: 500; }
 
     .px-grad { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 4px; }
     .px-grad-track { flex: auto; height: 4px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
@@ -202,6 +203,7 @@
     .sp-badges .px-badge { padding: 1px 6px; font-size: 9.5px; }
     .sp-right { text-align: right; flex-shrink: 0; }
     .sp-mcap { font-size: 13px; font-weight: 700; color: var(--text); }
+    .sp-mcap .sp-fdv { font-size: 11px; font-weight: 500; color: var(--text-3); }
     .sp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
     .sp-empty { text-align: center; padding: 28px 10px; color: var(--text-3); font-size: 13px; }
 
@@ -415,7 +417,10 @@
         ? (c.launchedAt ? Launch.timeAgo(c.launchedAt) + ' 前发行' : '—')
         : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + ' 前' : '—');
       var addr = c.creatorAddr || '—';
-      var mcap2 = c.marketCap ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>'
+      // MC = 流通市值；有锁定(lockedPct>0)时 FDV 不同 → 显示 MC / FDV（pons 语义）
+      var mcLine = c.marketCap
+        ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>' +
+          (c.lockedPct > 0 ? '<span class="px-mcap-fdv num">/ ' + mcTxt(c.fdv || c.marketCap) + ' FDV</span>' : '')
         : '<span class="px-mcap-label">—</span>';
       return '' +
         '<li class="px-grid-item"><a class="px-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
@@ -426,7 +431,7 @@
           '<span class="px-card-body">' +
             '<span class="px-name-row"><strong class="px-name">' + esc(c.name) + '</strong></span>' +
             '<small class="px-sym">$' + esc(c.symbol) + '</small>' +
-            '<span class="px-mcap">' + mcap2 + '</span>' +
+            '<span class="px-mcap">' + mcLine + '</span>' +
             mid +
             '<span class="px-meta">' +
               '<button class="px-deployer" title="发行者" onclick="event.stopPropagation();copyAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
@@ -617,7 +622,9 @@
             '<span class="sp-title-row"><span class="sp-name">' + esc(c.name) + '</span><span class="sp-ticker">$' + esc(c.symbol) + '</span></span>' +
             (badges ? '<span class="sp-badges">' + badges + '</span>' : '') +
           '</span>' +
-          '<span class="sp-right"><div class="sp-mcap num">' + mcTxt(c.marketCap) + '</div><div class="sp-sub num">' + sub + '</div></span>' +
+          '<span class="sp-right"><div class="sp-mcap num">' + mcTxt(c.marketCap) +
+            (c.lockedPct > 0 ? ' <span class="sp-fdv">/ ' + mcTxt(c.fdv || c.marketCap) + ' FDV</span>' : '') +
+            '</div><div class="sp-sub num">' + sub + '</div></span>' +
         '</button>';
       }).join('');
     }
