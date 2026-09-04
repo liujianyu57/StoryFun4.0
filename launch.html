@@ -577,8 +577,7 @@
       b.classList.toggle('on', !v); b.setAttribute('aria-pressed', String(!v));
     }
     function walletText() {
-      if (window.Launch) return Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
-      return '0x7A2b…3fD8';
+      return (window.Launch && Launch.walletText) ? Launch.walletText() : '0x7A2b…3fD8';
     }
 
     // ============ 作品数据源 ============

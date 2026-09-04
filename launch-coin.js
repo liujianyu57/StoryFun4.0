@@ -724,6 +724,10 @@
     if (typeof currentUser !== 'undefined' && currentUser && currentUser.name) return currentUser.name;
     return '创作者';
   }
+  // 当前用户钱包（确定性脱敏地址：同一账户永远同一串，形如 0x7A2b…3fD8）
+  function walletText() {
+    return walletFrom('user:' + (USER && USER.id ? USER.id : 'demo'));
+  }
   function isLoggedIn() {
     return typeof currentUser !== 'undefined' && currentUser && currentUser.isLoggedIn;
   }
@@ -948,6 +952,7 @@
     toggleWatch: toggleWatch,
     isLoggedIn: isLoggedIn,
     currentUserName: currentUserName,
+    walletText: walletText,
     buy: buy, sell: sell, tradePool: tradePool,
     tryGraduate: tryGraduate,
     notifyGraduated: notifyGraduated,

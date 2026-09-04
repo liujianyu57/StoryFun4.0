@@ -84,7 +84,7 @@
     var el2 = document.getElementById('ethDropAmount');
     if (el2) el2.textContent = Launch.fmtEth(u.eth).replace(' ETH', '');
     var el3 = document.getElementById('ethAddr');
-    if (el3) el3.textContent = Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
+    if (el3) el3.textContent = Launch.walletText ? Launch.walletText() : '0x7A2b…3fD8';
   }
 
   function refreshBell() {
