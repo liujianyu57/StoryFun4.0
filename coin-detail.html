@@ -196,6 +196,15 @@
   .ab-link { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
   .ab-link:hover { color: var(--text); border-color: var(--text-3); }
   @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } }
+  /* About：左说明 / 右侧 burn 面板 / 底行外链（figma 级原型：全要素假数据） */
+  .about-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 14px 26px; padding: 20px 22px; }
+  .ab-side { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; min-width: 220px; }
+  .ab-burn-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
+  .ab-burn-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .ab-burn-value small { font-size: 13px; color: var(--text-2); font-weight: 700; margin-left: 4px; }
+  .ab-burn-meta { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
+  .ab-links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } .ab-links { grid-column: auto; } }
   </style>
 </head>
 <body>
@@ -250,13 +259,14 @@
 
     </div>
 
-    <!-- About 卡（参考 token-about-card） -->
+    <!-- About 卡（参考 token-about-card：About + Burn 面板 + 外链） -->
     <div class="card about-card" id="aboutCard">
       <div>
         <div class="ab-title">About</div>
         <p class="ab-desc" id="abDesc">—</p>
         <div class="ab-meta" id="abMeta"></div>
       </div>
+      <div class="ab-side" id="abBurn" style="display:none"></div>
       <div class="ab-links" id="abLinks"></div>
     </div>
 
@@ -497,7 +507,7 @@ var holders = [];
         (coin.creatorTaxPct ? '<span class="tag">Creator tax ' + coin.creatorTaxPct + '%</span>' : '') +
         (coin.shareToHolders ? '<span class="tag tag-gold">费共享</span>' : '') +
         (coin.social && (coin.social.x || coin.social.tg) ? '<span class="tag" style="cursor:pointer" onclick="openSocial()">↗ 社区</span>' : '');
-      // About 卡
+      // About 卡（figma 级原型：全要素，数据为演示值）
       document.getElementById('abDesc').textContent = coin.tagline || (coin.sourceType === 'work' ? '一部短剧的叙事币。' : '一个 AI 叙事币。');
       var meta = [];
       meta.push('<span class="tag">配对 ' + esc(coin.pair || 'ETH') + '</span>');
@@ -508,10 +518,33 @@ var holders = [];
         : '<span class="tag">curve 进行中</span>');
       if (coin.sourceTitle) meta.push('<span class="tag">源自 ' + esc(coin.sourceTitle) + '</span>');
       document.getElementById('abMeta').innerHTML = meta.join('');
-      var links = '';
-      links += '<a class="ab-link" href="javascript:void(0)" onclick="goSource()">▶ 叙事</a>';
+      // Burn 面板（仅已毕业展示，模拟值）——参考：token-about-burn
+      var burnHost = document.getElementById('abBurn');
+      if (burnHost) {
+        if (coin.graduated) {
+          var h = 0, id2 = coin.id || 'x';
+          for (var i4 = 0; i4 < id2.length; i4++) h = (h * 31 + id2.charCodeAt(i4)) >>> 0;
+          var pct = 0.18 + (h % 340) / 1000;                 // 18%–52% 假销毁占比
+          var burned = Math.floor(1e9 * pct);
+          burnHost.style.display = '';
+          burnHost.innerHTML =
+            '<div class="ab-burn-label">Burned</div>' +
+            '<div class="ab-burn-value num">' + burned.toLocaleString() + '<small>' + esc(coin.symbol) + '</small></div>' +
+            '<div class="ab-burn-meta num">≈ ' + (pct * 100).toFixed(1) + '% of supply · 100% of fees go back to ' + esc(coin.symbol) + '</div>';
+        } else { burnHost.style.display = 'none'; burnHost.innerHTML = ''; }
+      }
+      // 外链行（按状态给 pons 形态的假链接）
+      var links = '<a class="ab-link" href="javascript:void(0)" onclick="goSource()">▶ 叙事</a>';
       if (coin.social && (coin.social.x || coin.social.tg)) links += '<a class="ab-link" href="javascript:void(0)" onclick="openSocial()">↗ 社区</a>';
-      links += '<a class="ab-link" href="javascript:void(0)" onclick="copyText(coin.creatorAddr)">⧉ 合约</a>';
+      if (coin.graduated) {
+        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">◆ Dexscreener</a>';
+        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">◆ GeckoTerminal</a>';
+        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Contract</a>';
+        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Pool</a>';
+      } else {
+        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Explorer</a>';
+        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Twitter</a>';
+      }
       document.getElementById('abLinks').innerHTML = links;
       // 叙事文案
       document.getElementById('storyDesc').textContent = coin.tagline || '这个币还没有简介';
@@ -535,6 +568,7 @@ var holders = [];
       if (s.tg) parts.push('t.me/' + s.tg);
       Launch.toast(parts.length ? ('社区: ' + parts.join(' · ')) : '该币暂未设置社区链接', parts.length ? 'ok' : 'warn');
     }
+    function fakeLink() { if (Launch && Launch.toast) Launch.toast('原型演示链接', 'ok'); }
     function copyText(t) {
       if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {});
     }
