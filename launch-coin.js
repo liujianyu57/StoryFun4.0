@@ -585,15 +585,23 @@
       if (c.graduated && c.gradAt && c.gradAt >= cutoff) { graduatedToday++; }
       if (c.graduated) graduations.push(c);
     });
-    // 发行趋势（演示 mock：近 7 天）
+    // 发行趋势 + 交易量趋势（演示 mock：近 14 天）
+    var DAYS = 14;
     var trend = [];
-    for (var d = 6; d >= 0; d--) {
+    var volTrend = [];
+    var realTotalVol = coins.reduce(function (s, c) { return s + (c.volumeUsd || 0); }, 0);
+    for (var d = DAYS - 1; d >= 0; d--) {
       var day = Date.now() - d * 86400000;
       var n = 0;
       coins.forEach(function (c) { if (c.launchedAt >= day && c.launchedAt < day + 86400000) n++; });
       // 用确定性伪随机补一点趋势（原型演示）
-      n = Math.max(n, Math.round((d === 6 ? 1 : 2) + Math.sin(d) * 0.8 + 1));
+      n = Math.max(n, Math.round((d === DAYS - 1 ? 1 : 2) + Math.sin(d * 0.9) * 0.8 + 1));
       trend.push({ label: fmtDay(day), value: n });
+      // 交易量：以平台总量按 14 天分配，近期温和抬升 + 波形（确定性，刷新不跳）
+      var volBase = Math.max(realTotalVol, 4000) / DAYS;
+      var lift = d < 3 ? (3 - d) * 0.25 : 0;            // 最近三天抬升
+      var wave = 0.8 + Math.abs(Math.sin(d * 1.3)) * 0.6;
+      volTrend.push({ label: fmtDay(day), value: Math.round(volBase * wave * (1 + lift)) });
     }
     graduations.sort(function (a, b) { return (b.gradAt || 0) - (a.gradAt || 0); });
     newCoins.sort(function (a, b) { return b.launchedAt - a.launchedAt; });
@@ -610,6 +618,7 @@
       graduations: graduations.slice(0, 6),
       newCoins: newCoins.slice(0, 6),
       trend: trend,
+      volTrend: volTrend,
       recentTrades: recentTrades,
       gradThresholdUsd: K.gradThresholdUsd
     };

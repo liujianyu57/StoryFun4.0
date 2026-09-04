@@ -18,33 +18,18 @@
     .an-stat .v { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; }
     .an-stat .s { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
 
-    .an-main { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: start; }
-    .an-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .an-main { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; align-items: start; }
+    .seg-wrap { display: flex; align-items: center; gap: 10px; }
     .card-title { font-size: 14px; font-weight: 700; }
     .card-sub { font-size: 12px; color: var(--text-2); margin-top: 3px; }
 
     /* 趋势图 */
     .trend-svg { width: 100%; display: block; margin-top: 12px; }
     .trend-legend { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-top: 6px; }
+    .trend-head-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .trend-peak { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
 
-    /* 最近列表 */
-    .recent-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-    .recent-row:last-child { border-bottom: none; }
-    .rc-cover { width: 38px; height: 38px; border-radius: 9px; overflow: hidden; background: var(--surface-2); flex-shrink: 0; cursor: pointer; }
-    .rc-cover img { width: 100%; height: 100%; object-fit: cover; }
-    .rc-info { flex: 1; min-width: 0; cursor: pointer; }
-    .rc-name { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .rc-sub { font-size: 11.5px; color: var(--text-2); margin-top: 1px; }
-    .rc-tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
-    .rc-tag.grad { background: rgba(14,159,110,.1); color: #0E9F6E; }
-    .rc-tag.new { background: rgba(10,11,13,.06); color: var(--text-2); }
-
-    .seg-wrap { display: flex; align-items: center; gap: 10px; }
-    .note { font-size: 11.5px; color: var(--text-3); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); line-height: 1.6; }
-
-    .empty { text-align: center; padding: 30px 10px; }
-    .empty-title { font-size: 14px; font-weight: 600; }
-    .empty-desc { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+    .note { font-size: 11.5px; color: var(--text-3); margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); line-height: 1.6; }
 
     @media (max-width: 980px) {
       .an-main { grid-template-columns: 1fr; }
@@ -59,7 +44,7 @@
       <div class="an-head">
         <div>
           <div class="an-title">发射台数据</div>
-          <div class="an-sub">平台活跃度与发行趋势</div>
+          <div class="an-sub">平台大盘 · 发行与成交趋势（近 14 天）</div>
         </div>
         <div class="seg-wrap">
           <div class="pill-seg" id="modeSeg">
@@ -74,48 +59,42 @@
     <div class="an-grid" id="statCards"></div>
 
     <div class="an-main">
-      <!-- 左列 -->
-      <div class="an-col">
-        <div class="card">
-          <div style="padding:18px 20px 0">
-            <div class="card-title">发行趋势</div>
-            <div class="card-sub">近 7 天每日新发行代币</div>
-          </div>
-          <div style="padding:0 20px 14px">
-            <svg class="trend-svg" id="trendSvg" viewBox="0 0 560 160" preserveAspectRatio="none"></svg>
-            <div class="trend-legend" id="trendLegend"></div>
+      <!-- 发行趋势 -->
+      <div class="card">
+        <div style="padding:18px 20px 0">
+          <div class="trend-head-row">
+            <div>
+              <div class="card-title">发行趋势</div>
+              <div class="card-sub">近 14 天每日新发行代币</div>
+            </div>
+            <div class="trend-peak num" id="issuePeak"></div>
           </div>
         </div>
-
-        <div class="card">
-          <div style="padding:18px 20px 0">
-            <div class="card-title">最近毕业</div>
-            <div class="card-sub">达到曲线阈值、流动性已上池</div>
-          </div>
-          <div style="padding:6px 20px 14px" id="gradList"></div>
+        <div style="padding:0 20px 14px">
+          <svg class="trend-svg" id="trendSvg" viewBox="0 0 560 160" preserveAspectRatio="none"></svg>
+          <div class="trend-legend" id="trendLegend"></div>
         </div>
       </div>
 
-      <!-- 右列 -->
-      <div class="an-col">
-        <div class="card">
-          <div style="padding:18px 20px 0">
-            <div class="card-title">最新发行</div>
-            <div class="card-sub">市场上新的叙事</div>
+      <!-- 交易量趋势 -->
+      <div class="card">
+        <div style="padding:18px 20px 0">
+          <div class="trend-head-row">
+            <div>
+              <div class="card-title">交易量趋势</div>
+              <div class="card-sub">近 14 天平台成交额</div>
+            </div>
+            <div class="trend-peak num" id="volPeak"></div>
           </div>
-          <div style="padding:6px 20px 14px" id="newList"></div>
         </div>
-        <div class="card">
-          <div style="padding:18px 20px 0">
-            <div class="card-title">我的交易</div>
-            <div class="card-sub">最近成交记录</div>
-          </div>
-          <div style="padding:6px 20px 14px" id="txList"></div>
+        <div style="padding:0 20px 14px">
+          <svg class="trend-svg" id="volSvg" viewBox="0 0 560 160" preserveAspectRatio="none"></svg>
+          <div class="trend-legend" id="volLegend"></div>
         </div>
       </div>
     </div>
 
-    <div class="note">数据为本地演示聚合：基于市场实时状态计算，刷新即更新。毕业阈值 4.2 ETH，曲线售罄后自动上池并永久锁定流动性。</div>
+    <div class="note">数据为本地演示聚合：基于市场实时状态计算，刷新即更新。毕业阈值 4.2 ETH，曲线售罄后自动上池并永久锁定流动性。个人交易记录请前往「资产」页查看。</div>
   </main>
 
   <script src="auth.js"></script>
@@ -126,12 +105,6 @@
     //  Analytics
     // ============================================================
     var mode = 'all';
-    var esc = function (s) {
-      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    };
-    function goCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
 
     function renderStats(a) {
       var cards = [
@@ -146,19 +119,24 @@
       }).join('');
     }
 
-    function renderTrend(a) {
-      var t = a.trend || [];
+    // 通用趋势折线：data = [{label, value}]，钱数可选
+    function drawTrend(svgId, legendId, data, money) {
+      var t = data || [];
       if (!t.length) return;
       var w = 560, h = 160, pl = 12, pr = 12, pt = 16, pb = 22;
       var iw = w - pl - pr, ih = h - pt - pb;
-      var mx = Math.max.apply(null, t.map(function (d) { return d.value; }));
-      var maxV = mx || 1;
+      var vals = t.map(function (d) { return d.value; });
+      var mx = Math.max.apply(null, vals);
+      var mn = Math.min.apply(null, vals);
+      var span = (mx - mn) || 1;
+      // 留 10% 顶部余量，视觉更稳
+      var maxV = mx + span * 0.1;
       var pts = t.map(function (d, i) {
         var x = pl + (iw / (t.length - 1 || 1)) * i;
         var y = pt + ih - (d.value / maxV) * ih;
         return { x: x, y: y, v: d.value };
       });
-      var svg = document.getElementById('trendSvg');
+      var svg = document.getElementById(svgId);
       var path = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
       var area = path + ' L' + (pl + iw).toFixed(1) + ' ' + (pt + ih) + ' L' + pl + ' ' + (pt + ih) + ' Z';
       var dots = pts.map(function (p) {
@@ -170,43 +148,24 @@
         '<stop offset="0" stop-color="rgba(10,11,13,.12)"/><stop offset="1" stop-color="rgba(10,11,13,0)"/></linearGradient></defs>' +
         '<path d="' + area + '" fill="url(#trendFill)"/>' +
         '<path d="' + path + '" fill="none" stroke="#0A0B0D" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' + dots;
-      document.getElementById('trendLegend').innerHTML =
+      document.getElementById(legendId).innerHTML =
         '<span>' + (labels[0] || '') + '</span><span>' + (labels[Math.floor(labels.length / 2)] || '') + '</span><span>' + (labels[labels.length - 1] || '') + '</span>';
-    }
-
-    function renderList(id, items, kind) {
-      var host = document.getElementById(id);
-      if (!items || !items.length) {
-        host.innerHTML = '<div class="empty"><div class="empty-title">暂无数据</div><div class="empty-desc">有新的' + (kind === 'grad' ? '毕业' : kind === 'new' ? '发行' : '交易') + '后会显示在这里</div></div>';
-        return;
-      }
-      host.innerHTML = items.map(function (c, i) {
-        if (kind === 'tx') {
-          var cc = Launch.coinById ? Launch.coinById(c.coinId) : null;
-          return '<div class="recent-row">' +
-            '<span style="width:34px;font-weight:700;font-size:12px" class="' + (c.side === 'buy' ? 'up' : 'down') + '">' + (c.side === 'buy' ? '买入' : '卖出') + '</span>' +
-            '<div class="rc-info"><div class="rc-name">' + esc(cc ? cc.name : (c.symbol || '')) + '</div>' +
-            '<div class="rc-sub num">' + (c.amount ? (c.amount >= 1000 ? (c.amount / 1000).toFixed(1) + 'K' : Math.floor(c.amount)) : '') + ' · ' + Launch.fmtUsd(c.grossUsd) + '</div></div>' +
-            '<span style="font-size:11px;color:var(--text-3)">' + Launch.timeAgo(c.at || Date.now()) + '</span></div>';
-        }
-        var sub = kind === 'grad'
-          ? (c.gradAt ? Launch.timeAgo(c.gradAt) + ' 前毕业 · ' + Launch.fmtUsd(c.marketCap) : '')
-          : (c.isNew ? '今日发行' : Launch.timeAgo(c.launchedAt) + ' 前');
-        return '<div class="recent-row">' +
-          '<div class="rc-cover" onclick="goCoin(\'' + esc(c.id) + '\')"><img src="' + esc(c.cover) + '" alt=""></div>' +
-          '<div class="rc-info" onclick="goCoin(\'' + esc(c.id) + '\')"><div class="rc-name">' + esc(c.name) + ' <span class="faint num" style="font-weight:600">$' + esc(c.symbol) + '</span></div>' +
-          '<div class="rc-sub num">' + Launch.fmtUsd(c.marketCap) + ' · ' + sub + '</div></div>' +
-          '<span class="rc-tag ' + (kind === 'grad' ? 'grad' : 'new') + '">' + (kind === 'grad' ? '已毕业' : 'NEW') + '</span></div>';
-      }).join('');
     }
 
     function renderAll() {
       var a = Launch.analytics(mode);
       renderStats(a);
-      renderTrend(a);
-      renderList('gradList', a.graduations, 'grad');
-      renderList('newList', a.newCoins, 'new');
-      renderList('txList', a.recentTrades, 'tx');
+      drawTrend('trendSvg', 'trendLegend', a.trend, false);
+      drawTrend('volSvg', 'volLegend', a.volTrend, true);
+      // 峰值标注
+      if (a.volTrend && a.volTrend.length) {
+        var peakV = Math.max.apply(null, a.volTrend.map(function (d) { return d.value; }));
+        document.getElementById('volPeak').textContent = '峰值 ' + Launch.fmtUsd(peakV);
+      }
+      if (a.trend && a.trend.length) {
+        var peakN = Math.max.apply(null, a.trend.map(function (d) { return d.value; }));
+        document.getElementById('issuePeak').textContent = '峰值 ' + peakN + ' / 日';
+      }
     }
 
     window.onLaunchShellReady = function () {
