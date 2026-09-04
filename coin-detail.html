@@ -205,6 +205,8 @@
   .ab-burn-meta { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
   .ab-links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
   @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } .ab-links { grid-column: auto; } }
+  .fee-card { display: grid; gap: 6px; padding: 16px 18px; }
+  #metaHost { display: grid; gap: 14px; }
   </style>
 </head>
 <body>
@@ -252,9 +254,9 @@
       <div class="cd-stats">
         <div><div class="cd-price-main num sim-num" id="cdPrice">—</div><div class="k">价格</div></div>
         <div class="cd-stat"><div class="v num sim-num" id="cdMcap">—</div><div class="k">市值</div></div>
-        <div class="cd-stat"><div class="v num sim-num" id="cdVol">—</div><div class="k">24h 成交</div></div>
-        <div class="cd-stat"><div class="v num sim-num" id="cdHolders">—</div><div class="k">持有者</div></div>
-        <div class="cd-stat"><div class="v num" id="cdChg">—</div><div class="k">24h</div></div>
+        <div class="cd-stat"><div class="v num sim-num" id="cdVol">—</div><div class="k" id="kStat3">24h 成交</div></div>
+        <div class="cd-stat"><div class="v num sim-num" id="cdHolders">—</div><div class="k" id="kStat4">持有者</div></div>
+        <div class="cd-stat" id="cdChgStat"><div class="v num" id="cdChg">—</div><div class="k" id="kStat5">24h</div></div>
       </div>
 
     </div>
@@ -371,7 +373,7 @@
         </div>
         
 <!-- 原型：参数信息（对齐参考的 About/Creator fees/Holder fee sharing） -->
-        <div class="card" id="metaCard" style="display:none"></div>
+        <div id="metaHost" style="display:none"></div>
       </div>
 
       
@@ -495,11 +497,34 @@ var holders = [];
           ? '市值 <span class="cd-fdv num">· FDV ' + Launch.fmtUsd(coin.fdv || coin.marketCap) + '</span>'
           : '市值';
       }
-      document.getElementById('cdVol').textContent = Launch.fmtUsd(coin.volumeUsd || 0);
-      document.getElementById('cdHolders').textContent = Launch.fmtNum(coin.holders);
+      var pairForPx = coin.pair || 'ETH';
+      var ppx = (window.Launch && Launch.assetPrice) ? Launch.assetPrice(pairForPx) : null;
+      var fmtPairPx = function (v) {
+        if (v == null || !isFinite(v)) return '—';
+        var s2 = v >= 1 ? v.toFixed(4) : v >= 0.0001 ? v.toFixed(8) : v.toFixed(12);
+        return s2.replace(/\.?0+$/, '');
+      };
       var chg = document.getElementById('cdChg');
       chg.textContent = Launch.pct(coin.change24h);
       chg.className = 'v num ' + Launch.dirClass(coin.change24h);
+      if (coin.graduated) {
+        document.getElementById('kStat3').textContent = '24h 成交';
+        document.getElementById('kStat4').textContent = '持有者';
+        document.getElementById('kStat5').textContent = '24h';
+        document.getElementById('cdVol').textContent = Launch.fmtUsd(coin.volumeUsd || 0);
+        document.getElementById('cdHolders').textContent = Launch.fmtNum(coin.holders);
+        document.getElementById('cdHolders').className = 'v num sim-num';
+        document.getElementById('cdChgStat').style.display = '';
+      } else {
+        // 未毕业（对齐参考）：Price / Market cap / Price in PAIR / Market(涨跌)
+        document.getElementById('kStat3').textContent = 'Price in ' + pairForPx;
+        document.getElementById('kStat4').textContent = 'Market';
+        document.getElementById('cdVol').textContent = ppx ? fmtPairPx((coin.priceUsd || 0) / ppx) : '—';
+        var mkt = document.getElementById('cdHolders');
+        mkt.textContent = (coin.change24h >= 0 ? '+' : '−') + Math.abs((coin.change24h || 0) * 100).toFixed(2) + '%';
+        mkt.className = 'v num ' + Launch.dirClass(coin.change24h);
+        document.getElementById('cdChgStat').style.display = 'none';
+      }
       document.getElementById('cdTags').innerHTML =
         '<span class="tag">' + (coin.sourceType === 'ai' ? 'AI 叙事' : '短剧作品') + '</span>' +
         (coin.isNew ? '<span class="tag tag-gold">NEW</span>' : '') +
@@ -512,7 +537,8 @@ var holders = [];
       var meta = [];
       meta.push('<span class="tag">配对 ' + esc(coin.pair || 'ETH') + '</span>');
       meta.push('<span class="tag">Creator tax ' + (((coin.creatorTaxPct || 0) * 1).toFixed(2)) + '%</span>');
-      meta.push('<span class="tag">Supply 1,000,000,000</span>');
+      meta.push('<span class="tag">Supply 1,000,000,000 · Fixed at launch</span>');
+      meta.push('<span class="tag" style="cursor:pointer" onclick="copyText(coin.creatorAddr)" title="复制">Creator ' + esc(coin.creatorAddr) + '</span>');
       meta.push(coin.graduated
         ? '<span class="tag tag-up">已毕业 · 流动性永久锁定</span>'
         : '<span class="tag">curve 进行中</span>');
@@ -569,6 +595,12 @@ var holders = [];
       Launch.toast(parts.length ? ('社区: ' + parts.join(' · ')) : '该币暂未设置社区链接', parts.length ? 'ok' : 'warn');
     }
     function fakeLink() { if (Launch && Launch.toast) Launch.toast('原型演示链接', 'ok'); }
+    function doClaim(id) {
+      if (!Launch.isLoggedIn()) { openLoginModal(); return; }
+      var r = Launch.claim(id);
+      if (r.ok) { Launch.toast('已领取 ' + Launch.fmtUsd(r.usd), 'ok'); renderHead(); renderGrad(); renderMeta(); }
+      else Launch.toast(r.msg || '暂无可领取收益', 'warn');
+    }
     function copyText(t) {
       if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () {});
     }
@@ -780,36 +812,48 @@ var holders = [];
     }
     // 参数信息（对齐参考 About/Creator fees/Holder fee sharing；已毕业时隐藏）
     function renderMeta() {
-      var host = document.getElementById('metaCard');
+      var host = document.getElementById('metaHost');
       if (!host) return;
       if (!coin || coin.graduated) { host.style.display = 'none'; host.innerHTML = ''; return; }
       var pair = coin.pair || 'ETH';
       var px = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 3200) : 3200;
-      var qty = function (usd) { var v = usd / px; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toFixed(4); };
+      var qty = function (usd) { var v = usd / px; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toFixed(6).replace(/\.?0+$/, ''); };
       var progress = Math.min(1, (coin.progress || 0));
       var sweeps = Math.max(1, Math.round(progress * 6));
       var earnedUsd = (coin.poolUsd || 0) * 0.05;
       var paidUsd = earnedUsd * 0.55, potUsd = earnedUsd - paidUsd;
-      var html = '<div class="mi-card">';
-      html += '<div class="mi-row"><span>配对资产</span><b>' + esc(pair) + '</b></div>';
-      html += '<div class="mi-row"><span>Creator tax</span><b>' + ((coin.creatorTaxPct || 0) * 1).toFixed(2) + '%</b></div>';
-      html += '<div class="mi-row"><span>Supply</span><b>1,000,000,000 · Fixed at launch</b></div>';
+      var dist = Math.max(0, sweeps - 1);
+      var html = '';
+      // 卡 1：Creator fees
+      html += '<div class="card fee-card">' +
+        '<div class="mi-title">Creator fees</div>';
       if (coin.shareToHolders) {
-        html += '<div class="mi-title">Creator fees</div>';
-        html += '<div class="mi-row"><span>Earned</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + ' · across ' + sweeps + ' sweeps</b></div>';
-        html += '<div class="mi-note">创作者费已路由给持有人：不存在创作者认领。</div>';
-        html += '<div class="mi-title">Holder fee sharing</div>';
-        html += '<div class="mi-row"><span>Paid to holders</span><b>' + qty(paidUsd) + ' ' + esc(pair) + ' · across ' + Math.max(1, sweeps - 1) + ' distributions</b></div>';
-        html += '<div class="mi-row"><span>In the pot</span><b>' + qty(potUsd) + ' ' + esc(pair) + '</b></div>';
-        html += '<div class="mi-note">分发给持有人 · 各自可从账户页领取。</div>';
-      } else if ((coin.creatorTaxPct || 0) > 0 || earnedUsd > 0) {
-        html += '<div class="mi-title">Creator fees</div>';
-        html += '<div class="mi-row"><span>可领取</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + '</b></div>';
-        html += '<div class="mi-note">创作者费归创建者钱包（可随时领取）。</div>';
+        html += '<div class="mi-row"><span>Earned</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + '</b></div>' +
+          '<div class="mi-row"><span>Across</span><b>' + sweeps + ' sweeps</b></div>' +
+          '<div class="mi-note">创作者费已通过分发合约路由给持有人 · 不存在创作者认领。</div>';
+      } else {
+        html += '<div class="mi-row"><span>可领取</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + '</b></div>' +
+          '<div class="mi-row"><span>Creator wallet</span><b>' + esc((window.Launch && Launch.walletText) ? Launch.walletText() : '—') + '</b></div>' +
+          '<div class="mi-note">创作者费归创建者钱包，可随时领取。</div>' +
+          '<button class="asset-btn" id="claimMeta" onclick="doClaim(\'' + esc(coin.id) + '\')" ' + (earnedUsd > 0 ? '' : 'disabled') + '>领取</button>';
+      }
+      html += '</div>';
+      // 卡 2：Holder fee sharing（持有人路由形态参考；创建者形态也展示以演示结构）
+      html += '<div class="card fee-card">' +
+        '<div class="mi-title">Holder fee sharing</div>';
+      if (coin.shareToHolders) {
+        html += '<div class="mi-row"><span>Paid to holders</span><b>' + qty(paidUsd) + ' ' + esc(pair) + '</b></div>' +
+          '<div class="mi-row"><span>Across</span><b>' + Math.max(1, dist) + ' distributions</b></div>' +
+          '<div class="mi-row"><span>In the pot</span><b>' + qty(potUsd) + ' ' + esc(pair) + '</b></div>' +
+          '<div class="mi-note">每一期分发后持有人可从个人页领取其份额。</div>';
+      } else {
+        html += '<div class="mi-row"><span>Routing</span><b>Off · fees to creator</b></div>' +
+          '<div class="mi-note">关闭该开关即可把创作者费路由给持有人（分发合约 + 两次确认）。</div>' +
+          '<button class="asset-btn" style="margin-top:8px" onclick="Launch.toast(\'原型：开启费共享需两次链上确认\',\'ok\')">开启费共享（原型）</button>';
       }
       html += '</div>';
       host.innerHTML = html;
-      host.style.display = 'block';
+      host.style.display = coin.graduated ? 'none' : 'grid';
     }
 
     // ============ Swap ============
