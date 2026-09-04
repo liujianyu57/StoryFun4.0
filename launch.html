@@ -222,6 +222,11 @@
     .adv-row:first-child { border-top: none; }
     .adv-row .lbl { font-size: 13px; font-weight: 500; }
     .adv-row .lbl small { display: block; font-size: 11px; color: var(--text-3); font-weight: 400; margin-top: 2px; }
+    /* Holder fee sharing（pons：状态文案 + 说明随开关变化） */
+    .adv-row.hfs { flex-direction: column; align-items: stretch; }
+    .adv-row.hfs .hfs-state { margin-top: 8px; font-size: 13px; font-weight: 700; line-height: 1.45; }
+    .adv-row.wallet-col { flex-direction: column; align-items: stretch; }
+    .adv-row.wallet-col .input { font-variant-numeric: tabular-nums; }
     .adv-row .ctrl { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
     .tax-val { font-size: 12px; font-weight: 700; width: 30px; text-align: right; }
     input[type=range] { width: 110px; accent-color: var(--accent); }
@@ -231,8 +236,6 @@
     .switch i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
     .switch input:checked + i { background: var(--accent); }
     .switch input:checked + i::after { transform: translateX(16px); }
-    .wallet-edit { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; justify-content: flex-end; }
-    .wallet-static { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
 
     /* 错误 */
     .inline-warn { display: none; align-items: center; gap: 8px; font-size: 12.5px; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
@@ -410,17 +413,17 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="adv-body" id="advBody">
-                <div class="adv-row">
-                  <span class="lbl">费共享给持有者<small>创作者收益按持仓比例分给持币者</small></span>
+                <div class="adv-row hfs">
+                  <span class="lbl">Holder fee sharing</span>
                   <span class="ctrl">
-                    <label class="switch"><input type="checkbox" id="shareToHolders" /><i></i></label>
+                    <label class="switch"><input type="checkbox" id="shareToHolders" onchange="syncHfs()" /><i></i></label>
                   </span>
+                  <span class="hfs-state" id="hfsState">Creator fees go to the creator wallet</span>
+                  <span class="f-note" id="hfsNote" style="margin-top:8px">Route this launch's creator fees to its holders, split pro-rata for each holder to claim from their profile menu.</span>
                 </div>
-                <div class="adv-row">
-                  <span class="lbl" style="flex:1">创作者钱包<small>留空使用当前钱包</small></span>
-                  <span class="wallet-edit">
-                    <span class="wallet-static num" id="walletAddr">0x7A2b…3fD8</span>
-                  </span>
+                <div class="adv-row wallet-col" id="creatorWalletRow">
+                  <span class="lbl">Creator wallet<small>Receives creator fees and the creator tax. Leave blank to use your connected wallet.</small></span>
+                  <input class="input num" id="pCreatorWallet" placeholder="0x7A2b…3fD8（留空 = 我的钱包）" autocomplete="off" spellcheck="false" />
                 </div>
                 <div class="adv-row">
                   <span class="lbl">创作者税<small>总交易费 1%，其中最多 10% 归你</small></span>
@@ -527,6 +530,18 @@
     function esc(s) { return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 
     function refreshEthHint() { // 余额提示已随 AI 生成移除，保留占位
+    }
+    /* ---- 高级设置文案联动 ----
+       pons：Holder fee sharing ON → 分给持有者（隐藏钱包输入）；
+       OFF → 分给创建者钱包（显示输入，留空 = 连接的钱包） */
+    function syncHfs() {
+      var on = document.getElementById('shareToHolders').checked;
+      document.getElementById('hfsState').textContent =
+        on ? 'Creator fees go to holders' : 'Creator fees go to the creator wallet';
+      document.getElementById('hfsNote').textContent = on
+        ? 'Two more confirmations after launch deploy the distributor and route every creator fee to holders. Permanent once routed.'
+        : "Route this launch's creator fees to its holders, split pro-rata for each holder to claim from their profile menu.";
+      document.getElementById('creatorWalletRow').style.display = on ? 'none' : 'flex';
     }
     function walletText() {
       if (window.Launch) return Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : ('0x' + (Launch.USER.id || 'demo'));
@@ -1000,6 +1015,7 @@
           social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
           creatorTaxPct:parseInt(document.getElementById('taxRange').value||0,10),
           shareToHolders:document.getElementById('shareToHolders').checked,
+          creatorWallet:document.getElementById('pCreatorWallet').value.trim(),
           snipeExempts:(document.getElementById('pSnipe').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean)
         });
         lastCoinId = coin.id;
@@ -1045,7 +1061,8 @@
       refreshEthHint();
       startGradRead('ETH');
       renderDevBuy();
-      document.getElementById('walletAddr').textContent = walletText();
+      syncHfs();
+      document.getElementById('pCreatorWallet').placeholder = walletText() + '（留空 = 我的钱包）';
       // reuse 参数（资产页“用它发币”）→ 直接作为已关联作品
       var q = new URLSearchParams(window.location.search);
       var reuseRaw = q.get('reuse');

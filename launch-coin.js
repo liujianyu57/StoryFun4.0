@@ -95,6 +95,7 @@
       tagline: o.tagline,
       creator: o.creator,
       creatorAddr: o.creatorAddr,
+      creatorWallet: o.creatorWallet || '',   // 高级设置：创作者费收款钱包（留空=连接钱包）
       cover: o.cover,
       video: o.video || '',
       sourceType: o.sourceType || 'ai',   // ai | work
@@ -695,6 +696,7 @@
       social: data.social || null,
       creatorTaxPct: data.creatorTaxPct || 0,
       shareToHolders: !!data.shareToHolders,
+      creatorWallet: data.creatorWallet || '',
       devBuyEth: data.devBuyEth || 0,
       devBuyQty: data.devBuyQty || 0,
       devBuyPair: data.devBuyPair || 'ETH',
