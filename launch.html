@@ -134,8 +134,11 @@
     .upload-box img { width: 100%; height: 100%; object-fit: cover; }
     .upload-box .up-plus { font-size: 22px; }
     .upload-copy { font-size: 13px; color: var(--text-2); font-weight: 600; cursor: pointer; }
-    .upload-hint { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
     .upload input[type=file] { display: none; }
+    .upload-box .up-busy {
+      display: none; font-size: 10.5px; font-weight: 600; color: var(--text-2);
+      text-align: center; line-height: 1.35; padding: 0 4px;
+    }
 
     /* 前缀输入 */
     .prefixed { position: relative; }
@@ -298,16 +301,16 @@
                   <textarea class="input" id="pTag" rows="2" maxlength="250" placeholder="讲清这个币是什么"></textarea>
                 </div>
                 <div class="field lp-wide">
-                  <div class="field-label">币图 <span class="opt">自定义图仅预览</span></div>
+                  <div class="field-label">币图</div>
                   <div class="upload">
                     <label class="upload-box" id="uploadBox" title="选择封面图">
                       <span class="up-plus" id="upPlus">＋</span>
+                      <span class="up-busy" id="upBusy">Uploading to ipfs…</span>
                       <img id="upImg" alt="" style="display:none" />
                       <input type="file" id="upFile" accept="image/png,image/jpeg,image/webp,image/gif" />
                     </label>
                     <div>
                       <span class="upload-copy" onclick="document.getElementById('upFile').click()">选择图片</span>
-                      <div class="upload-hint">PNG/JPG/WebP · 演示环境仅预览，创建后沿用叙事封面</div>
                     </div>
                   </div>
                 </div>
@@ -452,7 +455,7 @@
     // ============================================================
     //  创建（pons 骨架 · 全中文）
     // ============================================================
-    var uploadPreview = null; // 上传图（仅预览）
+    var uploadPreview = null; // 已就绪的自定义上传图（创建时作为币封面）
     var attached = null;      // 已关联作品 {type:'drama'|'clip'|'video', title, meta, cover, name, desc, video}
     var pkTab = 'drama';      // 弹层当前 Tab
     var pickerSel = null;     // 弹层内当前选中 {type,title,meta,cover,name,desc,video}
@@ -636,7 +639,7 @@
       // 自动回填：名称用 fillName（单集=剧名；整剧/视频=标题）；简介用描述
       if (!document.getElementById('pName').value) document.getElementById('pName').value = pickerSel.fillName || pickerSel.title;
       if (!document.getElementById('pTag').value) document.getElementById('pTag').value = pickerSel.desc || '';
-      uploadPreview = null; refreshUpload();
+      cancelUpload(); uploadPreview = null; refreshUpload();
       syncAll();
       Launch.toast('已关联：' + itemLabel(pickerSel), 'ok');
     }
@@ -669,16 +672,26 @@
     }
     function attachName() { return attached ? (attached.name || attached.title) : ''; }
 
-    // ---- 上传（仅预览，不持久） ----
+    // ---- 币图上传：模拟 IPFS（Uploading to ipfs… → 就绪填图） ----
+    var uploading = false;     // 上传中
+    var uploadTimer = null;    // 模拟上传完成定时器
     // 币图来源：自定义上传 > 已关联作品封面 > 空占位；左侧上传框与右侧预览卡同步展示
     function refreshUpload() {
-      var src = uploadPreview || currentCover();
       var img = document.getElementById('upImg');
       var plus = document.getElementById('upPlus');
-      if (src) { img.src = src; img.style.display = 'block'; plus.style.display = 'none'; }
-      else { img.style.display = 'none'; plus.style.display = ''; }
+      var busy = document.getElementById('upBusy');
       var pv = document.getElementById('pvImg');
       var ph = document.getElementById('pvPh');
+      if (uploading) {
+        // 上传中：框内显示 Uploading to ipfs…，预览卡保持原状
+        img.style.display = 'none'; plus.style.display = 'none';
+        busy.style.display = 'block';
+        return;
+      }
+      busy.style.display = 'none';
+      var src = uploadPreview || currentCover();
+      if (src) { img.src = src; img.style.display = 'block'; plus.style.display = 'none'; }
+      else { img.style.display = 'none'; plus.style.display = ''; }
       if (src) { pv.src = src; pv.style.display = 'block'; ph.style.display = 'none'; }
       else { pv.style.display = 'none'; ph.style.display = ''; }
     }
@@ -686,15 +699,30 @@
       if (attached && attached.cover) return attached.cover;
       return '';
     }
+    function queueUpload(dataUrl) {
+      uploading = true;
+      refreshUpload();
+      if (uploadTimer) clearTimeout(uploadTimer);
+      uploadTimer = setTimeout(function () {
+        uploading = false;
+        uploadPreview = dataUrl;
+        refreshUpload();
+        syncAll();
+      }, 900);
+    }
+    function cancelUpload() {
+      if (uploadTimer) { clearTimeout(uploadTimer); uploadTimer = null; }
+      uploading = false;
+    }
     function bindUpload() {
       var file = document.getElementById('upFile');
       file.addEventListener('change', function(){
         var f = file.files && file.files[0];
         if (!f) return;
-        var r = new FileReader();
-        r.onload = function(){ uploadPreview = r.result; refreshUpload(); syncAll(); };
-        r.readAsDataURL(f);
         file.value = '';
+        var r = new FileReader();
+        r.onload = function(){ queueUpload(r.result); };
+        r.readAsDataURL(f);
       });
     }
 
@@ -741,8 +769,8 @@
 
       var btn = document.getElementById('createBtn');
       btn.disabled = true; btn.textContent = '创建中…';
-      // cover：已关联作品封面优先；演示上传图不持久化则回退默认素材
-      var cover = currentCover() || pickCover();
+      // cover：自定义上传图 > 已关联作品封面 > 默认素材
+      var cover = uploadPreview || currentCover() || pickCover();
       var video = (attached && attached.video) || '';
       var sourceTitle = attached ? attached.title : '';
 
