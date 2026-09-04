@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 10;
+  var SCHEMA_VERSION = 11;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -91,6 +91,8 @@
       lastBuyAt: o.lastBuyAt || o.launchedAt || Date.now(),  // 最近一次买入时间（市场排序用）
       buyerAddr: o.buyerAddr || walletFrom('seed:' + o.id),       // 最近买入钱包（展示用，确定性模拟）
       creatorHoldsPct: o.creatorHoldsPct == null ? 0 : o.creatorHoldsPct, // 创建者持仓占比 %（>20 触发警示）
+      isOriginal: !!o.isOriginal,         // OG：本币名/代号首次发行
+      buybackLockedPct: o.buybackLockedPct || null, // 锁入创建者回购的比例
       // 创建页扩展字段
       social: o.social || null,          // {x, tg}
       creatorTaxPct: o.creatorTaxPct || 0, // 每笔交易费中归创作者的比例(额外税)
@@ -242,6 +244,9 @@
         var creatorHoldsPct = ((i0 * 17) % 8) === 0
           ? 22 + (i0 % 45)                                       // 22–66%
           : 1 + (i0 % 18);                                       // 1–18%（正常区间）
+        // OG：约 1/6 币视为本名首次发行（毕业/活跃均可能）；buyback：约 1/10 有回购锁仓
+        var isOriginal = ((i0 * 19) % 6) === 0;
+        var buybackLockedPct = ((i0 * 23) % 10) === 0 ? (3 + (i0 % 15)) / 100 : null;
         var price = mc / K.totalSupply;
         var pool = graduated
           ? (K.gradThresholdUsd + (i0 * 29) % 400000)
@@ -255,6 +260,8 @@
           lockedPct: lockedPct,
           shareToHolders: shareToHolders,
           creatorHoldsPct: creatorHoldsPct,
+          isOriginal: isOriginal,
+          buybackLockedPct: buybackLockedPct,
           priceUsd: price, holders: graduated ? (200 + (i0 * 47) % 9000) : (2 + (i0 * 19) % 600),
           volumeUsd: graduated ? (100000 + (i0 * 911) % 9000000) : (i0 * 97) % 50000,
           launchedAt: D(launchH), graduated: graduated, gradAt: graduated ? D(gradH) : null,
