@@ -185,7 +185,7 @@
     }
 
     /* ============================================================
-       Spotlight ⌘K 弹层（pons 同款：搜索 + 排序 + 时间 + 高级筛选）
+       Spotlight ⌘K 弹层（pons 同款：搜索 + 排序 + 时间 + Pair）
        ============================================================ */
     .spotlight-backdrop {
       position: fixed; inset: 0; z-index: 200; background: rgba(10,11,13,.4);
@@ -224,21 +224,15 @@
     .sp-pills button:hover { border-color: var(--border-strong); color: var(--text); }
     .sp-pills button.on { background: var(--accent); color: #fff; }
     .sp-quotes button { font-variant-numeric: tabular-nums; }
-    .sp-advanced { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; padding-top: 10px; border-top: 1px solid var(--border); }
-    .sp-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .sp-adv-toggle {
-      display: inline-flex; align-items: center; gap: 6px; width: fit-content;
-      border: none; background: none; color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; padding: 2px 0;
-    }
-    .sp-adv-toggle:hover { color: var(--text); }
-    .sp-num-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 14px; }
-    .sp-field { display: flex; flex-direction: column; gap: 4px; }
-    .sp-field > span { font-size: 11px; color: var(--text-3); }
-    .sp-input {
-      height: 32px; padding: 0 10px; border-radius: 9px; font-size: 12.5px;
-      border: 1px solid var(--border); background: var(--surface-2); color: var(--text); outline: none;
-    }
-    .sp-input:focus { border-color: var(--accent); }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     .spotlight-clear {
       width: 28px; height: 28px; border-radius: 9px; display: inline-flex; align-items: center;
       justify-content: center; border: none; background: none; color: var(--text-3); cursor: pointer; flex-shrink: 0;
@@ -451,35 +445,6 @@
             <button data-p="WYFI">WYFI</button>
           </div>
         </div>
-        <button class="sp-adv-toggle" id="spAdvToggle" type="button">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          高级筛选
-        </button>
-        <div class="sp-advanced" id="spAdvanced" style="display:none">
-          <div class="sp-num-fields">
-            <label class="sp-field"><span>Min mcap</span><input class="sp-input num" id="spMcMin" type="number" min="0" placeholder="Any" /></label>
-            <label class="sp-field"><span>Max mcap</span><input class="sp-input num" id="spMcMax" type="number" min="0" placeholder="Any" /></label>
-            <label class="sp-field"><span>Min volume</span><input class="sp-input num" id="spVolMin" type="number" min="0" placeholder="Any" /></label>
-            <label class="sp-field"><span>Min burned %</span><input class="sp-input num" id="spBurnMin" type="number" min="0" max="100" placeholder="Any" /></label>
-            <label class="sp-field"><span>Min age (h)</span><input class="sp-input num" id="spAgeMin" type="number" min="0" placeholder="Any" /></label>
-            <label class="sp-field"><span>Max age (h)</span><input class="sp-input num" id="spAgeMax" type="number" min="0" placeholder="Any" /></label>
-          </div>
-          <div class="sp-row">
-            <span class="sp-label">Graduation status</span>
-            <div class="pill-seg" id="spStatusSeg">
-              <button data-st="either" class="on">Either</button>
-              <button data-st="active">Active</button>
-              <button data-st="grad">Graduated</button>
-            </div>
-          </div>
-          <div class="sp-row">
-            <span class="sp-label">徽章</span>
-            <div class="pill-seg" id="spBadgeSeg">
-              <button data-b="all" class="on">Any</button>
-              <button data-b="og">OG 首发</button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div class="spotlight-results" id="spResults" role="listbox" aria-label="Token results"></div>
@@ -502,7 +467,7 @@
     //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + ⌘K 弹层
     // ============================================================
     var state = { sort: 'recent', time: 'all', gradPage: 1, expPage: 1 };
-    var spState = { sort: 'recent', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
+    var spState = { sort: 'recent', time: 'all', q: '', pair: 'all' };
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -706,14 +671,11 @@
       document.getElementById('spotlight').classList.remove('open');
     }
     function resetSpFilters() {
-      spState = { sort: 'recent', time: 'all', q: '', pair: 'all', mcMin: null, mcMax: null, volMin: null, burnMin: null, ageMin: null, ageMax: null, status: 'either', badge: 'all' };
-      ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) { document.getElementById(id).value = ''; });
+      spState = { sort: 'recent', time: 'all', q: '', pair: 'all' };
       syncSeg('#spSortSeg button', 'recent', 's');
       syncSeg('#spTimeSeg button', 'all', 't');
       var tl = document.getElementById('spTimeLabel');
       if (tl) tl.textContent = 'Age';
-      syncSeg('#spStatusSeg button', 'either', 'st');
-      syncSeg('#spBadgeSeg button', 'all', 'b');
       syncSeg('#spPairSeg button', 'all', 'p');
     }
     function syncSeg(sel, val, attr) {
@@ -744,18 +706,6 @@
           var ref = c.graduated ? (c.gradAt || c.launchedAt) : (c.lastBuyAt || c.launchedAt);
           if (!ref || ref < cutoff) return false;
         }
-        if (spState.status === 'active' && c.graduated) return false;
-        if (spState.status === 'grad' && !c.graduated) return false;
-        var m = metaOf(c);
-        if (spState.badge === 'og' && !c.isOriginal) return false;
-        var mc = c.marketCap || 0;
-        if (spState.mcMin != null && mc < spState.mcMin) return false;
-        if (spState.mcMax != null && mc > spState.mcMax) return false;
-        if (spState.volMin != null && (c.volumeUsd || 0) < spState.volMin) return false;
-        if (spState.burnMin != null && m.burnPct < spState.burnMin) return false;
-        var ageH = (Date.now() - (c.launchedAt || Date.now())) / 3600000;
-        if (spState.ageMin != null && ageH < spState.ageMin) return false;
-        if (spState.ageMax != null && ageH > spState.ageMax) return false;
         return true;
       });
       list.sort(function (a, b) {
@@ -824,12 +774,7 @@
       footer.style.display = total ? 'flex' : 'none';
       window._spTotal = total;
     }
-    function readSpNums() {
-      var v = function (id) { var x = parseFloat(document.getElementById(id).value); return isNaN(x) ? null : x; };
-      spState.mcMin = v('spMcMin'); spState.mcMax = v('spMcMax');
-      spState.volMin = v('spVolMin'); spState.burnMin = v('spBurnMin');
-      spState.ageMin = v('spAgeMin'); spState.ageMax = v('spAgeMax');
-    }
+
 
     // ============================================================
     //  交互绑定
@@ -872,8 +817,6 @@
         document.getElementById('spTimeLabel').textContent = spState.sort === 'volume' ? 'Window' : 'Age';
       });
       segClick('spTimeSeg', 'time', 't');
-      segClick('spStatusSeg', 'status', 'st');
-      segClick('spBadgeSeg', 'badge', 'b');
       segClick('spPairSeg', 'pair', 'p', function () {
         if (spState.pair !== 'all') Launch.toast('Pair 筛选为占位：当前演示仅代币', 'ok');
       });
@@ -892,15 +835,6 @@
       // 弹窗分页
       document.getElementById('spPrev').addEventListener('click', function () { spPage = Math.max(1, spPage - 1); renderSpotlight(); });
       document.getElementById('spNext').addEventListener('click', function () { spPage = spPage + 1; renderSpotlight(); });
-      ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) {
-        document.getElementById(id).addEventListener('input', function () { readSpNums(); renderSpotlight(); });
-      });
-      document.getElementById('spAdvToggle').addEventListener('click', function () {
-        var el = document.getElementById('spAdvanced');
-        var open = el.style.display === 'none';
-        el.style.display = open ? 'flex' : 'none';
-        this.querySelector('svg').style.transform = open ? 'rotate(45deg)' : '';
-      });
 
       // Explore 工具栏（页面级）
       document.getElementById('sortSeg').addEventListener('click', function (e) {
