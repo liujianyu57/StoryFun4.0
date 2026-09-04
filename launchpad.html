@@ -394,7 +394,7 @@
           </div>
         </div>
         <div class="sp-fg">
-          <span class="sp-label">Age</span>
+          <span class="sp-label" id="spTimeLabel">Age</span>
           <div class="sp-pills" id="spTimeSeg">
             <button data-t="all" class="on">All</button>
             <button data-t="24h">24h</button>
@@ -670,6 +670,8 @@
       ['spMcMin','spMcMax','spVolMin','spBurnMin','spAgeMin','spAgeMax'].forEach(function (id) { document.getElementById(id).value = ''; });
       syncSeg('#spSortSeg button', 'recent', 's');
       syncSeg('#spTimeSeg button', 'all', 't');
+      var tl = document.getElementById('spTimeLabel');
+      if (tl) tl.textContent = 'Age';
       syncSeg('#spStatusSeg button', 'either', 'st');
       syncSeg('#spBadgeSeg button', 'all', 'b');
       syncSeg('#spPairSeg button', 'all', 'p');
@@ -813,7 +815,10 @@
           renderSpotlight();
         });
       };
-      segClick('spSortSeg', 'sort', 's');
+      segClick('spSortSeg', 'sort', 's', function () {
+        // pons：选中 Volume 时该组标签 Age → Window，其余为 Age
+        document.getElementById('spTimeLabel').textContent = spState.sort === 'volume' ? 'Window' : 'Age';
+      });
       segClick('spTimeSeg', 'time', 't');
       segClick('spStatusSeg', 'status', 'st');
       segClick('spBadgeSeg', 'badge', 'b');
