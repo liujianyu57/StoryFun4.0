@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 8;
+  var SCHEMA_VERSION = 9;
 
   // ============================================================
   //  种子币（演示数据 12 个，覆盖全部状态）
@@ -124,7 +124,7 @@
 
   var SEED = [
     seedCoin({
-      id: 'c_feng', name: '凤骨琉璃', symbol: 'FENGGU', tagline: '琉璃易碎，凤骨不折。',
+      id: 'c_feng', name: '凤骨琉璃', symbol: 'FENGGU', tagline: '琉璃易碎，凤骨不折。', shareToHolders: true,
       creator: '林晚棠', creatorAddr: '0x7A2b…fD81', cover: IMG.feng, video: VID.feng, sourceType: 'work', sourceTitle: '短剧《凤骨琉璃》',
       priceUsd: 0.0009, holders: 2841, volumeUsd: 124000, launchedAt: D(52), graduated: false, progress: 0.94,
       poolUsd: 12650, change24h: 0.42, lastBuyAt: D(1.2), spark: [0.2, 0.35, 0.3, 0.45, 0.6, 0.72, 0.8, 0.94],
@@ -173,7 +173,7 @@
       poolUsd: 420, change24h: 0.84, isNew: true, lastBuyAt: D(0.6), spark: [0.5, 0.6, 0.55, 0.7]
     }),
     seedCoin({
-      id: 'c_names', name: '无名者档案', symbol: 'NAMES', tagline: '名字被夺走的人，自己写回自己的名字。',
+      id: 'c_names', name: '无名者档案', symbol: 'NAMES', tagline: '名字被夺走的人，自己写回自己的名字。', shareToHolders: true,
       creator: '白鹭', creatorAddr: '0x33A1…c8f0', cover: IMG.names, video: '', sourceType: 'work', sourceTitle: '短剧《无名者档案》',
       priceUsd: 0.00055, holders: 1732, volumeUsd: 67100, launchedAt: D(66), graduated: true, gradAt: D(49),
       poolUsd: 20300, change24h: 0.11, lastBuyAt: D(30), spark: [0.2, 0.3, 0.5, 0.55, 0.8, 0.75]
@@ -185,7 +185,7 @@
       poolUsd: 190, change24h: 0.15, isNew: true, lastBuyAt: D(0.4), spark: [0.4, 0.45]
     }),
     seedCoin({
-      id: 'c_hero', name: '孤胆英雄传', symbol: 'HERO', tagline: '无人记得的名字，撑起整座城。',
+      id: 'c_hero', name: '孤胆英雄传', symbol: 'HERO', tagline: '无人记得的名字，撑起整座城。', shareToHolders: true,
       creator: '陈破晓', creatorAddr: '0x6E2b…a4d7', cover: IMG.hero, video: VID.fight, sourceType: 'work', sourceTitle: '短剧《孤胆英雄传》',
       priceUsd: 0.00041, holders: 958, volumeUsd: 24000, launchedAt: D(18), graduated: false, progress: 0.42,
       poolUsd: 4800, change24h: -0.08, lastBuyAt: D(14), spark: [0.4, 0.6, 0.5, 0.55, 0.48, 0.45]
@@ -235,6 +235,8 @@
         var lockedPct = graduated
           ? ((i0 * 7) % 5 === 0 ? (10 + (i0 % 26)) / 100 : 0)   // 约 1/5 已毕业带 10–35% 锁
           : ((i0 * 11) % 9 === 0 ? (5 + (i0 % 15)) / 100 : 0);  // 约 1/9 活跃带 5–19% 锁
+        // 收益共享（Creator rewards → holders）：毕业/活跃都会出现（pons 两区均有该徽章）
+        var shareToHolders = ((i0 * 13) % 7) < 2;               // 约 2/7 开启费共享
         var price = mc / K.totalSupply;
         var pool = graduated
           ? (K.gradThresholdUsd + (i0 * 29) % 400000)
@@ -246,6 +248,7 @@
           cover: COVERS[i0 % COVERS.length], video: '', sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
           sourceTitle: '', supply: K.totalSupply,
           lockedPct: lockedPct,
+          shareToHolders: shareToHolders,
           priceUsd: price, holders: graduated ? (200 + (i0 * 47) % 9000) : (2 + (i0 * 19) % 600),
           volumeUsd: graduated ? (100000 + (i0 * 911) % 9000000) : (i0 * 97) % 50000,
           launchedAt: D(launchH), graduated: graduated, gradAt: graduated ? D(gradH) : null,
