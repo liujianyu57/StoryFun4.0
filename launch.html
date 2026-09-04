@@ -574,7 +574,7 @@
       var q = pickerSearchQ();
       var dramas = myDramas().map(function (d) {
         return { type: 'drama', title: d.title, cover: d.cover || 'image/hero-bg-blur.jpg', video: d.video || '',
-                 meta: '短剧 · ' + (d.episodes || ''), name: d.title, fillName: d.title, desc: d.desc || '' };
+                 meta: d.episodes || '', name: d.title, fillName: d.title, desc: d.desc || '' };
       });
       var items = pkTab === 'drama' ? dramas : videoItems();
       if (q) {
