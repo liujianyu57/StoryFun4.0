@@ -150,6 +150,23 @@
       .cd-head { flex-wrap: wrap; }
       .cd-price-main { font-size: 24px; }
     }
+  /* 原型：挂单类型条 / 参数信息块 */
+  .ord-bar { display: flex; gap: 6px; margin: 0 16px 4px; }
+  .ord-bar button { height: 30px; padding: 0 14px; border-radius: 999px; border: none; background: none; color: var(--text-2); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+  .ord-bar button.on { background: var(--accent-soft); color: var(--text); }
+  .ord-panel .f-note { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
+  .ord-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid #F0F1F3; font-size: 12.5px; }
+  .ord-row:first-child { border-top: none; }
+  .ord-row b { color: var(--text); }
+  .ord-side { font-weight: 700; }
+  .ord-side.buy { color: #0E9F6E; } .ord-side.sell { color: var(--down); }
+  .swap-arrow { cursor: pointer; }
+  .mi-card { padding: 14px 16px; }
+  .mi-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 12.5px; color: var(--text-2); border-top: 1px dashed #F0F1F3; }
+  .mi-row:first-of-type { border-top: none; }
+  .mi-row b { color: var(--text); font-weight: 700; text-align: right; }
+  .mi-title { font-size: 13.5px; font-weight: 800; margin: 10px 0 4px; }
+  .mi-note { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -254,6 +271,8 @@
             <div class="story-src" id="storySrc"></div>
           </div>
         </div>
+        <!-- 原型：参数信息（对齐参考的 About/Creator fees/Holder fee sharing） -->
+        <div class="card" id="metaCard" style="display:none"></div>
       </div>
 
       <!-- 右列 Swap -->
@@ -263,6 +282,13 @@
             <button data-s="buy" class="on">买入</button>
             <button data-s="sell">卖出</button>
           </div>
+          <!-- 原型：已毕业显示 Market | Limit | Orders -->
+          <div class="ord-bar" id="ordBar" style="display:none">
+            <button type="button" class="on" data-o="market" onclick="ordMode('market')">Market</button>
+            <button type="button" data-o="limit" onclick="ordMode('limit')">Limit</button>
+            <button type="button" data-o="orders" onclick="ordMode('orders')">Orders</button>
+          </div>
+          <div id="mktPanel">
           <div class="swap-box">
             <div class="swap-box-label"><span>支付</span><b id="payBalance">—</b></div>
             <div class="swap-input-row">
@@ -271,7 +297,7 @@
             </div>
             <div class="quick-row" id="quickRow"></div>
           </div>
-          <div class="swap-arrow">
+          <div class="swap-arrow" id="swapArrow" title="对调买卖方向">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10l5-5 5 5M17 14l-5 5-5-5"/></svg>
           </div>
           <div class="swap-box">
@@ -290,6 +316,32 @@
           <div class="inline-warn danger" id="swapErr"></div>
           <div class="inline-warn warn" id="swapWarn"></div>
           <button class="btn btn-primary btn-lg swap-submit" id="swapBtn" onclick="doSwap()">买入</button>
+          </div>
+          <!-- 原型：限价单面板 -->
+          <div class="ord-panel" id="limPanel" style="display:none">
+            <div class="swap-box">
+              <div class="swap-box-label"><span>限价（每个币的价格）</span><b class="num" id="limHint">—</b></div>
+              <div class="swap-input-row">
+                <input id="limPriceIn" class="swap-input num" type="number" min="0" step="any" placeholder="0.00" />
+                <span class="swap-token" id="limTok">$</span>
+              </div>
+            </div>
+            <div class="swap-box">
+              <div class="swap-box-label"><span>数量</span></div>
+              <div class="swap-input-row">
+                <input id="limQtyIn" class="swap-input num" type="number" min="0" step="any" placeholder="0.00" />
+                <span class="swap-token" id="limQtyTok">SYM</span>
+              </div>
+            </div>
+            <div class="sd-row"><span>说明</span><b>本地演示 · 不真实撮合</b></div>
+            <button class="btn btn-primary btn-lg swap-submit" style="margin-top:10px" onclick="placeLimit()">挂限价单</button>
+            <div class="f-note">原型：仅把订单加入下方 Orders 列表展示。</div>
+          </div>
+          <!-- 原型：挂单列表 -->
+          <div class="ord-panel" id="ordListPanel" style="display:none">
+            <div class="card-pad" id="ordRows"></div>
+            <div class="f-note" style="padding:0 16px 12px">模拟挂单仅供原型展示。</div>
+          </div>
         </div>
 
 
@@ -383,7 +435,8 @@ var holders = [];
       renderChart();
       renderHolders();
       refreshSwap();
-
+      ordShow();
+      renderMeta();
     }
 
     function buildSeries(seed) {
@@ -479,9 +532,17 @@ var holders = [];
       }
       var p = Math.min(100, Math.round(((coin.poolUsd || 0) / (coin.gradThresholdUsd || 13440)) * 100));
       band.className = 'grad-band';
+      // 配对币单位换算（原型：非 ETH 配对时进度条以配对资产计价，对齐参考）
+      var pair = coin.pair || 'ETH';
+      var sub = '池内 ' + Launch.fmtUsd(coin.poolUsd || 0) + ' / ' + Launch.fmtUsd(coin.gradThresholdUsd || 13440) + ' · curve 售罄后自动毕业';
+      var pairPx = (window.Launch && Launch.assetPrice) ? Launch.assetPrice(pair) : null;
+      if (pair !== 'ETH' && pairPx) {
+        var nu = function (usd) { var v = usd / pairPx; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toFixed(4); };
+        sub = '已募 ' + nu(coin.poolUsd || 0) + ' / ' + nu(coin.gradThresholdUsd || 13440) + ' ' + esc(pair) + ' · 达到阈值后自动毕业上池';
+      }
       band.innerHTML =
         '<div class="gb-row"><span class="gb-title">距毕业</span><span class="tag" style="margin-left:auto" id="gbPct">' + p + '%</span></div>' +
-        '<div class="gb-sub num">池内 ' + Launch.fmtUsd(coin.poolUsd || 0) + ' / ' + Launch.fmtUsd(coin.gradThresholdUsd || 13440) + ' · curve 售罄后自动毕业</div>' +
+        '<div class="gb-sub num">' + sub + '</div>' +
         '<div class="grad-progress"><i style="width:' + p + '%" id="gbBar"></i></div>';
     }
 
@@ -587,6 +648,94 @@ var holders = [];
       }).join('');
     }
 
+    // ============ 原型：挂单类型 / 方向互换 / 参数信息 ============
+    var ordModeCur = 'market';
+    var orderRows = [];
+    function ordMode(m) {
+      if (!coin || !coin.graduated) m = 'market';
+      ordModeCur = m;
+      var bar = document.querySelectorAll('#ordBar button');
+      for (var i = 0; i < bar.length; i++) bar[i].classList.toggle('on', bar[i].getAttribute('data-o') === m);
+      document.getElementById('mktPanel').style.display = m === 'market' ? '' : 'none';
+      document.getElementById('limPanel').style.display = m === 'limit' ? '' : 'none';
+      document.getElementById('ordListPanel').style.display = m === 'orders' ? '' : 'none';
+      if (m === 'orders') renderOrders();
+    }
+    function ordShow() {
+      if (!coin) return;
+      var bar = document.getElementById('ordBar');
+      bar.style.display = coin.graduated ? 'flex' : 'none';
+      if (coin.graduated) {
+        document.getElementById('limHint').textContent = '当前 ' + Launch.fmtPrice(coin.priceUsd);
+        var lp = document.getElementById('limPriceIn');
+        if (!lp.value) lp.value = coin.priceUsd.toFixed(6);
+        document.getElementById('limTok').textContent = '$' + esc(coin.symbol);
+        document.getElementById('limQtyTok').textContent = esc(coin.symbol);
+      }
+      ordMode(ordModeCur);
+    }
+    function renderOrders() {
+      var host = document.getElementById('ordRows');
+      if (!orderRows.length) {
+        host.innerHTML = '<div class="empty" style="padding:26px 10px"><div class="empty-title" style="font-size:13px">暂无挂单</div><div class="empty-desc" style="font-size:12px">切到 Limit 挂一笔试试</div></div>';
+        return;
+      }
+      host.innerHTML = orderRows.slice().reverse().map(function (o) {
+        return '<div class="ord-row"><span class="ord-side ' + o.side + '">' + (o.side === 'buy' ? '买入' : '卖出') + '</span>' +
+          '<span class="num">限价 ' + o.price.toFixed(6) + '</span>' +
+          '<span class="num">' + (o.qty >= 1000 ? (o.qty / 1000).toFixed(1) + 'K' : o.qty.toFixed(4)) + ' ' + esc(coin.symbol) + '</span>' +
+          '<span class="num" style="color:var(--text-3)">' + Launch.timeAgo(o.at) + '</span></div>';
+      }).join('');
+    }
+    function placeLimit() {
+      var price = parseFloat(document.getElementById('limPriceIn').value);
+      var qty = parseFloat(document.getElementById('limQtyIn').value);
+      if (!(price > 0) || !(qty > 0)) { Launch.toast('请填写限价与数量', 'err'); return; }
+      orderRows.push({ side: side, price: price, qty: qty, at: Date.now() });
+      if (orderRows.length > 20) orderRows.shift();
+      Launch.toast('已挂模拟限价单', 'ok');
+      ordMode('orders');
+    }
+    function flipSwap() {
+      side = side === 'buy' ? 'sell' : 'buy';
+      var btns = document.querySelectorAll('#swapSeg button');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', btns[i].getAttribute('data-s') === side);
+      refreshSwap();
+    }
+    // 参数信息（对齐参考 About/Creator fees/Holder fee sharing；已毕业时隐藏）
+    function renderMeta() {
+      var host = document.getElementById('metaCard');
+      if (!host) return;
+      if (!coin || coin.graduated) { host.style.display = 'none'; host.innerHTML = ''; return; }
+      var pair = coin.pair || 'ETH';
+      var px = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 3200) : 3200;
+      var qty = function (usd) { var v = usd / px; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toFixed(4); };
+      var progress = Math.min(1, (coin.progress || 0));
+      var sweeps = Math.max(1, Math.round(progress * 6));
+      var earnedUsd = (coin.poolUsd || 0) * 0.05;
+      var paidUsd = earnedUsd * 0.55, potUsd = earnedUsd - paidUsd;
+      var html = '<div class="mi-card">';
+      html += '<div class="mi-row"><span>配对资产</span><b>' + esc(pair) + '</b></div>';
+      html += '<div class="mi-row"><span>Creator tax</span><b>' + ((coin.creatorTaxPct || 0) * 1).toFixed(2) + '%</b></div>';
+      html += '<div class="mi-row"><span>Supply</span><b>1,000,000,000 · Fixed at launch</b></div>';
+      if (coin.shareToHolders) {
+        html += '<div class="mi-title">Creator fees</div>';
+        html += '<div class="mi-row"><span>Earned</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + ' · across ' + sweeps + ' sweeps</b></div>';
+        html += '<div class="mi-note">创作者费已路由给持有人：不存在创作者认领。</div>';
+        html += '<div class="mi-title">Holder fee sharing</div>';
+        html += '<div class="mi-row"><span>Paid to holders</span><b>' + qty(paidUsd) + ' ' + esc(pair) + ' · across ' + Math.max(1, sweeps - 1) + ' distributions</b></div>';
+        html += '<div class="mi-row"><span>In the pot</span><b>' + qty(potUsd) + ' ' + esc(pair) + '</b></div>';
+        html += '<div class="mi-note">分发给持有人 · 各自可从账户页领取。</div>';
+      } else if ((coin.creatorTaxPct || 0) > 0 || earnedUsd > 0) {
+        html += '<div class="mi-title">Creator fees</div>';
+        html += '<div class="mi-row"><span>可领取</span><b>' + qty(earnedUsd) + ' ' + esc(pair) + '</b></div>';
+        html += '<div class="mi-note">创作者费归创建者钱包（可随时领取）。</div>';
+      }
+      html += '</div>';
+      host.innerHTML = html;
+      host.style.display = 'block';
+    }
+
     // ============ Swap ============
     function refreshSwap() {
       if (!coin) return;
@@ -688,6 +837,8 @@ var holders = [];
       renderTx();
       renderChart();
       refreshSwap();
+      ordShow();
+      renderMeta();
     }
 
     function fireGradFx() {
@@ -738,6 +889,7 @@ var holders = [];
 
     // ============ 事件绑定 ============
     document.addEventListener('click', function (e) {
+      if (e.target.closest('#swapArrow')) flipSwap();
       var sb = e.target.closest('#swapSeg button');
       if (sb) {
         side = sb.getAttribute('data-s');
