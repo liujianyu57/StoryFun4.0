@@ -8,8 +8,9 @@
   <style>
     /* ===== Analytics ===== */
     .an-hero { padding: 30px 0 6px; }
-    .an-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-    .an-sub { font-size: 13px; color: var(--text-2); margin-top: 5px; }
+    .an-title { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+    .an-sub { font-size: 13.5px; color: var(--text-2); margin-top: 6px; line-height: 1.6; }
+    .an-sub .an-sub2 { display: block; font-size: 12px; color: var(--text-3); margin-top: 4px; font-variant-numeric: tabular-nums; }
     .an-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
 
     .an-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 22px 0 20px; }
@@ -52,8 +53,10 @@
     <div class="an-hero">
       <div class="an-head">
         <div>
-          <div class="an-title">发射台数据</div>
-          <div class="an-sub">平台大盘 · 发行与成交趋势（近 14 天）</div>
+          <div class="an-title">Protocol analytics</div>
+          <div class="an-sub">Independent onchain reporting for pons markets on Robinhood Chain.
+            <span class="an-sub2 num" id="duneMeta">Dune updated —</span>
+          </div>
         </div>
         <div class="seg-wrap">
           <div class="pill-seg" id="modeSeg">
@@ -181,7 +184,20 @@
       }
     }
 
+    function fillDuneMeta() {
+      var el = document.getElementById('duneMeta');
+      if (!el) return;
+      try {
+        var now = new Date();
+        var t = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        var y = new Date(Date.now() - 86400000);
+        var day = y.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+        el.textContent = 'Dune updated ' + t + ', latest complete day ' + day + ' UTC';
+      } catch (e) { el.textContent = 'Dune updated —'; }
+    }
+
     window.onLaunchShellReady = function () {
+      fillDuneMeta();
       document.getElementById('modeSeg').addEventListener('click', function (e) {
         var b = e.target.closest('button[data-m]');
         if (!b) return;
