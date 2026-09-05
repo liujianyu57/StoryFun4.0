@@ -196,16 +196,24 @@
   .ab-link { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
   .ab-link:hover { color: var(--text); border-color: var(--text-3); }
   @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } }
-  /* About：左说明 / 右侧 burn 面板 / 底行外链（figma 级原型：全要素假数据） */
-  .about-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 14px 26px; padding: 20px 22px; }
-  .ab-side { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; min-width: 220px; }
-  .ab-burn-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; }
-  .ab-burn-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .ab-burn-value small { font-size: 13px; color: var(--text-2); font-weight: 700; margin-left: 4px; }
-  .ab-burn-meta { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
-  .ab-links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
-  @media (max-width: 640px) { .about-card { grid-template-columns: 1fr; } .ab-links { grid-column: auto; } }
-  /* 费卡（对齐 token-creator-fees-card.float） */
+  /* About（pons token-about-card：左说明+Creator / 中 Supply / 右 Paired+合约地址） */
+  .about-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-rows: auto auto; gap: 12px 40px; padding: 22px 24px; }
+  .ab-main { min-width: 0; }
+  .ab-desc { margin: 0 0 10px; font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.6; max-width: 560px; }
+  .ab-creator { font-size: 12.5px; color: var(--text-3); }
+  .ab-creator .ab-creator-addr { font-family: var(--mono); color: var(--text-2); cursor: pointer; }
+  .ab-creator b { color: var(--text-2); font-weight: 600; }
+  .ab-bd-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; margin-bottom: 4px; }
+  .ab-bd-value { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -0.01em; }
+  .ab-bd-value small { font-size: 13px; font-weight: 700; color: var(--text-2); margin-left: 4px; }
+  .ab-bd-note { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+  .ab-right { display: grid; gap: 16px; justify-items: start; }
+  .ab-addr-line { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .ab-addr-line .mono { font-family: var(--mono); color: var(--text-2); }
+  .ab-link { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .ab-link:hover { color: var(--text); border-color: var(--text-3); }
+  @media (max-width: 860px) { .about-card { grid-template-columns: 1fr; } }
+    /* 费卡（对齐 token-creator-fees-card.float） */
   #metaHost { display: grid; gap: 14px; margin-top: 4px; }
   .fee-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
@@ -275,15 +283,27 @@
 
     </div>
 
-    <!-- About 卡（参考 token-about-card：About + Burn 面板 + 外链） -->
+    <!-- About 卡（pons token-about-card 四区：左说明+Creator / 中 Supply / 右 Paired+地址） -->
     <div class="card about-card" id="aboutCard">
-      <div>
-        <div class="ab-title">About</div>
+      <div class="ab-main">
         <p class="ab-desc" id="abDesc">—</p>
-        <div class="ab-meta" id="abMeta"></div>
+        <div class="ab-creator" id="abCreator"></div>
       </div>
-      <div class="ab-side" id="abBurn" style="display:none"></div>
-      <div class="ab-links" id="abLinks"></div>
+      <div class="ab-supply">
+        <div class="ab-bd-label">Supply</div>
+        <div class="ab-bd-value num" id="abSupplyVal">—</div>
+        <div class="ab-bd-note">Fixed at launch</div>
+      </div>
+      <div class="ab-right">
+        <div>
+          <div class="ab-bd-label">Paired</div>
+          <div class="ab-bd-value num" id="abPair">—</div>
+        </div>
+        <div>
+          <div class="ab-addr-line"><span class="mono num" id="abTokenAddr">—</span></div>
+          <div class="ab-addr-line" style="margin-top:6px"><a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Explorer</a></div>
+        </div>
+      </div>
     </div>
 
     <div id="metaHost" style="display:none"></div>
@@ -547,46 +567,24 @@ var holders = [];
         (coin.creatorTaxPct ? '<span class="tag">Creator tax ' + coin.creatorTaxPct + '%</span>' : '') +
         (coin.shareToHolders ? '<span class="tag tag-gold">费共享</span>' : '') +
         (coin.social && (coin.social.x || coin.social.tg) ? '<span class="tag" style="cursor:pointer" onclick="openSocial()">↗ 社区</span>' : '');
-      // About 卡（figma 级原型：全要素，数据为演示值）
-      document.getElementById('abDesc').textContent = coin.tagline || (coin.sourceType === 'work' ? '一部短剧的叙事币。' : '一个 AI 叙事币。');
-      var meta = [];
-      meta.push('<span class="tag">配对 ' + esc(coin.pair || 'ETH') + '</span>');
-      meta.push('<span class="tag">Creator tax ' + (((coin.creatorTaxPct || 0) * 1).toFixed(2)) + '%</span>');
-      meta.push('<span class="tag">Supply 1,000,000,000 · Fixed at launch</span>');
-      meta.push('<span class="tag" style="cursor:pointer" onclick="copyText(coin.creatorAddr)" title="复制">Creator ' + esc(coin.creatorAddr) + '</span>');
-      meta.push(coin.graduated
-        ? '<span class="tag tag-up">已毕业 · 流动性永久锁定</span>'
-        : '<span class="tag">curve 进行中</span>');
-      if (coin.sourceTitle) meta.push('<span class="tag">源自 ' + esc(coin.sourceTitle) + '</span>');
-      document.getElementById('abMeta').innerHTML = meta.join('');
-      // Burn 面板（仅已毕业展示，模拟值）——参考：token-about-burn
-      var burnHost = document.getElementById('abBurn');
-      if (burnHost) {
-        if (coin.graduated) {
-          var h = 0, id2 = coin.id || 'x';
-          for (var i4 = 0; i4 < id2.length; i4++) h = (h * 31 + id2.charCodeAt(i4)) >>> 0;
-          var pct = 0.18 + (h % 340) / 1000;                 // 18%–52% 假销毁占比
-          var burned = Math.floor(1e9 * pct);
-          burnHost.style.display = '';
-          burnHost.innerHTML =
-            '<div class="ab-burn-label">Burned</div>' +
-            '<div class="ab-burn-value num">' + burned.toLocaleString() + '<small>' + esc(coin.symbol) + '</small></div>' +
-            '<div class="ab-burn-meta num">≈ ' + (pct * 100).toFixed(1) + '% of supply · 100% of fees go back to ' + esc(coin.symbol) + '</div>';
-        } else { burnHost.style.display = 'none'; burnHost.innerHTML = ''; }
-      }
-      // 外链行（按状态给 pons 形态的假链接）
-      var links = '<a class="ab-link" href="javascript:void(0)" onclick="goSource()">▶ 叙事</a>';
-      if (coin.social && (coin.social.x || coin.social.tg)) links += '<a class="ab-link" href="javascript:void(0)" onclick="openSocial()">↗ 社区</a>';
-      if (coin.graduated) {
-        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">◆ Dexscreener</a>';
-        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">◆ GeckoTerminal</a>';
-        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Contract</a>';
-        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Pool</a>';
-      } else {
-        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Explorer</a>';
-        links += '<a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Twitter</a>';
-      }
-      document.getElementById('abLinks').innerHTML = links;
+      // About 卡（pons token-about-card 四区：左描述+Creator / 中 Supply / 右 Paired+地址）
+      document.getElementById('abDesc').textContent = coin.tagline ||
+        (coin.sourceTitle ? '关于「' + coin.sourceTitle + '」的链上故事，见证它从第一笔走向毕业。' : '一枚在 Story.fun 发射的叙事代币。');
+      var taxTxt = (((coin.creatorTaxPct || 0) * 1).toFixed(2)) + '%';
+      document.getElementById('abCreator').innerHTML =
+        'Creator <span class="ab-creator-addr num" onclick="copyText(coin.creatorAddr)" title="复制">' + esc(coin.creatorAddr) + '</span>' +
+        ' · <b>' + taxTxt + '</b> creator tax';
+      document.getElementById('abSupplyVal').innerHTML = '1,000,000,000 <small>' + esc(coin.symbol) + '</small>';
+      document.getElementById('abPair').textContent = esc(coin.pair || 'ETH');
+      // Token 合约地址：确定性假地址（区别于 Creator 地址）
+      (function () {
+        var seed = 'token:' + (coin.id || 'x');
+        var h = 2166136261, i;
+        for (i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+        var hex = ('00000000' + (h >>> 0).toString(16)).slice(-8);
+        document.getElementById('abTokenAddr').textContent =
+          '0x' + hex.slice(0, 2).toUpperCase() + hex.slice(2, 4) + '…' + hex.slice(4, 6) + hex.slice(6, 8).toUpperCase();
+      })();
       // 叙事文案
       document.getElementById('storyDesc').textContent = coin.tagline || '这个币还没有简介';
       var src = '';
