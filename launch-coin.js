@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 13;
+  var SCHEMA_VERSION = 14;
 
   // ============================================================
   //  配对资产（quote）：ETH + 股票代币
@@ -207,14 +207,14 @@
     }),
     seedCoin({
       id: 'c_candle', name: '烛火与王冠', symbol: 'CANDLE', tagline: '在权力的烛光里，谁先燃尽。',
-      creator: 'Sylvan', creatorAddr: '0xB20f…9e01', cover: IMG.candle, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
+      creator: 'Sylvan', creatorAddr: '0xB20f…9e01', cover: IMG.candle, video: 'video/打斗视频.mp4', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.0001, holders: 1206, volumeUsd: 22000, launchedAt: D(10), graduated: false, progress: 0.28,
       poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45],
       pair: 'GLD'
     }),
     seedCoin({
       id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。', lockedPct: 0.18, creatorHoldsPct: 29,
-      creator: 'Noah', creatorAddr: '0x57C9…f1a3', cover: IMG.survivor, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
+      creator: 'Noah', creatorAddr: '0x57C9…f1a3', cover: IMG.survivor, video: 'video/丞相府今日开饭.mp4', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.00018, holders: 2304, volumeUsd: 88000, launchedAt: D(40), graduated: true, gradAt: D(21),
       poolUsd: 15400, change24h: -0.24, lastBuyAt: D(12), spark: [0.3, 0.5, 0.8, 0.9, 0.7, 0.6, 0.62, 0.5],
       social: { x: 'noah_survive', tg: 'noah_bunker' },
@@ -229,13 +229,13 @@
     }),
     seedCoin({
       id: 'c_names', name: '无名者档案', symbol: 'NAMES', tagline: '名字被夺走的人，自己写回自己的名字。', shareToHolders: true,
-      creator: '白鹭', creatorAddr: '0x33A1…c8f0', cover: IMG.names, video: '', sourceType: 'work', sourceTitle: '短剧《无名者档案》',
+      creator: '白鹭', creatorAddr: '0x33A1…c8f0', cover: IMG.names, video: 'video/凤骨琉璃.mp4', sourceType: 'work', sourceTitle: '短剧《无名者档案》',
       priceUsd: 0.00055, holders: 1732, volumeUsd: 67100, launchedAt: D(66), graduated: true, gradAt: D(49),
       poolUsd: 20300, change24h: 0.11, lastBuyAt: D(30), spark: [0.2, 0.3, 0.5, 0.55, 0.8, 0.75]
     }),
     seedCoin({
       id: 'c_pyramid', name: '金字塔之梦', symbol: 'PYRAMID', tagline: '梦境深处，法老仍在等待。',
-      creator: 'Ramesh', creatorAddr: '0xF90C…d2e8', cover: IMG.pyramid, video: '', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
+      creator: 'Ramesh', creatorAddr: '0xF90C…d2e8', cover: IMG.pyramid, video: 'video/我卸甲后天下大乱了.mp4', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.000078, holders: 501, volumeUsd: 8900, launchedAt: D(1), graduated: false, progress: 0.03,
       poolUsd: 190, change24h: 0.15, isNew: true, lastBuyAt: D(0.4), spark: [0.4, 0.45]
     }),
@@ -307,7 +307,9 @@
           id: 'gen_' + i0, name: A + ' ' + B, symbol: sym,
           tagline: TAGLINES[(i0 * 13 + 5) % TAGLINES.length],
           creator: 'Creator' + (i0 % 97), creatorAddr: walletFrom('genc:' + i0),
-          cover: COVERS[i0 % COVERS.length], video: '', sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
+          cover: COVERS[i0 % COVERS.length],
+          video: (i0 % 4 === 3 ? '' : ['video/凤骨琉璃.mp4','video/丞相府今日开饭.mp4','video/打斗视频.mp4','video/我卸甲后天下大乱了.mp4'][i0 % 4]),
+          sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
           sourceTitle: '', supply: K.totalSupply,
           pair: pairOf('gen_' + i0),   // 确定性随机配对资产（含约 1/5 ETH）
           lockedPct: lockedPct,
