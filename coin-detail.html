@@ -609,6 +609,47 @@ var holders = [];
       Launch.toast(parts.length ? ('社区: ' + parts.join(' · ')) : '该币暂未设置社区链接', parts.length ? 'ok' : 'warn');
     }
     function fakeLink() { if (Launch && Launch.toast) Launch.toast('原型演示链接', 'ok'); }
+    var __divAmt = {};
+    // 调试身份（演示 Creator / Holder / 路人 门控语义）：localStorage sf_demo_role
+    function __demoRole() {
+      var r = ''; try { r = localStorage.getItem('sf_demo_role') || ''; } catch (e) {}
+      return (r === 'creator' || r === 'holder' || r === 'other') ? r : '';
+    }
+    function __demoHeldPct() {
+      var h2 = 0, s2 = coin.id || 'x', i2;
+      for (i2 = 0; i2 < s2.length; i2++) h2 = (h2 * 31 + s2.charCodeAt(i2)) >>> 0;
+      return 2 + (h2 % 6);
+    }
+    function __isMyCoin() {
+      var r = __demoRole();
+      if (r === 'creator') return true;
+      if (r === 'holder' || r === 'other') return false;
+      return !!(window.Launch && (Launch.USER.created || []).indexOf(coin.id) !== -1);
+    }
+    function __heldCoin() {
+      var r = __demoRole();
+      if (r === 'holder') return true;
+      if (r === 'creator' || r === 'other') return false;
+      var h = (window.Launch && Launch.USER.holdings) ? Launch.USER.holdings[coin.id] : null;
+      return !!(h && h.amount > 0);
+    }
+    function __divClaimed(id) {
+      try { var a = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]'); return a.indexOf(id) !== -1; } catch (e) { return false; }
+    }
+    function __markDivClaimed(id) {
+      try { var a = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]'); if (a.indexOf(id) === -1) { a.push(id); localStorage.setItem('sf_div_claimed', JSON.stringify(a)); } } catch (e) {}
+    }
+    function claimHolderDiv() {
+      var amt = __divAmt[coin.id];
+      if (!amt) { Launch.toast('当前无待领分红', 'warn'); return; }
+      if (window.Launch && Launch.USER) {
+        Launch.USER.eth += Launch.usdToEth(amt);
+        if (Launch.persist) Launch.persist();
+      }
+      __markDivClaimed(coin.id);
+      Launch.toast('已领取持有人分红 ' + Launch.fmtUsd(amt), 'ok');
+      renderMeta();
+    }
     function doClaim(id) {
       if (!Launch.isLoggedIn()) { openLoginModal(); return; }
       var r = Launch.claim(id);
@@ -855,22 +896,26 @@ var holders = [];
       if (toHolders) {
         html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>';
       } else {
-        // 创建者钱包路由：可领金额 + 收款地址 + Claim 按钮（pons 同款文案）
+        // 创建者钱包路由：可领金额 + 收款地址；仅部署者本人显示 Claim（pons 口径）
         html += '<div class="ff-assets">' + valHtml(claimable) +
           '<span class="ff-sub">Claimable now, across every launch paid to ' + esc(recv) + '</span></div>' +
           '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>' +
-          '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">Claim</button>';
+          (__isMyCoin() ? '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">Claim</button>' : '');
       }
       html += '</div>';
       // 卡 2：Holder fee sharing
       html += '<div class="card fee-card">' +
         '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>';
       if (toHolders) {
+        __divAmt[coin.id] = r6(pot * (0.15 + ((h6 >>> 13) % 25) / 100));   // 演示：本钱包可领份额
         html += '<div class="ff-assets">' + valHtml(paid) +
           '<span class="ff-sub">Paid to holders across ' + dist + ' distribution' + (dist === 1 ? '' : 's') + '</span></div>' +
           '<div class="ff-assets">' + valHtml(pot) +
           '<span class="ff-sub">In the pot for the next distribution</span></div>' +
-          '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>';
+          '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>' +
+          ((__heldCoin() && !__divClaimed(coin.id))
+            ? '<button class="btn btn-ghost ff-act" onclick="claimHolderDiv()">Claim dividends</button>'
+            : (__divClaimed(coin.id) ? '<span class="ff-hint" style="margin:0">已领取本币分红</span>' : ''));
       } else {
         html += '<div class="ff-assets">' + valHtml(0) +
           '<span class="ff-sub">Routing off · 费当前归创建者钱包</span></div>' +
@@ -1000,14 +1045,16 @@ var holders = [];
     // ============ Holders ============
     function renderHolders() {
       var names = ['0x7A2b…fD81', '0x9F3c…aa12', '0x1D8a…b40e', '0xE45b…77c9', '0x33A1…c8f0', '0xB20f…9e01'];
-      var isCreatorMine = Launch.USER.created.indexOf(coin.id) !== -1;
-      var meHeld = Launch.USER.holdings[coin.id];
+      var isCreatorMine = __isMyCoin();
       var base = [28, 16, 11, 8, 6, 5];
       holders = base.map(function (p, i) {
         return { addr: names[i % names.length], pct: p, creator: i === 0 };
       });
       if (isCreatorMine) { holders[0].creator = true; holders[0].addr = 'Creator'; }
-      var myPct = meHeld ? Math.max(1, Math.round(meHeld.amount / 1e5)) : 0;
+      // “我”行跟随调试身份：默认按真实持仓；持有人演示态补占位行；创建者/路人态不显示
+      var myPct = 0, rRole = __demoRole();
+      if (rRole === 'holder') myPct = __demoHeldPct();
+      else if (!rRole) { var meHeld = Launch.USER.holdings[coin.id]; myPct = (meHeld && meHeld.amount > 0) ? Math.max(1, Math.round(meHeld.amount / 1e5)) : 0; }
       if (myPct) holders.push({ addr: '我', pct: myPct, me: true });
       var total = Math.min(99, holders.reduce(function (s, h) { return s + h.pct; }, 0));
       document.getElementById('holdersTotal').textContent = Launch.fmtNum(coin.holders || 0);
@@ -1074,6 +1121,37 @@ var holders = [];
       }
     });
     document.getElementById('swapIn').addEventListener('input', updateQuote);
+
+    // 调试身份开关（演示创建者 / 持有人 / 路人 门控语义）
+    (function () {
+      var seq = ['', 'creator', 'holder', 'other'];
+      var names = { '': '默认(当前钱包)', creator: '创建者', holder: '持有人', other: '路人' };
+      var dots = { '': '#a9a9c2', creator: '#8b5cf6', holder: '#16a34a', other: '#f59e0b' };
+      var css = document.createElement('style');
+      css.textContent = '#cdbgPill{position:fixed;right:12px;bottom:12px;z-index:900;display:inline-flex;align-items:center;gap:6px;max-width:78vw;padding:6px 12px 6px 9px;border:1px dashed #b9b9c9;border-radius:999px;background:#fff;color:#3a3a45;font:11px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.10);cursor:pointer;user-select:none;-webkit-user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+        '#cdbgPill .cdbg-dot{width:8px;height:8px;border-radius:50%;flex:none;transition:background .2s}' +
+        '@media (max-width:900px){#cdbgPill{bottom:78px}}';
+      document.head.appendChild(css);
+      var pill = document.createElement('button');
+      pill.id = 'cdbgPill';
+      pill.type = 'button';
+      pill.title = '切换演示身份：创建者 / 持有人 / 路人 —— 仅影响本页 Creator fees / Holder fee sharing 与持有人列表的门控显示';
+      function paint() {
+        var r = __demoRole();
+        pill.innerHTML = '<i class="cdbg-dot"></i>调试身份：' + names[r];
+        pill.querySelector('.cdbg-dot').style.background = dots[r];
+      }
+      pill.addEventListener('click', function () {
+        var r = __demoRole();
+        var nx = seq[(seq.indexOf(r) + 1) % seq.length];
+        try { localStorage.setItem('sf_demo_role', nx); } catch (e) {}
+        paint();
+        if (window.Launch && typeof coin !== 'undefined' && coin && typeof renderMeta === 'function') { renderMeta(); renderHolders(); }
+        Launch.toast('演示身份 → ' + names[nx] + (nx ? '（仅演示门控语义）' : '（恢复真实钱包）'), 'ok');
+      });
+      paint();
+      document.body.appendChild(pill);
+    })();
 
     window.onLaunchShellReady = function () {
       // 快捷按钮
