@@ -302,6 +302,27 @@
       drawPnl();
     }
 
+    // 持有人分红（与币详情页同口径的确定性演示值）
+    function divClaimed(id) {
+      try { var a = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]'); return a.indexOf(id) !== -1; } catch (e) { return false; }
+    }
+    function assetsDivAmt(id) {
+      var h6 = 0, i6 = 0, ss2 = id || 'x';
+      for (i6 = 0; i6 < ss2.length; i6++) h6 = (h6 * 31 + ss2.charCodeAt(i6)) >>> 0;
+      var r6 = function (x) { return Math.round(x * 1e6) / 1e6; };
+      var earned = r6(1.2 + (h6 % 48000) / 1000);
+      var pot = r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100));
+      return r6(pot * (0.15 + ((h6 >>> 13) % 25) / 100));
+    }
+    function claimDiv(id) {
+      var amt = assetsDivAmt(id);
+      if (!amt) { Launch.toast('当前无待领分红', 'warn'); return; }
+      Launch.USER.eth += Launch.usdToEth(amt);
+      Launch.persist();
+      try { var a = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]'); if (a.indexOf(id) === -1) { a.push(id); localStorage.setItem('sf_div_claimed', JSON.stringify(a)); } } catch (e) {}
+      Launch.toast('已领取分红 ' + Launch.fmtUsd(amt), 'ok');
+      renderHold();
+    }
     function renderHold() {
       var holds = myHoldings();
       var host = document.getElementById('asBody');
@@ -329,6 +350,9 @@
             '<div class="v num">' + Launch.fmtUsd(val) + '</div>' +
             '<div class="s num ' + Launch.dirClass(pnl) + '">' + (pnl >= 0 ? '+' : '−') + Launch.fmtUsd(Math.abs(pnl)) + '</div>' +
             '<button class="asset-btn ghost" onclick="goCoin(\'' + c.id + '\')">交易</button>' +
+            (c.shareToHolders && !divClaimed(c.id)
+              ? '<button class="asset-btn" style="margin-top:6px" onclick="claimDiv(\'' + c.id + '\')">领取分红</button>'
+              : '') +
           '</div></div>';
       }).join('') + '</div>';
     }
