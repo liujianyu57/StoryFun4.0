@@ -84,6 +84,42 @@
     .p-share { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
       background: var(--surface-2); color: var(--text-2); cursor: pointer; display: grid; place-items: center; transition: all .15s; }
     .p-share:hover { color: var(--text); border-color: var(--text-3); background: var(--surface); }
+    .p-share svg { width: 15px; height: 15px; }
+
+    /* 分享弹层：HTML 分享卡（视觉近似分享图，不真实生成文件） */
+    .share-overlay { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center;
+      background: rgba(10,11,13,.5); padding: 20px; }
+    .share-overlay.open { display: flex; }
+    .share-card { width: min(400px, 94vw); background: #fff; border-radius: 20px; padding: 16px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.25); display: flex; flex-direction: column; gap: 12px; }
+    .share-head { display: flex; align-items: center; justify-content: space-between; }
+    .share-head b { font-size: 14px; font-weight: 700; }
+    .share-head button { width: 30px; height: 30px; border-radius: 50%; border: none; background: rgba(0,0,0,.06);
+      color: #555; font-size: 14px; cursor: pointer; }
+    .share-card .sv { background: #fff; border: 1px solid #F0F1F3; border-radius: 16px; padding: 20px 20px 14px;
+      display: flex; flex-direction: column; gap: 16px; }
+    .sv-head { display: flex; align-items: baseline; justify-content: space-between; }
+    .sv-head .sv-k { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: #8E8E93; }
+    .sv-head .sv-brand { font-size: 11px; font-weight: 700; color: #0A0B0D; }
+    .sv-mid { display: flex; align-items: center; gap: 12px; }
+    .sv-logo { width: 52px; height: 52px; border-radius: 13px; overflow: hidden; background: #F4F5F7; flex: none;
+      display: grid; place-items: center; font-size: 18px; font-weight: 800; color: #B9BEC4; }
+    .sv-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .sv-tt b { display: block; font-size: 17px; font-weight: 800; }
+    .sv-tt i { display: block; font-style: normal; font-size: 12px; color: #8E8E93; font-weight: 600; margin-top: 2px; }
+    .sv-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sv-stats > div { background: #F7F8FA; border-radius: 12px; padding: 10px 12px; min-width: 0; }
+    .sv-stats label { display: block; font-size: 10px; color: #8E8E93; font-weight: 600; margin-bottom: 3px; }
+    .sv-stats b { display: block; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sv-stats .up b { color: #0E9F6E; }
+    .sv-stats .down b { color: #E5484D; }
+    .sv-foot { text-align: center; font-size: 10px; color: #C7CBD0; }
+    .share-actions { display: flex; gap: 10px; }
+    .share-actions button { flex: 1; height: 42px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
+    .share-actions .sv-copy { background: rgba(0,0,0,.06); color: #111; }
+    .share-actions .sv-copy:hover { background: rgba(0,0,0,.12); }
+    .share-actions .sv-down { background: #0A0B0D; color: #fff; }
+    .share-actions .sv-down:hover { opacity: .88; }
 
 
     .history-card { padding: 6px 18px 14px; }
@@ -196,6 +232,18 @@
       <div id="asBody"></div>
     </div>
   </main>
+
+  <!-- 持仓分享（HTML 分享卡示意，不生成图片文件） -->
+  <div class="share-overlay" id="shareModal">
+    <div class="share-card">
+      <div class="share-head"><b>分享持仓</b><button type="button" id="shareClose" aria-label="关闭">✕</button></div>
+      <div class="sv" id="svBody"></div>
+      <div class="share-actions">
+        <button type="button" class="sv-copy" onclick="shareAction('复制图片')">复制图片</button>
+        <button type="button" class="sv-down" onclick="shareAction('下载图片')">下载图片</button>
+      </div>
+    </div>
+  </div>
 
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
@@ -416,10 +464,57 @@
         '<div class="pos-scroll"><div class="pos-list">' + rows + '</div></div>';
     }
 
-    // 分享：原型占位（不真实生成图片）
-    function sharePosition() {
-      if (window.Launch && Launch.toast) Launch.toast('分享图片 · 演示占位', 'ok');
+    // 分享：弹出“看起来像图片”的 HTML 分享卡（含持仓信息，不真实生成文件）
+    function fmtMc(n) {
+      if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+      if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+      return '$' + n.toFixed(2);
     }
+    function sharePosition(id) {
+      var c = Launch.coinById(id);
+      if (!c) return;
+      var h = Launch.USER.holdings[id] || { amount: 0, avgUsd: 0 };
+      var cost = h.amount * h.avgUsd;
+      var val = h.amount * c.priceUsd;
+      var pnl = val - cost;
+      var pct = cost > 0 ? (pnl / cost) * 100 : 0;
+      var up = pnl >= 0;
+      var entryMcap = (c.marketCap || 0) * (h.avgUsd / Math.max(c.priceUsd, 1e-12));
+      var curMcap = c.marketCap || 0;
+      var logo = c.cover
+        ? '<img src="' + esc(c.cover) + '" alt="">'
+        : esc((c.symbol || '?').charAt(0).toUpperCase());
+      document.getElementById('svBody').innerHTML =
+        '<div class="sv-head"><span class="sv-k">OPEN POSITION</span><span class="sv-brand">story.fun</span></div>' +
+        '<div class="sv-mid">' +
+          '<span class="sv-logo">' + logo + '</span>' +
+          '<span class="sv-tt"><b>' + esc(c.name) + '</b><i>$' + esc(c.symbol) + '</i></span>' +
+        '</div>' +
+        '<div class="sv-stats">' +
+          '<div><label>Entry mcap</label><b>' + fmtMc(entryMcap) + '</b></div>' +
+          '<div><label>Current mcap</label><b>' + fmtMc(curMcap) + '</b></div>' +
+          '<div><label>Value</label><b>' + Launch.fmtUsd(val) + '</b></div>' +
+          '<div class="' + (up ? 'up' : 'down') + '"><label>PnL</label><b>' + (up ? '▲ +' : '▼ −') +
+            Launch.fmtUsd(Math.abs(pnl)) + ' (' + (pct >= 0 ? '+' : '−') + Math.abs(pct).toFixed(1) + '%)</b></div>' +
+        '</div>' +
+        '<div class="sv-foot">story.fun · open pons position · ' +
+          new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '</div>';
+      var modal = document.getElementById('shareModal');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeShare() {
+      document.getElementById('shareModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function shareAction(kind) {
+      if (window.Launch && Launch.toast) Launch.toast(kind + ' · 演示占位（不生成文件）', 'ok');
+    }
+    document.getElementById('shareClose').addEventListener('click', closeShare);
+    document.getElementById('shareModal').addEventListener('click', function (e) {
+      if (e.target === this) closeShare();
+    });
 
     function renderMade() {
       var made = myCreated();
