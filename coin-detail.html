@@ -502,7 +502,7 @@ var holders = [];
 
     function initCoin() {
       var q = new URLSearchParams(window.location.search).get('id');
-      coin = Launch.coinById(q) || Launch.coins[0];
+      coin = Launch.coinById(q) || (Launch.topCoin ? Launch.topCoin() : Launch.coins[0]);
       paySym = coin.pair || 'ETH';
       document.title = coin.name + ' · 发射台';
 

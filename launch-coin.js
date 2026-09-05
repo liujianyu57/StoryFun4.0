@@ -445,6 +445,18 @@
     for (var i = 0; i < SEED.length; i++) if (SEED[i].id === id) return SEED[i];
     return null;
   }
+  // 最热币（确定性）：成交量降序，并列取较新发行 —— 供“交易”tab 无 id 时的默认盘口
+  function topCoin() {
+    var best = null;
+    for (var i = 0; i < SEED.length; i++) {
+      var c = SEED[i];
+      if (!c) continue;
+      var v = c.volumeUsd || 0;
+      if (!best || v > (best.volumeUsd || 0) ||
+          (v === (best.volumeUsd || 0) && (c.launchedAt || 0) > (best.launchedAt || 0))) best = c;
+    }
+    return best || SEED[0] || null;
+  }
   function fmtPrice(u) {
     if (u == null || isNaN(u)) return '—';
     if (u >= 1) return '$' + u.toFixed(2);
@@ -1057,6 +1069,7 @@
     dirClass: dirClass, dirSign: dirSign,
     toast: toast,
     priceAt: priceAt,
+    topCoin: topCoin,
     priceAtGraduation: priceAtGraduation,
     swap: swap,
     createCoin: createCoin,
