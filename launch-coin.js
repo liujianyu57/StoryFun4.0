@@ -352,6 +352,7 @@
   // 旧存档迁移：补齐已实现盈亏字段
   USER.realizedPnl = USER.realizedPnl || 0;
   USER.realizedByCoin = USER.realizedByCoin || {};
+  USER.closed = USER.closed || [];   // Closed positions（完整退出记录，pons History）
 
   // ============================================================
   //  演示钱包：各计价/支付资产余额（开发者预买/水龙头/交易用）
@@ -629,11 +630,41 @@
     USER.realizedPnl = (USER.realizedPnl || 0) + realized;
     USER.realizedByCoin[coinId] = (USER.realizedByCoin[coinId] || 0) + realized;
     // 扣持仓
+    var prevAvgPx = h.avgUsd || 0;
+    var wasHeld = h.amount;
     h.amount -= coins;
     if (h.amount < 0.000001) delete USER.holdings[coinId];
     addFee(c, fee);
     addTx(c, 'sell', gross, net, coins, '我');
     if (USER.tx.length) USER.tx[0].realizedUsd = realized; // 供资产页逐笔标记
+    // 完整退出 → 记录 Closed position（pons History: fully exited with realized PnL）
+    if (wasHeld > 0 && h.amount < 0.000001) {
+      if (!USER.closed) USER.closed = [];
+      var prevCyc = 0, lastExit = 0;
+      USER.closed.forEach(function (r) {
+        if (r.coinId === coinId) {
+          prevCyc += r.realizedPnlUsd || 0;
+          if ((r.exitAt || 0) > lastExit) lastExit = r.exitAt;
+        }
+      });
+      var cycRealized = (USER.realizedByCoin[coinId] || 0) - prevCyc;
+      var buysN = 0, buysNet = 0, sellsN = 0;
+      (USER.tx || []).forEach(function (t) {
+        if (t.coinId !== coinId || (t.at || 0) <= lastExit) return;
+        if (t.side === 'buy') { buysN++; buysNet += t.netUsd || t.grossUsd || 0; }
+        else if (t.side === 'sell') sellsN++;
+      });
+      var entryMcapUsd = c.marketCap
+        ? (c.marketCap * prevAvgPx / Math.max(c.priceUsd, 1e-12)) : 0;
+      var pnlPct = buysNet > 0 ? (cycRealized / buysNet) * 100 : 0;
+      USER.closed.unshift({
+        coinId: coinId, name: c.name, symbol: c.symbol, state: 'closed',
+        entryMcapUsd: entryMcapUsd, investedUsd: buysNet,
+        realizedPnlUsd: cycRealized, totalPnlUsd: cycRealized, totalPnlPct: pnlPct,
+        buys: buysN, sells: sellsN, exitAt: Date.now()
+      });
+      if (USER.closed.length > 40) USER.closed.pop();
+    }
     persist();
     return { ok: true, proceedsUsd: net, fee: fee, coins: coins, realizedUsd: realized };
   }

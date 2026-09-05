@@ -217,8 +217,9 @@
 
     <div class="as-tabs">
       <button class="as-tab on" data-t="hold">Positions</button>
+      <button class="as-tab" data-t="closed">History</button>
       <button class="as-tab" data-t="made">Launches</button>
-      <button class="as-tab" data-t="tx">History</button>
+      <button class="as-tab" data-t="tx">Activity</button>
       <button class="as-tab" data-t="ai">AI 叙事</button>
     </div>
 
@@ -437,13 +438,14 @@
         var logo = c.cover
           ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy">'
           : esc((c.symbol || '?').charAt(0).toUpperCase());
+        var meta = posMeta(c);
         var claim = (c.shareToHolders && !divClaimed(c.id))
           ? '<button class="p-claim" onclick="event.stopPropagation();claimDiv(\'' + esc(c.id) + '\')">领取分红</button>'
           : '';
         return '<div class="pos-row" onclick="goCoin(\'' + esc(c.id) + '\')">' +
           '<div class="p-cell p-token">' +
             '<span class="p-logo">' + logo + '</span>' +
-            '<span class="p-tt"><b>' + esc(c.name) + '</b><i>$' + esc(c.symbol) + '</i>' + claim + '</span>' +
+            '<span class="p-tt"><b>' + esc(c.name) + '</b><i>$' + esc(c.symbol) + esc(meta) + '</i>' + claim + '</span>' +
           '</div>' +
           '<div class="p-cell"><span class="p-lab">Entry mcap</span><span class="p-val num">' + Launch.fmtUsd(entryMcap) + '</span></div>' +
           '<div class="p-cell"><span class="p-lab">Current mcap</span><span class="p-val num">' + Launch.fmtUsd(curMcap) + '</span></div>' +
@@ -516,6 +518,93 @@
       if (e.target === this) closeShare();
     });
 
+    // Open 持仓行 meta：$SYM · time ago · N trades（本轮，自上次完整退出起）
+    function posMeta(c) {
+      var lastExit = 0;
+      (Launch.USER.closed || []).forEach(function (r) { if (r.coinId === c.id && (r.exitAt || 0) > lastExit) lastExit = r.exitAt; });
+      var nb = 0, ns = 0, lastAt = 0;
+      (Launch.USER.tx || []).forEach(function (t) {
+        if (t.coinId !== c.id || (t.at || 0) <= lastExit) return;
+        if (t.side === 'buy') nb++; else if (t.side === 'sell') ns++;
+        if ((t.at || 0) > lastAt) lastAt = t.at || 0;
+      });
+      var ago = lastAt ? ' \u00b7 ' + Launch.timeAgo(lastAt) + ' ago' : '';
+      return ago + ' \u00b7 ' + (nb + ns) + ' trades';
+    }
+
+    function actHead() { return '<div class="pos-head"><div class="pos-title">Activity</div><div class="pos-sub">Recent buys and sells across pons pools.</div></div>'; }
+
+    // History：Closed positions（pons：Fully exited positions with realized PnL.）
+    function renderClosed() {
+      var list = Launch.USER.closed || [];
+      var host = document.getElementById('asBody');
+      var head = '<div class="pos-head"><div class="pos-title">Closed positions</div>' +
+        '<div class="pos-sub">Fully exited positions with realized PnL.</div></div>';
+      if (!list.length) {
+        host.innerHTML = head + '<div class="empty"><div class="empty-icon">◔</div>' +
+          '<div class="empty-title">No closed positions yet.</div>' +
+          '<div class="empty-desc">完全卖出持仓后，会在这里看到已实现的 PnL。</div></div>';
+        return;
+      }
+      var rows = list.map(function (r, i) {
+        var c = coinById(r.coinId);
+        var up = (r.totalPnlUsd || 0) >= 0;
+        var arrow = up ? '▲' : '▼';
+        var logo = (c && c.cover)
+          ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy">'
+          : esc((r.symbol || '?').charAt(0).toUpperCase());
+        var ago = ' \u00b7 ' + Launch.timeAgo(r.exitAt || Date.now()) + ' ago \u00b7 ' + ((r.buys || 0) + (r.sells || 0)) + ' trades';
+        return '<div class="pos-row" onclick="goCoin(\'' + esc(r.coinId) + '\')">' +
+          '<div class="p-cell p-token">' +
+            '<span class="p-logo">' + logo + '</span>' +
+            '<span class="p-tt"><b>' + esc(r.name || (c && c.name) || '') + '</b><i>$' + esc(r.symbol || '') + esc(ago) + '</i></span>' +
+          '</div>' +
+          '<div class="p-cell"><span class="p-lab">Entry mcap</span><span class="p-val num">' + fmtMc(r.entryMcapUsd || 0) + '</span></div>' +
+          '<div class="p-cell"><span class="p-lab">Realized</span><span class="p-val num ' + (up ? 'up' : 'down') + '">' + fmtSignedUsd(r.realizedPnlUsd || 0) + '</span></div>' +
+          '<div class="p-cell"><span class="p-lab">Invested</span><span class="p-val num">' + fmtMc(r.investedUsd || 0) + '</span></div>' +
+          '<div class="p-cell p-pnl"><span class="p-lab">PnL</span>' +
+            '<span class="p-val num ' + (up ? 'up' : 'down') + '">' +
+              '<span class="p-arrow">' + arrow + '</span>' + fmtSignedUsd(r.totalPnlUsd || 0) +
+              ' <span class="p-pct">' + ((r.totalPnlPct || 0) >= 0 ? '+' : '−') + Math.abs(r.totalPnlPct || 0).toFixed(1) + '%</span>' +
+            '</span></div>' +
+          '<div class="p-share-cell"><button class="p-share" title="分享" aria-label="分享" onclick="event.stopPropagation();shareClosed(' + i + ')">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>' +
+          '</button></div>' +
+        '</div>';
+      }).join('');
+      host.innerHTML = head + '<div class="pos-scroll"><div class="pos-list">' + rows + '</div></div>';
+    }
+
+    // Closed 分享卡（HTML 示意）
+    function shareClosed(i) {
+      var r = (Launch.USER.closed || [])[i];
+      if (!r) return;
+      var c = coinById(r.coinId);
+      var up = (r.totalPnlUsd || 0) >= 0;
+      var logo = (c && c.cover)
+        ? '<img src="' + esc(c.cover) + '" alt="">'
+        : esc((r.symbol || '?').charAt(0).toUpperCase());
+      document.getElementById('svBody').innerHTML =
+        '<div class="sv-head"><span class="sv-k">CLOSED POSITION</span><span class="sv-brand">story.fun</span></div>' +
+        '<div class="sv-mid">' +
+          '<span class="sv-logo">' + logo + '</span>' +
+          '<span class="sv-tt"><b>' + esc(r.name || '') + '</b><i>$' + esc(r.symbol || '') + '</i></span>' +
+        '</div>' +
+        '<div class="sv-stats">' +
+          '<div><label>Entry mcap</label><b>' + fmtMc(r.entryMcapUsd || 0) + '</b></div>' +
+          '<div class="' + (up ? 'up' : 'down') + '"><label>Realized</label><b>' + fmtSignedUsd(r.realizedPnlUsd || 0) + '</b></div>' +
+          '<div><label>Invested</label><b>' + fmtMc(r.investedUsd || 0) + '</b></div>' +
+          '<div class="' + (up ? 'up' : 'down') + '"><label>PnL</label><b>' + (up ? '▲ +' : '▼ −') +
+            Launch.fmtUsd(Math.abs(r.totalPnlUsd || 0)) + ' (' + ((r.totalPnlPct || 0) >= 0 ? '+' : '−') +
+            Math.abs(r.totalPnlPct || 0).toFixed(1) + '%)</b></div>' +
+        '</div>' +
+        '<div class="sv-foot">story.fun · closed pons position · ' +
+          new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '</div>';
+      var modal = document.getElementById('shareModal');
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
     function renderMade() {
       var made = myCreated();
       var host = document.getElementById('asBody');
@@ -543,11 +632,12 @@
     function renderTx() {
       var txs = Launch.USER.tx || [];
       var host = document.getElementById('asBody');
+      var head = actHead();
       if (!txs.length) {
-        host.innerHTML = '<div class="empty"><div class="empty-icon">⇅</div><div class="empty-title">还没有交易</div><div class="empty-desc">买入第一笔后，历史会显示在这里</div><button class="btn btn-primary" onclick="location.href=\'launchpad.html\'">去市场看看</button></div>';
+        host.innerHTML = head + '<div class="empty"><div class="empty-icon">⇅</div><div class="empty-title">还没有交易</div><div class="empty-desc">买入第一笔后，会显示在这里</div><button class="btn btn-primary" onclick="location.href=\'launchpad.html\'">去市场看看</button></div>';
         return;
       }
-      host.innerHTML = '<div class="card history-card">' + txs.slice(0, 40).map(function (t) {
+      host.innerHTML = head + '<div class="card history-card">' + txs.slice(0, 40).map(function (t) {
         var c = coinById(t.coinId);
         var pnlMark = '';
         if (t.side === 'sell' && t.realizedUsd != null) {
@@ -632,6 +722,7 @@
       if (!logged) return;
       renderSummary();
       if (tab === 'hold') renderHold();
+      else if (tab === 'closed') renderClosed();
       else if (tab === 'made') renderMade();
       else if (tab === 'tx') renderTx();
       else if (tab === 'ai') renderAi();
