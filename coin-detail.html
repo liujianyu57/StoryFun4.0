@@ -188,7 +188,7 @@
   .mi-note { font-size: 11.5px; color: var(--text-3); line-height: 1.5; }
   /* About 卡（参考 token-about-card） */
   .about-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 12px 24px; padding: 20px 22px; }
-  .ab-title { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+  .ab-title { grid-column: 1 / -1; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 4px; }
   .ab-desc { margin-top: 7px; font-size: 13px; color: var(--text-2); line-height: 1.6; max-width: 640px; }
   .ab-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
   .ab-meta .tag { font-weight: 600; }
@@ -285,6 +285,7 @@
 
     <!-- About 卡（pons token-about-card 四区：左说明+Creator / 中 Supply / 右 Paired+地址） -->
     <div class="card about-card" id="aboutCard">
+      <h2 class="ab-title">About</h2>
       <div class="ab-main">
         <p class="ab-desc" id="abDesc">—</p>
         <div class="ab-creator" id="abCreator"></div>
@@ -300,7 +301,7 @@
           <div class="ab-bd-value num" id="abPair">—</div>
         </div>
         <div>
-          <div class="ab-addr-line"><span class="mono num" id="abTokenAddr">—</span></div>
+          <div class="ab-addr-line"><span class="mono num" id="abTokenAddr" onclick="copyText(this.textContent)" title="复制合约地址" style="cursor:pointer;border-bottom:1px dashed rgba(10,11,13,.25)">—</span></div>
           <div class="ab-addr-line" style="margin-top:6px"><a class="ab-link" href="javascript:void(0)" onclick="fakeLink()">Explorer</a></div>
         </div>
       </div>
