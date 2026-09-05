@@ -24,6 +24,14 @@
     .an-note { font-size: 12px; color: var(--text-3); margin-top: 22px; padding-top: 14px;
       border-top: 1px solid var(--border); line-height: 1.6; max-width: 720px; }
 
+    /* pons daily-context 图卡 */
+    .an-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; align-items: start; margin-top: 8px; }
+    .an-chart .k { font-size: 12px; color: var(--text-2); font-weight: 600; }
+    .an-chart .v { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; }
+    .an-chart .an-chart-sub { font-size: 12px; color: var(--text-3); margin-top: 6px; line-height: 1.5; }
+    .an-chart .trend-svg { margin-top: 14px; }
+    @media (max-width: 820px) { .an-charts { grid-template-columns: 1fr; } }
+
     .an-main { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; align-items: start; }
     .seg-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .an-dune {
@@ -72,6 +80,22 @@
 
     <!-- 24h 数据（pons：三块 + Dune 数据说明） -->
     <div class="an-grid" id="statCards"></div>
+
+    <!-- Daily context（pons：最近完整日高亮） -->
+    <div class="an-charts">
+      <div class="card an-chart">
+        <div class="k">Trading volume</div>
+        <div class="v num" id="chVolVal">—</div>
+        <div class="an-chart-sub">Recent daily context with the latest completed day highlighted.</div>
+        <svg class="trend-svg" id="chVolSvg" viewBox="0 0 560 150" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="card an-chart">
+        <div class="k">Token launches</div>
+        <div class="v num" id="chLauVal">—</div>
+        <div class="an-chart-sub">Recent daily context with the latest completed day highlighted.</div>
+        <svg class="trend-svg" id="chLauSvg" viewBox="0 0 560 150" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
 
     <div class="an-note">Data is supplied by Dune from indexed onchain activity. The 24h view uses the latest completed UTC day.</div>
   </main>
@@ -135,6 +159,13 @@
           '<div class="d ' + c.d.c + '">' + c.d.t + '</div>' +
         '</div>';
       }).join('');
+      // Daily context 图卡（pons：Trading volume / Token launches，最近完整日高亮）
+      var vv = document.getElementById('chVolVal');
+      var lv = document.getElementById('chLauVal');
+      if (vv) vv.textContent = fmtUsdShort(volCur);
+      if (lv) lv.textContent = fmtK(lauCur);
+      drawDaily('chVolSvg', volT, curIdx);
+      drawDaily('chLauSvg', lauT, curIdx);
     }
 
     function fillDuneMeta() {
@@ -147,6 +178,37 @@
         var day = y.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
         el.textContent = 'Dune updated ' + t + ', latest complete day ' + day + ' UTC';
       } catch (e) { el.textContent = 'Dune updated —'; }
+    }
+
+    function drawDaily(svgId, data, hi) {
+      var svg = document.getElementById(svgId);
+      if (!svg || !data || data.length < 2) return;
+      var w = 560, h = 150, pl = 12, pr = 12, pt = 16, pb = 20;
+      var iw = w - pl - pr, ih = h - pt - pb;
+      var vals = data.map(function (d) { return d.value; });
+      var mx = Math.max.apply(null, vals);
+      var mn = Math.min.apply(null, vals);
+      var span = (mx - mn) || 1;
+      var maxV = mx + span * 0.15, minV = Math.max(0, mn - span * 0.1);
+      var yAt = function (v) { return pt + ih - ((v - minV) / (maxV - minV || 1)) * ih; };
+      var pts = data.map(function (d, i) {
+        var x = pl + (iw / (data.length - 1)) * i;
+        return { x: x, y: yAt(d.value) };
+      });
+      var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+      var area = line + ' L' + pts[pts.length - 1].x.toFixed(1) + ' ' + (pt + ih) + ' L' + pl + ' ' + (pt + ih) + ' Z';
+      var dots = pts.map(function (p) {
+        return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.6" fill="#fff" stroke="#0A0B0D" stroke-width="1.6"/>';
+      }).join('');
+      var hiP = pts[Math.max(0, Math.min(pts.length - 1, hi))];
+      svg.innerHTML =
+        '<defs><linearGradient id="ctxFill" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="rgba(10,11,13,.10)"/><stop offset="1" stop-color="rgba(10,11,13,0)"/></linearGradient></defs>' +
+        '<path d="' + area + '" fill="url(#ctxFill)"/>' +
+        '<path d="' + line + '" fill="none" stroke="#0A0B0D" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' + dots +
+        // 最近完整日高亮（pons：latest completed day highlighted）
+        '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="4.6" fill="#0A0B0D" stroke="#fff" stroke-width="2"/>' +
+        '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="9" fill="none" stroke="rgba(10,11,13,.25)" stroke-width="1.5"/>';
     }
 
     window.onLaunchShellReady = function () {
