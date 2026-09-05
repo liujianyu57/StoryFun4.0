@@ -975,6 +975,11 @@ var holders = [];
       var recv = coin.creatorAddr || (window.Launch && Launch.walletText ? Launch.walletText() : '0x…');
       var dist = 1 + ((h6 >>> 7) % 10);
       function valHtml(u) { return '<span class="ff-value num">' + q6(u) + ' <small>' + esc(pair) + '</small></span>'; }
+      // 费态演示：自动 / 待领取 / 已领取 / 无可领（只影响费卡展示）
+      var feeDemo = cdFeeDemo();
+      var fdNone = feeDemo === 'none';
+      var fdClaimed = feeDemo === 'claimed';
+      var fdReady = feeDemo === 'ready';
       var html = '';
       // 卡 1：Creator fees
       html += '<div class="card fee-card">' +
@@ -985,10 +990,20 @@ var holders = [];
         html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>';
       } else {
         // 创建者钱包路由：可领金额 + 收款地址；仅部署者本人显示 Claim（pons 口径）
-        html += '<div class="ff-assets">' + valHtml(claimable) +
-          '<span class="ff-sub">Claimable now, across every launch paid to ' + esc(recv) + '</span></div>' +
-          '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>' +
-          (__isMyCoin() ? '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">Claim</button>' : '');
+        if (fdNone) {
+          html += '<div class="ff-assets">' + valHtml(0) +
+            '<span class="ff-sub">No fees to claim.</span></div>' +
+            '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>';
+        } else if (fdClaimed) {
+          html += '<div class="ff-assets">' + valHtml(claimable) +
+            '<span class="ff-sub">Claimed · 已领取到 ' + esc(recv) + '</span></div>' +
+            '<span class="ff-hint" style="margin:0">已领取 · Claimed</span>';
+        } else {
+          html += '<div class="ff-assets">' + valHtml(claimable) +
+            '<span class="ff-sub">Claimable now, across every launch paid to ' + esc(recv) + '</span></div>' +
+            '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>' +
+            (__isMyCoin() ? '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">Claim</button>' : '');
+        }
       }
       html += '</div>';
       // 卡 2：Holder fee sharing
@@ -996,14 +1011,23 @@ var holders = [];
         '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>';
       if (toHolders) {
         __divAmt[coin.id] = r6(pot * (0.15 + ((h6 >>> 13) % 25) / 100));   // 演示：本钱包可领份额
-        html += '<div class="ff-assets">' + valHtml(paid) +
+        var paidShow = fdNone ? 0 : paid;
+        var potShow = fdNone ? 0 : pot;
+        html += '<div class="ff-assets">' + valHtml(paidShow) +
           '<span class="ff-sub">Paid to holders across ' + dist + ' distribution' + (dist === 1 ? '' : 's') + '</span></div>' +
-          '<div class="ff-assets">' + valHtml(pot) +
-          '<span class="ff-sub">In the pot for the next distribution</span></div>' +
-          '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>' +
-          ((__heldCoin() && !__divClaimed(coin.id))
-            ? '<button class="btn btn-ghost ff-act" onclick="claimHolderDiv()">Claim dividends</button>'
-            : (__divClaimed(coin.id) ? '<span class="ff-hint" style="margin:0">已领取本币分红</span>' : ''));
+          '<div class="ff-assets">' + valHtml(potShow) +
+          '<span class="ff-sub">In the pot for the next distribution</span></div>';
+        if (fdNone) {
+          html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. No dividends to claim.</p>';
+        } else if (fdClaimed) {
+          html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders.</p>' +
+            '<span class="ff-hint" style="margin:0">已领取本币分红 · Claimed</span>';
+        } else {
+          html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders. Each holder claims their share from their profile menu.</p>' +
+            ((fdReady || __heldCoin()) && !__divClaimed(coin.id)
+              ? '<button class="btn btn-ghost ff-act" onclick="claimHolderDiv()">Claim dividends</button>'
+              : (__divClaimed(coin.id) ? '<span class="ff-hint" style="margin:0">已领取本币分红</span>' : ''));
+        }
       } else {
         html += '<div class="ff-assets">' + valHtml(0) +
           '<span class="ff-sub">Routing off · 费当前归创建者钱包</span></div>' +
@@ -1362,6 +1386,40 @@ var holders = [];
         Launch.toast('演示身份 → ' + names[nx] + (nx ? '（仅演示门控语义）' : '（恢复真实钱包）'), 'ok');
       });
       paint();
+      document.body.appendChild(pill);
+    })();
+
+    // 费态演示：自动 / 待领取 / 已领取 / 无可领（仅影响本页费卡展示）
+    function cdFeeDemo() {
+      var v = '';
+      try { v = localStorage.getItem('sf_cd_fee_demo') || ''; } catch (e) {}
+      return (v === 'ready' || v === 'claimed' || v === 'none') ? v : '';
+    }
+    var CDF_LABEL = { ready: '费态: 待领取', claimed: '费态: 已领取', none: '费态: 无可领', '': '费态: 自动' };
+    function cdfLabel() { return CDF_LABEL[cdFeeDemo()] || '费态: 自动'; }
+    function cycleCdFee() {
+      var seq = ['', 'ready', 'claimed', 'none'];
+      var m = cdFeeDemo();
+      var nx = seq[(seq.indexOf(m) + 1) % seq.length];
+      try { if (nx) localStorage.setItem('sf_cd_fee_demo', nx); else localStorage.removeItem('sf_cd_fee_demo'); } catch (e) {}
+      var p = document.getElementById('cdfPill');
+      if (p) p.textContent = cdfLabel();
+      renderMeta();
+    }
+    (function () {
+      var css = document.createElement('style');
+      css.textContent = '#cdfPill{position:fixed;right:12px;bottom:58px;z-index:895;display:inline-flex;align-items:center;' +
+        'padding:6px 12px;border:1px dashed #b9b9c9;border-radius:999px;background:#fff;color:#3a3a45;' +
+        'font:11px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC",sans-serif;' +
+        'box-shadow:0 2px 8px rgba(0,0,0,.10);cursor:pointer;user-select:none;-webkit-user-select:none;white-space:nowrap}' +
+        '@media (max-width:900px){#cdfPill{bottom:126px}}';
+      document.head.appendChild(css);
+      var pill = document.createElement('button');
+      pill.id = 'cdfPill';
+      pill.type = 'button';
+      pill.title = '切换费卡演示状态：自动 / 待领取 / 已领取 / 无可领（仅影响本页费卡显示）';
+      pill.textContent = cdfLabel();
+      pill.addEventListener('click', cycleCdFee);
       document.body.appendChild(pill);
     })();
 
