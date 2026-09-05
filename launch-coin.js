@@ -46,9 +46,12 @@
   //  顺序必须与市场 Pair 筛选按钮一致（launchpad 动态注入同一列表）
   // ============================================================
   var PAIR_STOCKS = ['AAPL','AMD','AMZN','BB','COIN','COST','CRCL','DELL','DJT','FIG','GLD','GME','GOOGL','HIMS','JNJ','LLY','LULU','META','MRNA','MRVL','MSFT','MSTR','MU','NVDA','PFE','PLTR','QQQ','RBLX','RDDT','RIVN','SKHY','SNAP','SNDK','SPCX','SPY','TSLA','TSM','TTWO','USO','WYFI'];
+  // pons v2 quote 资产：原生 ETH + 稳定币/封装/加密（USDG、cbBTC…）+ 通证化股票
+  var QUOTE_CRYPTO = ['WETH', 'USDG', 'cbBTC'];
   // 演示美元价（≈真实价位）：用于毕业阈值换算 / 演示钱包余额与水龙头
   var ASSET_PRICES = {
-    ETH: 3200, AAPL: 210, AMD: 160, AMZN: 205, BB: 4.2, COIN: 265, COST: 940,
+    ETH: 3200, WETH: 3200, USDG: 1, cbBTC: 98000,
+    AAPL: 210, AMD: 160, AMZN: 205, BB: 4.2, COIN: 265, COST: 940,
     CRCL: 150, DELL: 130, DJT: 30, FIG: 95, GLD: 255, GME: 26, GOOGL: 192,
     HIMS: 62, JNJ: 148, LLY: 820, LULU: 245, META: 555, MRNA: 42, MRVL: 108,
     MSFT: 462, MSTR: 420, MU: 132, NVDA: 175, PFE: 27, PLTR: 118, QQQ: 470,
@@ -56,6 +59,8 @@
     SPY: 560, TSLA: 350, TSM: 195, TTWO: 152, USO: 88, WYFI: 34
   };
   var ALL_PAIRS = ['ETH'].concat(PAIR_STOCKS);
+  // 全部可计价/可支付资产（含 ETH 镜像钱包）；顺序 = 各页面支付选择器的默认顺序
+  var ALL_ASSETS = ALL_PAIRS.concat(QUOTE_CRYPTO);
   function hashStr(s) {
     var h = 0;
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
@@ -349,31 +354,72 @@
   USER.realizedByCoin = USER.realizedByCoin || {};
 
   // ============================================================
-  //  演示钱包：各配对资产余额（开发者预买/水龙头用）
+  //  演示钱包：各计价/支付资产余额（开发者预买/水龙头/交易用）
+  //  ETH 双字段锁定：USER.eth（旧 UI 读取）== balances.ETH（权威）
   // ============================================================
-  var DEFAULT_CREDIT_USD = 500; // 每个资产初始给等值 500 美元
+  var DEFAULT_CREDIT_USD = 500; // 每个资产初始给等值 500 美元（ETH 例外：沿用旧 2.5 ETH）
   var FAUCET_USD = 250;         // 每次领取等值 250 美元
-  function assetPrice(sym) { return ASSET_PRICES[sym] || null; }
+  function assetPrice(sym) { return (sym && ASSET_PRICES[sym] != null) ? ASSET_PRICES[sym] : null; }
   function ensureBalances() {
     if (!USER.balances) USER.balances = {};
-    for (var i = 0; i < ALL_PAIRS.length; i++) {
-      var s = ALL_PAIRS[i];
+    // 旧档迁移：首见 ETH 时沿用旧 USER.eth（默认 2.5），避免余额跳水；
+    // 若两者都曾有记录，取更大者（旧版交易走 USER.eth、新版走 balances.ETH，可能分叉）
+    if (USER.balances.ETH == null && USER.eth != null && USER.eth > 0) USER.balances.ETH = USER.eth;
+    else if (USER.balances.ETH != null && USER.eth != null && USER.eth > USER.balances.ETH) USER.balances.ETH = USER.eth;
+    for (var i = 0; i < ALL_ASSETS.length; i++) {
+      var s = ALL_ASSETS[i];
       if (USER.balances[s] == null) {
         var px = assetPrice(s);
         USER.balances[s] = px ? DEFAULT_CREDIT_USD / px : 0;
       }
     }
+    USER.eth = USER.balances.ETH; // ETH 锁定镜像
   }
   ensureBalances();
   function balanceOf(sym) { ensureBalances(); return USER.balances[sym] || 0; }
+  // 加/扣资产余额（ETH 时同步 USER.eth 镜像）
+  function credit(sym, qty) {
+    if (!(qty > 0)) return;
+    ensureBalances();
+    USER.balances[sym] = (USER.balances[sym] || 0) + qty;
+    if (sym === 'ETH') USER.eth = USER.balances.ETH;
+  }
   // 模拟水龙头：领取等值 FAUCET_USD 的指定资产，返回领取数量（单位）
   function faucet(sym) {
     ensureBalances();
     var px = assetPrice(sym);
     var amt = px ? FAUCET_USD / px : 0;
     USER.balances[sym] = (USER.balances[sym] || 0) + amt;
+    if (sym === 'ETH') USER.eth = USER.balances.ETH;
     persist();
     return amt;
+  }
+
+  // ---- quote / 折算 / 展示 ----
+  // 资产数量 ↔ USD（内部统一 USD 记账；价格与毕业按配对资产计价展示）
+  function usdOfQty(q, sym) { var p = assetPrice(sym); return p ? q * p : q; }
+  function qtyOfUsd(u, sym) { var p = assetPrice(sym); return p ? u / p : u; }
+  // 各资产的展示图标/前缀
+  function assetIcon(sym) {
+    if (sym === 'ETH' || sym === 'WETH') return 'Ξ';
+    if (sym === 'USDG') return '$';
+    if (sym === 'cbBTC') return '₿';
+    return '$';
+  }
+  // 支付候选资产（顺序：加密优先 + 股票）；币的计价始终是其配对资产
+  function payAssets() { return ['ETH', 'WETH', 'USDG', 'cbBTC'].concat(PAIR_STOCKS); }
+  // 自适应小数（不带货币符号）
+  function fmtQty(q) {
+    if (q == null || isNaN(q)) return '—';
+    var a = Math.abs(q);
+    var s;
+    if (a >= 1e6) s = (q / 1e6).toFixed(2) + 'M';
+    else if (a >= 1e3) s = (q / 1e3).toFixed(2) + 'K';
+    else if (a >= 1) s = q.toFixed(4);
+    else if (a >= 1e-4) s = q.toFixed(8);
+    else s = q.toFixed(12);
+    s = s.replace(/\.?0+$/, '');
+    return (s === '' || s === '-' || s === '.') ? '0' : s;
   }
 
   function persist() {
@@ -643,41 +689,99 @@
     return { ok: true, coins: coins, fee: fee, proceedsUsd: net };
   }
 
-  // 买入/卖出的入口：ETH ↔ USD → 扣/加余额
-  function swap(coinId, side, ethIn) {
-    if (!isLoggedIn()) return { ok: false, msg: 'need_login' };
-    if (ethIn <= 0) return { ok: false, msg: '金额无效' };
-    var usd = ethToUsd(ethIn);
+  // 纯预览（不落盘/不改价）：返回按配对资产计价的估算
+  //  buy: amt = 支付资产数量(paySym, 默认=币的配对资产)；sell: amt = 币数量
+  function preview(coinId, side, amt, paySym) {
     var c = coinById(coinId);
     if (!c) return { ok: false, msg: '币不存在' };
-    var fee = usd * K.feeRate;
-    var net = usd - fee;
+    var quote = c.pair || 'ETH';
+    var out = { ok: true, pair: quote, priceUsd: c.priceUsd, priceQty: qtyOfUsd(c.priceUsd, quote), quotePx: assetPrice(quote) };
+    if (!(amt > 0)) { out.zero = true; return out; }
     if (side === 'buy') {
-      if (USER.eth < ethIn) return { ok: false, msg: 'ETH 余额不足' };
-      var r = c.graduated ? tradePool(coinId, 'buy', usd) : buy(coinId, usd);
-      if (r.ok) {
-        USER.eth -= ethIn;
-        var h = USER.holdings[coinId] || { amount: 0, avgUsd: 0 };
-        var totalAmt = h.amount + r.coins;
-        h.avgUsd = (h.avgUsd * h.amount + net) / totalAmt;
-        h.amount = totalAmt;
-        USER.holdings[coinId] = h;
-        persist();
+      paySym = paySym || quote;
+      var ppx = assetPrice(paySym);
+      if (!ppx) return { ok: false, msg: '不支持的支付资产' };
+      var usd = amt * ppx;
+      var net = usd * (1 - K.feeRate);
+      var pNow = c.graduated ? c.priceUsd : priceAt(c);
+      var coins;
+      if (c.graduated) coins = net / Math.max(pNow, 1e-9);
+      else {
+        var p0 = c.p0 || (pNow / (1 + K.curveK * progressOf(c)));
+        var poolAfter = (c.poolUsd || 0) + net;
+        var pAfter = p0 * (1 + K.curveK * clamp(poolAfter / (c.gradThresholdUsd || K.gradThresholdUsd), 0.001, 1));
+        coins = net / Math.max((pNow + pAfter) / 2, 1e-12);
       }
-      return r;
+      out.paySym = paySym;
+      out.usd = usd;
+      out.coins = coins;
+      out.feeQty = qtyOfUsd(usd * K.feeRate, paySym);
+      out.balanceOk = (USER.balances[paySym] || 0) + 1e-9 >= amt;
+      out.balance = USER.balances[paySym] || 0;
+      out.impact = Math.min(3, usd / Math.max((c.poolUsd || 0) + 100, 100));
     } else {
-      // 卖出：传币数 = usd 按现价折算；统一走 sell()（curve 与池内都扣持仓 + 记已实现）
-      var coinsToSell = usd / Math.max(c.priceUsd, 1e-9);
+      // 卖出：按现价折算（curve 受池内资金防线约束），净得按配对资产结算
       var h = USER.holdings[coinId];
-      if (!h || h.amount < coinsToSell) coinsToSell = h ? h.amount : 0;
-      if (coinsToSell <= 0) return { ok: false, msg: '无持仓' };
-      var r2 = sell(coinId, coinsToSell);
-      if (r2.ok) {
-        USER.eth += usdToEth(r2.proceedsUsd || (coinsToSell * c.priceUsd - fee));
-        persist();
+      var toSell = h ? Math.min(amt, h.amount) : 0;
+      var pNow2 = c.graduated ? c.priceUsd : priceAt(c);
+      var gross = toSell * pNow2;
+      if (!c.graduated && gross > (c.poolUsd || 0)) {
+        toSell = (c.poolUsd || 0) / Math.max(pNow2, 1e-12);
+        gross = toSell * pNow2;
       }
-      return r2;
+      var netUsd = gross * (1 - K.feeRate);
+      out.sellable = toSell;
+      out.held = h ? h.amount : 0;
+      out.grossUsd = gross;
+      out.proceedsUsd = netUsd;
+      out.coins = toSell;
+      out.proceedsQty = qtyOfUsd(netUsd, quote);
+      out.impact = Math.min(3, gross / Math.max((c.poolUsd || 0) + 100, 100));
     }
+    return out;
+  }
+
+  // 交易入口：买卖一律按币的配对资产（quote）结算；买入可用任一受支持资产支付（自动折算）
+  function swap(coinId, side, amt, paySym) {
+    if (!isLoggedIn()) return { ok: false, msg: 'need_login' };
+    if (!(amt > 0)) return { ok: false, msg: '金额无效' };
+    var c = coinById(coinId);
+    if (!c) return { ok: false, msg: '币不存在' };
+    var quote = c.pair || 'ETH';
+    ensureBalances();
+    if (side === 'buy') {
+      paySym = paySym || quote;
+      var ppx = assetPrice(paySym);
+      if (!ppx) return { ok: false, msg: '不支持的支付资产' };
+      if ((USER.balances[paySym] || 0) < amt - 1e-9) return { ok: false, msg: paySym + ' 余额不足' };
+      var usd = amt * ppx;
+      var r = c.graduated ? tradePool(coinId, 'buy', usd) : buy(coinId, usd);
+      if (!r.ok) return r;
+      USER.balances[paySym] -= amt;
+      if (paySym === 'ETH') USER.eth = USER.balances.ETH;
+      var feeUsd = r.fee || (usd * K.feeRate);
+      var netUsd = usd - feeUsd;
+      var h = USER.holdings[coinId] || { amount: 0, avgUsd: 0 };
+      var totalAmt = h.amount + r.coins;
+      h.avgUsd = totalAmt > 0 ? (h.avgUsd * h.amount + netUsd) / totalAmt : netUsd;
+      h.amount = totalAmt;
+      USER.holdings[coinId] = h;
+      persist();
+      return { ok: true, coins: r.coins, usd: usd, paySym: paySym, pair: quote,
+        priceQty: qtyOfUsd(c.priceUsd, quote), proceedsQty: qtyOfUsd(feeUsd, quote), graduated: !!r.graduated };
+    }
+    // sell：amt = 币数量
+    var h0 = USER.holdings[coinId];
+    if (!h0 || h0.amount < 1) return { ok: false, msg: '无持仓' };
+    var toSell = Math.min(amt, h0.amount);
+    var r2 = sell(coinId, toSell);
+    if (!r2.ok) return r2;
+    var proceedsUsd = r2.proceedsUsd || 0;
+    USER.balances[quote] = (USER.balances[quote] || 0) + qtyOfUsd(proceedsUsd, quote);
+    if (quote === 'ETH') USER.eth = USER.balances.ETH;
+    persist();
+    return { ok: true, coins: r2.coins, proceedsUsd: proceedsUsd, proceedsQty: qtyOfUsd(proceedsUsd, quote),
+      pair: quote, priceQty: qtyOfUsd(c.priceUsd, quote), realizedUsd: r2.realizedUsd };
   }
 
   // 创建币
@@ -713,8 +817,11 @@
       coin.devBuyQty = use;
       if (dbPair === 'ETH') coin.devBuyEth = use;
     }
-    // 发行费
-    USER.eth -= usdToEth(K.launchFeeUsd + (data.sourceType === 'ai' ? K.genFeeUsd : 0));
+    // 发行费（ETH）
+    ensureBalances();
+    var feeEth = usdToEth(K.launchFeeUsd + (data.sourceType === 'ai' ? K.genFeeUsd : 0));
+    USER.balances.ETH = Math.max(0, (USER.balances.ETH || 0) - feeEth);
+    USER.eth = USER.balances.ETH;
     SEED.unshift(coin);
     USER.created.unshift(id);
     persist();
@@ -731,15 +838,20 @@
   function isLoggedIn() {
     return typeof currentUser !== 'undefined' && currentUser && currentUser.isLoggedIn;
   }
-  // 领取创作者收益
+  // 领取创作者收益：按币的配对资产结算（pons：creator 以 quote 收款）
   function claim(coinId) {
     var v = USER.claimable[coinId] || 0;
     if (v <= 0) return { ok: false, msg: '暂无可领取收益' };
-    USER.eth += usdToEth(v);
+    var c = coinById(coinId);
+    var quote = (c && c.pair) || 'ETH';
+    ensureBalances();
+    var qty = qtyOfUsd(v, quote);
+    USER.balances[quote] = (USER.balances[quote] || 0) + qty;
+    if (quote === 'ETH') USER.eth = USER.balances.ETH;
     USER.claimed[coinId] = (USER.claimed[coinId] || 0) + v;
     USER.claimable[coinId] = 0;
     persist();
-    return { ok: true, usd: v };
+    return { ok: true, usd: v, pair: quote, qty: qty };
   }
 
   // 关注 / 通知
@@ -765,7 +877,7 @@
   // ============================================================
   //  Debug 面板辅助
   // ============================================================
-  function setEth(v) { USER.eth = v; persist(); }
+  function setEth(v) { ensureBalances(); USER.balances.ETH = v; USER.eth = v; persist(); }
   function forceGraduate(id) { var c = coinById(id); if (!c) return false; c.graduated = true; c.progress = 1; c.gradAt = Date.now(); c.poolUsd = Math.max(c.poolUsd||0, c.gradThresholdUsd||K.gradThresholdUsd); notifyGraduated(c); persist(); return true; }
   function forceUngraduate(id) { var c = coinById(id); if (!c) return false; c.graduated = false; c.progress = 0.5; c.gradAt = null; persist(); return true; }
   function resetAll() {
@@ -962,10 +1074,17 @@
     analytics: analytics,
     // 配对资产（quote 股票代币表，顺序=市场 Pair 按钮顺序）
     pairStocks: PAIR_STOCKS.slice(),
-    // 演示钱包：资产美元价 / 余额 / 水龙头
+    quoteCrypto: QUOTE_CRYPTO.slice(),
+    // 演示钱包：资产美元价 / 余额 / 水龙头 / 折算 / 支付候选
     assetPrice: assetPrice,
     balanceOf: balanceOf,
     faucet: faucet,
+    credit: credit,
+    usdOfQty: usdOfQty, qtyOfUsd: qtyOfUsd,
+    assetIcon: assetIcon,
+    payAssets: payAssets,
+    fmtQty: fmtQty,
+    preview: preview,
     fmtDay: fmtDay,
     persist: persist,
     // 模拟活跃引擎
