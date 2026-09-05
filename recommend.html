@@ -39,6 +39,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);-webkit-ta
 .side-overlay.open{opacity:1;visibility:visible}
 .side-drawer{position:fixed;top:0;left:0;bottom:0;z-index:299;width:300px;max-width:82vw;background:#fff;transform:translateX(-100%);transition:transform .25s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:4px 0 40px rgba(0,0,0,.12);border-right:.5px solid rgba(0,0,0,.06);will-change:transform;contain:layout style}
 .side-drawer.open{transform:translateX(0)}
+    /* ── Web2 入口抽屉（个人主页 / 创作 / 设置等入口收敛） ── */
+    .sd-body{flex:1;overflow-y:auto;padding:4px 10px calc(12px + env(safe-area-inset-bottom,0px))}
+    .sd-acc{display:flex;align-items:center;gap:12px;padding:12px;margin:2px 2px 8px;border-radius:16px;background:rgba(0,0,0,.03);cursor:pointer}
+    .sd-acc:active{background:rgba(0,0,0,.07)}
+    .sd-ava{width:46px;height:46px;border-radius:50%;background:#0a0b0d;color:#fff;display:grid;place-items:center;font-size:18px;font-weight:700;overflow:hidden;flex-shrink:0}
+    .sd-ava img{width:100%;height:100%;object-fit:cover}
+    .sd-acc-main{flex:1;min-width:0}
+    .sd-acc-name{display:block;font-size:15px;font-weight:700;color:#1a1a2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sd-acc-sub{display:block;font-size:11px;color:rgba(0,0,0,.35);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sd-acc-go{font-size:18px;color:rgba(0,0,0,.22);flex-shrink:0}
+    .sd-group{margin:0 0 4px}
+    .sd-group-label{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:rgba(0,0,0,.32);padding:8px 12px 4px;text-transform:uppercase}
+    .sd-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:12px;color:#1a1a2e;background:none;border:0;font-family:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer;text-decoration:none;transition:background .15s;box-sizing:border-box}
+    .sd-row:hover,.sd-row:active{background:rgba(0,0,0,.05)}
+    .sd-row-ic{width:32px;height:32px;border-radius:9px;background:rgba(0,0,0,.05);color:#1a1a2e;display:grid;place-items:center;flex-shrink:0}
+    .sd-row-ic svg{width:17px;height:17px}
+    .sd-row-go{margin-left:auto;color:rgba(0,0,0,.22);font-size:17px}
+    .sd-row.danger{color:#f45b69}
+    .sd-row.danger .sd-row-ic{background:rgba(244,91,105,.08);color:#f45b69}
+    .sd-foot{padding:10px 16px 4px;text-align:center;font-size:10.5px;color:rgba(0,0,0,.28)}
+    @media(min-width:769px){.menu-btn,.side-drawer,.side-overlay{display:none!important}}
+
 .sd-header{display:flex;align-items:center;justify-content:flex-end;padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
 .sd-close{width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.06);border:none;color:#666;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .sd-close:active{background:rgba(0,0,0,.12);color:#333}
@@ -388,17 +410,30 @@ body.clean-mode .clean-exit-btn{display:flex}
 
 <div class="side-overlay" id="sideOverlay"></div>
 <div class="side-drawer" id="sideDrawer">
-  <div class="sd-header"><button class="sd-close" id="sdClose">✕</button></div>
-  <div class="sd-section-label" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="location.href='notifications.html'">通知消息<span class="sd-notify-dot" style="margin-left:8px;margin-top:0"></span><span style="font-size:16px;color:rgba(0,0,0,.25);margin-right:4px">›</span></div>
-  <div class="sd-notify-list">
-    <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text">@Jack 评论了你的短剧 <strong>《凤骨琉璃》</strong></div><div class="sd-notify-time">12分钟前</div></div><span class="sd-notify-dot"></span></div>
-    <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text"><strong>李云飞</strong> 赞了你的视频</div><div class="sd-notify-time">18分钟前</div></div></div>
-    <div class="sd-notify-item" onclick="location.href='notifications.html'"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80" style="width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;" alt=""><div><div class="sd-notify-text"><strong>苏婉清</strong> 收藏了你的短剧 《凤骨琉璃》</div><div class="sd-notify-time">42分钟前</div></div></div>
+    <div class="sd-header"><button class="sd-close" id="sdClose">✕</button></div>
+  <div class="sd-body">
+    <div class="sd-acc" onclick="location.href='profile-center.html'">
+      <span class="sd-ava" id="sdAva">?</span>
+      <span class="sd-acc-main">
+        <span class="sd-acc-name" id="sdName">—</span>
+        <span class="sd-acc-sub" id="sdSub">点击进入个人主页</span>
+      </span>
+      <span class="sd-acc-go">›</span>
+    </div>
+    <div class="sd-group">
+      <div class="sd-group-label">我的</div>
+      <a class="sd-row" href="profile-center.html"><span class="sd-row-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21a7 7 0 0 1 14 0"/></svg></span>个人主页<span class="sd-row-go">›</span></a>
+      <a class="sd-row" href="narrator.html"><span class="sd-row-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L8 20l-5 1 1-5L17 3z"/></svg></span>创作管理<span class="sd-row-go">›</span></a>
+      <a class="sd-row" href="watch-history.html"><span class="sd-row-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>观看历史<span class="sd-row-go">›</span></a>
+      <a class="sd-row" href="notifications.html"><span class="sd-row-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>通知消息<span class="sd-row-go">›</span></a>
+    </div>
+    <div class="sd-group">
+      <div class="sd-group-label">通用</div>
+      <a class="sd-row" href="settings.html"><span class="sd-row-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="#fff" stroke="currentColor"/><circle cx="15" cy="12" r="2" fill="#fff" stroke="currentColor"/><circle cx="7" cy="18" r="2" fill="#fff" stroke="currentColor"/></svg></span>设置<span class="sd-row-go">›</span></a>
+    </div>
+    <button class="sd-row danger" type="button" onclick="sdLogout()"><span class="sd-row-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>退出登录<span class="sd-row-go"></span></button>
+    <div class="sd-foot">Story.fun · 演示原型 v0.4</div>
   </div>
-  <div class="sd-section-label" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="location.href='watch-history.html'">观看历史<span style="font-size:16px;color:rgba(0,0,0,.25);margin-right:4px">›</span></div>
-  <div class="sd-history-list" id="sdHistoryList"></div>
-</div>
-
 <div id="loading"><div class="spinner"></div></div>
 <div id="toast"></div>
 <div id="app">
@@ -618,10 +653,24 @@ function openSide(){
     location.href = 'mobile-login.html?redirect=' + encodeURIComponent(location.pathname);
     return;
   }
-  sideDrawer.classList.add("open");sideOverlay.classList.add("open");
+  renderSdAccount();sideDrawer.classList.add("open");sideOverlay.classList.add("open");
 }
 function closeSide(){sideDrawer.classList.remove("open");sideOverlay.classList.remove("open")}
+function renderSdAccount(){
+  var ava=document.getElementById('sdAva');var nm=document.getElementById('sdName');var sb=document.getElementById('sdSub');
+  if(!ava||!nm)return;
+  var cu=(typeof currentUser!=='undefined'&&currentUser)?currentUser:null;
+  var name=(cu&&(cu.name||cu.nickname))||'Story 用户';
+  var idv=(cu&&cu.id)?cu.id:'storyfun';
+  if(cu&&cu.avatar&&typeof cu.avatar==='string'){ava.innerHTML='<img src="'+cu.avatar+'" alt="">';}
+  else {ava.textContent=(name||'?').charAt(0).toUpperCase();}
+  nm.textContent=name;
+  sb.textContent=(cu&&cu.isLoggedIn)?('@'+idv+' · 已登录'):'点击登录';
+}
+function sdLogout(){closeSide();if(typeof showLogoutConfirm==='function'){showLogoutConfirm();}}
+
 menuBtn.addEventListener("click",function(e){e.stopPropagation();openSide()});
+document.addEventListener('auth-ready',function(){renderSdAccount();});
 sdClose.addEventListener("click",closeSide);
 sideOverlay.addEventListener("click",closeSide);
 
