@@ -172,6 +172,9 @@
     #fbClaim { border: none; border-radius: 999px; background: #0A0B0D; color: #fff; font-size: 13px;
       font-weight: 700; padding: 9px 18px; cursor: pointer; flex: none; }
     #fbClaim:hover { opacity: .9; }
+    #divClaim { border: none; border-radius: 999px; background: #0A0B0D; color: #fff; font-size: 13px;
+      font-weight: 700; padding: 9px 18px; cursor: pointer; flex: none; }
+    #divClaim:hover { opacity: .9; }
     .pos-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .fee-demo-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
       padding: 6px 12px; font-size: 11px; font-weight: 600; color: var(--text-2); cursor: pointer; white-space: nowrap; }
@@ -257,6 +260,13 @@
         </div>
         <canvas class="pf-canvas" id="pfChart"></canvas>
       </div>
+    </div>
+
+    <!-- Holder dividends 横幅（pons：Holder dividends ready + Claim all） -->
+    <div class="fees-banner" id="divBanner" style="display:none">
+      <span class="fb-ic">◎</span>
+      <span class="fb-txt"><b>Holder dividends ready</b><small id="divDesc">—</small></span>
+      <button type="button" id="divClaim">Claim all holder dividends</button>
     </div>
 
     <!-- Creator fees 横幅（pons：有 claimable 才出现） -->
@@ -481,11 +491,83 @@
       Launch.toast('已领取分红 ' + Launch.fmtQty(Launch.qtyOfUsd ? Launch.qtyOfUsd(amt, pair) : Launch.usdToEth(amt)) + ' ' + pair, 'ok');
       renderHold();
     }
+    // ===== Holder dividends（pons：Holder dividends ready + Claim all） =====
+    function divDemoMode() {
+      var v = '';
+      try { v = localStorage.getItem('sf_div_demo') || ''; } catch (e) {}
+      return (v === 'ready' || v === 'claimed' || v === 'none') ? v : '';
+    }
+    function divResolved(c) {
+      var m = divDemoMode();
+      if (m === 'ready') return { ready: true, amount: assetsDivAmt(c.id), claimed: false };
+      if (m === 'claimed') return { ready: false, claimed: true, amount: assetsDivAmt(c.id) };
+      if (m === 'none') return { ready: false, claimed: false, amount: 0 };
+      if (c.shareToHolders && !divClaimed(c.id)) return { ready: true, amount: assetsDivAmt(c.id), claimed: false };
+      return { ready: false, claimed: !!c.shareToHolders, amount: assetsDivAmt(c.id) };
+    }
+    var DIV_DEMO_LABEL = { ready: '分红演示: 待领取', claimed: '分红演示: 已领取', none: '分红演示: 无', '': '分红演示: 自动' };
+    function divDemoLabel() { return DIV_DEMO_LABEL[divDemoMode()] || '分红演示: 自动'; }
+    function cycleDivDemo() {
+      var seq = ['', 'ready', 'claimed', 'none'];
+      var m = divDemoMode();
+      var nx = seq[(seq.indexOf(m) + 1) % seq.length];
+      try { if (nx) localStorage.setItem('sf_div_demo', nx); else localStorage.removeItem('sf_div_demo'); } catch (e) {}
+      renderHold();
+      syncDivBanner();
+    }
+    function divReadyList() {
+      return myHoldings().filter(function (h) { return divResolved(h.coin).ready; });
+    }
+    function markDivClaimedId(id) {
+      try {
+        var arr = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]');
+        if (arr.indexOf(id) === -1) { arr.push(id); localStorage.setItem('sf_div_claimed', JSON.stringify(arr)); }
+      } catch (e) {}
+    }
+    function syncDivBanner() {
+      var banner = document.getElementById('divBanner');
+      if (!banner) return;
+      var list = divReadyList();
+      var tot = 0;
+      list.forEach(function (h) { tot += assetsDivAmt(h.coin.id); });
+      var show = !visitorAddr && list.length > 0 && tot > 0;
+      banner.style.display = show ? 'flex' : 'none';
+      if (show) {
+        document.getElementById('divDesc').textContent =
+          Launch.fmtUsd(tot) + ' ready across ' + list.length + ' coin' + (list.length === 1 ? '' : 's');
+      }
+    }
+    function claimAllDivs() {
+      if (visitorAddr) { Launch.toast('访客视图不可领取', 'warn'); return; }
+      var list = divReadyList();
+      if (!list.length) { Launch.toast('暂无可领取分红', 'warn'); return; }
+      if (divDemoMode() === 'ready') {
+        try { localStorage.setItem('sf_div_demo', 'claimed'); } catch (e) {}
+        Launch.toast('演示：已领取持有人分红', 'ok');
+      } else {
+        var done = 0, tot = 0;
+        list.forEach(function (h) {
+          var id = h.coin.id, amt = assetsDivAmt(id);
+          if (!amt) return;
+          var pair = h.coin.pair || 'ETH';
+          if (Launch.credit && Launch.qtyOfUsd) Launch.credit(pair, Launch.qtyOfUsd(amt, pair));
+          else Launch.USER.eth += Launch.usdToEth(amt);
+          markDivClaimedId(id);
+          done++; tot += amt;
+        });
+        if (Launch.persist) Launch.persist();
+        Launch.toast(done ? ('已领取持有人分红 ' + Launch.fmtUsd(tot)) : '暂无可领取分红', done ? 'ok' : 'warn');
+      }
+      renderSummary();
+      render();
+    }
+
     function renderHold() {
       var holds = myHoldings();
       var host = document.getElementById('asBody');
       if (!holds.length) {
         host.innerHTML = '<div class="empty"><div class="empty-icon">◎</div><div class="empty-title">还没有持仓</div><div class="empty-desc">发现一个叙事，从第一笔开始</div><button class="btn btn-primary" onclick="location.href=\'launchpad.html\'">去市场看看</button></div>';
+        syncDivBanner();
         return;
       }
       var rows = holds.map(function (h) {
@@ -503,13 +585,10 @@
           ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy">'
           : esc((c.symbol || '?').charAt(0).toUpperCase());
         var meta = posMeta(c);
-        var claim = (c.shareToHolders && !divClaimed(c.id))
-          ? '<button class="p-claim" onclick="event.stopPropagation();claimDiv(\'' + esc(c.id) + '\')">领取分红</button>'
-          : '';
         return '<div class="pos-row" onclick="goCoin(\'' + esc(c.id) + '\')">' +
           '<div class="p-cell p-token">' +
             '<span class="p-logo">' + logo + '</span>' +
-            '<span class="p-tt"><b>' + esc(c.name) + '</b><i>$' + esc(c.symbol) + esc(meta) + '</i>' + claim + '</span>' +
+            '<span class="p-tt"><b>' + esc(c.name) + '</b><i>$' + esc(c.symbol) + esc(meta) + '</i></span>' +
           '</div>' +
           '<div class="p-cell"><span class="p-lab">Entry mcap</span><span class="p-val num">' + Launch.fmtUsd(entryMcap) + '</span></div>' +
           '<div class="p-cell"><span class="p-lab">Current mcap</span><span class="p-val num">' + Launch.fmtUsd(curMcap) + '</span></div>' +
@@ -524,10 +603,12 @@
           '</button></div>' +
         '</div>';
       }).join('');
-      host.innerHTML =
-        '<div class="pos-head"><div class="pos-title">Open positions</div>' +
+      var head = '<div class="pos-head pos-head-row"><div>' +
+        '<div class="pos-title">Open positions</div>' +
         '<div class="pos-sub">Entry, current market cap, value, and PnL.</div></div>' +
-        '<div class="pos-scroll"><div class="pos-list">' + rows + '</div></div>';
+        '<button type="button" class="fee-demo-btn" onclick="cycleDivDemo()" title="切换持有人分红演示状态">' + divDemoLabel() + '</button></div>';
+      host.innerHTML = head + '<div class="pos-scroll"><div class="pos-list">' + rows + '</div></div>';
+      syncDivBanner();
     }
 
     // 分享：弹出“看起来像图片”的 HTML 分享卡（含持仓信息，不真实生成文件）
@@ -878,6 +959,8 @@
       if (!logged) {
         var fbN = document.getElementById('feesBanner');
         if (fbN) fbN.style.display = 'none';
+        var dbN = document.getElementById('divBanner');
+        if (dbN) dbN.style.display = 'none';
         return;
       }
       renderSummary();
@@ -886,6 +969,7 @@
       else if (tab === 'made') renderMade();
       else if (tab === 'tx') renderTx();
       syncFeesBanner();
+      syncDivBanner();
     }
 
     window.onLaunchShellReady = function () {
@@ -918,10 +1002,14 @@
       // Creator fees Claim
       var fcb = document.getElementById('fbClaim');
       if (fcb) fcb.addEventListener('click', claimFees);
+      // Holder dividends Claim all
+      var dcb = document.getElementById('divClaim');
+      if (dcb) dcb.addEventListener('click', claimAllDivs);
       // 登录状态变化重新渲染
       window.addEventListener('auth-ready', function () { render(); });
       render();
       syncFeesBanner();
+      syncDivBanner();
     };
   </script>
   <script src="load-desktop-header.js"></script>
