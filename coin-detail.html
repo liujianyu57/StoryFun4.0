@@ -842,6 +842,8 @@ var holders = [];
       var sweeps = 12 + (h6 % 120);
       var paid = toHolders ? r6(earned * (0.6 + ((h6 >>> 5) % 35) / 100)) : 0;
       var pot = toHolders ? r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100)) : 0;
+      var claimable = toHolders ? 0 : r6(earned * (0.42 + ((h6 >>> 11) % 20) / 100));
+      var recv = coin.creatorAddr || (window.Launch && Launch.walletText ? Launch.walletText() : '0x…');
       var dist = 1 + ((h6 >>> 7) % 10);
       function valHtml(u) { return '<span class="ff-value num">' + q6(u) + ' <small>' + esc(pair) + '</small></span>'; }
       var html = '';
@@ -853,7 +855,11 @@ var holders = [];
       if (toHolders) {
         html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>';
       } else {
-        html += '<p class="ff-hint">创作者费归创建者钱包（含 Creator tax），可在账户页领取。</p>';
+        // 创建者钱包路由：可领金额 + 收款地址 + Claim 按钮（pons 同款文案）
+        html += '<div class="ff-assets">' + valHtml(claimable) +
+          '<span class="ff-sub">Claimable now, across every launch paid to ' + esc(recv) + '</span></div>' +
+          '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>' +
+          '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">Claim</button>';
       }
       html += '</div>';
       // 卡 2：Holder fee sharing
