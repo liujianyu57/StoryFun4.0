@@ -297,9 +297,9 @@
       document.getElementById('pfAddr').textContent = fullAddr();
       // Portfolio
       document.getElementById('pfBal').textContent = Launch.fmtUsd(totalValUsd);
-      document.getElementById('pfBalSub').textContent = holds.length + ' open positions · 已实现 ' + fmtSignedUsd(realized);
-      var claimable = Object.keys(Launch.USER.claimable || {}).reduce(function (s, k) { return s + Launch.USER.claimable[k]; }, 0);
-      if (claimable > 0) document.getElementById('pfBalSub').textContent += ' · 可领取 ' + Launch.fmtUsd(claimable);
+      // pons：Across N open pons position(s)
+      document.getElementById('pfBalSub').textContent =
+        'Across ' + holds.length + ' open pons position' + (holds.length === 1 ? '' : 's');
       var rl = { '1d': '1d', '7d': '7d', '30d': '30d' }[pnlRange] || '1d';
       document.getElementById('pfPnlHead').innerHTML = fmtSignedUsd(totalPnl) + '<span class="pf-pnl-rng">PnL · ' + rl + '</span>';
       drawPnl();
