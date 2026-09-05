@@ -35,6 +35,8 @@
     .an-metrics .d.down { color: #E5484D; }
     .an-metrics .d.up { color: #0E9F6E; }
     .an-metrics .d.na { color: var(--text-3); }
+    .an-metrics .v.na-v { color: var(--text-3); font-size: 22px; font-weight: 600; margin-top: 12px; }
+    .an-metrics .m-cell:nth-child(n+4) { border-top: 1px solid var(--border); }
     .an-panel .an-note { border-top: none; margin-top: 10px; padding-top: 0; padding-bottom: 6px; max-width: none; }
     @media (max-width: 760px) {
       .an-metrics { grid-template-columns: 1fr; }
@@ -90,10 +92,16 @@
             <span class="an-sub2 num" id="duneMeta">Dune updated —</span>
           </div>
         </div>
-        <a class="an-dune" href="https://dune.com/adam_tehc/pons" target="_blank" rel="noopener" title="打开 pons 官方 Dune 链上数据看板">
-          View on Dune
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-        </a>
+        <div class="seg-wrap">
+          <div class="pill-seg" id="modeSeg">
+            <button type="button" data-m="24h" class="on">24h</button>
+            <button type="button" data-m="all">All time</button>
+          </div>
+          <a class="an-dune" href="https://dune.com/adam_tehc/pons" target="_blank" rel="noopener" title="打开 pons 官方 Dune 链上数据看板">
+            View on Dune
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+          </a>
+        </div>
       </div>
 
       <!-- 三块 24h 数据 -->
@@ -124,12 +132,11 @@
   <script src="launch-shell.js"></script>
   <script>
     // ============================================================
-    //  Analytics
-    // ============================================================
-    // ============================================================
-    //  Protocol analytics（pons：Dune 提供的 24h 三块数据）
+    //  Protocol analytics（pons：Dune 提供；24h / All time 两视图）
     //  数据取自本地演示引擎（确定性 mock），结构与文案对齐 pons
     // ============================================================
+    var mode = '24h';   // '24h' | 'all'
+
     function fmtK(n) {
       if (n == null || isNaN(n)) return '—';
       var a = Math.abs(n);
@@ -150,42 +157,98 @@
       var s = (p >= 0 ? '+' : '') + p.toFixed(1) + '% from prior day';
       return { t: s, c: p >= 0 ? 'up' : 'down' };
     }
-    function renderStats() {
+
+    // All time 图卡用：确定性 60 点序列（同一天内稳定）
+    function seededSeries(n, scale, seed) {
+      var s = (seed || 1) >>> 0, out = [];
+      function rnd() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }
+      for (var i = 0; i < n; i++) {
+        var f = 0.35 + 0.65 * (n === 1 ? 1 : i / (n - 1));
+        var j = 0.72 + rnd() * 0.56;
+        out.push({ value: Math.max(1, scale * f * j) });
+      }
+      return out;
+    }
+
+    function cellHtml(c) {
+      return '<div class="m-cell">' +
+        '<div class="k">' + c.k + '</div>' +
+        '<div class="v ' + (c.na ? 'na-v' : 'num') + '">' + c.v + '</div>' +
+        '<div class="d ' + (c.dc || 'na') + '">' + c.d + '</div>' +
+      '</div>';
+    }
+
+    function renderMetrics() {
       var host = document.getElementById('statCards');
       if (!host) return;
-      var a = Launch.analytics('24h');
-      var volT = a.volTrend || [], lauT = a.trend || [];
-      var curIdx = Math.max(0, volT.length - 2);   // 最近完整日 = 昨天（索引倒数第二）
-      var preIdx = curIdx - 1;
+      var cards = [];
+      if (mode === 'all') {
+        var all = Launch.analytics('all');
+        var allVol = all.totalVol || 0;
+        var allLau = all.launched || 0;
+        var allTrd = Math.max(0, Math.round(allVol / 60));
+        var seen = {}, devs = 0;
+        (Launch.coins || []).forEach(function (c) {
+          var kk = c.creatorAddr || c.creator || '';
+          if (kk && !seen[kk]) { seen[kk] = 1; devs++; }
+        });
+        cards = [
+          { k: 'All-time volume', v: fmtUsdShort(allVol), d: 'Complete Dune history' },
+          { k: 'All-time launches', v: fmtK(allLau), d: 'Complete Dune history' },
+          { k: 'All-time trades', v: fmtK(allTrd), d: 'Complete Dune history' },
+          { k: 'Protocol revenue', v: 'Unavailable', na: true, d: 'Lifetime total' },
+          { k: 'Creator earnings', v: 'Unavailable', na: true, d: 'Lifetime total' },
+          { k: 'Unique token devs', v: fmtK(devs), d: 'Lifetime total' }
+        ];
+      } else {
+        var a = Launch.analytics('24h');
+        var volT = a.volTrend || [], lauT = a.trend || [];
+        var curIdx = Math.max(0, volT.length - 2);
+        var preIdx = curIdx - 1;
+        var volCur = volT[curIdx] ? volT[curIdx].value : 0;
+        var volPre = preIdx >= 0 && volT[preIdx] ? volT[preIdx].value : null;
+        var lauCur = lauT[curIdx] ? lauT[curIdx].value : 0;
+        var lauPre = preIdx >= 0 && lauT[preIdx] ? lauT[preIdx].value : null;
+        var trdCur = Math.max(0, Math.round(volCur / 60));
+        var trdPre = volPre != null ? Math.max(0, Math.round(volPre / 60)) : null;
+        var vd = pctLine(volCur, volPre), ld = pctLine(lauCur, lauPre), td = pctLine(trdCur, trdPre);
+        cards = [
+          { k: '24h volume', v: fmtUsdShort(volCur), d: vd.t, dc: vd.c },
+          { k: '24h launches', v: fmtK(lauCur), d: ld.t, dc: ld.c },
+          { k: '24h trades', v: fmtK(trdCur), d: td.t, dc: td.c }
+        ];
+      }
+      host.innerHTML = cards.map(cellHtml).join('');
+    }
+
+    function renderCharts() {
+      var a24 = Launch.analytics('24h');
+      var volT = a24.volTrend || [], lauT = a24.trend || [];
+      var curIdx = Math.max(0, volT.length - 2);
       var volCur = volT[curIdx] ? volT[curIdx].value : 0;
-      var volPre = preIdx >= 0 && volT[preIdx] ? volT[preIdx].value : null;
       var lauCur = lauT[curIdx] ? lauT[curIdx].value : 0;
-      var lauPre = preIdx >= 0 && lauT[preIdx] ? lauT[preIdx].value : null;
-      var trdCur = volCur != null ? Math.max(0, Math.round(volCur / 60)) : 0; // 演示：约 60$/笔
-      var trdPre = volPre != null ? Math.max(0, Math.round(volPre / 60)) : null;
-      var vd = pctLine(volCur, volPre);
-      var ld = pctLine(lauCur, lauPre);
-      var td = pctLine(trdCur, trdPre);
-      var cards = [
-        { k: '24h volume', v: fmtUsdShort(volCur), d: vd },
-        { k: '24h launches', v: fmtK(lauCur), d: ld },
-        { k: '24h trades', v: fmtK(trdCur), d: td }
-      ];
-      host.innerHTML = cards.map(function (c) {
-        return '<div class="m-cell">' +
-          '<div class="k">' + c.k + '</div>' +
-          '<div class="v num">' + c.v + '</div>' +
-          '<div class="d ' + c.d.c + '">' + c.d.t + '</div>' +
-        '</div>';
-      }).join('');
-      // Daily context 图卡（pons：Trading volume / Token launches，最近完整日高亮）
+      var volData, lauData, hi, volVal, lauVal;
+      if (mode === 'all') {
+        var all = Launch.analytics('all');
+        volData = seededSeries(60, Math.max((all.totalVol || 0) / 70, 1), 20260901);
+        lauData = seededSeries(60, Math.max((all.launched || 0) / 55, 1), 20260902);
+        hi = volData.length - 1;
+        volVal = fmtUsdShort(all.totalVol || 0);
+        lauVal = fmtK(all.launched || 0);
+      } else {
+        volData = volT; lauData = lauT; hi = curIdx;
+        volVal = fmtUsdShort(volCur);
+        lauVal = fmtK(lauCur);
+      }
       var vv = document.getElementById('chVolVal');
       var lv = document.getElementById('chLauVal');
-      if (vv) vv.textContent = fmtUsdShort(volCur);
-      if (lv) lv.textContent = fmtK(lauCur);
-      drawDaily('chVolSvg', volT, curIdx);
-      drawDaily('chLauSvg', lauT, curIdx);
+      if (vv) vv.textContent = volVal;
+      if (lv) lv.textContent = lauVal;
+      drawDaily('chVolSvg', volData, hi);
+      drawDaily('chLauSvg', lauData, hi);
     }
+
+    function renderAll() { renderMetrics(); renderCharts(); }
 
     function fillDuneMeta() {
       var el = document.getElementById('duneMeta');
@@ -217,7 +280,7 @@
       var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
       var area = line + ' L' + pts[pts.length - 1].x.toFixed(1) + ' ' + (pt + ih) + ' L' + pl + ' ' + (pt + ih) + ' Z';
       var dots = pts.map(function (p) {
-        return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.6" fill="#fff" stroke="#0A0B0D" stroke-width="1.6"/>';
+        return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="1.6" fill="#fff" stroke="#0A0B0D" stroke-width="1.2"/>';
       }).join('');
       var hiP = pts[Math.max(0, Math.min(pts.length - 1, hi))];
       svg.innerHTML =
@@ -225,16 +288,21 @@
         '<stop offset="0" stop-color="rgba(10,11,13,.10)"/><stop offset="1" stop-color="rgba(10,11,13,0)"/></linearGradient></defs>' +
         '<path d="' + area + '" fill="url(#ctxFill)"/>' +
         '<path d="' + line + '" fill="none" stroke="#0A0B0D" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' + dots +
-        // 最近完整日高亮（pons：latest completed day highlighted）
         '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="4.6" fill="#0A0B0D" stroke="#fff" stroke-width="2"/>' +
         '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="9" fill="none" stroke="rgba(10,11,13,.25)" stroke-width="1.5"/>';
     }
 
     window.onLaunchShellReady = function () {
       fillDuneMeta();
-      renderStats();
-    };
-  </script>
+      document.getElementById('modeSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-m]');
+        if (!b || b.getAttribute('data-m') === mode) return;
+        mode = b.getAttribute('data-m');
+        document.querySelectorAll('#modeSeg button').forEach(function (x) { x.classList.toggle('on', x === b); });
+        renderAll();
+      });
+      renderAll();
+    };  </script>
   <script src="load-desktop-header.js"></script>
   <script src="load-sidebar.js"></script>
   <script src="load-bottom-nav.js"></script>
