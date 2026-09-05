@@ -64,6 +64,26 @@
     .convert-amount { flex: 1; min-width: 0; text-align: right; font-size: 20px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
     .convert-asset { height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; color: var(--text); flex-shrink: 0; }
     .convert-asset i { font-style: normal; }
+    button.convert-asset { cursor: pointer; font-family: inherit; transition: border-color .15s ease; }
+    button.convert-asset:hover { border-color: var(--text); }
+    .convert-panel { position: relative; }
+    .faucet-mini { color: var(--text); text-decoration: underline; cursor: pointer; font-weight: 600; white-space: nowrap; }
+    .asset-pop { position: absolute; left: 8px; right: 8px; top: calc(100% - 4px); z-index: 200; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,.16); padding: 6px;
+      max-height: min(430px, 62vh); overflow-y: auto; }
+    .ap-group { font-size: 10px; letter-spacing: .1em; color: var(--text-3); padding: 10px 8px 4px; text-transform: uppercase; }
+    .ap-row { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 10px; cursor: pointer; }
+    .ap-row:hover { background: var(--accent-soft); }
+    .ap-row.on { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--border); }
+    .ap-ic { width: 24px; height: 24px; border-radius: 50%; background: var(--text); color: #fff; display: grid; place-items: center;
+      font-size: 10px; font-weight: 700; font-style: normal; flex: none; }
+    .ap-row.stk .ap-ic { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .ap-main { min-width: 0; line-height: 1.25; }
+    .ap-main .ap-code { display: block; font-size: 13px; font-weight: 700; }
+    .ap-main .ap-meta { display: block; font-size: 10.5px; color: var(--text-3); }
+    .ap-bal { margin-left: auto; text-align: right; line-height: 1.25; }
+    .ap-bal b { display: block; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .ap-bal span { display: block; font-size: 10px; color: var(--text-3); }
     .convert-swap-wrap {
       align-self: center; margin: -12px 0; position: relative; z-index: 2;
       width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border-strong);
@@ -323,12 +343,13 @@
         <div id="mktPanel">
           <div class="convert-stack">
             <div class="convert-panel">
-              <span class="convert-panel-label"><span id="paySideLabel">支付</span><b class="cp-bal num" id="payBalance">—</b></span>
+              <span class="convert-panel-label"><span id="paySideLabel">支付</span><span class="cp-bal num" id="payBalance">—</span></span>
               <div class="convert-row">
                 <input class="swap-input num" id="swapIn" type="number" min="0" step="any" placeholder="0.00" autocomplete="off" />
-                <span class="convert-asset" id="payToken"><i>Ξ</i> ETH</span>
+                <button type="button" class="convert-asset pay-sel" id="payToken" title="选择支付资产（按配对资产计价结算）"><i>Ξ</i> ETH</button>
               </div>
               <div class="quick-row" id="quickRow"></div>
+              <div class="asset-pop" id="assetPop" style="display:none"></div>
             </div>
             <button type="button" class="convert-swap-wrap" id="swapArrow" title="对调方向" aria-label="对调方向">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5-5 5 5M17 14l-5 5-5-5"/></svg>
@@ -425,6 +446,7 @@
     // ============================================================
     var coin = null;
     var side = 'buy';
+    var paySym = 'ETH';   // 支付资产（默认=币的配对资产，可切任意受支持资产）
     var range = '1d';
     var esc = function (s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -481,6 +503,7 @@ var holders = [];
     function initCoin() {
       var q = new URLSearchParams(window.location.search).get('id');
       coin = Launch.coinById(q) || Launch.coins[0];
+      paySym = coin.pair || 'ETH';
       document.title = coin.name + ' · 发射台';
 
       // 图表数据按币生成确定性序列
@@ -642,18 +665,26 @@ var holders = [];
     function claimHolderDiv() {
       var amt = __divAmt[coin.id];
       if (!amt) { Launch.toast('当前无待领分红', 'warn'); return; }
-      if (window.Launch && Launch.USER) {
-        Launch.USER.eth += Launch.usdToEth(amt);
+      var pair = coin.pair || 'ETH';
+      var qty = (Launch.qtyOfUsd ? Launch.qtyOfUsd(amt, pair) : Launch.usdToEth(amt));
+      if (window.Launch && Launch.credit) {
+        Launch.credit(pair, qty);
+        if (Launch.persist) Launch.persist();
+      } else if (window.Launch && Launch.USER) {
+        Launch.USER.eth += qty;
         if (Launch.persist) Launch.persist();
       }
       __markDivClaimed(coin.id);
-      Launch.toast('已领取持有人分红 ' + Launch.fmtUsd(amt), 'ok');
+      Launch.toast('已领取持有人分红 ' + Launch.fmtQty(qty) + ' ' + pair, 'ok');
       renderMeta();
     }
     function doClaim(id) {
       if (!Launch.isLoggedIn()) { openLoginModal(); return; }
       var r = Launch.claim(id);
-      if (r.ok) { Launch.toast('已领取 ' + Launch.fmtUsd(r.usd), 'ok'); renderHead(); renderGrad(); renderMeta(); }
+      if (r.ok) {
+        var cq = r.qty != null ? (Launch.fmtQty(r.qty) + ' ' + (r.pair || 'ETH') + '（≈' + Launch.fmtUsd(r.usd) + '）') : Launch.fmtUsd(r.usd);
+        Launch.toast('已领取 ' + cq, 'ok'); renderHead(); renderGrad(); renderMeta();
+      }
       else Launch.toast(r.msg || '暂无可领取收益', 'warn');
     }
     function copyText(t) {
@@ -690,13 +721,15 @@ var holders = [];
       }
       var p = Math.min(100, Math.round(((coin.poolUsd || 0) / (coin.gradThresholdUsd || 13440)) * 100));
       band.className = 'grad-band';
-      // 配对币单位换算（原型：非 ETH 配对时进度条以配对资产计价，对齐参考）
+      // 进度/毕业阈值始终按币的配对资产（quote）计价
       var pair = coin.pair || 'ETH';
-      var sub = '池内 ' + Launch.fmtUsd(coin.poolUsd || 0) + ' / ' + Launch.fmtUsd(coin.gradThresholdUsd || 13440) + ' · curve 售罄后自动毕业';
       var pairPx = (window.Launch && Launch.assetPrice) ? Launch.assetPrice(pair) : null;
-      if (pair !== 'ETH' && pairPx) {
-        var nu = function (usd) { var v = usd / pairPx; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toFixed(4); };
-        sub = '已募 ' + nu(coin.poolUsd || 0) + ' / ' + nu(coin.gradThresholdUsd || 13440) + ' ' + esc(pair) + ' · 达到阈值后自动毕业上池';
+      var sub;
+      if (pairPx) {
+        var nu = function (usd) { var v = usd / pairPx; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : Launch.fmtQty(v); };
+        sub = '已募 ' + nu(coin.poolUsd || 0) + ' / ' + nu(coin.gradThresholdUsd || 13440) + ' ' + esc(pair) + ' · 达阈值后 curve 售罄自动毕业';
+      } else {
+        sub = '已募 ' + Launch.fmtUsd(coin.poolUsd || 0) + ' / ' + Launch.fmtUsd(coin.gradThresholdUsd || 13440) + ' · curve 售罄后自动毕业';
       }
       band.innerHTML =
         '<div class="gb-row"><span class="gb-title">距毕业</span><span class="tag" style="margin-left:auto" id="gbPct">' + p + '%</span></div>' +
@@ -878,7 +911,9 @@ var holders = [];
       var h6 = 0, ss = coin.id || 'x';
       for (var i6 = 0; i6 < ss.length; i6++) h6 = (h6 * 31 + ss.charCodeAt(i6)) >>> 0;
       var r6 = function (x) { return Math.round(x * 1e6) / 1e6; };
-      var q6 = function (x) { return r6(x).toFixed(6).replace(/\.?0+$/, '') || '0'; };
+      // 展示一律换算成配对资产单位（内部数值仍按 USD 推导）
+      var pxq = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 1) : 1;
+      var q6 = function (x) { var v = r6(x / pxq); var s2 = v.toFixed(8).replace(/\.?0+$/, ''); return s2 || '0'; };
       var earned = r6(1.2 + (h6 % 48000) / 1000);
       var sweeps = 12 + (h6 % 120);
       var paid = toHolders ? r6(earned * (0.6 + ((h6 >>> 5) % 35) / 100)) : 0;
@@ -930,90 +965,123 @@ var holders = [];
     // ============ Swap ============
     function refreshSwap() {
       if (!coin) return;
+      var pair = coin.pair || 'ETH';
       var held = Launch.USER.holdings[coin.id];
       var heldAmt = held ? held.amount : 0;
-      document.getElementById('payBalance').innerHTML =
-        side === 'buy'
-          ? '可用 <b class="num">' + Launch.fmtEth(Launch.USER.eth) + '</b>'
-          : '持仓 <b class="num">' + (heldAmt >= 10000 ? (heldAmt / 1000).toFixed(1) + 'K' : Launch.fmtNum(Math.floor(heldAmt))) + '</b>';
-      document.getElementById('payToken').innerHTML = side === 'buy'
-        ? '<i>Ξ</i> ETH' : '<i>$</i> ' + esc(coin.symbol);
-      document.getElementById('outToken').innerHTML = side === 'buy'
-        ? '<i>$</i> ' + esc(coin.symbol) : '<i>Ξ</i> ETH';
-      var pl = document.getElementById('paySideLabel');
-      if (pl) pl.textContent = side === 'buy' ? '支付' : '卖出';
-      document.getElementById('outLabel').textContent = side === 'buy' ? '预计获得' : '预计获得 (ETH)';
+      var payBal = document.getElementById('payBalance');
+      var ptok = document.getElementById('payToken');
+      if (side === 'buy') {
+        var bal = Launch.balanceOf(paySym);
+        payBal.innerHTML = '可用 <b class="num">' + Launch.fmtQty(bal) + '</b> ' + esc(paySym) +
+          ' · <a class="faucet-mini" href="javascript:void(0)" onclick="faucetPay()" title="领取测试余额（$250 等值）">水龙头</a>';
+        ptok.innerHTML = chipHtml(paySym);
+        ptok.title = '选择支付资产（按配对资产计价结算）';
+        document.getElementById('outLabel').textContent = '预计获得';
+        document.getElementById('outToken').innerHTML = '<i>$</i> ' + esc(coin.symbol);
+      } else {
+        payBal.innerHTML = '持仓 <b class="num">' + (heldAmt >= 10000 ? (heldAmt / 1000).toFixed(1) + 'K' : Launch.fmtNum(Math.floor(heldAmt))) + '</b> ' + esc(coin.symbol);
+        ptok.innerHTML = '<i>$</i> ' + esc(coin.symbol);
+        ptok.title = '卖出数量（币）';
+        document.getElementById('outLabel').textContent = '预计获得 (' + pair + ')';
+        document.getElementById('outToken').innerHTML = chipHtml(pair);
+      }
       document.getElementById('swapBtn').textContent = side === 'buy' ? ('买入 ' + coin.symbol) : ('卖出 ' + coin.symbol);
-      document.getElementById('sdPrice').textContent = Launch.fmtPrice(coin.priceUsd);
+      var px = Launch.assetPrice(pair) || 1;
+      document.getElementById('sdPrice').innerHTML = '1 ' + esc(coin.symbol) + ' ≈ <b class="num">' +
+        Launch.fmtQty((coin.priceUsd || 0) / px) + '</b> ' + esc(pair);
       updateQuote();
+    }
+    function chipHtml(sym) { return '<i>' + Launch.assetIcon(sym) + '</i> ' + esc(sym); }
+    function assetList() {
+      var pair = coin.pair || 'ETH';
+      return [
+        { g: '计价 · ' + pair, rows: [pair] },
+        { g: '加密资产', rows: ['ETH', 'WETH', 'USDG', 'cbBTC'].filter(function (x) { return x !== pair; }) },
+        { g: '股票', rows: Launch.pairStocks.filter(function (x) { return x !== pair; }) }
+      ];
+    }
+    function buildPayPop() {
+      var host = document.getElementById('assetPop');
+      if (!host) return;
+      var html = '';
+      assetList().forEach(function (grp) {
+        html += '<div class="ap-group">' + esc(grp.g) + '</div>';
+        grp.rows.forEach(function (sym) {
+          var bal = Launch.balanceOf(sym);
+          var px = Launch.assetPrice(sym);
+          html += '<div class="ap-row' + (sym === paySym ? ' on' : '') + (Launch.pairStocks.indexOf(sym) >= 0 ? ' stk' : '') +
+            '" data-sym="' + esc(sym) + '">' +
+            '<i class="ap-ic">' + Launch.assetIcon(sym) + '</i>' +
+            '<span class="ap-main"><span class="ap-code">' + esc(sym) + '</span><span class="ap-meta">' + (px != null ? '$' + px : '—') + '</span></span>' +
+            '<span class="ap-bal"><b class="num">' + Launch.fmtQty(bal) + '</b><span>余额</span></span></div>';
+        });
+      });
+      host.innerHTML = html;
+    }
+    function togglePayPop() {
+      var pop = document.getElementById('assetPop');
+      if (!pop) return;
+      if (pop.style.display === 'none') { buildPayPop(); pop.style.display = 'block'; }
+      else pop.style.display = 'none';
+    }
+    function selectPay(sym) {
+      if (!sym) return;
+      paySym = sym;
+      var pop = document.getElementById('assetPop');
+      if (pop) pop.style.display = 'none';
+      refreshSwap();
+    }
+    function faucetPay() {
+      if (side !== 'buy') return;
+      var q = Launch.faucet(paySym);
+      Launch.toast('已领取 ' + Launch.fmtQty(q) + ' ' + paySym + '（测试余额）', 'ok');
+      refreshSwap();
     }
     function updateQuote() {
       var inp = parseFloat(document.getElementById('swapIn').value) || 0;
-      var held = Launch.USER.holdings[coin.id];
-      var heldAmt = held ? held.amount : 0;
       var outEl = document.getElementById('swapOut');
       var err = document.getElementById('swapErr');
       var warn = document.getElementById('swapWarn');
       err.classList.remove('show'); warn.classList.remove('show');
       if (!inp) { outEl.textContent = '0'; document.getElementById('sdImpact').textContent = '—'; return; }
+      var pv = Launch.preview(coin.id, side, inp, paySym);
+      if (!pv || !pv.ok) { outEl.textContent = '0'; if (pv && pv.msg) { err.textContent = pv.msg; err.classList.add('show'); } return; }
       if (side === 'buy') {
-        var usd = inp * 3200;
-        var coins = usd / Math.max(coin.priceUsd, 1e-9);
-        if (coin.graduated) coins *= (1 - 0.005);
-        else coins *= (1 - 0.01 - 0.005);
-        outEl.textContent = fmtBig(coins);
-        var impact = Math.min(3, usd / Math.max(coin.poolUsd || 100, 100));
-        document.getElementById('sdImpact').textContent = '+' + (impact * 2).toFixed(1) + '%';
-        if (Launch.USER.eth < inp) { err.textContent = 'ETH 余额不足 · 点击右上角 ETH 领取测试币'; err.classList.add('show'); }
-        if (usd > 2000) { warn.textContent = '大额买入将显著推高价格'; warn.classList.add('show'); }
+        outEl.textContent = fmtBig(pv.coins);
+        document.getElementById('sdImpact').textContent = '+' + (pv.impact * 2).toFixed(1) + '%';
+        if (!pv.balanceOk) { err.textContent = paySym + ' 余额不足 · 点水龙头领取测试余额'; err.classList.add('show'); }
+        if (pv.usd > 2000) { warn.textContent = '大额买入将显著推高价格'; warn.classList.add('show'); }
       } else {
-        // 卖出：输入 ETH 金额折算成币量
-        var sellUsd = inp * 3200;
-        var needCoins = sellUsd / Math.max(coin.priceUsd, 1e-9);
-        if (heldAmt <= 0) {
+        if (!pv.sellable || pv.sellable <= 0) {
           outEl.textContent = '0';
-          err.textContent = '暂无持仓'; err.classList.add('show');
+          err.textContent = pv.held > 0 ? '持仓不足' : '暂无持仓'; err.classList.add('show');
           document.getElementById('sdImpact').textContent = '—';
           return;
         }
-        var actualCoins = Math.min(needCoins, heldAmt);
-        var outEth = (actualCoins * coin.priceUsd) / 3200 * (1 - 0.01 - 0.005);
-        outEl.textContent = outEth.toFixed(5);
-        document.getElementById('sdImpact').textContent = '-' + (needCoins > heldAmt ? Math.min(3, sellUsd / 100) : (sellUsd / Math.max(coin.poolUsd || 100, 100))).toFixed(1) + '%';
+        outEl.textContent = Launch.fmtQty(pv.proceedsQty);
+        document.getElementById('sdImpact').textContent = '-' + (pv.impact * 2).toFixed(1) + '%';
+        if (inp > pv.sellable) { warn.textContent = '持仓不足，按全部 ' + fmtBig(pv.sellable) + ' 卖出'; warn.classList.add('show'); }
       }
     }
     function fmtBig(n) {
+      if (n == null || isNaN(n)) return '0';
+      if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
       if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
       if (n >= 1000) return (n / 1000).toFixed(2) + 'K';
       return Launch.fmtNum(Math.floor(n));
     }
-
     function doSwap() {
       if (!Launch.isLoggedIn()) { openLoginModal(); Launch.toast('登录后即可交易', 'warn'); return; }
       var inp = parseFloat(document.getElementById('swapIn').value) || 0;
       if (inp <= 0) { Launch.toast('输入有效金额', 'err'); return; }
-      // 卖出的输入语义：币量（简化：输入 ETH 表示要卖出的市值等量币）
-      var r;
-      if (side === 'buy') {
-        r = Launch.swap(coin.id, 'buy', inp);
-      } else {
-        var usd = inp * 3200;
-        var coinsAmt = usd / Math.max(coin.priceUsd, 1e-9);
-        var h = Launch.USER.holdings[coin.id];
-        if (h) coinsAmt = Math.min(coinsAmt, h.amount);
-        // 统一引擎 sell：curve 与毕业池都会扣持仓 + 结算已实现盈亏
-        r = Launch.sell(coin.id, coinsAmt);
-        if (r.ok) {
-          Launch.USER.eth += Launch.usdToEth(r.proceedsUsd || coinsAmt * coin.priceUsd);
-          Launch.persist();
-        }
-      }
+      var r = side === 'buy' ? Launch.swap(coin.id, 'buy', inp, paySym) : Launch.swap(coin.id, 'sell', inp);
       if (r && r.ok) {
-        var gained = side === 'buy' ? r.coins : inp;
-        Launch.toast(side === 'buy' ? ('已买入 ' + fmtBig(r.coins)) : ('已卖出 ' + fmtBig(gained)), 'ok');
-        if (r.graduated) fireGradFx();
-        // 刷新
-        if (side === 'buy') coin.holders = (coin.holders || 0) + 1;
+        if (side === 'buy') {
+          Launch.toast('已买入 ' + fmtBig(r.coins) + ' ' + coin.symbol + ' · 支付 ' + Launch.fmtQty(inp) + ' ' + (r.paySym || paySym), 'ok');
+          if (r.graduated) fireGradFx();
+        } else {
+          Launch.toast('已卖出 ' + fmtBig(r.coins) + ' ' + coin.symbol + ' · 收到 ' + Launch.fmtQty(r.proceedsQty) + ' ' + (r.pair || coin.pair), 'ok');
+        }
         refreshAllAfterTx();
       } else if (r && r.msg === 'need_login') {
         openLoginModal();
@@ -1084,6 +1152,12 @@ var holders = [];
 
     // ============ 事件绑定 ============
     document.addEventListener('click', function (e) {
+      var ar = e.target.closest('#assetPop .ap-row');
+      if (ar) { selectPay(ar.getAttribute('data-sym')); return; }
+      if (e.target.closest('.faucet-mini')) { faucetPay(); return; }
+      if (e.target.closest('#payToken')) { if (side === 'buy') togglePayPop(); return; }
+      var apEl = document.getElementById('assetPop');
+      if (apEl && apEl.style.display !== 'none' && !e.target.closest('#assetPop')) apEl.style.display = 'none';
       if (e.target.closest('#swapArrow')) flipSwap();
       var sb = e.target.closest('#swapSeg button');
       if (sb) {
@@ -1108,15 +1182,10 @@ var holders = [];
       var qb = e.target.closest('#quickRow button');
       if (qb) {
         var p = parseFloat(qb.getAttribute('data-p'));
-        if (side === 'buy') {
-          document.getElementById('swapIn').value = (Launch.USER.eth * p).toFixed(4);
-        } else {
-          var h = Launch.USER.holdings[coin.id];
-          if (h) {
-            var ethVal = (h.amount * p * coin.priceUsd) / 3200;
-            document.getElementById('swapIn').value = ethVal.toFixed(4);
-          }
-        }
+        var qtyIn = null;
+        if (side === 'buy') qtyIn = Launch.balanceOf(paySym) * p;
+        else { var hq = Launch.USER.holdings[coin.id]; if (hq) qtyIn = hq.amount * p; }
+        if (qtyIn != null) document.getElementById('swapIn').value = Launch.fmtQty(qtyIn);
         updateQuote();
       }
     });

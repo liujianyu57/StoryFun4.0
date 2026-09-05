@@ -657,7 +657,7 @@
       '查看市场': 'View market', '查看我的币': 'View my token',
       '创建中…': 'Working…', '已创建并上架': 'Token created and listed',
       // —— 配对下拉 ——
-      '主资产': 'Native', '股票代币': 'Stocks',
+      '主资产': 'Native', '加密资产': 'Crypto', '股票代币': 'Stocks',
       'Receives creator fees and the creator tax. Leave blank to use your connected wallet.': 'Receives creator fees and the creator tax. Leave blank to use your connected wallet.',
       // —— 币图状态 ——
       'Uploading to ipfs…': 'Uploading to ipfs…',
@@ -1027,11 +1027,12 @@
       QQQ: 'Invesco QQQ', RBLX: 'Roblox', RDDT: 'Reddit', RIVN: 'Rivian Automotive',
       SKHY: 'SK hynix', SNAP: 'Snap', SNDK: 'SanDisk', SPCX: 'SpaceX Class A',
       SPY: 'SPDR S&P 500 ETF', TSLA: 'Tesla', TSM: 'Taiwan Semiconductor Manufacturing',
-      TTWO: 'Take-Two Interactive', USO: 'United States Oil Fund', WYFI: 'WhiteFiber'
+      TTWO: 'Take-Two Interactive', USO: 'United States Oil Fund', WYFI: 'WhiteFiber',
+      WETH: 'Wrapped Ether', USDG: 'USD Global', cbBTC: 'Coinbase Wrapped BTC'
     };
     function pairName(p) { return PAIR_NAMES[p] || p; }
-    function pairIcoTxt(p) { return p === 'ETH' ? 'Ξ' : String(p).charAt(0); }
-    function pairIcoCls(p) { return p === 'ETH' ? 'eth' : 'stk'; }
+    function pairIcoTxt(p) { return p === 'ETH' || p === 'WETH' ? 'Ξ' : p === 'cbBTC' ? '₿' : p === 'USDG' ? '$' : String(p).charAt(0); }
+    function pairIcoCls(p) { return p === 'ETH' || p === 'WETH' ? 'eth' : p === 'USDG' || p === 'cbBTC' ? 'eth' : 'stk'; }
     function pairOptionHTML(p) {
       var on = p === pairSel;
       return '<button type="button" role="option" class="pair-dd-option' + (on ? ' active' : '') + '" data-pair="' + esc(p) + '" aria-selected="' + on + '" onclick="pickPair(\'' + esc(p) + '\')">' +
@@ -1042,7 +1043,11 @@
     }
     function renderPairMenu() {
       var stocks = (window.Launch && Launch.pairStocks) ? Launch.pairStocks : [];
+      var crypto = (window.Launch && Launch.quoteCrypto) ? Launch.quoteCrypto.filter(function (x) { return x !== 'WETH'; }) : [];
       var html = '<div class="pair-dd-group">' + tt('主资产') + '</div>' + pairOptionHTML('ETH');
+      if (crypto.length) {
+        html += '<div class="pair-dd-group">' + tt('加密资产') + '</div>' + crypto.map(pairOptionHTML).join('');
+      }
       if (stocks.length) {
         html += '<div class="pair-dd-group">' + tt('股票代币') + '</div>' + stocks.map(pairOptionHTML).join('');
       }
@@ -1069,7 +1074,8 @@
     // 演示用资产美元价（≈真实价位），阈值统一 ≈$13,440（4.2 ETH @3200）
     var GRAD_USD = 13440;
     var ASSET_PRICES = {
-      ETH: 3200, AAPL: 210, AMD: 160, AMZN: 205, BB: 4.2, COIN: 265, COST: 940,
+      ETH: 3200, WETH: 3200, USDG: 1, cbBTC: 98000,
+      AAPL: 210, AMD: 160, AMZN: 205, BB: 4.2, COIN: 265, COST: 940,
       CRCL: 150, DELL: 130, DJT: 30, FIG: 95, GLD: 255, GME: 26, GOOGL: 192,
       HIMS: 62, JNJ: 148, LLY: 820, LULU: 245, META: 555, MRNA: 42, MRVL: 108,
       MSFT: 462, MSTR: 420, MU: 132, NVDA: 175, PFE: 27, PLTR: 118, QQQ: 470,

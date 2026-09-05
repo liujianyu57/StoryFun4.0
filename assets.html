@@ -317,10 +317,18 @@
     function claimDiv(id) {
       var amt = assetsDivAmt(id);
       if (!amt) { Launch.toast('当前无待领分红', 'warn'); return; }
-      Launch.USER.eth += Launch.usdToEth(amt);
-      Launch.persist();
+      // 分红按该币配对资产入账（与币详情页一致）
+      var c = (Launch.coinById && Launch.coinById(id)) || null;
+      var pair = (c && c.pair) || 'ETH';
+      if (Launch.qtyOfUsd && Launch.credit) {
+        Launch.credit(pair, Launch.qtyOfUsd(amt, pair));
+        if (Launch.persist) Launch.persist();
+      } else {
+        Launch.USER.eth += Launch.usdToEth(amt);
+        Launch.persist();
+      }
       try { var a = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]'); if (a.indexOf(id) === -1) { a.push(id); localStorage.setItem('sf_div_claimed', JSON.stringify(a)); } } catch (e) {}
-      Launch.toast('已领取分红 ' + Launch.fmtUsd(amt), 'ok');
+      Launch.toast('已领取分红 ' + Launch.fmtQty(Launch.qtyOfUsd ? Launch.qtyOfUsd(amt, pair) : Launch.usdToEth(amt)) + ' ' + pair, 'ok');
       renderHold();
     }
     function renderHold() {
