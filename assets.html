@@ -84,27 +84,7 @@
     .p-share { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border);
       background: var(--surface-2); color: var(--text-2); cursor: pointer; display: grid; place-items: center; transition: all .15s; }
     .p-share:hover { color: var(--text); border-color: var(--text-3); background: var(--surface); }
-    .p-share svg { width: 15px; height: 15px; }
 
-    /* 分享弹层 */
-    .share-overlay { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center;
-      background: rgba(10,11,13,.5); padding: 20px; }
-    .share-overlay.open { display: flex; }
-    .share-card { width: min(430px, 94vw); background: #fff; border-radius: 20px; padding: 16px;
-      box-shadow: 0 24px 70px rgba(0,0,0,.25); display: flex; flex-direction: column; gap: 12px; max-height: 92vh; }
-    .share-head { display: flex; align-items: center; justify-content: space-between; }
-    .share-head b { font-size: 14px; font-weight: 700; }
-    .share-head button { width: 30px; height: 30px; border-radius: 50%; border: none; background: rgba(0,0,0,.06);
-      color: #555; font-size: 14px; cursor: pointer; }
-    .share-preview { border-radius: 14px; overflow: hidden; background: #F4F5F7; min-height: 120px; display: grid; place-items: center; }
-    .share-preview img { display: block; width: 100%; height: auto; }
-    .share-preview .share-loading { font-size: 12px; color: #9AA; padding: 24px; }
-    .share-actions { display: flex; gap: 10px; }
-    .share-actions button { flex: 1; height: 42px; border-radius: 999px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; }
-    #shareCopy { background: rgba(0,0,0,.06); color: #111; }
-    #shareCopy:hover { background: rgba(0,0,0,.12); }
-    #shareDown { background: #0A0B0D; color: #fff; }
-    #shareDown:hover { opacity: .88; }
 
     .history-card { padding: 6px 18px 14px; }
     .his-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
@@ -216,18 +196,6 @@
       <div id="asBody"></div>
     </div>
   </main>
-
-  <!-- 持仓分享弹层 -->
-  <div class="share-overlay" id="shareModal">
-    <div class="share-card">
-      <div class="share-head"><b>分享持仓</b><button type="button" id="shareClose" aria-label="关闭">✕</button></div>
-      <div class="share-preview"><span class="share-loading" id="shareLoading">正在生成分享图…</span><img id="shareImg" alt="" style="display:none"></div>
-      <div class="share-actions">
-        <button type="button" id="shareCopy">复制图片</button>
-        <button type="button" id="shareDown">下载图片</button>
-      </div>
-    </div>
-  </div>
 
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
@@ -448,167 +416,10 @@
         '<div class="pos-scroll"><div class="pos-list">' + rows + '</div></div>';
     }
 
-    // ---- 持仓分享图（canvas → PNG：下载 / 复制） ----
-    var _shareCanvas = null;
-    var _shareCoinId = '';
-    function loadPosLogo(c) {
-      return new Promise(function (resolve) {
-        if (!c || !c.cover) { resolve(null); return; }
-        var img = new Image();
-        img.onload = function () { resolve(img); };
-        img.onerror = function () { resolve(null); };
-        img.src = c.cover;
-      });
+    // 分享：原型占位（不真实生成图片）
+    function sharePosition() {
+      if (window.Launch && Launch.toast) Launch.toast('分享图片 · 演示占位', 'ok');
     }
-    function sharePosition(id) {
-      var c = Launch.coinById(id);
-      if (!c) return;
-      _shareCoinId = id;
-      var modal = document.getElementById('shareModal');
-      var imgEl = document.getElementById('shareImg');
-      var load = document.getElementById('shareLoading');
-      modal.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      imgEl.style.display = 'none';
-      load.style.display = '';
-      load.textContent = '正在生成分享图…';
-      loadPosLogo(c).then(function (logo) {
-        try {
-          _shareCanvas = drawShareCard(c, logo);
-          imgEl.src = _shareCanvas.toDataURL('image/png');
-          imgEl.style.display = '';
-          load.style.display = 'none';
-        } catch (e) { load.textContent = '生成失败，请重试'; }
-      });
-    }
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
-    }
-    function fmtShareMcap(n) {
-      if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
-      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
-      if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
-      return '$' + n.toFixed(2);
-    }
-    function drawShareCard(c, logo) {
-      var h = Launch.USER.holdings[c.id] || { amount: 0, avgUsd: 0 };
-      var W = 640, H = 470;
-      var canvas = document.createElement('canvas');
-      canvas.width = W; canvas.height = H;
-      var ctx = canvas.getContext('2d');
-      var font = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif';
-      // 底色
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
-      // 头部
-      ctx.fillStyle = '#0A0B0D';
-      ctx.font = '800 24px ' + font; ctx.textAlign = 'left';
-      ctx.fillText('Open position', 30, 56);
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = '500 13px ' + font;
-      ctx.fillText('Entry, current market cap, value, and PnL.', 30, 80);
-      ctx.strokeStyle = '#F0F1F3'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(30, 98); ctx.lineTo(W - 30, 98); ctx.stroke();
-      // 币 logo + 名
-      var lx = 30, ly = 130, size = 92;
-      ctx.fillStyle = '#F4F5F7';
-      roundRect(ctx, lx, ly, size, size, 18); ctx.fill();
-      if (logo) {
-        ctx.save();
-        roundRect(ctx, lx, ly, size, size, 18); ctx.clip();
-        ctx.drawImage(logo, lx, ly, size, size);
-        ctx.restore();
-      } else {
-        ctx.fillStyle = '#B9BEC4';
-        ctx.font = '800 40px ' + font; ctx.textAlign = 'center';
-        ctx.fillText((c.symbol || '?').charAt(0), lx + size / 2, ly + size / 2 + 14);
-      }
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#0A0B0D';
-      ctx.font = '800 26px ' + font;
-      ctx.fillText(c.name, lx + size + 20, ly + 38);
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = '700 17px ' + font;
-      ctx.fillText('$' + c.symbol, lx + size + 20, ly + 66);
-      // 指标 2×2
-      var cost = h.amount * h.avgUsd;
-      var val = h.amount * c.priceUsd;
-      var pnl = val - cost;
-      var pct = cost > 0 ? (pnl / cost) * 100 : 0;
-      var up = pnl >= 0;
-      var entryMcap = (c.marketCap || 0) * (h.avgUsd / Math.max(c.priceUsd, 1e-12));
-      var curMcap = c.marketCap || 0;
-      var st = [
-        { lab: 'Entry mcap', val: fmtShareMcap(entryMcap), col: '#0A0B0D' },
-        { lab: 'Current mcap', val: fmtShareMcap(curMcap), col: '#0A0B0D' },
-        { lab: 'Value', val: Launch.fmtUsd(val), col: '#0A0B0D' },
-        { lab: 'PnL', val: (up ? '▲ +' : '▼ −') + Launch.fmtUsd(Math.abs(pnl)) + '  (' + (pct >= 0 ? '+' : '−') + Math.abs(pct).toFixed(1) + '%)', col: up ? '#0E9F6E' : '#E5484D' }
-      ];
-      var bx = 30, bw = (W - 60 - 16) / 2, bh = 66;
-      for (var i = 0; i < 4; i++) {
-        var x = bx + (i % 2) * (bw + 16);
-        var y = 268 + Math.floor(i / 2) * (bh + 14);
-        ctx.fillStyle = '#F7F8FA';
-        roundRect(ctx, x, y, bw, bh, 14); ctx.fill();
-        ctx.fillStyle = '#8E8E93';
-        ctx.font = '500 12px ' + font;
-        ctx.fillText(st[i].lab, x + 16, y + 26);
-        ctx.fillStyle = st[i].col;
-        ctx.font = '800 19px ' + font;
-        ctx.fillText(st[i].val, x + 16, y + 52);
-      }
-      // 底部
-      ctx.fillStyle = '#C7CBD0';
-      ctx.font = '500 12px ' + font; ctx.textAlign = 'center';
-      ctx.fillText('story.fun · open pons position · ' + new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), W / 2, H - 18);
-      return canvas;
-    }
-    function closeShare() {
-      var m = document.getElementById('shareModal');
-      m.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-    function bindShareModal() {
-      var modal = document.getElementById('shareModal');
-      if (!modal) return;
-      document.getElementById('shareClose').addEventListener('click', closeShare);
-      modal.addEventListener('click', function (e) { if (e.target === modal) closeShare(); });
-      document.getElementById('shareDown').addEventListener('click', function () {
-        if (!_shareCanvas) { Launch.toast('图片未生成', 'warn'); return; }
-        _shareCanvas.toBlob(function (blob) {
-          if (!blob) { Launch.toast('生成失败', 'err'); return; }
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url;
-          a.download = 'storyfun-position-' + _shareCoinId + '.png';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 400);
-          Launch.toast('已下载分享图', 'ok');
-        }, 'image/png');
-      });
-      document.getElementById('shareCopy').addEventListener('click', function () {
-        if (!_shareCanvas) { Launch.toast('图片未生成', 'warn'); return; }
-        _shareCanvas.toBlob(function (blob) {
-          if (!blob) { Launch.toast('生成失败', 'err'); return; }
-          try {
-            if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
-              navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                .then(function () { Launch.toast('图片已复制', 'ok'); })
-                .catch(function () { Launch.toast('复制失败，请用下载', 'warn'); });
-            } else {
-              Launch.toast('当前浏览器不支持复制图片，请下载', 'warn');
-            }
-          } catch (e) { Launch.toast('复制失败，请用下载', 'warn'); }
-        }, 'image/png');
-      });
-    }
-    bindShareModal();
 
     function renderMade() {
       var made = myCreated();
