@@ -1070,6 +1070,11 @@ var holders = [];
       if (n >= 1000) return (n / 1000).toFixed(2) + 'K';
       return Launch.fmtNum(Math.floor(n));
     }
+    // number 输入框只接受纯数字：最多保留 6 位小数
+    function qtyToInput(v) {
+      if (v == null || isNaN(v)) return '';
+      return String(Math.round(v * 1e6) / 1e6);
+    }
     function doSwap() {
       if (!Launch.isLoggedIn()) { openLoginModal(); Launch.toast('登录后即可交易', 'warn'); return; }
       var inp = parseFloat(document.getElementById('swapIn').value) || 0;
@@ -1185,7 +1190,7 @@ var holders = [];
         var qtyIn = null;
         if (side === 'buy') qtyIn = Launch.balanceOf(paySym) * p;
         else { var hq = Launch.USER.holdings[coin.id]; if (hq) qtyIn = hq.amount * p; }
-        if (qtyIn != null) document.getElementById('swapIn').value = Launch.fmtQty(qtyIn);
+        if (qtyIn != null) document.getElementById('swapIn').value = qtyToInput(qtyIn);
         updateQuote();
       }
     });
