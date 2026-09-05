@@ -702,7 +702,7 @@
       var list = gradCoins();
       var grid = document.getElementById('gradGrid');
       var empty = document.getElementById('gradEmpty');
-      var per = 10;
+      var per = 6; // 已毕业：一页 6 条（大卡）
       var pages = Math.max(1, Math.ceil(list.length / per));
       if (state.gradPage > pages) state.gradPage = pages;
       if (state.gradPage < 1) state.gradPage = 1;
