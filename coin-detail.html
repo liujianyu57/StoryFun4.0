@@ -419,11 +419,12 @@
 <!-- K线 -->
         <div class="card kcard">
           <div class="kcard-head">
-            <div class="kcard-title" id="kTitle">价格</div>
-            <div class="pill-seg sm" id="kSeg">
-              <button data-k="1h">1H</button>
-              <button data-k="1d" class="on">1D</button>
-              <button data-k="7d">7D</button>
+            <div class="pill-seg sm" id="kSeg" style="margin-left:auto">
+              <button data-k="5m">5M</button>
+              <button data-k="1h" class="on">1H</button>
+              <button data-k="6h">6H</button>
+              <button data-k="1d">1D</button>
+              <button data-k="all">ALL</button>
             </div>
           </div>
           <canvas class="kchart" id="kChart"></canvas>
@@ -500,7 +501,7 @@
     var coin = null;
     var side = 'buy';
     var paySym = 'ETH';   // 支付资产（默认=币的配对资产，可切任意受支持资产）
-    var range = '1d';
+    var range = '1h';
     var esc = function (s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -510,6 +511,8 @@
     // 演示 holders / charts 数据
 var holders = [];
     var chartSeries = [];
+    var chartSeed = 0;
+    var RANGE_LEN = { '5m': 36, '1h': 60, '6h': 84, '1d': 120, all: 160 };
     var myTrades = [];
 
     // 模拟成交落点：仅当成交币 = 当前币时联动刷新（数字/毕业条/图表尾部）
@@ -524,7 +527,7 @@ var holders = [];
       var last = chartSeries[chartSeries.length - 1];
       var step = (last || 0.5) + (r - 0.46) * 0.05; // 轻微上行偏向
       chartSeries.push(Math.max(0.05, Math.min(1, step)));
-      if (chartSeries.length > 90) chartSeries.shift();
+      if (chartSeries.length > ((RANGE_LEN && RANGE_LEN[range]) || 90) + 6) chartSeries.shift();
     }
     function flashPrice() {
       var el = document.getElementById('cdPrice');
@@ -561,6 +564,7 @@ var holders = [];
 
       // 图表数据按币生成确定性序列
       var seedVal = coin.id.split('').reduce(function (a, c) { return a + c.charCodeAt(0); }, 0);
+      chartSeed = seedVal;
       chartSeries = buildSeries(seedVal);
       simChartInit();
       // 初始成交流（静态种子），模拟成交在其上追加
@@ -582,8 +586,8 @@ var holders = [];
       renderMeta();
     }
 
-    function buildSeries(seed) {
-      var n = 48;
+    function buildSeries(seed, n) {
+      n = n || 60;
       var out = [];
       var v = 0.3 + (seed % 40) / 100;
       for (var i = 0; i < n; i++) {
@@ -591,6 +595,12 @@ var holders = [];
         out.push(v);
       }
       return out;
+    }
+    // 切时间范围：按范围密度重建确定性序列（5M/1H/6H/1D/ALL）
+    function chartRebuild() {
+      var n = RANGE_LEN[range] || 60;
+      chartSeries = buildSeries(chartSeed || 0, n);
+      renderChart();
     }
 
     function renderHead() {
@@ -1336,7 +1346,7 @@ var holders = [];
       if (kb) {
         range = kb.getAttribute('data-k');
         document.querySelectorAll('#kSeg button').forEach(function (b) { b.classList.toggle('on', b === kb); });
-        renderChart();
+        chartRebuild();
       }
       var rb = e.target.closest('#recSeg button');
       if (rb) {
