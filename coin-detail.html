@@ -208,6 +208,17 @@
     font-size: 11px; font-weight: 700; color: var(--text-2); padding: 4px 12px; cursor: pointer; white-space: nowrap; }
   .ff-route button.on { background: var(--text); border-color: var(--text); color: #fff; }
   .ff-rowbtns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  /* Creator fees 卡：整齐行布局 */
+  .ff-row { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 0; border-top: 1px dashed rgba(10,11,13,.08); }
+  .ff-row:first-of-type { border-top: none; }
+  .ff-mini { min-width: 0; }
+  .ff-mlabel { display: block; font-size: 10.5px; color: var(--text-3); font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+  .ff-mval { display: block; font-size: 14px; font-weight: 800; margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .ff-mval small { font-size: 10px; color: var(--text-3); font-weight: 600; margin-left: 2px; }
+  .ff-mval.mono { font-size: 11px; font-weight: 600; font-family: var(--mono); color: var(--text-2); }
+  .ff-mstate { font-size: 11px; color: var(--text-3); font-weight: 600; flex: none; }
+  .ff-row .ff-act, .ff-row .ff-transfer { margin: 0; flex: none; }
   #tfInp { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
     font-family: var(--mono); font-size: 13px; color: var(--text); margin: 10px 0 4px; }
   /* pons Limit 面板 */
@@ -1239,21 +1250,28 @@ var holders = [];
       } else {
         if (isIssuer) {
           var potI = issPot(coin);
-          // 收款人 + Transfer
-          html += '<div class="ff-recip"><span class="ff-sub">Fee recipient</span><span class="mono num" title="' + esc(recv) + '">' + esc(sRecv) + '</span>' +
-            '<button type="button" class="ff-transfer" onclick="openTransfer()">Transfer</button></div>';
-          // 待收集曲线费（Collect → 进入 claimable）
-          html += '<div class="ff-assets">' + valHtml(potI.pending) +
-            '<span class="ff-sub">Pending curve fees — collect to your claimable balance</span></div>' +
+          // 收款人（+ Transfer）
+          html += '<div class="ff-row">' +
+            '<div class="ff-mini"><span class="ff-mlabel">Fee recipient</span>' +
+            '<span class="ff-mval mono" title="' + esc(recv) + '">' + esc(sRecv) + '</span></div>' +
+            '<button type="button" class="ff-transfer" onclick="openTransfer()">Transfer</button>' +
+            '</div>';
+          // 待收集曲线费：Collect → 转入 Claimable
+          html += '<div class="ff-row">' +
+            '<div class="ff-mini"><span class="ff-mlabel">Pending curve fees</span>' +
+            '<span class="ff-mval num">' + q6(potI.pending) + ' <small>' + esc(pair) + '</small></span></div>' +
             (potI.pending > 0
-              ? '<button class="btn btn-ghost ff-act" onclick="collectCurveFees()">Collect curve fees</button>'
-              : '<span class="ff-hint" style="margin:0">No pending curve fees</span>');
+              ? '<button type="button" class="btn btn-ghost ff-act" onclick="collectCurveFees()">Collect curve fees</button>'
+              : '<span class="ff-mstate">Collected</span>') +
+            '</div>';
           // 可领取（按 pair 提取）
-          html += '<div class="ff-assets">' + valHtml(potI.claimable) +
-            '<span class="ff-sub">Claimable now, paid to ' + esc(sRecv) + '</span></div>' +
+          html += '<div class="ff-row">' +
+            '<div class="ff-mini"><span class="ff-mlabel">Claimable</span>' +
+            '<span class="ff-mval num">' + q6(potI.claimable) + ' <small>' + esc(pair) + '</small></span></div>' +
             (potI.claimable > 0
-              ? '<button class="btn btn-ghost ff-act" onclick="doIssuerClaim()">Claim ' + esc(pair) + '</button>'
-              : '<span class="ff-hint" style="margin:0">Nothing claimable yet — collect curve fees first</span>');
+              ? '<button type="button" class="btn btn-ghost ff-act" onclick="doIssuerClaim()">Claim ' + esc(pair) + '</button>'
+              : '<span class="ff-mstate">' + (potI.pending > 0 ? 'Collect first' : '—') + '</span>') +
+            '</div>';
         } else {
           if (fdNone) {
             html += '<div class="ff-assets">' + valHtml(0) + '<span class="ff-sub">No fees to claim.</span></div>' +
