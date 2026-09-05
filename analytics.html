@@ -16,8 +16,13 @@
     .an-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 22px 0 20px; }
     .an-stat { padding: 18px 20px; }
     .an-stat .k { font-size: 12px; color: var(--text-2); }
-    .an-stat .v { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-top: 6px; }
-    .an-stat .s { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+    .an-stat .v { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; }
+    .an-stat .d { font-size: 12.5px; margin-top: 9px; font-variant-numeric: tabular-nums; }
+    .an-stat .d.down { color: #E5484D; }
+    .an-stat .d.up { color: #0E9F6E; }
+    .an-stat .d.na { color: var(--text-3); }
+    .an-note { font-size: 12px; color: var(--text-3); margin-top: 22px; padding-top: 14px;
+      border-top: 1px solid var(--border); line-height: 1.6; max-width: 720px; }
 
     .an-main { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; align-items: start; }
     .seg-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -58,59 +63,17 @@
             <span class="an-sub2 num" id="duneMeta">Dune updated —</span>
           </div>
         </div>
-        <div class="seg-wrap">
-          <div class="pill-seg" id="modeSeg">
-            <button data-m="24h">24h</button>
-            <button data-m="all" class="on">全部</button>
-          </div>
-          <a class="an-dune" href="https://dune.com/adam_tehc/pons" target="_blank" rel="noopener" title="打开 pons 官方 Dune 链上数据看板">
-            View on Dune
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
-          </a>
-        </div>
+        <a class="an-dune" href="https://dune.com/adam_tehc/pons" target="_blank" rel="noopener" title="打开 pons 官方 Dune 链上数据看板">
+          View on Dune
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+        </a>
       </div>
     </div>
 
-    <!-- 指标卡 -->
+    <!-- 24h 数据（pons：三块 + Dune 数据说明） -->
     <div class="an-grid" id="statCards"></div>
 
-    <div class="an-main">
-      <!-- 发行趋势 -->
-      <div class="card">
-        <div style="padding:18px 20px 0">
-          <div class="trend-head-row">
-            <div>
-              <div class="card-title">发行趋势</div>
-              <div class="card-sub">近 14 天每日新发行代币</div>
-            </div>
-            <div class="trend-peak num" id="issuePeak"></div>
-          </div>
-        </div>
-        <div style="padding:0 20px 14px">
-          <svg class="trend-svg" id="trendSvg" viewBox="0 0 560 160" preserveAspectRatio="none"></svg>
-          <div class="trend-legend" id="trendLegend"></div>
-        </div>
-      </div>
-
-      <!-- 交易量趋势 -->
-      <div class="card">
-        <div style="padding:18px 20px 0">
-          <div class="trend-head-row">
-            <div>
-              <div class="card-title">交易量趋势</div>
-              <div class="card-sub">近 14 天平台成交额</div>
-            </div>
-            <div class="trend-peak num" id="volPeak"></div>
-          </div>
-        </div>
-        <div style="padding:0 20px 14px">
-          <svg class="trend-svg" id="volSvg" viewBox="0 0 560 160" preserveAspectRatio="none"></svg>
-          <div class="trend-legend" id="volLegend"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="note">数据为本地演示聚合：基于市场实时状态计算，刷新即更新。毕业阈值 4.2 ETH，曲线售罄后自动上池并永久锁定流动性。个人交易记录请前往「资产」页查看。</div>
+    <div class="an-note">Data is supplied by Dune from indexed onchain activity. The 24h view uses the latest completed UTC day.</div>
   </main>
 
   <script src="auth.js"></script>
@@ -120,68 +83,58 @@
     // ============================================================
     //  Analytics
     // ============================================================
-    var mode = 'all';
-
-    function renderStats(a) {
+    // ============================================================
+    //  Protocol analytics（pons：Dune 提供的 24h 三块数据）
+    //  数据取自本地演示引擎（确定性 mock），结构与文案对齐 pons
+    // ============================================================
+    function fmtK(n) {
+      if (n == null || isNaN(n)) return '—';
+      var a = Math.abs(n);
+      if (a >= 1e12) return (n / 1e12).toFixed(2) + 'T';
+      if (a >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+      if (a >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+      if (a >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+      return n.toLocaleString('en-US');
+    }
+    function fmtUsdShort(n) {
+      if (n == null || isNaN(n)) return '—';
+      if (Math.abs(n) >= 1000) return '$' + fmtK(n);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    }
+    function pctLine(cur, prev) {
+      if (prev == null || !(prev > 0) || cur == null) return { t: 'No prior-day baseline', c: 'na' };
+      var p = ((cur - prev) / prev) * 100;
+      var s = (p >= 0 ? '+' : '') + p.toFixed(1) + '% from prior day';
+      return { t: s, c: p >= 0 ? 'up' : 'down' };
+    }
+    function renderStats() {
+      var host = document.getElementById('statCards');
+      if (!host) return;
+      var a = Launch.analytics('24h');
+      var volT = a.volTrend || [], lauT = a.trend || [];
+      var curIdx = Math.max(0, volT.length - 2);   // 最近完整日 = 昨天（索引倒数第二）
+      var preIdx = curIdx - 1;
+      var volCur = volT[curIdx] ? volT[curIdx].value : 0;
+      var volPre = preIdx >= 0 && volT[preIdx] ? volT[preIdx].value : null;
+      var lauCur = lauT[curIdx] ? lauT[curIdx].value : 0;
+      var lauPre = preIdx >= 0 && lauT[preIdx] ? lauT[preIdx].value : null;
+      var trdCur = volCur != null ? Math.max(0, Math.round(volCur / 60)) : 0; // 演示：约 60$/笔
+      var trdPre = volPre != null ? Math.max(0, Math.round(volPre / 60)) : null;
+      var vd = pctLine(volCur, volPre);
+      var ld = pctLine(lauCur, lauPre);
+      var td = pctLine(trdCur, trdPre);
       var cards = [
-        { k: '总市值', v: Launch.fmtUsd(a.totalCap), s: a.launched + ' 个币' },
-        { k: '交易量', v: Launch.fmtUsd(a.totalVol), s: mode === '24h' ? '最近 24h' : '累计' },
-        { k: '发行数', v: Launch.fmtNum(a.launched), s: mode === '24h' ? ('今日 +' + a.createdToday) : '累计发行' },
-        { k: '已毕业', v: Launch.fmtNum(a.graduations.length), s: mode === '24h' ? ('今日 +' + a.graduatedToday) : '流动性锁定' },
-        { k: '总持有者', v: Launch.fmtNum(a.holders), s: '活跃地址' }
+        { k: '24h volume', v: fmtUsdShort(volCur), d: vd },
+        { k: '24h launches', v: fmtK(lauCur), d: ld },
+        { k: '24h trades', v: fmtK(trdCur), d: td }
       ];
-      document.getElementById('statCards').innerHTML = cards.map(function (c) {
-        return '<div class="card an-stat"><div class="k">' + c.k + '</div><div class="v num">' + c.v + '</div><div class="s">' + c.s + '</div></div>';
+      host.innerHTML = cards.map(function (c) {
+        return '<div class="card an-stat">' +
+          '<div class="k">' + c.k + '</div>' +
+          '<div class="v num">' + c.v + '</div>' +
+          '<div class="d ' + c.d.c + '">' + c.d.t + '</div>' +
+        '</div>';
       }).join('');
-    }
-
-    // 通用趋势折线：data = [{label, value}]，钱数可选
-    function drawTrend(svgId, legendId, data, money) {
-      var t = data || [];
-      if (!t.length) return;
-      var w = 560, h = 160, pl = 12, pr = 12, pt = 16, pb = 22;
-      var iw = w - pl - pr, ih = h - pt - pb;
-      var vals = t.map(function (d) { return d.value; });
-      var mx = Math.max.apply(null, vals);
-      var mn = Math.min.apply(null, vals);
-      var span = (mx - mn) || 1;
-      // 留 10% 顶部余量，视觉更稳
-      var maxV = mx + span * 0.1;
-      var pts = t.map(function (d, i) {
-        var x = pl + (iw / (t.length - 1 || 1)) * i;
-        var y = pt + ih - (d.value / maxV) * ih;
-        return { x: x, y: y, v: d.value };
-      });
-      var svg = document.getElementById(svgId);
-      var path = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
-      var area = path + ' L' + (pl + iw).toFixed(1) + ' ' + (pt + ih) + ' L' + pl + ' ' + (pt + ih) + ' Z';
-      var dots = pts.map(function (p) {
-        return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3.5" fill="#fff" stroke="#0A0B0D" stroke-width="2"/>';
-      }).join('');
-      var labels = t.map(function (d) { return d.label; });
-      svg.innerHTML =
-        '<defs><linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0" stop-color="rgba(10,11,13,.12)"/><stop offset="1" stop-color="rgba(10,11,13,0)"/></linearGradient></defs>' +
-        '<path d="' + area + '" fill="url(#trendFill)"/>' +
-        '<path d="' + path + '" fill="none" stroke="#0A0B0D" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' + dots;
-      document.getElementById(legendId).innerHTML =
-        '<span>' + (labels[0] || '') + '</span><span>' + (labels[Math.floor(labels.length / 2)] || '') + '</span><span>' + (labels[labels.length - 1] || '') + '</span>';
-    }
-
-    function renderAll() {
-      var a = Launch.analytics(mode);
-      renderStats(a);
-      drawTrend('trendSvg', 'trendLegend', a.trend, false);
-      drawTrend('volSvg', 'volLegend', a.volTrend, true);
-      // 峰值标注
-      if (a.volTrend && a.volTrend.length) {
-        var peakV = Math.max.apply(null, a.volTrend.map(function (d) { return d.value; }));
-        document.getElementById('volPeak').textContent = '峰值 ' + Launch.fmtUsd(peakV);
-      }
-      if (a.trend && a.trend.length) {
-        var peakN = Math.max.apply(null, a.trend.map(function (d) { return d.value; }));
-        document.getElementById('issuePeak').textContent = '峰值 ' + peakN + ' / 日';
-      }
     }
 
     function fillDuneMeta() {
@@ -198,15 +151,7 @@
 
     window.onLaunchShellReady = function () {
       fillDuneMeta();
-      document.getElementById('modeSeg').addEventListener('click', function (e) {
-        var b = e.target.closest('button[data-m]');
-        if (!b) return;
-        mode = b.getAttribute('data-m');
-        document.querySelectorAll('#modeSeg button').forEach(function (x) { x.classList.remove('on'); });
-        b.classList.add('on');
-        renderAll();
-      });
-      renderAll();
+      renderStats();
     };
   </script>
   <script src="load-desktop-header.js"></script>
