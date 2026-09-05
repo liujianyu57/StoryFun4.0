@@ -24,6 +24,24 @@
     .an-note { font-size: 12px; color: var(--text-3); margin-top: 22px; padding-top: 14px;
       border-top: 1px solid var(--border); line-height: 1.6; max-width: 720px; }
 
+    /* 大卡片：标题/副标题 + 三块 24h 数据 + Dune 注脚 */
+    .an-panel { padding: 26px 28px 18px; border-radius: 22px; }
+    .an-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border); margin-top: 24px; padding-top: 6px; }
+    .an-metrics .m-cell { padding: 14px 26px 4px; border-left: 1px solid var(--border); }
+    .an-metrics .m-cell:first-child { border-left: none; padding-left: 2px; }
+    .an-metrics .k { font-size: 12px; color: var(--text-2); font-weight: 600; }
+    .an-metrics .v { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin-top: 8px; }
+    .an-metrics .d { font-size: 12.5px; margin-top: 10px; font-variant-numeric: tabular-nums; }
+    .an-metrics .d.down { color: #E5484D; }
+    .an-metrics .d.up { color: #0E9F6E; }
+    .an-metrics .d.na { color: var(--text-3); }
+    .an-panel .an-note { border-top: none; margin-top: 10px; padding-top: 0; padding-bottom: 6px; max-width: none; }
+    @media (max-width: 760px) {
+      .an-metrics { grid-template-columns: 1fr; }
+      .an-metrics .m-cell { border-left: none; border-bottom: 1px solid var(--border); padding: 16px 2px; }
+      .an-metrics .m-cell:last-child { border-bottom: none; }
+    }
+
     /* pons daily-context 图卡 */
     .an-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; align-items: start; margin-top: 8px; }
     .an-chart { padding: 20px 22px 18px; }
@@ -63,8 +81,8 @@
 <body>
   <div id="launch-header-host"></div>
 
-  <main class="launch-shell">
-    <div class="an-hero">
+    <main class="launch-shell">
+    <div class="card an-panel">
       <div class="an-head">
         <div>
           <div class="an-title">Protocol analytics</div>
@@ -77,10 +95,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
         </a>
       </div>
-    </div>
 
-    <!-- 24h 数据（pons：三块 + Dune 数据说明） -->
-    <div class="an-grid" id="statCards"></div>
+      <!-- 三块 24h 数据 -->
+      <div class="an-metrics" id="statCards"></div>
+
+      <div class="an-note">Data is supplied by Dune from indexed onchain activity. The 24h view uses the latest completed UTC day.</div>
+    </div>
 
     <!-- Daily context（pons：最近完整日高亮） -->
     <div class="an-charts">
@@ -97,8 +117,6 @@
         <svg class="trend-svg" id="chLauSvg" viewBox="0 0 560 150" preserveAspectRatio="none"></svg>
       </div>
     </div>
-
-    <div class="an-note">Data is supplied by Dune from indexed onchain activity. The 24h view uses the latest completed UTC day.</div>
   </main>
 
   <script src="auth.js"></script>
@@ -154,7 +172,7 @@
         { k: '24h trades', v: fmtK(trdCur), d: td }
       ];
       host.innerHTML = cards.map(function (c) {
-        return '<div class="card an-stat">' +
+        return '<div class="m-cell">' +
           '<div class="k">' + c.k + '</div>' +
           '<div class="v num">' + c.v + '</div>' +
           '<div class="d ' + c.d.c + '">' + c.d.t + '</div>' +
