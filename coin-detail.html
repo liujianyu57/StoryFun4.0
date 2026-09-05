@@ -197,6 +197,19 @@
   .ord-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid #F0F1F3; font-size: 12.5px; }
   .ord-row:first-child { border-top: none; }
   .ord-row b { color: var(--text); }
+  /* Creator fees 两步 + 收款人 + 路由切换 */
+  .ff-recip { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 2px 0 4px; font-size: 12px; color: var(--text-2); }
+  .ff-recip .mono { font-family: var(--mono); font-weight: 600; color: var(--text); }
+  .ff-transfer { border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-2);
+    font-size: 11px; font-weight: 700; padding: 3px 12px; cursor: pointer; }
+  .ff-transfer:hover { color: var(--text); border-color: var(--text-3); }
+  .ff-route { display: flex; gap: 6px; padding: 2px 0 8px; }
+  .ff-route button { border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+    font-size: 11px; font-weight: 700; color: var(--text-2); padding: 4px 12px; cursor: pointer; white-space: nowrap; }
+  .ff-route button.on { background: var(--text); border-color: var(--text); color: #fff; }
+  .ff-rowbtns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  #tfInp { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
+    font-family: var(--mono); font-size: 13px; color: var(--text); margin: 10px 0 4px; }
   /* pons Limit 面板 */
   .token-limit-side-toggle { display: flex; background: var(--accent-soft); border-radius: 12px; padding: 3px; margin-bottom: 10px; }
   .token-limit-side-toggle button { flex: 1; height: 36px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700;
@@ -548,6 +561,18 @@
       <div class="review-actions">
         <button type="button" class="rv-cancel" id="rvCancel">Cancel</button>
         <button type="button" class="rv-confirm" id="rvConfirm">Confirm buy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 收款人修改弹层 -->
+  <div class="review-overlay" id="transferModal" onclick="if(event.target===this)closeTransfer()">
+    <div class="review-card">
+      <div class="review-head"><div class="rt">New fee recipient</div><button type="button" id="tfClose" aria-label="关闭" onclick="closeTransfer()">✕</button></div>
+      <input id="tfInp" type="text" placeholder="0x…" autocomplete="off" spellcheck="false" />
+      <div class="review-actions">
+        <button type="button" class="rv-cancel" onclick="closeTransfer()">Cancel</button>
+        <button type="button" class="rv-confirm" onclick="confirmTransfer()">Transfer</button>
       </div>
     </div>
   </div>
@@ -1115,11 +1140,76 @@ var holders = [];
       refreshSwap();
     }
     // 参数信息（对齐参考 About/Creator fees/Holder fee sharing；已毕业时隐藏）
+    // ===== Creator fees 两步 + 收款人 + 动态路由（发行者视角） =====
+    function issRecv(coin2) {
+      try { var r = localStorage.getItem('sf_fee_recipient_' + coin2.id); if (r && /^0x[0-9a-fA-F]{6,}$/.test(r)) return r; } catch (e) {}
+      return coin2.creatorWallet || coin2.creatorAddr || '0x…';
+    }
+    function shortRecv(a) {
+      a = a || '';
+      return a.length > 14 ? a.slice(0, 8) + '…' + a.slice(-6) : a;
+    }
+    function saveIssRecv(coin2, addr) { try { localStorage.setItem('sf_fee_recipient_' + coin2.id, addr); } catch (e) {} }
+    function issPot(coin2) {
+      try {
+        var raw = localStorage.getItem('sf_cf_' + coin2.id);
+        if (raw) { var o = JSON.parse(raw); return { pending: +o.pending || 0, claimable: +o.claimable || 0 }; }
+      } catch (e) {}
+      var h = 0, sx = coin2.id || 'x';
+      for (var i = 0; i < sx.length; i++) h = (h * 31 + sx.charCodeAt(i)) >>> 0;
+      var earned = Math.round((1.2 + (h % 48000) / 1000) * 1e6) / 1e6;
+      var p = { pending: Math.round(earned * (0.5 + ((h >>> 3) % 9) / 100) * 1e6) / 1e6, claimable: 0 };
+      try { localStorage.setItem('sf_cf_' + coin2.id, JSON.stringify(p)); } catch (e) {}
+      return p;
+    }
+    function saveIssPot(coin2, p) { try { localStorage.setItem('sf_cf_' + coin2.id, JSON.stringify(p)); } catch (e) {} }
+    function collectCurveFees() {
+      var p = issPot(coin);
+      if (!(p.pending > 0)) { Launch.toast('没有待收集的曲线费', 'warn'); return; }
+      var moved = p.pending;
+      p.claimable += moved; p.pending = 0;
+      saveIssPot(coin, p);
+      Launch.toast('已收集曲线费 +' + Launch.fmtQty(Launch.qtyOfUsd(moved, coin.pair || 'ETH')) + ' ' + (coin.pair || 'ETH'), 'ok');
+      renderMeta();
+    }
+    function doIssuerClaim() {
+      var p = issPot(coin);
+      if (!(p.claimable > 0)) { Launch.toast('暂无可领取', 'warn'); return; }
+      var pair = coin.pair || 'ETH';
+      var qty = Launch.qtyOfUsd(p.claimable, pair);
+      if (Launch.credit) { Launch.credit(pair, qty); if (Launch.persist) Launch.persist(); }
+      else { Launch.USER.eth += Launch.usdToEth(p.claimable); if (Launch.persist) Launch.persist(); }
+      p.claimable = 0;
+      saveIssPot(coin, p);
+      Launch.toast('已领取 ' + Launch.fmtQty(qty) + ' ' + pair, 'ok');
+      renderMeta();
+    }
+    function setFeeRoute(holders) {
+      if (!!coin.shareToHolders === !!holders) return;
+      coin.shareToHolders = !!holders;
+      if (Launch.persist) Launch.persist();
+      renderMeta();
+    }
+    function openTransfer() {
+      var m = document.getElementById('transferModal');
+      if (m) { m.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+    function closeTransfer() {
+      var m = document.getElementById('transferModal');
+      if (m) m.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function confirmTransfer() {
+      var v = document.getElementById('tfInp').value.trim();
+      if (!/^0x[0-9a-fA-F]{6,}$/.test(v)) { Launch.toast('请输入有效地址', 'err'); return; }
+      saveIssRecv(coin, v);
+      closeTransfer();
+      Launch.toast('收款地址已更新', 'ok');
+      renderMeta();
+    }
     function renderMeta() {
       var host = document.getElementById('metaHost');
       if (!host) return;
-      // 未毕业一律展示两张费卡（参考：Creator fees + Holder fee sharing）；
-      // 已毕业不展示。文案按费路由分支（数据为确定性演示值）。
       if (!coin || coin.graduated) { host.style.display = 'none'; host.innerHTML = ''; return; }
       var pair = coin.pair || 'ETH';
       var nm = coin.name || coin.symbol || 'Token';
@@ -1127,7 +1217,6 @@ var holders = [];
       var h6 = 0, ss = coin.id || 'x';
       for (var i6 = 0; i6 < ss.length; i6++) h6 = (h6 * 31 + ss.charCodeAt(i6)) >>> 0;
       var r6 = function (x) { return Math.round(x * 1e6) / 1e6; };
-      // 展示一律换算成配对资产单位（内部数值仍按 USD 推导）
       var pxq = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 1) : 1;
       var q6 = function (x) { var v = r6(x / pxq); var s2 = v.toFixed(8).replace(/\.?0+$/, ''); return s2 || '0'; };
       var earned = r6(1.2 + (h6 % 48000) / 1000);
@@ -1135,14 +1224,15 @@ var holders = [];
       var paid = toHolders ? r6(earned * (0.6 + ((h6 >>> 5) % 35) / 100)) : 0;
       var pot = toHolders ? r6(earned * (0.05 + ((h6 >>> 9) % 15) / 100)) : 0;
       var claimable = toHolders ? 0 : r6(earned * (0.42 + ((h6 >>> 11) % 20) / 100));
-      var recv = coin.creatorAddr || (window.Launch && Launch.walletText ? Launch.walletText() : '0x…');
+      var recv = issRecv(coin);
+      var sRecv = shortRecv(recv);
       var dist = 1 + ((h6 >>> 7) % 10);
       function valHtml(u) { return '<span class="ff-value num">' + q6(u) + ' <small>' + esc(pair) + '</small></span>'; }
-      // 费态演示：自动 / 待领取 / 已领取 / 无可领（只影响费卡展示）
       var feeDemo = cdFeeDemo();
       var fdNone = feeDemo === 'none';
       var fdClaimed = feeDemo === 'claimed';
       var fdReady = feeDemo === 'ready';
+      var isIssuer = __isMyCoin();
       var html = '';
       // 卡 1：Creator fees
       html += '<div class="card fee-card">' +
@@ -1152,28 +1242,50 @@ var holders = [];
       if (toHolders) {
         html += '<p class="ff-hint">Creator fees route to ' + esc(nm) + ' holders through the fee distributor. There is no creator claim.</p>';
       } else {
-        // 创建者钱包路由：可领金额 + 收款地址；仅部署者本人显示 Claim（pons 口径）
-        if (fdNone) {
-          html += '<div class="ff-assets">' + valHtml(0) +
-            '<span class="ff-sub">No fees to claim.</span></div>' +
-            '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>';
-        } else if (fdClaimed) {
-          html += '<div class="ff-assets">' + valHtml(claimable) +
-            '<span class="ff-sub">Claimed · 已领取到 ' + esc(recv) + '</span></div>' +
-            '<span class="ff-hint" style="margin:0">已领取 · Claimed</span>';
+        if (isIssuer) {
+          var potI = issPot(coin);
+          // 收款人 + Transfer
+          html += '<div class="ff-recip"><span class="ff-sub">Fee recipient</span><span class="mono num" title="' + esc(recv) + '">' + esc(sRecv) + '</span>' +
+            '<button type="button" class="ff-transfer" onclick="openTransfer()">Transfer</button></div>';
+          // 待收集曲线费（Collect → 进入 claimable）
+          html += '<div class="ff-assets">' + valHtml(potI.pending) +
+            '<span class="ff-sub">Pending curve fees — collect to your claimable balance</span></div>' +
+            (potI.pending > 0
+              ? '<button class="btn btn-ghost ff-act" onclick="collectCurveFees()">Collect curve fees</button>'
+              : '<span class="ff-hint" style="margin:0">No pending curve fees</span>');
+          // 可领取（按 pair 提取）
+          html += '<div class="ff-assets">' + valHtml(potI.claimable) +
+            '<span class="ff-sub">Claimable now, paid to ' + esc(sRecv) + '</span></div>' +
+            (potI.claimable > 0
+              ? '<button class="btn btn-ghost ff-act" onclick="doIssuerClaim()">Claim ' + esc(pair) + '</button>'
+              : '<span class="ff-hint" style="margin:0">Nothing claimable yet — collect curve fees first</span>');
         } else {
-          html += '<div class="ff-assets">' + valHtml(claimable) +
-            '<span class="ff-sub">Claimable now, across every launch paid to ' + esc(recv) + '</span></div>' +
-            '<p class="ff-hint">Payable to ' + esc(recv) + '. Connect that wallet to claim.</p>' +
-            (__isMyCoin() ? '<button class="btn btn-ghost ff-act" onclick="doClaim(\'' + esc(coin.id) + '\')">Claim</button>' : '');
+          if (fdNone) {
+            html += '<div class="ff-assets">' + valHtml(0) + '<span class="ff-sub">No fees to claim.</span></div>' +
+              '<p class="ff-hint">Payable to ' + esc(sRecv) + '. Connect that wallet to claim.</p>';
+          } else if (fdClaimed) {
+            html += '<div class="ff-assets">' + valHtml(claimable) +
+              '<span class="ff-sub">Claimed · 已领取到 ' + esc(sRecv) + '</span></div>' +
+              '<span class="ff-hint" style="margin:0">已领取 · Claimed</span>';
+          } else {
+            html += '<div class="ff-assets">' + valHtml(claimable) +
+              '<span class="ff-sub">Claimable now, across every launch paid to ' + esc(sRecv) + '</span></div>' +
+              '<p class="ff-hint">Payable to ' + esc(sRecv) + '. Connect that wallet to claim.</p>';
+          }
         }
       }
       html += '</div>';
-      // 卡 2：Holder fee sharing
+      // 卡 2：Holder fee sharing（含发行者路由切换）
       html += '<div class="card fee-card">' +
         '<div class="ff-head"><span class="ff-title">Holder fee sharing</span></div>';
+      if (isIssuer) {
+        html += '<div class="ff-route">' +
+          '<button type="button" class="' + (toHolders ? 'on' : '') + '" onclick="setFeeRoute(true)">Share fees with holders</button>' +
+          '<button type="button" class="' + (toHolders ? '' : 'on') + '" onclick="setFeeRoute(false)">Route to wallet ' + esc(sRecv) + '</button>' +
+          '</div>';
+      }
       if (toHolders) {
-        __divAmt[coin.id] = r6(pot * (0.15 + ((h6 >>> 13) % 25) / 100));   // 演示：本钱包可领份额
+        __divAmt[coin.id] = r6(pot * (0.15 + ((h6 >>> 13) % 25) / 100));
         var paidShow = fdNone ? 0 : paid;
         var potShow = fdNone ? 0 : pot;
         html += '<div class="ff-assets">' + valHtml(paidShow) +
