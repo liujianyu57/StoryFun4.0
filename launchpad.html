@@ -607,7 +607,7 @@
             '<span class="px-mcap">' + mcLine + '</span>' +
             mid +
             '<span class="px-meta">' +
-              '<button class="px-deployer" title="' + tt('发行者') + '" onclick="event.stopPropagation();copyAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
+              '<button class="px-deployer" title="' + tt('查看该地址档案') + '" onclick="event.stopPropagation();goAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
               '<time class="px-time">' + ago + '</time>' +
             '</span>' +
           '</span>' +
@@ -706,6 +706,7 @@
     }
 
     function openCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
+    function goAddr(a) { location.href = 'assets.html?address=' + encodeURIComponent(a); }
     function copyAddr(a) {
       if (!a) return;
       if (navigator.clipboard) navigator.clipboard.writeText(a).catch(function () {});

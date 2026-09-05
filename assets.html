@@ -161,6 +161,11 @@
     .ai-thumb .pb { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; }
 
     /* ===== Profile 骨架（参考 pons Profile） ===== */
+    .pf-visit { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; width: max-content;
+      font-size: 12px; color: var(--text-2); background: var(--accent-soft); border: 1px solid var(--border);
+      border-radius: 999px; padding: 6px 14px; }
+    .pf-visit b { font-weight: 700; }
+    .pf-visit a { color: var(--text); font-weight: 700; text-decoration: underline; margin-left: 4px; }
     .pf-hero { display: flex; align-items: center; gap: 16px; margin: 8px 0 20px; flex-wrap: wrap; }
     .pf-id { display: flex; align-items: center; gap: 14px; min-width: 0; }
     .pf-avatar { width: 54px; height: 54px; border-radius: 50%; overflow: hidden; background: var(--text); color: #fff; display: grid; place-items: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
@@ -204,6 +209,7 @@
 
   <main class="launch-shell">
     <!-- 身份 hero -->
+    <div class="pf-visit" id="pfVisitBar" style="display:none"><b>访客视图</b>· 演示数据 · <a href="assets.html">返回我的资产</a></div>
     <div class="pf-hero" id="pfHero">
       <div class="pf-id">
         <div class="pf-avatar" id="pfAvatar">—</div>
@@ -274,6 +280,13 @@
     //  我的资产
     // ============================================================
     var tab = 'hold';
+    // 访客模式：assets.html?address=0x… → 以该地址查看（数据为演示档案）
+    var visitorAddr = (function () {
+      try {
+        var q = new URLSearchParams(location.search).get('address');
+        return (q && /^0x[0-9a-fA-F]{40}$/.test(q)) ? q.toLowerCase() : '';
+      } catch (e) { return ''; }
+    })();
     var esc = function (s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -383,12 +396,10 @@
       pfPnlSign = totalPnl >= 0 ? 1 : -1;
       pfMaxUsd = Math.max(totalValUsd, totalPnl, 1);
       // 身份
-      var name = (window.Launch && Launch.currentUserName) ? Launch.currentUserName() : '故事玩家';
       var av = document.getElementById('pfAvatar');
       var cu = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
-      if (cu && cu.avatar) av.innerHTML = '<img src="' + esc(cu.avatar) + '" alt="">';
-      else av.textContent = (name || '?').charAt(0);
-      // 头像右侧：完整（不脱敏）钱包地址 + 复制
+      var bar = document.getElementById('pfVisitBar');
+      if (bar) bar.style.display = visitorAddr ? '' : 'none';
       function fullAddr() {
         var uid = (window.Launch && Launch.USER && Launch.USER.id) ? Launch.USER.id : 'demo';
         var seedStr = 'user:' + uid, h = 2166136261, i2;
@@ -397,7 +408,16 @@
         for (i2 = 0; i2 < 40; i2++) { h = Math.imul(h ^ (h >>> 13), 2654435761) >>> 0; hex += '0123456789abcdef'.charAt(h & 15); }
         return '0x' + hex;
       }
-      document.getElementById('pfAddr').textContent = fullAddr();
+      var displayAddr = visitorAddr || fullAddr();
+      if (visitorAddr) {
+        av.innerHTML = '';
+        av.textContent = String(displayAddr.charAt(2) || '?').toUpperCase();
+      } else if (cu && cu.avatar) {
+        av.innerHTML = '<img src="' + esc(cu.avatar) + '" alt="">';
+      } else {
+        av.textContent = '?';
+      }
+      document.getElementById('pfAddr').textContent = displayAddr;
       // Portfolio
       document.getElementById('pfBal').textContent = Launch.fmtUsd(totalValUsd);
       // pons：Across N open pons position(s)
