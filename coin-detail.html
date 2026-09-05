@@ -249,6 +249,35 @@
   .ff-sub { font-size: 12.5px; color: var(--text-2); }
   .ff-hint { font-size: 12px; color: var(--text-3); line-height: 1.55; margin: 0; }
   .ff-act { justify-self: start; }
+    /* ── Trade Review（pons 确认弹窗） ── */
+    .slip-chip { display: inline-flex; align-items: center; gap: 5px; border: none; background: none;
+      color: var(--text); cursor: pointer; font-family: inherit; padding: 2px 6px; border-radius: 8px; }
+    .slip-chip em { font-style: normal; font-size: 10.5px; color: var(--text-3); font-weight: 600; text-decoration: underline; }
+    .slip-edit { display: flex; align-items: center; gap: 8px; padding: 8px 2px 2px; font-size: 12px; color: var(--text-2); font-weight: 600; }
+    .slip-edit input { width: 74px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--text); background: var(--surface); }
+    .slip-edit .slip-done { border: none; border-radius: 999px; padding: 6px 12px; background: var(--accent-soft);
+      color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; }
+    .review-overlay { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center;
+      background: rgba(10,11,13,.45); padding: 20px; }
+    .review-overlay.open { display: flex; }
+    .review-card { width: min(430px, 94vw); background: #fff; border-radius: 22px; padding: 20px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.22); max-height: 92vh; overflow: auto; }
+    .review-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .review-head .rt { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+    .review-head button { width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(0,0,0,.06);
+      color: #555; font-size: 14px; cursor: pointer; }
+    .rv-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 10px 0;
+      border-bottom: 1px dashed rgba(10,11,13,.08); font-size: 13.5px; }
+    .rv-row .rv-l { color: var(--text-2); font-weight: 600; flex: none; }
+    .rv-row .rv-v { color: var(--text); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+    .rv-min { font-size: 12px; color: var(--text-3); text-align: right; margin-top: 6px; }
+    .review-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .review-actions button { flex: 1; height: 46px; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; }
+    .rv-cancel { background: rgba(0,0,0,.06); color: var(--text); }
+    .rv-cancel:hover { background: rgba(0,0,0,.11); }
+    .rv-confirm { background: #0A0B0D; color: #fff; }
+    .rv-confirm:hover { opacity: .9; }
   </style>
 </head>
 <body>
@@ -364,7 +393,16 @@
           </div>
           <div class="swap-details" style="margin-top:8px">
             <div class="sd-row"><span>价格</span><b class="num" id="sdPrice">—</b></div>
-            <div class="sd-row"><span>滑点</span><b class="num">0.5%</b></div>
+            <div class="sd-row sd-slip">
+              <span>Slippage</span>
+              <button type="button" class="slip-chip" id="slipToggle" onclick="toggleSlipEdit()"><span class="num" id="slipVal">1%</span> <em>Adjust</em></button>
+            </div>
+            <div class="slip-edit" id="slipEdit" style="display:none">
+              <span>Slippage</span>
+              <input type="number" id="slipInput" min="0.1" max="10" step="0.1" value="1" oninput="slipApply(this.value)" />
+              <span>%</span>
+              <button type="button" class="slip-done" onclick="toggleSlipEdit(false)">Done</button>
+            </div>
             <div class="sd-row"><span>价格影响</span><b class="num" id="sdImpact">—</b></div>
             <div class="sd-row"><span>手续费</span><b class="num" id="sdFee">1%</b></div>
           </div>
@@ -436,6 +474,21 @@
       
     </div>
   </main>
+
+  <!-- Trade Review（pons：Review buy/sell + Confirm） -->
+  <div class="review-overlay" id="reviewModal">
+    <div class="review-card">
+      <div class="review-head">
+        <div class="rt" id="rvTitle">Review buy</div>
+        <button type="button" id="rvClose" aria-label="关闭">✕</button>
+      </div>
+      <div id="rvBody"></div>
+      <div class="review-actions">
+        <button type="button" class="rv-cancel" id="rvCancel">Cancel</button>
+        <button type="button" class="rv-confirm" id="rvConfirm">Confirm buy</button>
+      </div>
+    </div>
+  </div>
 
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
@@ -1075,14 +1128,79 @@ var holders = [];
       if (v == null || isNaN(v)) return '';
       return String(Math.round(v * 1e6) / 1e6);
     }
-    function doSwap() {
-      if (!Launch.isLoggedIn()) { openLoginModal(); Launch.toast('登录后即可交易', 'warn'); return; }
-      var inp = parseFloat(document.getElementById('swapIn').value) || 0;
-      if (inp <= 0) { Launch.toast('输入有效金额', 'err'); return; }
-      var r = side === 'buy' ? Launch.swap(coin.id, 'buy', inp, paySym) : Launch.swap(coin.id, 'sell', inp);
+    // ===== Slippage（pons：Slippage · Adjust 0.1–10%） =====
+    var slipBp = 100;
+    function slipPct() { return slipBp / 100; }
+    function setSlip(v) {
+      var n = parseFloat(v);
+      if (!(n > 0)) return;
+      slipBp = Math.round(Math.min(10, Math.max(0.1, n)) * 100);
+      slipUI();
+    }
+    function slipUI() {
+      var v = document.getElementById('slipVal');
+      var inp = document.getElementById('slipInput');
+      if (v) v.textContent = slipPct() + '%';
+      if (inp) inp.value = slipPct();
+    }
+    function toggleSlipEdit(force) {
+      var el = document.getElementById('slipEdit');
+      if (!el) return;
+      var show = typeof force === 'boolean' ? force : el.style.display === 'none';
+      el.style.display = show ? 'flex' : 'none';
+      if (show) {
+        var inp = document.getElementById('slipInput');
+        if (inp) { inp.value = slipPct(); inp.focus(); }
+      } else {
+        var inp2 = document.getElementById('slipInput');
+        if (inp2) setSlip(inp2.value);
+      }
+    }
+    function slipApply(v) { setSlip(v); updateQuote(); }
+
+    // ===== Review（pons：Review buy/sell → Confirm / Cancel） =====
+    var reviewPlan = null;
+    function rvRow(l, v) {
+      return '<div class="rv-row"><span class="rv-l">' + l + '</span><span class="rv-v">' + v + '</span></div>';
+    }
+    function openReview(side2, inp2, pv) {
+      reviewPlan = { side: side2, inp: inp2 };
+      var sym = coin.symbol, pair = coin.pair || 'ETH';
+      var isBuy = side2 === 'buy';
+      var sVal, rVal, min;
+      if (isBuy) {
+        sVal = Launch.fmtQty(inp2) + ' ' + paySym;
+        rVal = Launch.fmtQty(pv.coins) + ' ' + sym;
+        min = Launch.fmtQty(pv.coins * (1 - slipPct() / 100)) + ' ' + sym;
+      } else {
+        sVal = Launch.fmtQty(pv.coins) + ' ' + sym;
+        rVal = Launch.fmtQty(pv.proceedsQty) + ' ' + pair;
+        min = Launch.fmtQty(pv.proceedsQty * (1 - slipPct() / 100)) + ' ' + pair;
+      }
+      var market = coin.graduated ? 'Uniswap v4 pool' : 'Bonding curve';
+      document.getElementById('rvTitle').textContent = isBuy ? 'Review buy' : 'Review sell';
+      document.getElementById('rvBody').innerHTML =
+        rvRow('You send', sVal) + rvRow('You receive', rVal) +
+        '<div class="rv-min">Min received ' + min + '</div>' +
+        rvRow('Market', market) + rvRow('Max slippage', slipPct() + '%');
+      document.getElementById('rvConfirm').textContent = isBuy ? 'Confirm buy' : 'Confirm sell';
+      document.getElementById('reviewModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeReview() {
+      var m = document.getElementById('reviewModal');
+      if (m) m.classList.remove('open');
+      document.body.style.overflow = '';
+      reviewPlan = null;
+    }
+    function execReview() {
+      var plan = reviewPlan;
+      if (!plan) return;
+      var r = plan.side === 'buy' ? Launch.swap(coin.id, 'buy', plan.inp, paySym) : Launch.swap(coin.id, 'sell', plan.inp);
+      closeReview();
       if (r && r.ok) {
-        if (side === 'buy') {
-          Launch.toast('已买入 ' + fmtBig(r.coins) + ' ' + coin.symbol + ' · 支付 ' + Launch.fmtQty(inp) + ' ' + (r.paySym || paySym), 'ok');
+        if (plan.side === 'buy') {
+          Launch.toast('已买入 ' + fmtBig(r.coins) + ' ' + coin.symbol + ' · 支付 ' + Launch.fmtQty(plan.inp) + ' ' + (r.paySym || paySym), 'ok');
           if (r.graduated) fireGradFx();
         } else {
           Launch.toast('已卖出 ' + fmtBig(r.coins) + ' ' + coin.symbol + ' · 收到 ' + Launch.fmtQty(r.proceedsQty) + ' ' + (r.pair || coin.pair), 'ok');
@@ -1096,6 +1214,26 @@ var holders = [];
       document.getElementById('swapIn').value = '';
       updateQuote();
     }
+    function doSwap() {
+      if (!Launch.isLoggedIn()) { openLoginModal(); Launch.toast('登录后即可交易', 'warn'); return; }
+      var inp = parseFloat(document.getElementById('swapIn').value) || 0;
+      if (inp <= 0) { Launch.toast('输入有效金额', 'err'); return; }
+      var pv = Launch.preview(coin.id, side, inp, paySym);
+      if (!pv || !pv.ok) { Launch.toast((pv && pv.msg) || '报价失败', 'err'); return; }
+      if (side === 'buy' && !pv.balanceOk) { Launch.toast(paySym + ' 余额不足 · 点水龙头', 'err'); return; }
+      if (side === 'sell' && (!pv.sellable || pv.sellable <= 0)) { Launch.toast('暂无持仓', 'err'); return; }
+      openReview(side, inp, pv);
+    }
+    (function bindReview() {
+      var c = document.getElementById('rvCancel');
+      var x = document.getElementById('rvClose');
+      var m = document.getElementById('reviewModal');
+      var ok = document.getElementById('rvConfirm');
+      if (c) c.addEventListener('click', closeReview);
+      if (x) x.addEventListener('click', closeReview);
+      if (m) m.addEventListener('click', function (e) { if (e.target === m) closeReview(); });
+      if (ok) ok.addEventListener('click', execReview);
+    })();
 
     function refreshAllAfterTx() {
       renderHead();
