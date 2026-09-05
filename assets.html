@@ -161,6 +161,23 @@
     .ai-thumb .pb { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; }
 
     /* ===== Profile 骨架（参考 pons Profile） ===== */
+    /* Creator fees 横幅 + 演示状态按钮（pons：有 claimable 才显示） */
+    .fees-banner { display: flex; align-items: center; gap: 12px; padding: 13px 16px; margin: 0 0 16px;
+      background: #FFFBEB; border: 1px solid #F2E0A4; border-radius: 16px; }
+    .fees-banner .fb-ic { width: 34px; height: 34px; border-radius: 50%; background: #0A0B0D; color: #fff;
+      display: grid; place-items: center; font-size: 13px; flex: none; }
+    .fees-banner .fb-txt { flex: 1; min-width: 0; }
+    .fees-banner .fb-txt b { display: block; font-size: 14px; font-weight: 800; }
+    .fees-banner .fb-txt small { display: block; font-size: 11.5px; color: #8a6d1a; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    #fbClaim { border: none; border-radius: 999px; background: #0A0B0D; color: #fff; font-size: 13px;
+      font-weight: 700; padding: 9px 18px; cursor: pointer; flex: none; }
+    #fbClaim:hover { opacity: .9; }
+    .pos-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .fee-demo-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+      padding: 6px 12px; font-size: 11px; font-weight: 600; color: var(--text-2); cursor: pointer; white-space: nowrap; }
+    .fee-demo-btn:hover { color: var(--text); border-color: var(--text-3); }
+    .pl-state.ready { color: #0E9F6E; font-weight: 700; }
+    .pl-state.claimed { color: var(--text-2); font-weight: 700; }
     .pf-visit { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; width: max-content;
       font-size: 12px; color: var(--text-2); background: var(--accent-soft); border: 1px solid var(--border);
       border-radius: 999px; padding: 6px 14px; }
@@ -240,6 +257,13 @@
         </div>
         <canvas class="pf-canvas" id="pfChart"></canvas>
       </div>
+    </div>
+
+    <!-- Creator fees 横幅（pons：有 claimable 才出现） -->
+    <div class="fees-banner" id="feesBanner" style="display:none">
+      <span class="fb-ic">◆</span>
+      <span class="fb-txt"><b>Creator fees</b><small id="fbDesc">—</small></span>
+      <button type="button" id="fbClaim">Claim fees</button>
     </div>
 
     <div class="as-tabs">
@@ -645,30 +669,89 @@
       document.body.style.overflow = 'hidden';
     }
 
+    // ===== Creator fees（pons：Ready/Claimed/Open + 横幅；含演示状态切换） =====
+    function demoFeeMode() {
+      var v = '';
+      try { v = localStorage.getItem('sf_fee_demo') || ''; } catch (e) {}
+      return (v === 'ready' || v === 'claimed' || v === 'open') ? v : '';
+    }
+    function simFeeAmt(c) {
+      var h = 0, str = c.id || 'x';
+      for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+      return Math.round((1.2 + (h % 48000) / 1000) * 100) / 100;
+    }
+    function feeResolved(c) {
+      var m = demoFeeMode();
+      if (m === 'ready') return { claimable: simFeeAmt(c), claimed: 0 };
+      if (m === 'claimed') return { claimable: 0, claimed: simFeeAmt(c) };
+      if (m === 'open') return { claimable: 0, claimed: 0 };
+      return { claimable: Launch.USER.claimable[c.id] || 0, claimed: Launch.USER.claimed[c.id] || 0 };
+    }
+    var FEE_DEMO_LABEL = { ready: '演示: 待领取', claimed: '演示: 已领取', open: '演示: 无收益', '': '演示: 自动' };
+    function demoFeeLabel() { return FEE_DEMO_LABEL[demoFeeMode()] || '演示: 自动'; }
+    function cycleFeeDemo() {
+      var seq = ['', 'ready', 'claimed', 'open'];
+      var m = demoFeeMode();
+      var nx = seq[(seq.indexOf(m) + 1) % seq.length];
+      try { if (nx) localStorage.setItem('sf_fee_demo', nx); else localStorage.removeItem('sf_fee_demo'); } catch (e) {}
+      renderMade();
+      syncFeesBanner();
+    }
+    function syncFeesBanner() {
+      var banner = document.getElementById('feesBanner');
+      if (!banner) return;
+      var made = myCreated();
+      var tot = 0, cnt = 0;
+      made.forEach(function (c) { var fs = feeResolved(c); if (fs.claimable > 0) { tot += fs.claimable; cnt++; } });
+      var show = !visitorAddr && made.length > 0 && tot > 0;
+      banner.style.display = show ? 'flex' : 'none';
+      if (show) {
+        document.getElementById('fbDesc').textContent =
+          Launch.fmtUsd(tot) + ' claimable across ' + cnt + ' launch' + (cnt === 1 ? '' : 'es');
+      }
+    }
+    function claimFees() {
+      if (visitorAddr) { Launch.toast('访客视图不可领取', 'warn'); return; }
+      var made = myCreated();
+      var ids = made.filter(function (c) { return feeResolved(c).claimable > 0; }).map(function (c) { return c.id; });
+      if (!ids.length) { Launch.toast('暂无可领取收益', 'warn'); return; }
+      if (demoFeeMode() === 'ready') {
+        Launch.toast('演示：已领取 Creator fees', 'ok');
+        try { localStorage.setItem('sf_fee_demo', 'claimed'); } catch (e) {}
+      } else {
+        var done = 0, usd = 0;
+        ids.forEach(function (id) { var r = Launch.claim(id); if (r && r.ok) { done++; usd += r.usd; } });
+        Launch.toast(done ? ('已领取 ' + Launch.fmtUsd(usd)) : '暂无可领取收益', done ? 'ok' : 'warn');
+      }
+      renderSummary();
+      render();
+    }
+
     function renderMade() {
       var made = myCreated();
       var host = document.getElementById('asBody');
-      var head = '<div class="pos-head"><div class="pos-title">Launches</div>' +
-        '<div class="pos-sub">Tokens you launched on Robinhood Chain.</div></div>';
+      var head = '<div class="pos-head pos-head-row"><div>' +
+        '<div class="pos-title">Launches</div>' +
+        '<div class="pos-sub">Tokens you launched on Robinhood Chain.</div></div>' +
+        '<button type="button" class="fee-demo-btn" onclick="cycleFeeDemo()" title="切换 Launches 领取状态演示（自动/待领取/已领取/无收益）">' + demoFeeLabel() + '</button></div>';
       if (!made.length) {
         host.innerHTML = head + '<div class="empty"><div class="empty-icon">✦</div>' +
           '<div class="empty-title">No launches yet.</div>' +
           '<div class="empty-desc">用一个叙事在发射台发射第一个代币</div>' +
           '<button class="btn btn-primary" onclick="location.href=\'launch.html\'">Launch a token</button></div>';
+        syncFeesBanner();
         return;
       }
       var rows = made.map(function (c) {
-        var claimable = Launch.USER.claimable[c.id] || 0;
-        var createdTotal = Launch.USER.claimed[c.id] || 0;
+        var fs = feeResolved(c);
         var logo = c.cover
           ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy">'
           : esc((c.symbol || '?').charAt(0).toUpperCase());
         var status;
-        if (claimable > 0) {
-          status = '<button class="pl-claimbtn" onclick="event.stopPropagation();doClaim(\'' + esc(c.id) + '\')">' +
-            'Ready \u00b7 领取 ' + Launch.fmtUsd(claimable) + '</button>';
-        } else if (createdTotal > 0) {
-          status = '<span class="pl-state">Claimed \u00b7 ' + Launch.fmtUsd(createdTotal) + '</span>';
+        if (fs.claimable > 0) {
+          status = '<span class="pl-state ready">Ready \u00b7 ' + Launch.fmtUsd(fs.claimable) + '</span>';
+        } else if (fs.claimed > 0) {
+          status = '<span class="pl-state claimed">Claimed \u00b7 ' + Launch.fmtUsd(fs.claimed) + '</span>';
         } else {
           status = '<span class="pl-state">Open</span>';
         }
@@ -680,6 +763,7 @@
         '</div>';
       }).join('');
       host.innerHTML = head + '<div class="pl-list">' + rows + '</div>';
+      syncFeesBanner();
     }
 
     function renderTx() {
@@ -791,12 +875,17 @@
       document.getElementById('asBody').style.display = logged ? '' : 'none';
       document.getElementById('pfHero').style.display = logged ? '' : 'none';
       document.getElementById('pfPortfolio').style.display = logged ? '' : 'none';
-      if (!logged) return;
+      if (!logged) {
+        var fbN = document.getElementById('feesBanner');
+        if (fbN) fbN.style.display = 'none';
+        return;
+      }
       renderSummary();
       if (tab === 'hold') renderHold();
       else if (tab === 'closed') renderClosed();
       else if (tab === 'made') renderMade();
       else if (tab === 'tx') renderTx();
+      syncFeesBanner();
     }
 
     window.onLaunchShellReady = function () {
@@ -826,9 +915,13 @@
           render();
         });
       });
+      // Creator fees Claim
+      var fcb = document.getElementById('fbClaim');
+      if (fcb) fcb.addEventListener('click', claimFees);
       // 登录状态变化重新渲染
       window.addEventListener('auth-ready', function () { render(); });
       render();
+      syncFeesBanner();
     };
   </script>
   <script src="load-desktop-header.js"></script>
