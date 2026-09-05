@@ -197,6 +197,33 @@
   .ord-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid #F0F1F3; font-size: 12.5px; }
   .ord-row:first-child { border-top: none; }
   .ord-row b { color: var(--text); }
+  /* pons Limit 面板 */
+  .token-limit-side-toggle { display: flex; background: var(--accent-soft); border-radius: 12px; padding: 3px; margin-bottom: 10px; }
+  .token-limit-side-toggle button { flex: 1; height: 36px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700;
+    background: transparent; color: var(--text-2); cursor: pointer; }
+  .token-limit-side-toggle button.on { background: var(--surface); box-shadow: var(--shadow-sm); color: var(--text); }
+  .token-limit-field { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; margin-bottom: 10px; }
+  .tl-label { font-size: 11px; color: var(--text-3); font-weight: 600; }
+  .tl-head { display: flex; align-items: center; justify-content: space-between; }
+  .token-limit-value-toggle { display: flex; gap: 2px; background: var(--accent-soft); border-radius: 999px; padding: 2px; }
+  .token-limit-value-toggle button { border: none; background: transparent; border-radius: 999px; font-size: 11px; font-weight: 700;
+    color: var(--text-2); padding: 3px 10px; cursor: pointer; }
+  .token-limit-value-toggle button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+  .tl-row-in { display: flex; align-items: center; gap: 8px; }
+  .tl-row-in input { flex: 1; min-width: 0; border: none; background: transparent; outline: none; font-family: var(--mono);
+    font-size: 20px; font-weight: 700; color: var(--text); }
+  .token-limit-currency { font-size: 12.5px; }
+  .tl-cur { font-weight: 700; color: var(--text-3); font-family: var(--mono); }
+  .tl-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--text-3); }
+  .token-limit-fiat { font-variant-numeric: tabular-nums; }
+  .tl-bal { display: flex; align-items: center; gap: 8px; }
+  .tl-max { border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-2);
+    font-size: 10.5px; font-weight: 700; padding: 2px 9px; cursor: pointer; }
+  .tl-max:hover { color: var(--text); border-color: var(--text-3); }
+  .tl-note { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+  .tl-preview { margin: 2px 0 4px; }
+  #limErr { margin-top: 4px; }
+  #limSubmit { margin-top: 6px; }
   .ord-side { font-weight: 700; }
   .ord-side.buy { color: #0E9F6E; } .ord-side.sell { color: var(--down); }
   .swap-arrow { cursor: pointer; }
@@ -409,8 +436,43 @@
           <div class="inline-warn warn" id="swapWarn"></div>
           <button class="btn btn-primary btn-lg swap-submit" id="swapBtn" onclick="doSwap()">买入</button>
         </div>
-        <div class="ord-panel" id="limPanel" style="display:none"><div class="card-pad"><div class="empty" style="padding:22px 8px"><div class="empty-title" style="font-size:13px">Limit</div><div class="empty-desc" style="font-size:12px">原型：限价单面板待按参考细化</div></div></div></div>
-        <div class="ord-panel" id="ordListPanel" style="display:none"><div class="card-pad"><div class="empty" style="padding:22px 8px"><div class="empty-title" style="font-size:13px">Orders</div><div class="empty-desc" style="font-size:12px">暂无挂单（原型）</div></div></div></div>
+        <div class="ord-panel" id="limPanel" style="display:none"><div class="card-pad">
+          <div class="token-limit-side-toggle" id="limSide">
+            <button type="button" data-s="buy" class="on">Buy limit</button>
+            <button type="button" data-s="sell">Sell limit</button>
+          </div>
+          <div class="convert-panel token-limit-field">
+            <span class="tl-label">Amount</span>
+            <div class="tl-row-in">
+              <input type="text" inputmode="decimal" id="limAmtIn" placeholder="0" autocomplete="off" />
+              <span class="convert-currency token-limit-currency" id="limAmtTok">Ξ ETH</span>
+            </div>
+            <div class="tl-meta">
+              <span class="token-limit-fiat num" id="limFiat">≈ $0</span>
+              <span class="tl-bal"><b class="num" id="limAvail">0 available</b><button type="button" class="tl-max" onclick="limPct(1)">Max</button></span>
+            </div>
+          </div>
+          <div class="convert-panel token-limit-field">
+            <div class="tl-head"><span class="tl-label">Target</span>
+              <div class="token-limit-value-toggle" id="limTgtMode">
+                <button type="button" data-t="price" class="on">Price</button>
+                <button type="button" data-t="mcap">Market cap</button>
+              </div>
+            </div>
+            <div class="tl-row-in"><span class="tl-cur">$</span>
+              <input type="text" inputmode="decimal" id="limTgtIn" placeholder="0" autocomplete="off" />
+            </div>
+            <div class="tl-note num" id="limCurrent">—</div>
+          </div>
+          <div class="quick-row" id="limQuickRow" style="margin-top:6px"></div>
+          <div class="tl-preview" id="limPreview" style="display:none">
+            <div class="sd-row"><span id="limPvLab">Estimated fill</span><b class="num" id="limPvVal">—</b></div>
+            <div class="sd-row"><span>Target market cap</span><b class="num" id="limPvMc">—</b></div>
+          </div>
+          <div class="inline-warn danger" id="limErr"></div>
+          <button type="button" class="btn btn-primary btn-lg swap-submit" id="limSubmit">Enter amount</button>
+        </div></div>
+        <div class="ord-panel" id="ordListPanel" style="display:none"><div class="card-pad"><div id="ordRows"></div></div></div>
       </div>
 
       </div>
@@ -889,6 +951,7 @@ var holders = [];
       document.getElementById('limPanel').style.display = m === 'limit' ? '' : 'none';
       document.getElementById('ordListPanel').style.display = m === 'orders' ? '' : 'none';
       if (m === 'orders') renderOrders();
+      if (m === 'limit') refreshLim();
     }
     function ordShow() {
       if (!coin) return;
@@ -896,40 +959,155 @@ var holders = [];
       var band = document.getElementById('gradBand');
       bar.style.display = coin.graduated ? 'flex' : 'none';
       if (band) band.style.display = coin.graduated ? 'none' : 'block';
-      if (coin.graduated) {
-        document.getElementById('limHint').textContent = '当前 ' + Launch.fmtPrice(coin.priceUsd);
-        var lp = document.getElementById('limPriceIn');
-        if (!lp.value) lp.value = coin.priceUsd.toFixed(6);
-        document.getElementById('limTok').textContent = '$' + esc(coin.symbol);
-        document.getElementById('limQtyTok').textContent = esc(coin.symbol);
-      }
+      if (coin.graduated) refreshLim();
       ordMode(ordModeCur);
+    }
+
+    // ================== Limit（pons：Amount / Target(Price|Market cap) / Place order） ==================
+    var limSide = 'buy';     // buy|sell
+    var limMode = 'price';   // price|marketCap
+    function limHeld() { var h = Launch.USER.holdings[coin.id]; return h ? h.amount : 0; }
+    function limAvailQty() { return limSide === 'buy' ? Launch.balanceOf(paySym) : limHeld(); }
+    function limAmt() { return parseFloat(document.getElementById('limAmtIn').value) || 0; }
+    function limTgt() { return parseFloat(document.getElementById('limTgtIn').value) || 0; }
+    function limSupply() { return coin.circulating || coin.supply || 1e9; }
+    function limTgtPriceUsd() {
+      var v = limTgt();
+      if (!(v > 0)) return 0;
+      return limMode === 'price' ? v : v / limSupply();
+    }
+    function limTgtMcUsd() {
+      var v = limTgt();
+      if (!(v > 0)) return 0;
+      return limMode === 'mcap' ? v : v * limSupply();
+    }
+    function refreshLim() {
+      if (!coin || !document.getElementById('limAmtTok')) return;
+      document.getElementById('limAmtTok').innerHTML = limSide === 'buy' ? chipHtml(paySym) : '<i>$</i> ' + coin.symbol;
+      var ti0 = document.getElementById('limTgtIn');
+      if (limMode === 'price' && ti0 && ti0.value === '' && coin.priceUsd > 0) ti0.value = qtyToInput(coin.priceUsd);
+      var curNote = limMode === 'price'
+        ? 'Current $' + Launch.fmtQty(coin.priceUsd)
+        : 'Current market cap ' + Launch.fmtUsd(coin.marketCap || 0);
+      document.getElementById('limCurrent').textContent = curNote;
+      var qr = document.getElementById('limQuickRow');
+      if (qr && qr.children && !qr.children.length) {
+        qr.innerHTML = [0.25, 0.5, 0.75, 1].map(function (p) {
+          return '<button type="button" data-p="' + p + '" onclick="limPct(' + p + ')">' + (p === 1 ? 'Max' : p * 100 + '%') + '</button>';
+        }).join('');
+      }
+      limCalc();
+    }
+    function limPct(p) {
+      var q = limAvailQty() * p;
+      document.getElementById('limAmtIn').value = qtyToInput(q);
+      limCalc();
+    }
+    function limCalc() {
+      var elAvail = document.getElementById('limAvail');
+      var elFiat = document.getElementById('limFiat');
+      var elErr = document.getElementById('limErr');
+      var elBtn = document.getElementById('limSubmit');
+      var elPv = document.getElementById('limPreview');
+      var elPvLab = document.getElementById('limPvLab');
+      var elPvVal = document.getElementById('limPvVal');
+      var elPvMc = document.getElementById('limPvMc');
+      elErr.classList.remove('show');
+      elPv.style.display = 'none';
+      var avail = limAvailQty();
+      elAvail.textContent = Launch.fmtQty(avail) + ' available';
+      var amt = limAmt(), tgt = limTgt(), buy = limSide === 'buy';
+      if (amt > 0) {
+        var usdVal = buy ? amt * (Launch.assetPrice(paySym) || 0) : amt * coin.priceUsd;
+        elFiat.textContent = '≈ ' + Launch.fmtUsd(usdVal);
+      } else elFiat.textContent = '≈ $0';
+      if (!(amt > 0)) { elBtn.textContent = 'Enter amount'; return; }
+      if (!(tgt > 0)) { elBtn.textContent = 'Enter target'; return; }
+      var priceT = limTgtPriceUsd(), mcT = limTgtMcUsd();
+      if (!priceT || !isFinite(priceT) || priceT <= 0) { elBtn.textContent = 'Check limit price'; return; }
+      if (avail < amt) {
+        elErr.textContent = (buy ? paySym : coin.symbol) + ' 余额不足';
+        elErr.classList.add('show');
+        elBtn.textContent = 'Insufficient ' + (buy ? 'ETH' : coin.symbol);
+        return;
+      }
+      // 预览
+      if (buy) {
+        var est = (amt * (Launch.assetPrice(paySym) || 0)) / priceT;
+        elPvLab.textContent = 'Estimated fill';
+        elPvVal.textContent = Launch.fmtQty(est) + ' ' + coin.symbol;
+      } else {
+        elPvLab.textContent = 'Estimated value';
+        elPvVal.textContent = Launch.fmtUsd(amt * priceT);
+      }
+      elPvMc.textContent = Launch.fmtUsd(mcT);
+      elPv.style.display = '';
+      elBtn.textContent = buy ? 'Place buy limit' : 'Place sell limit';
+    }
+    function openReviewLimit() {
+      var amt = limAmt(), priceT = limTgtPriceUsd(), mcT = limTgtMcUsd(), buy = limSide === 'buy';
+      var dep = buy ? Launch.fmtQty(amt) + ' ' + paySym : Launch.fmtQty(amt) + ' ' + coin.symbol;
+      document.getElementById('rvTitle').textContent = buy ? 'Review buy limit' : 'Review sell limit';
+      document.getElementById('rvBody').innerHTML =
+        rvRow('You deposit', dep) +
+        rvRow('Target price', '$' + Launch.fmtQty(priceT)) +
+        rvRow('Target market cap', Launch.fmtUsd(mcT)) +
+        rvRow('Network', 'Robinhood Chain (4663)') +
+        rvRow('Position manager', '0xF4fC0C…7F35');
+      document.getElementById('rvConfirm').textContent = 'Place order';
+      reviewPlan = { kind: 'limit', side: limSide, amt: amt, price: priceT, mcap: mcT };
+      document.getElementById('reviewModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function limPlace() {
+      if (!coin || !coin.graduated) return;
+      if (!(limAmt() > 0)) { Launch.toast('请填写数量', 'err'); return; }
+      if (!(limTgt() > 0)) { Launch.toast('请填写目标价/目标市值', 'err'); return; }
+      if (limAvailQty() < limAmt()) { Launch.toast('余额不足', 'err'); return; }
+      openReviewLimit();
     }
     function renderOrders() {
       var host = document.getElementById('ordRows');
       if (!host) return;
       if (!orderRows.length) {
-        host.innerHTML = '<div class="empty" style="padding:26px 10px"><div class="empty-title" style="font-size:13px">暂无挂单</div><div class="empty-desc" style="font-size:12px">切到 Limit 挂一笔试试</div></div>';
+        host.innerHTML = '<div class="empty" style="padding:22px 10px"><div class="empty-title" style="font-size:13px">暂无挂单</div><div class="empty-desc" style="font-size:12px">切到 Limit 挂一笔试试</div></div>';
         return;
       }
-      host.innerHTML = orderRows.slice().reverse().map(function (o) {
-        return '<div class="ord-row"><span class="ord-side ' + o.side + '">' + (o.side === 'buy' ? '买入' : '卖出') + '</span>' +
-          '<span class="num">限价 ' + o.price.toFixed(6) + '</span>' +
-          '<span class="num">' + (o.qty >= 1000 ? (o.qty / 1000).toFixed(1) + 'K' : o.qty.toFixed(4)) + ' ' + esc(coin.symbol) + '</span>' +
-          '<span class="num" style="color:var(--text-3)">' + Launch.timeAgo(o.at) + '</span></div>';
-      }).join('');
+      host.innerHTML = '<div style="font-size:11px;color:var(--text-3);font-weight:600;margin:2px 0 6px">Open limit orders</div>' +
+        orderRows.slice().reverse().map(function (o) {
+          var sym = o.symbol || coin.symbol;
+          return '<div class="ord-row">' +
+            '<span class="ord-side ' + o.side + '">' + (o.side === 'buy' ? 'Buy limit' : 'Sell limit') + '</span>' +
+            '<span class="num">$' + Launch.fmtQty(o.price) + '</span>' +
+            '<span class="num">' + (o.qty >= 1000 ? (o.qty / 1000).toFixed(1) + 'K' : o.qty.toFixed(4)) + ' ' + esc(sym) + '</span>' +
+            '<span class="num" style="color:var(--text-3)">' + Launch.timeAgo(o.at) + '</span></div>';
+        }).join('');
     }
-    function placeLimit() {
-      var pin = document.getElementById('limPriceIn');
-      if (!pin) { Launch.toast('限价面板为原型占位', 'warn'); return; }
-      var price = parseFloat(pin.value);
-      var qty = parseFloat(document.getElementById('limQtyIn').value);
-      if (!(price > 0) || !(qty > 0)) { Launch.toast('请填写限价与数量', 'err'); return; }
-      orderRows.push({ side: side, price: price, qty: qty, at: Date.now() });
-      if (orderRows.length > 20) orderRows.shift();
-      Launch.toast('已挂模拟限价单', 'ok');
-      ordMode('orders');
+    function bindLimitUI() {
+      var seg = document.getElementById('limSide');
+      if (seg) seg.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-s]');
+        if (!b) return;
+        limSide = b.getAttribute('data-s');
+        document.querySelectorAll('#limSide button').forEach(function (x) { x.classList.toggle('on', x === b); });
+        refreshLim();
+      });
+      var tm = document.getElementById('limTgtMode');
+      if (tm) tm.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-t]');
+        if (!b) return;
+        limMode = b.getAttribute('data-t');
+        document.querySelectorAll('#limTgtMode button').forEach(function (x) { x.classList.toggle('on', x === b); });
+        refreshLim();
+      });
+      var ai = document.getElementById('limAmtIn');
+      var ti = document.getElementById('limTgtIn');
+      if (ai) ai.addEventListener('input', limCalc);
+      if (ti) ti.addEventListener('input', limCalc);
+      var sb = document.getElementById('limSubmit');
+      if (sb) sb.addEventListener('click', limPlace);
     }
+
     function flipSwap() {
       side = side === 'buy' ? 'sell' : 'buy';
       var btns = document.querySelectorAll('#swapSeg button');
@@ -1205,6 +1383,17 @@ var holders = [];
     function execReview() {
       var plan = reviewPlan;
       if (!plan) return;
+      if (plan.kind === 'limit') {
+        var estQty = plan.side === 'buy'
+          ? (plan.amt * (Launch.assetPrice(paySym) || 0)) / Math.max(plan.price, 1e-12)
+          : plan.amt;
+        orderRows.push({ side: plan.side, price: plan.price, qty: estQty, at: Date.now(), symbol: coin.symbol, kind: 'limit' });
+        if (orderRows.length > 20) orderRows.shift();
+        closeReview();
+        Launch.toast('已挂限价单 · ' + (plan.side === 'buy' ? 'Buy' : 'Sell') + ' limit @ $' + Launch.fmtQty(plan.price), 'ok');
+        ordMode('orders');
+        return;
+      }
       var r = plan.side === 'buy' ? Launch.swap(coin.id, 'buy', plan.inp, paySym) : Launch.swap(coin.id, 'sell', plan.inp);
       closeReview();
       if (r && r.ok) {
@@ -1409,6 +1598,7 @@ var holders = [];
     })();
 
     window.onLaunchShellReady = function () {
+      bindLimitUI();
       // 快捷按钮
       var qr = document.getElementById('quickRow');
       qr.innerHTML = [0.25, 0.5, 1].map(function (p) {
