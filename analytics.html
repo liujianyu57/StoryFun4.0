@@ -158,14 +158,18 @@
       return { t: s, c: p >= 0 ? 'up' : 'down' };
     }
 
-    // All time 图卡用：确定性 60 点序列（同一天内稳定）
+    // All time 图卡用：确定性 60 点序列（同一天内稳定）；带 M/D 日期标签，末点 = 最近完整日
+    function dayLabel(offsetDays) {
+      var d = new Date(Date.now() - (offsetDays || 0) * 86400000);
+      return (d.getMonth() + 1) + '/' + d.getDate();
+    }
     function seededSeries(n, scale, seed) {
       var s = (seed || 1) >>> 0, out = [];
       function rnd() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }
       for (var i = 0; i < n; i++) {
         var f = 0.35 + 0.65 * (n === 1 ? 1 : i / (n - 1));
         var j = 0.72 + rnd() * 0.56;
-        out.push({ value: Math.max(1, scale * f * j) });
+        out.push({ label: dayLabel(n - 1 - i), value: Math.max(1, scale * f * j) });
       }
       return out;
     }
@@ -236,7 +240,10 @@
         volVal = fmtUsdShort(all.totalVol || 0);
         lauVal = fmtK(all.launched || 0);
       } else {
-        volData = volT; lauData = lauT; hi = curIdx;
+        // 截到最近完整日（昨天），保证横轴最后一个刻度即高亮点
+        volData = volT.slice(0, curIdx + 1);
+        lauData = lauT.slice(0, curIdx + 1);
+        hi = volData.length - 1;
         volVal = fmtUsdShort(volCur);
         lauVal = fmtK(lauCur);
       }
@@ -265,7 +272,7 @@
     function drawDaily(svgId, data, hi) {
       var svg = document.getElementById(svgId);
       if (!svg || !data || data.length < 2) return;
-      var w = 560, h = 150, pl = 12, pr = 12, pt = 16, pb = 20;
+      var w = 560, h = 150, pl = 12, pr = 12, pt = 14, pb = 28;
       var iw = w - pl - pr, ih = h - pt - pb;
       var vals = data.map(function (d) { return d.value; });
       var mx = Math.max.apply(null, vals);
@@ -283,13 +290,28 @@
         return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="1.6" fill="#fff" stroke="#0A0B0D" stroke-width="1.2"/>';
       }).join('');
       var hiP = pts[Math.max(0, Math.min(pts.length - 1, hi))];
+      var axisY = pt + ih;
+      // 横轴日期：只取少量关键刻度（首/中/尾等 ≤5 个），避免放不下
+      var NT = 5;
+      var ticks = [];
+      for (var t = 0; t < NT; t++) ticks.push(Math.round(t * (pts.length - 1) / (NT - 1)));
+      var labels = '';
+      for (var t2 = 0; t2 < ticks.length; t2++) {
+        var iT = ticks[t2];
+        var pT = pts[iT];
+        var tx = (data[iT] && data[iT].label) || '';
+        if (!tx) continue;
+        var anchor = iT === 0 ? 'start' : (iT === pts.length - 1 ? 'end' : 'middle');
+        labels += '<text x="' + pT.x.toFixed(1) + '" y="' + (axisY + 13).toFixed(1) + '" font-size="9" fill="rgba(10,11,13,.42)" text-anchor="' + anchor + '" style="font-variant-numeric:tabular-nums">' + tx + '</text>';
+      }
       svg.innerHTML =
         '<defs><linearGradient id="ctxFill" x1="0" y1="0" x2="0" y2="1">' +
         '<stop offset="0" stop-color="rgba(10,11,13,.10)"/><stop offset="1" stop-color="rgba(10,11,13,0)"/></linearGradient></defs>' +
+        '<line x1="' + pl + '" y1="' + axisY + '" x2="' + (pl + iw) + '" y2="' + axisY + '" stroke="rgba(10,11,13,.12)" stroke-width="1"/>' +
         '<path d="' + area + '" fill="url(#ctxFill)"/>' +
         '<path d="' + line + '" fill="none" stroke="#0A0B0D" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>' + dots +
         '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="4.6" fill="#0A0B0D" stroke="#fff" stroke-width="2"/>' +
-        '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="9" fill="none" stroke="rgba(10,11,13,.25)" stroke-width="1.5"/>';
+        '<circle cx="' + hiP.x.toFixed(1) + '" cy="' + hiP.y.toFixed(1) + '" r="9" fill="none" stroke="rgba(10,11,13,.25)" stroke-width="1.5"/>' + labels;
     }
 
     window.onLaunchShellReady = function () {
