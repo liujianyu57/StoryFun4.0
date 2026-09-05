@@ -1141,34 +1141,31 @@ var holders = [];
     }
     // 参数信息（对齐参考 About/Creator fees/Holder fee sharing；已毕业时隐藏）
     // ===== Creator fees 两步 + 收款人 + 动态路由（发行者视角） =====
+    var __issSession = { pots: {}, recv: {} };
     function issRecv(coin2) {
-      try { var r = localStorage.getItem('sf_fee_recipient_' + coin2.id); if (r && /^0x[0-9a-fA-F]{6,}$/.test(r)) return r; } catch (e) {}
+      if (__issSession.recv[coin2.id]) return __issSession.recv[coin2.id];
       return coin2.creatorWallet || coin2.creatorAddr || '0x…';
     }
     function shortRecv(a) {
       a = a || '';
       return a.length > 14 ? a.slice(0, 8) + '…' + a.slice(-6) : a;
     }
-    function saveIssRecv(coin2, addr) { try { localStorage.setItem('sf_fee_recipient_' + coin2.id, addr); } catch (e) {} }
+    function saveIssRecv(coin2, addr) { __issSession.recv[coin2.id] = addr; }
+    // 发行者两步领取：会话内存态（不持久化，刷新即可重演）
     function issPot(coin2) {
-      try {
-        var raw = localStorage.getItem('sf_cf_' + coin2.id);
-        if (raw) { var o = JSON.parse(raw); return { pending: +o.pending || 0, claimable: +o.claimable || 0 }; }
-      } catch (e) {}
+      if (__issSession.pots[coin2.id]) return __issSession.pots[coin2.id];
       var h = 0, sx = coin2.id || 'x';
       for (var i = 0; i < sx.length; i++) h = (h * 31 + sx.charCodeAt(i)) >>> 0;
       var earned = Math.round((1.2 + (h % 48000) / 1000) * 1e6) / 1e6;
       var p = { pending: Math.round(earned * (0.5 + ((h >>> 3) % 9) / 100) * 1e6) / 1e6, claimable: 0 };
-      try { localStorage.setItem('sf_cf_' + coin2.id, JSON.stringify(p)); } catch (e) {}
+      __issSession.pots[coin2.id] = p;
       return p;
     }
-    function saveIssPot(coin2, p) { try { localStorage.setItem('sf_cf_' + coin2.id, JSON.stringify(p)); } catch (e) {} }
     function collectCurveFees() {
       var p = issPot(coin);
       if (!(p.pending > 0)) { Launch.toast('没有待收集的曲线费', 'warn'); return; }
       var moved = p.pending;
       p.claimable += moved; p.pending = 0;
-      saveIssPot(coin, p);
       Launch.toast('已收集曲线费 +' + Launch.fmtQty(Launch.qtyOfUsd(moved, coin.pair || 'ETH')) + ' ' + (coin.pair || 'ETH'), 'ok');
       renderMeta();
     }
@@ -1180,15 +1177,13 @@ var holders = [];
       if (Launch.credit) { Launch.credit(pair, qty); if (Launch.persist) Launch.persist(); }
       else { Launch.USER.eth += Launch.usdToEth(p.claimable); if (Launch.persist) Launch.persist(); }
       p.claimable = 0;
-      saveIssPot(coin, p);
       Launch.toast('已领取 ' + Launch.fmtQty(qty) + ' ' + pair, 'ok');
       renderMeta();
     }
     function setFeeRoute(holders) {
       if (!!coin.shareToHolders === !!holders) return;
       coin.shareToHolders = !!holders;
-      if (Launch.persist) Launch.persist();
-      renderMeta();
+      renderMeta();   // 仅会话内切换，不落盘
     }
     function openTransfer() {
       var m = document.getElementById('transferModal');
