@@ -69,12 +69,12 @@
 
     /* ---- Grid / Card（pons 规格：minmax 168 + gap 12，全宽方形封面竖卡） ---- */
     .px-grid {
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 12px; margin: 0; padding: 0; list-style: none;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px; margin: 0; padding: 0; list-style: none;
     }
     .px-card {
-      display: grid; grid-template-rows: auto 1fr; gap: 10px;
-      padding: 10px; border-radius: 20px; cursor: pointer; text-decoration: none;
+      display: grid; grid-template-rows: auto 1fr; gap: 12px;
+      padding: 14px; border-radius: 22px; cursor: pointer; text-decoration: none;
       background: var(--surface); border: 1px solid var(--border);
       color: inherit; position: relative;
       transition: transform .16s ease, background .16s ease, border-color .16s ease;
@@ -82,12 +82,16 @@
     .px-card:hover { transform: translateY(-2px); border-color: var(--border-strong); background: var(--surface-2); z-index: 5; }
     .px-media { position: relative; }
     .px-logo {
-      aspect-ratio: 1; width: 100%; border-radius: 14px;
+      position: relative; aspect-ratio: 16 / 9; width: 100%; border-radius: 16px;
       background: var(--surface-2); border: 1px solid var(--border);
       display: grid; place-items: center; overflow: hidden;
-      color: var(--text-3); font-size: 26px; font-weight: 700;
+      color: var(--text-3); font-size: 30px; font-weight: 700;
     }
     .px-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .px-hover-play { position: absolute; right: 8px; bottom: 8px; width: 26px; height: 26px;
+      border-radius: 50%; background: rgba(10,11,13,.55); color: #fff; display: grid; place-items: center;
+      font-size: 9px; font-style: normal; pointer-events: none; border: .5px solid rgba(255,255,255,.35); }
+    .px-hover-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
     .px-badges {
       position: absolute; top: 8px; left: 8px; right: 8px; z-index: 1;
       display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
@@ -303,11 +307,8 @@
     .sp-page-btn:disabled { opacity: .35; cursor: default; }
     .sp-page-num { font-size: 12px; color: var(--text-2); min-width: 34px; text-align: center; }
 
-    @media (max-width: 1080px) {
-      .px-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    }
-    @media (max-width: 860px) {
-      .px-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 1060px) {
+      .px-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 640px) {
       .px-toolbar { flex-wrap: wrap; gap: 8px; }
@@ -586,10 +587,12 @@
         ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>' +
           (c.lockedPct > 0 ? '<span class="px-mcap-fdv num">/ ' + mcTxt(c.fdv || c.marketCap) + ' FDV</span>' : '')
         : '<span class="px-mcap-label">—</span>';
+      var vAttr = c.video ? ' data-video="' + esc(c.video) + '"' : '';
+      var vHint = c.video ? '<i class="px-hover-play" aria-hidden="true">▶</i>' : '';
       return '' +
         '<li class="px-grid-item"><a class="px-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
           '<span class="px-media">' +
-            '<span class="px-logo">' + logo + '</span>' +
+            '<span class="px-logo"' + vAttr + '>' + logo + vHint + '</span>' +
             '<span class="px-badges">' + badge + '</span>' +
           '</span>' +
           '<span class="px-card-body">' +
@@ -614,6 +617,45 @@
         '</a></li>';
     }
 
+    // hover 播放关联视频（仅精确指针设备；离开即停）
+    var PX_VIDEO_OK = (function () {
+      try { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { return true; }
+    })();
+    function pxVidRemove(logo) {
+      if (!logo || !logo.__pv) return;
+      try { logo.__pv.pause(); } catch (e) {}
+      try { if (logo.__pv.parentNode) logo.__pv.parentNode.removeChild(logo.__pv); } catch (e) {}
+      logo.__pv = null;
+    }
+    function pxVidEnter(e) {
+      var logo = e.currentTarget;
+      if (!logo || logo.__pv) return;
+      var src = logo.getAttribute('data-video');
+      if (!src) return;
+      var v = document.createElement('video');
+      v.className = 'px-hover-video';
+      v.src = src;
+      v.muted = true;
+      v.loop = true;
+      v.playsInline = true;
+      v.setAttribute('playsinline', '');
+      v.setAttribute('preload', 'metadata');
+      v.addEventListener('error', function () { pxVidRemove(logo); });
+      logo.appendChild(v);
+      logo.__pv = v;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () { pxVidRemove(logo); });
+    }
+    function pxVidLeave(e) { pxVidRemove(e.currentTarget); }
+    function bindPxVideos(root) {
+      if (!PX_VIDEO_OK || !root) return;
+      Array.prototype.forEach.call(root.querySelectorAll('.px-logo[data-video]'), function (logo) {
+        if (logo.__pxBound) return;
+        logo.__pxBound = true;
+        logo.addEventListener('mouseenter', pxVidEnter);
+        logo.addEventListener('mouseleave', pxVidLeave);
+      });
+    }
     function gradCoins() {
       return (Launch.coins || []).filter(function (c) { return c.graduated; })
         .sort(function (a, b) { return (b.gradAt || 0) - (a.gradAt || 0); });
@@ -650,6 +692,7 @@
       var slice = list.slice((state.gradPage - 1) * per, state.gradPage * per);
       document.getElementById('gradCount').textContent = Launch.fmtNum(list.length);
       grid.innerHTML = slice.map(cardHTML).join('');
+      bindPxVideos(grid);
       empty.style.display = list.length ? 'none' : 'block';
       renderPager('gradPager', state.gradPage, pages, function (p) { state.gradPage = p; renderGrad(); });
     }
@@ -666,6 +709,7 @@
         ? Launch.fmtNum(list.length) + ' launched'
         : '已发射 ' + Launch.fmtNum(list.length);
       grid.innerHTML = slice.map(cardHTML).join('');
+      bindPxVideos(grid);
       empty.style.display = list.length ? 'none' : 'block';
       renderPager('expPager', state.expPage, pages, function (p) { state.expPage = p; renderExplore(); });
     }
