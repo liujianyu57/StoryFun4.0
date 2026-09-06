@@ -670,6 +670,10 @@
       '请输入完整 0x 钱包地址（42 位十六进制）': 'Enter a full 0x wallet address (42 hex chars).',
       '该地址已在豁免名单中': 'This address is already in the exemption list.',
       '请输入名称': 'Enter a token name.',
+      '名称最多 60 字': 'Name must be 1–60 characters.',
+      '一句话介绍最多 256 字': 'Tagline must be no longer than 256 characters.',
+      'X handle 需 1–15 位字母或数字（不带 @）': 'X handle: 1–15 letters/digits, no @.',
+      'Telegram handle 需 1–32 位字母或数字': 'Telegram handle: 1–32 letters/digits.',
       '代号需 2–20 位字母或数字': 'Ticker must be 2–20 letters or numbers.',
       '代号已被使用': 'This ticker is already taken.',
       '请关联一部作品或上传币图': 'Link a work or upload a token image first.',
@@ -1041,11 +1045,7 @@
     }
     function renderPairMenu() {
       var stocks = (window.Launch && Launch.pairStocks) ? Launch.pairStocks : [];
-      var crypto = (window.Launch && Launch.quoteCrypto) ? Launch.quoteCrypto.filter(function (x) { return x !== 'WETH'; }) : [];
       var html = '<div class="pair-dd-group">' + tt('主资产') + '</div>' + pairOptionHTML('ETH');
-      if (crypto.length) {
-        html += '<div class="pair-dd-group">' + tt('加密资产') + '</div>' + crypto.map(pairOptionHTML).join('');
-      }
       if (stocks.length) {
         html += '<div class="pair-dd-group">' + tt('股票代币') + '</div>' + stocks.map(pairOptionHTML).join('');
       }
@@ -1300,8 +1300,15 @@
       var tag = document.getElementById('pTag').value.trim();
       var err = document.getElementById('createErr');
       err.classList.remove('show');
+      function cpLen(t) { try { return Array.from(t).length; } catch (e) { return t.length; } }
       if (!name) { err.textContent = tt('请输入名称'); err.classList.add('show'); return; }
+      if (cpLen(name) > 60) { err.textContent = tt('名称最多 60 字'); err.classList.add('show'); return; }
+      if (tag && cpLen(tag) > 256) { err.textContent = tt('一句话介绍最多 256 字'); err.classList.add('show'); return; }
       if (!/^[A-Z0-9]{2,20}$/.test(sym)) { err.textContent = tt('代号需 2–20 位字母或数字'); err.classList.add('show'); return; }
+      var xv = document.getElementById('pX').value.trim();
+      var tgv = document.getElementById('pTg').value.trim();
+      if (xv && !/^[A-Za-z0-9]{1,15}$/.test(xv)) { err.textContent = tt('X handle 需 1–15 位字母或数字（不带 @）'); err.classList.add('show'); return; }
+      if (tgv && !/^[A-Za-z0-9]{1,32}$/.test(tgv)) { err.textContent = tt('Telegram handle 需 1–32 位字母或数字'); err.classList.add('show'); return; }
       if ((Launch.coins||[]).some(function(c){return c.symbol===sym;})) { err.textContent = tt('代号已被使用'); err.classList.add('show'); return; }
       var isWork = !!attached;
       if (!isWork && !uploadPreview) { err.textContent = tt('请关联一部作品或上传币图'); err.classList.add('show'); return; }
@@ -1334,7 +1341,7 @@
           pair: pairSel,
           devBuyQty: dbQty,
           devBuyPair: pairSel,
-          social:{ x:document.getElementById('pX').value.trim(), tg:document.getElementById('pTg').value.trim() },
+          social:{ x: xv, tg: tgv },
           creatorTaxPct: taxPct(),
           shareToHolders:document.getElementById('shareToHolders').checked,
           creatorWallet:document.getElementById('pCreatorWallet').value.trim(),

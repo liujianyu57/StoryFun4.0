@@ -500,6 +500,14 @@
     var hex = ('00000000' + (h >>> 0).toString(16)).slice(-8).toUpperCase();
     return '0x' + hex.slice(0, 2) + hex.slice(2, 4).toLowerCase() + '…' + hex.slice(4, 6).toLowerCase() + hex.slice(6, 8).toUpperCase();
   }
+  // 创建者完整地址（收款人默认值）：同一账户永远同一串
+  function fullWallet(seed) {
+    var h = 2166136261, i;
+    for (i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    var hex = '';
+    for (i = 0; i < 40; i++) { h = Math.imul(h ^ (h >>> 13), 2654435761) >>> 0; hex += '0123456789abcdef'.charAt(h & 15); }
+    return '0x' + hex;
+  }
   function usdToEth(u) { return u / K.ETH_USD; }
   function ethToUsd(e) { return e * K.ETH_USD; }
   function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
@@ -845,7 +853,7 @@
       social: data.social || null,
       creatorTaxPct: data.creatorTaxPct || 0,
       shareToHolders: !!data.shareToHolders,
-      creatorWallet: data.creatorWallet || '',
+      creatorWallet: data.creatorWallet || fullWallet('user:' + (USER.id || 'demo')),
       devBuyEth: data.devBuyEth || 0,
       devBuyQty: data.devBuyQty || 0,
       devBuyPair: data.devBuyPair || 'ETH',
