@@ -84,7 +84,7 @@ About 卡：描述 / Creator / Supply / Paired / 合约 / Explorer
 ### 5.1 通用规则
 - 未登录：查看可读，点击“买入/卖出/下单/领取”等触发连接引导。
 - 金额侧单位：买入=支付资产数量；卖出=币数量；支付资产可切换（ETH/WETH/USDG/cbBTC/股票，自动折算），**计价与结算始终按本币配对资产**。
-- 滑点：默认 1%，可 Adjust（0.1–10%）。
+- 滑点：默认 1%（面板不展示调整/明细行；Review 中显示 Max slippage）。
 - 所有成交先进入 **Review 弹窗**（You send / You receive / Min received / Market / Max slippage）→ Confirm 后执行。
 
 ### 5.2 按状态

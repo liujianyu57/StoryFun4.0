@@ -264,7 +264,9 @@
       font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--text); background: var(--surface); }
     .slip-edit .slip-done { border: none; border-radius: 999px; padding: 6px 12px; background: var(--accent-soft);
       color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; }
-    .review-overlay { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center;
+    .swap-details { display: none !important; }   /* v2 面板不展示 价格/滑点/价格影响/手续费 明细（pons 对齐） */
+
+  .review-overlay { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center;
       background: rgba(10,11,13,.45); padding: 20px; }
     .review-overlay.open { display: flex; }
     .review-card { width: min(430px, 94vw); background: #fff; border-radius: 22px; padding: 20px;
