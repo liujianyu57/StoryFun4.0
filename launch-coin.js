@@ -867,6 +867,17 @@
     var feeEth = usdToEth(K.launchFeeUsd + (data.sourceType === 'ai' ? K.genFeeUsd : 0));
     USER.balances.ETH = Math.max(0, (USER.balances.ETH || 0) - feeEth);
     USER.eth = USER.balances.ETH;
+    // 开发者预买 = 真实持仓（pons：随发射交易完成，随后可交易）
+    if (dbQty > 0 && USER.holdings[coin.id]) { /* noop */ }
+    if (dbQty > 0) {
+      var hh = USER.holdings[coin.id] || { amount: 0, avgUsd: 0 };
+      var costPx = coin.priceUsd || data.priceUsd || 0.0001;
+      var totalAmt = hh.amount + dbQty;
+      hh.avgUsd = totalAmt > 0 ? (hh.avgUsd * hh.amount + dbQty * costPx) / totalAmt : costPx;
+      hh.amount = totalAmt;
+      USER.holdings[coin.id] = hh;
+      addTx(coin, 'buy', dbQty * costPx, dbQty * costPx, dbQty, '我');
+    }
     SEED.unshift(coin);
     USER.created.unshift(id);
     persist();
