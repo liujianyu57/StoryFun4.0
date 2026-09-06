@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|---|
 | 状态条 | curve 进度（已募/阈值） | 同左 | 同左 | 已毕业（池内、永久锁定） | 同左 | 同左 |
 | 四格统计 | Price/Mcap/Price in X/Market=Bonding curve | 同左 | 同左 | 同左，Market=Uniswap v4 | 同左 | 同左 |
-| 交易 | Market 曲线买卖 | 同左 | 同左 | Market 池内 + Limit + Orders | 同左 | 同左 |
+| 交易 | Market 曲线买卖 | 同左 | 同左 | Market（池内买卖） | 同左 | 同左 |
 | 费用-路由 wallet | 只读 Claimable（无按钮） | 只读 | 收款人/Transfer、Collect、Claim{pair} | 按池内费口径同上分层 | 同左 | 同左 |
 | 费用-路由 holders | 卡1提示无 creator claim | 卡2 分红可领（持有即领） | 同上 + 可切换路由 | 同上 | 同上 | 同上 + 可切换路由 |
 | 成交流/持有者 | 可见 | 可见（“我”行） | 可见 | 可见 | 可见 | 可见 |
@@ -40,7 +40,7 @@
 状态条：curve 进度（未毕业）｜已毕业（池内永久锁）
 四格统计：Price / Market cap / Price in {pair} / Market
 交易卡：方向（买/卖）→ 金额与支付资产 → 滑点 → Review → 成交
-        （未毕业=curve 即时；已毕业多出 Limit / Orders）
+        （v2 语义：无论未毕业还是已毕业都仅 Market，不提供限价单）
 叙事区：视频/封面 + 故事 + 播放
 参数区（未毕业展示）：
   - Creator fees（按路由/身份分层）
@@ -91,11 +91,11 @@ About 卡：描述 / Creator / Supply / Paired / 合约 / Explorer
 | 场景 | 可用交易形态 |
 |---|---|
 | 未毕业 | Market（曲线买卖：随池额推进价格、毕业即停） |
-| 已毕业 | Market（池内）+ **Limit**（限价单）+ **Orders**（挂单列表） |
+| 已毕业 | Market（池内买卖） |
 
-### 5.3 Limit / Orders（仅已毕业）
-- Limit：方向（Buy/Sell limit）、Amount + Max、Target（Price 或 Market cap，可换算）、当前价提示、预览与错误态、Place order（走 Review：You deposit / Target price / Target mcap / Network / Position manager）。
-- Orders：显示“Open limit orders”列表（方向/目标价/数量/时间）；订单为“待执行/已填”状态占位（撮合在链下匹配，页面显示执行结果）。
+### 5.3 关于 Limit / Orders / Heatmap
+- 按 pons **v2** 语义：发行曲线阶段与毕业后**均不提供**限价单、挂单列表与买卖热力图（这些属于 v1/V3 池页能力）；
+- 本页统一为「Market 即时成交 + Review」单一形态。
 
 ### 5.4 校验与异常（交易）
 - 金额为空/非法、余额不足（支付资产 / 持仓）、目标未填、滑点/价格影响超限 → 行内或 toast 阻止。
@@ -173,8 +173,7 @@ About 卡：描述 / Creator / Supply / Paired / 合约 / Explorer
 
 - [ ] 状态条与四格在未毕业/已毕业下正确切换
 - [ ] Market 交易 Review 全流程（多资产支付、滑点、Confirm）
-- [ ] 已毕业出现 Limit + Orders；未毕业无
-- [ ] Limit：Amount/Max、Target Price/Mcap 换算、Review、挂单入 Orders
+- [ ] 未毕业/已毕业均仅 Market（无 Limit/Orders/Heatmap 入口）
 - [ ] 费用卡按「身份 × 路由」八种组合展示正确（见第 0 节矩阵）
 - [ ] 创建者：Transfer 改收款人、Collect→Claimable 增加、Claim{pair} 领取
 - [ ] 持有人：Claim dividends 领取、领完消失；游客只读
