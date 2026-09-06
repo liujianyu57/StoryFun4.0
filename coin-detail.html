@@ -13,47 +13,40 @@
     .cd-top { padding: 20px 0 4px; }
     .cd-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); margin-bottom: 14px; }
     .cd-back:hover { color: var(--text); }
-    .cd-head { display: flex; align-items: flex-start; gap: 16px; }
-    .cd-avatar { width: 72px; height: 72px; border-radius: 18px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); flex-shrink: 0; position: relative; }
-    .cd-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .cd-avatar .play {
-      position: absolute; inset: 0; display: grid; place-items: center;
-      background: rgba(10,11,13,.25); color: #fff;
-    }
-    .cd-id { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-    .cd-name { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-    .cd-sym { font-size: 13px; color: var(--text-3); font-weight: 600; }
-    .cd-addr { font-size: 12px; color: var(--text-3); font-family: var(--mono); cursor: pointer; }
-    .cd-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-    .cd-actions { display: flex; gap: 8px; margin-left: auto; }
-    .icon-btn {
-      width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
-      background: var(--surface); display: grid; place-items: center; color: var(--text-2);
-    }
-    .icon-btn:hover { border-color: var(--border-strong); color: var(--text); }
-    .icon-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    /* 币图（移入交易卡身份行，纯展示） */
+    .cd-avatar { width: 44px; height: 44px; border-radius: 12px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); flex-shrink: 0; }
+    .cd-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* 交易卡身份行：币图/名称/代号/Paired/曲线状态 */
+    .swap-id { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 13px; border-bottom: 1px dashed var(--border); }
+    .swap-id-main { min-width: 0; }
+    .swap-id-title { display: flex; align-items: baseline; gap: 8px; }
+    .swap-nm { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .swap-sym { font-size: 12px; color: var(--text-3); font-weight: 600; }
+    .swap-id-sub { display: flex; align-items: center; gap: 7px; margin-top: 5px; font-size: 12px; color: var(--text-2); flex-wrap: wrap; }
+    .swap-id-sub b { color: var(--text); font-weight: 600; }
+    .swap-id-dot { color: var(--border-strong); }
+    .swap-id-sub .phase { font-weight: 700; color: var(--text); }
+    .swap-id-sub .phase.up { color: var(--up); }
+    /* curve 毕业进度（pons v2-graduation 忠实还原） */
+    .v2-grad { border: 1px solid var(--border); background: var(--surface-2); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; margin: -4px 0 14px; }
+    .v2-grad .vg-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; font-weight: 800; }
+    .v2-grad .vg-head span:last-child { color: var(--text-2); font-variant-numeric: tabular-nums; font-weight: 700; }
+    .v2-grad .vg-track { background: rgba(10,11,13,.08); border-radius: 999px; height: 6px; overflow: hidden; }
+    .v2-grad .vg-fill { border-radius: inherit; background: var(--accent); height: 100%; transition: width .24s ease-out; }
+    .v2-grad .vg-note { color: var(--text-2); margin: 0; font-size: 12px; line-height: 1.5; }
 
     .cd-stats { display: flex; gap: 34px; margin: 16px 0 4px; flex-wrap: wrap; }
     .cd-stat .k { font-size: 12px; color: var(--text-2); }
     .cd-stat .k .cd-fdv { color: var(--text-3); font-weight: 500; }
     .cd-stat .v { font-size: 15px; font-weight: 700; margin-top: 2px; }
-    .cd-price-main { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
 
-    /* 毕业状态条 */
-    .grad-band { border-radius: 14px; padding: 14px 16px; margin: 18px 0 20px; border: 1px solid var(--border); background: var(--surface); }
-    .grad-band .gb-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .grad-band .gb-title { font-size: 13px; font-weight: 700; }
-    .grad-band .gb-sub { font-size: 12px; color: var(--text-2); margin-top: 3px; }
-    .grad-progress { height: 6px; border-radius: 6px; background: var(--accent-soft); margin-top: 10px; overflow: hidden; }
-    .grad-progress i { display: block; height: 100%; background: var(--accent); border-radius: 6px; transition: width .4s; }
-    .grad-band.done { border-color: rgba(14,159,110,.3); background: linear-gradient(180deg, #fff, #F4FBF7); }
-    .grad-band.done .grad-progress { background: rgba(14,159,110,.15); }
-    .grad-band.done .grad-progress i { background: #0E9F6E; width: 100% !important; }
 
     /* 主布局 */
-    .cd-grid { display: grid; grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); gap: 18px; margin-top: 4px; align-items: start; }
+    .cd-grid { display: grid; grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
     .cd-trade { min-width: 0; }
     .cd-market { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .cd-market .kcard { flex: 1 1 auto; }
     .cd-bottom { display: grid; gap: 18px; margin-top: 18px; }
     /* 交易卡（pons convert 双面板） */
     .convert-stack { display: flex; flex-direction: column; gap: 6px; position: relative; }
@@ -61,7 +54,7 @@
     .convert-panel-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-2); margin-bottom: 8px; }
     .convert-row { display: flex; align-items: center; gap: 8px; }
     .convert-row input { flex: 1; min-width: 0; }
-    .convert-amount { flex: 1; min-width: 0; text-align: right; font-size: 20px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+    .convert-amount { flex: 1; min-width: 0; text-align: left; font-size: 20px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
     .convert-asset { height: 32px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; color: var(--text); flex-shrink: 0; }
     .convert-asset i { font-style: normal; }
     button.convert-asset { cursor: pointer; font-family: inherit; transition: border-color .15s ease; }
@@ -94,12 +87,29 @@
     .cd-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 
     /* K线 */
-    .kcard { padding: 18px; }
-    .kcard-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .kcard-title { font-size: 14px; font-weight: 700; }
+    .kcard { padding: 18px; display: flex; flex-direction: column; }
+    .kcard-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
     .pill-seg.sm button { height: 24px; padding: 0 10px; font-size: 12px; }
-    .kchart { width: 100%; height: 240px; display: block; }
-    .klegend { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-top: 8px; }
+    .kchart-box { position: relative; flex: 1 1 auto; min-height: 240px; }
+    .kchart { width: 100%; height: 100%; display: block; }
+    /* hover 信息卡 */
+    .ktip { position: absolute; z-index: 6; pointer-events: none; display: none;
+      min-width: 128px; padding: 8px 11px; border-radius: 12px;
+      background: #fff; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .ktip-title { font-size: 10px; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; }
+    .ktip-val { font-size: 13px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .ktip-time { font-size: 11px; color: var(--text-2); margin-top: 1px; font-variant-numeric: tabular-nums; }
+    /* K线卡头市值大字 + 涨跌幅 */
+    .kh { min-width: 0; }
+    .kh-main { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .kh-lab { font-size: 12px; color: var(--text-3); font-weight: 600; }
+    .kh-num { font-size: 23px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+    .kh-sub { font-size: 12px; color: var(--text-2); margin-top: 3px; }
+    .kh-sub.up { color: var(--up); }
+    .kh-sub.down { color: var(--down); }
+    /* 四格统计：位于 K线卡最上方 */
+    .kcard .cd-stats { display: flex; gap: 26px; flex-wrap: wrap; margin: 0 0 12px; padding: 0 0 12px; border-bottom: 1px dashed var(--border); }
+    @media (max-width: 640px) { .kcard .cd-stats { gap: 14px 22px; } }
 
     /* 成交记录 */
     .tx-list { max-height: 220px; overflow-y: auto; }
@@ -132,7 +142,7 @@
     .swap-arrow { display: grid; place-items: center; height: 22px; color: var(--text-3); margin: 2px 0; }
     .swap-details { font-size: 11.5px; color: var(--text-2); }
     .swap-details .sd-row { display: flex; justify-content: space-between; padding: 3px 0; }
-    .swap-submit { height: 52px; margin-top: 6px; }
+    .swap-submit { height: 52px; margin-top: 6px; width: 100%; }
     .quick-row { display: flex; gap: 6px; margin: 8px 0 12px; }
     .quick-row button { flex: 1; height: 28px; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-2); }
     .quick-row button:hover { border-color: var(--accent); color: var(--text); }
@@ -149,24 +159,21 @@
     .holder-tag.me { background: rgba(10,11,13,.8); color: #fff; }
     .holder-tag.creator { background: #FFFBEB; color: #B45309; }
 
-    /* 叙事 */
+    /* 叙事：独立行卡（About 与 Creator fees 之间；点击整卡全屏播放，页面不铺大封面） */
     .story-card { overflow: hidden; }
-    .story-video { position: relative; background: #0A0B0D; aspect-ratio: 16 / 8; display: grid; place-items: center; }
-    .story-video video { width: 100%; height: 100%; object-fit: cover; }
-    .story-video .play-big {
-      position: absolute; inset: 0; margin: auto; width: 62px; height: 62px; border-radius: 50%;
-      background: rgba(10,11,13,.55); display: grid; place-items: center; cursor: pointer;
-      backdrop-filter: blur(4px);
-    }
-    .story-foot { padding: 14px 18px 16px; }
-    .story-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .story-desc { font-size: 12.5px; color: var(--text-2); margin-top: 6px; line-height: 1.6; }
-    .story-src { font-size: 12px; margin-top: 8px; }
-    .story-src a { color: var(--text); font-weight: 600; text-decoration: underline; }
+    .story-row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; cursor: pointer; transition: border-color .15s ease; }
+    .story-row:hover { border-color: var(--border-strong); }
+    .story-row .sr-play { width: 38px; height: 38px; flex: none; border-radius: 50%; background: var(--text); color: #fff; display: grid; place-items: center; }
+    .story-row .sr-play svg { display: block; }
+    .story-row .sr-main { min-width: 0; flex: 1; }
+    .story-row .sr-title { font-size: 13.5px; font-weight: 700; }
+    .story-row .sr-desc { font-size: 12.5px; color: var(--text-2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .story-row .sr-src { font-size: 11.5px; margin-top: 4px; }
+    .story-row .sr-src a { color: var(--text); font-weight: 600; text-decoration: underline; }
 
     /* 毕业动画 */
     .grad-fx {
-      position: fixed; inset: 0; z-index: 400; pointer-events: none;
+      position: fixed; inset: 0; z-index: 3000; pointer-events: none;
       display: flex; align-items: center; justify-content: center;
       opacity: 0; transition: opacity .3s;
     }
@@ -186,9 +193,85 @@
       .swap-card { position: static; }
     }
     @media (max-width: 640px) {
-      .cd-head { flex-wrap: wrap; }
-      .cd-price-main { font-size: 24px; }
+      .swap-id { flex-wrap: wrap; }
     }
+
+    /* ============ 移动端交易底部弹层（≤820px；桌面隐藏） ============ */
+    .m-trade-bar, .trade-scrim, .m-grip, .cd-mh { display: none; }
+    @media (max-width: 820px) {
+      /* 触发条：通栏主按钮，位于底导（≤768）之上 */
+      .m-trade-bar {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        position: fixed; left: 12px; right: 12px;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+        z-index: 1150; height: 50px; border: none; border-radius: 16px;
+        background: #0A0B0D; color: #fff; font-size: 15px; font-weight: 700;
+        box-shadow: 0 10px 28px rgba(10,11,13,.30); transition: opacity .2s;
+        cursor: pointer; -webkit-tap-highlight-color: transparent;
+      }
+      .m-trade-bar svg { display: block; }
+      body.trade-open .m-trade-bar { opacity: 0; pointer-events: none; }
+      @media (max-width: 768px) {
+        .m-trade-bar { bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); }
+      }
+      /* 遮罩 */
+      .trade-scrim {
+        display: block; position: fixed; inset: 0; z-index: 1200;
+        background: rgba(10,11,13,.42); opacity: 0; transition: opacity .25s;
+        pointer-events: none;
+      }
+      body.trade-open .trade-scrim { opacity: 1; pointer-events: auto; }
+      body.trade-open { overflow: hidden; }
+      /* 交易卡弹层化：同一 DOM，关闭时沉到屏幕外 */
+      #swapCard {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 1250; margin: 0;
+        max-height: min(88vh, 720px); overflow-y: auto; overscroll-behavior: contain;
+        border-radius: 22px 22px 0 0; border-bottom: none;
+        transform: translateY(calc(100% + 56px));
+        transition: transform .3s cubic-bezier(.32, .72, .24, 1);
+        pointer-events: none; box-shadow: 0 -18px 54px rgba(0,0,0,.20);
+        padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+      }
+      body.trade-open #swapCard { transform: none; pointer-events: auto; }
+      /* 弹层头：把手 + 标题 + 关闭 */
+      .m-grip { display: block; margin-bottom: 6px; }
+      .m-grip .mg-bar {
+        width: 44px; height: 5px; border-radius: 3px; margin: 2px auto 10px;
+        background: rgba(10,11,13,.14);
+      }
+      .m-grip .mg-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .m-grip .mg-title { font-size: 15px; font-weight: 800; }
+      .m-grip .mg-close {
+        width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 50%;
+        background: var(--surface); color: var(--text-2); font-size: 13px;
+        cursor: pointer; display: grid; place-items: center;
+      }
+      /* 单列去网格间隙：交易列让位（固定弹层脱离文档流） */
+      .cd-grid { display: block; }
+      .cd-market { margin-top: 0; }
+      /* 移动端隐藏 ← 市场 返回链接（走底导/顶部导航） */
+      .cd-back { display: none; }
+      .cd-top { padding: 12px 0 18px; }
+      /* 移动端吸顶币信息头 */
+      .cd-mh {
+        display: block; position: sticky; top: 0; z-index: 950;
+        margin: 0 -16px 14px; padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
+        background: rgba(255, 255, 255, .92);
+        backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(10, 11, 13, .07);
+      }
+      .cd-mh-id { display: flex; align-items: center; gap: 10px; }
+      .cd-mh-name { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+      .cd-mh-nm { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cd-mh-sym { font-size: 12px; color: var(--text-3); font-weight: 600; flex: none; }
+      @media (min-width: 769px) {
+        /* 该区间存在固定站点顶栏（56px），吸顶头下移对齐 */
+        .cd-mh { top: 56px; }
+      }
+      /* 内容底部让位，避免被常驻按钮遮挡 */
+      .launch-shell { padding-left: 16px; padding-right: 16px; padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+    }
+
   /* 原型：挂单类型条 / 参数信息块 */
   /* Creator fees 两步 + 收款人 + 路由切换 */
   .ff-recip { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 2px 0 4px; font-size: 12px; color: var(--text-2); }
@@ -240,7 +323,7 @@
   .ab-link:hover { color: var(--text); border-color: var(--text-3); }
   @media (max-width: 860px) { .about-card { grid-template-columns: 1fr; } }
     /* 费卡（对齐 token-creator-fees-card.float） */
-  #metaHost { display: grid; gap: 14px; margin-top: 4px; }
+  #metaHost { display: grid; gap: 14px; margin-top: 18px; }
   .fee-card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
     padding: 20px 22px; display: grid; gap: 14px;
@@ -307,36 +390,29 @@
     </div>
   </div>
 
+  <!-- 移动端：交易底部弹层 触发条 / 遮罩（≤820px 生效；同一份交易卡 DOM） -->
+  <button type="button" class="m-trade-bar" id="mTradeBar" aria-label="交易">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.98 19.5a8.5 8.5 0 1 1 3.5-8.5c0 1.4-.3 2.6-.9 3.7"/><path d="M17 20v-3h-3"/><path d="M7 4.5a8.5 8.5 0 0 0-3.5 8.5c0 1.4.3 2.6.9 3.7"/><path d="M7 4v3h3"/></svg>
+    <span>交易</span>
+  </button>
+  <div class="trade-scrim" id="mTradeScrim"></div>
+
   <main class="launch-shell" id="detailApp">
     <div class="cd-top">
       <a class="cd-back" href="launchpad.html">← 市场</a>
-      <div class="cd-head">
-        <div class="cd-avatar" id="cdAvatar" onclick="playStory()"></div>
-        <div>
-          <div class="cd-id">
-            <span class="cd-name" id="cdName">—</span>
-            <span class="cd-sym num" id="cdSym">—</span>
-            <span class="cd-addr" id="cdAddr" title="复制地址">—</span>
+    </div>
+
+    <!-- 移动端吸顶币信息头（≤820px；币图 + 名称/$代号） -->
+    <div class="cd-mh" id="cdMobileHead">
+      <div class="cd-mh-id">
+        <div class="cd-avatar" id="mhAvatar"></div>
+        <div class="cd-mh-tt">
+          <div class="cd-mh-name">
+            <span class="cd-mh-nm" id="mhName">—</span>
+            <span class="cd-mh-sym num" id="mhSym">—</span>
           </div>
-          <div class="cd-tags" id="cdTags"></div>
-        </div>
-        <div class="cd-actions">
-          <button class="icon-btn" id="watchBtn" title="关注" onclick="toggleWatch()">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </button>
-          <button class="icon-btn" title="分享" onclick="shareCoin()">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
-          </button>
         </div>
       </div>
-
-      <div class="cd-stats">
-        <div class="cd-stat"><div class="v num sim-num" id="cdPrice">—</div><div class="k">Price</div></div>
-        <div class="cd-stat"><div class="v num sim-num" id="cdMcap">—</div><div class="k">Market cap</div></div>
-        <div class="cd-stat"><div class="v num sim-num" id="cdPairPx">—</div><div class="k" id="kPairLab">Price in —</div></div>
-        <div class="cd-stat"><div class="v num" id="cdMkt">—</div><div class="k">Market</div></div>
-      </div>
-
     </div>
 
     <!-- About 卡（pons token-about-card 四区：左说明+Creator / 中 Supply / 右 Paired+地址） -->
@@ -363,18 +439,54 @@
       </div>
     </div>
 
+    <!-- 叙事（独立行卡：About 与 Creator fees 之间；点击整卡全屏播放） -->
+    <div class="cd-bottom story-zone">
+      <div class="card story-card story-row" onclick="playStory()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();playStory()}">
+        <div class="sr-play" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="sr-main">
+          <div class="sr-title">▶ 这个币的故事</div>
+          <div class="sr-desc" id="storyDesc">—</div>
+          <div class="sr-src" id="storySrc"></div>
+        </div>
+      </div>
+    </div>
     <div id="metaHost" style="display:none"></div>
 
         <div class="cd-grid">
       <div class="cd-col cd-trade">
       <div class="card swap-card" id="swapCard">
-        <div id="tkState">
-          <div class="grad-band" id="gradBand" style="display:none"></div>
+        <div class="m-grip">
+          <div class="mg-bar"></div>
+          <div class="mg-row">
+            <span class="mg-title">交易</span>
+            <button type="button" class="mg-close" id="mSheetClose" aria-label="关闭">✕</button>
+          </div>
+        </div>
+        <div class="swap-id">
+          <div class="cd-avatar" id="cdAvatar"></div>
+          <div class="swap-id-main">
+            <div class="swap-id-title">
+              <span class="swap-nm" id="cdName">—</span>
+              <span class="swap-sym num" id="cdSym">—</span>
+            </div>
+            <div class="swap-id-sub">
+              <span>Paired <b id="cdPairTxt">—</b></span>
+              <span id="cdPhaseWrap" style="display:none"><span class="swap-id-dot">·</span><span class="phase up" id="cdPhase">Uniswap v4</span></span>
+            </div>
+          </div>
+        </div>
+        <!-- curve 毕业进度（pons v2-graduation；仅未毕业展示） -->
+        <div class="v2-grad" id="cdGrad" style="display:none">
+          <div class="vg-head"><span>Bonding curve</span><span class="num" id="cdGradPct">0% to graduation</span></div>
+          <div class="vg-track" id="cdGradTrack" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progress toward graduation"><div class="vg-fill" id="cdGradBar" style="width:0%"></div></div>
+          <p class="vg-note num" id="cdGradSub">—</p>
         </div>
         <div id="mktPanel">
           <div class="convert-stack">
             <div class="convert-panel">
-              <span class="convert-panel-label"><span id="paySideLabel">支付</span><span class="cp-bal num" id="payBalance">—</span></span>
+              <span class="convert-panel-label"><span id="paySideLabel">Sell</span><span class="cp-bal num" id="payBalance">—</span></span>
               <div class="convert-row">
                 <input class="swap-input num" id="swapIn" type="number" min="0" step="any" placeholder="0.00" autocomplete="off" />
                 <button type="button" class="convert-asset pay-sel" id="payToken" title="选择支付资产（按配对资产计价结算）"><i>Ξ</i> ETH</button>
@@ -386,7 +498,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5-5 5 5M17 14l-5 5-5-5"/></svg>
             </button>
             <div class="convert-panel">
-              <span class="convert-panel-label"><span id="outLabel">预计获得</span></span>
+              <span class="convert-panel-label"><span id="outLabel">Buy</span></span>
               <div class="convert-row">
                 <div class="convert-amount num" id="swapOut">0</div>
                 <span class="convert-asset" id="outToken"><i>$</i> —</span>
@@ -418,8 +530,18 @@
       <div class="cd-col cd-market">
 <!-- K线 -->
         <div class="card kcard">
+          <div class="cd-stats">
+            <div class="cd-stat"><div class="v num sim-num" id="cdPrice">—</div><div class="k">Price</div></div>
+            <div class="cd-stat"><div class="v num sim-num" id="cdMcap">—</div><div class="k">Market cap</div></div>
+            <div class="cd-stat"><div class="v num sim-num" id="cdPairPx">—</div><div class="k" id="kPairLab">Price in —</div></div>
+            <div class="cd-stat"><div class="v num" id="cdMkt">—</div><div class="k">Market</div></div>
+          </div>
           <div class="kcard-head">
-            <div class="pill-seg sm" id="kSeg" style="margin-left:auto">
+            <div class="kh">
+              <div class="kh-main"><span class="kh-lab">市值</span><span class="kh-num num" id="cdMcapBig">—</span></div>
+              <div class="kh-sub num" id="cdChg">涨跌幅：— 1H</div>
+            </div>
+            <div class="pill-seg sm" id="kSeg">
               <button data-k="5m">5M</button>
               <button data-k="1h" class="on">1H</button>
               <button data-k="6h">6H</button>
@@ -427,53 +549,38 @@
               <button data-k="all">ALL</button>
             </div>
           </div>
-          <canvas class="kchart" id="kChart"></canvas>
-          <div class="klegend"><span id="kLeft">—</span><span id="kMid">—</span><span id="kRight">—</span></div>
-        </div>
-
-        
-<!-- 成交记录 / 持有者（页签） -->
-        <div class="card">
-          <div class="card-head-row">
-            <div class="tab-seg" id="recSeg">
-              <button class="tab-btn on" data-v="tx">成交记录</button>
-              <button class="tab-btn" data-v="holders">持有者</button>
+          <div class="kchart-box" id="kChartBox">
+            <canvas class="kchart" id="kChart"></canvas>
+            <div class="ktip" id="kTip" style="display:none">
+              <div class="ktip-title">Market cap</div>
+              <div class="ktip-val num" id="kTipVal">—</div>
+              <div class="ktip-time num" id="kTipTime">—</div>
             </div>
           </div>
-          <div class="card-pad tx-list" id="txList"></div>
-          <div class="card-pad holder-pad" id="holdersPane" style="display:none">
-            <div class="holder-top">
-              <div class="ht-num num" id="holdersTotal">—</div>
-              <div class="ht-txt">持有者<br /><span style="font-size:11px" id="top10">—</span></div>
-            </div>
-            <div id="holderList"></div>
-          </div>
         </div>
-
-        
       </div>
     </div>
 
     <div class="cd-bottom">
-<!-- 叙事 -->
-        <div class="card story-card">
-          <div class="story-video" id="storyPreview">
-            <div class="play-big" onclick="playStory()">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-            </div>
-          </div>
-          <div class="story-foot">
-            <div class="story-title">▶ 这个币的故事</div>
-            <div class="story-desc" id="storyDesc">—</div>
-            <div class="story-src" id="storySrc"></div>
+      <!-- 成交记录 / 持有者（页签） -->
+      <div class="card">
+        <div class="card-head-row">
+          <div class="tab-seg" id="recSeg">
+            <button class="tab-btn on" data-v="tx">成交记录</button>
+            <button class="tab-btn" data-v="holders">持有者</button>
           </div>
         </div>
-        
-<!-- 原型：参数信息（对齐参考的 About/Creator fees/Holder fee sharing） -->
+        <div class="card-pad tx-list" id="txList"></div>
+        <div class="card-pad holder-pad" id="holdersPane" style="display:none">
+          <div class="holder-top">
+            <div class="ht-num num" id="holdersTotal">—</div>
+            <div class="ht-txt">持有者<br /><span style="font-size:11px" id="top10">—</span></div>
+          </div>
+          <div id="holderList"></div>
+        </div>
       </div>
-
-      
     </div>
+      
   </main>
 
   <!-- Trade Review（pons：Review buy/sell + Confirm） -->
@@ -525,6 +632,16 @@ var holders = [];
     var chartSeries = [];
     var chartSeed = 0;
     var RANGE_LEN = { '5m': 36, '1h': 60, '6h': 84, '1d': 120, all: 160 };
+    var RANGE_NAME = { '5m': '5M', '1h': '1H', '6h': '6H', '1d': '1D', all: 'ALL' };
+    var RANGE_MS = { '5m': 5 * 60e3, '1h': 3600e3, '6h': 6 * 3600e3, '1d': 24 * 3600e3, all: 30 * 24 * 3600e3 };
+    var __cm = null;   // 最近一次 K线绘制的几何元数据（hover 复用）
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+    function fmtAxisTime(ts, full) {
+      var d = new Date(ts);
+      var hm = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+      if (full) return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + hm;
+      return (RANGE_MS[range] || 3600e3) <= 6 * 3600e3 ? hm : (d.getMonth() + 1) + '/' + d.getDate() + ' ' + hm;
+    }
     var myTrades = [];
 
     // 模拟成交落点：仅当成交币 = 当前币时联动刷新（数字/毕业条/图表尾部）
@@ -551,7 +668,7 @@ var holders = [];
       if (!coin || !c || c.id !== coin.id) return;
       simChartTail();
       renderHead();   // 内部会 refreshSwap
-      renderGrad();
+      renderCurve();
       renderChart();
       flashPrice();
       // 偶发将模拟成交写入记录流（顶部插入一条）
@@ -581,15 +698,13 @@ var holders = [];
       simChartInit();
       // 初始成交流（静态种子），模拟成交在其上追加
       txHistory = fakeTrades();
-      document.getElementById('cdAvatar').innerHTML =
-        '<img src="' + esc(coin.cover) + '" alt="">' +
-        (coin.video ? '<div class="play"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>' : '');
-      // 叙事
-      document.getElementById('storyPreview').innerHTML =
-        (coin.video ? '<video src="' + esc(coin.video) + '" muted playsinline style="width:100%;height:100%;object-fit:cover"></video>' : '') +
-        '<div class="play-big" onclick="playStory()"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>';
+      document.getElementById('cdAvatar').innerHTML = '<img src="' + esc(coin.cover) + '" alt="">';
+      // 移动端吸顶币信息头头像（与交易卡身份行同图）
+      var _mhAv = document.getElementById('mhAvatar');
+      if (_mhAv) _mhAv.innerHTML = '<img src="' + esc(coin.cover) + '" alt="">';
+      // 叙事（独立行卡：无原地大封面，文案由 renderHead 填充，整卡点击播放）
       renderHead();
-      renderGrad();
+      renderCurve();
       renderTx();
       renderChart();
       renderHolders();
@@ -612,16 +727,47 @@ var holders = [];
     function chartRebuild() {
       var n = RANGE_LEN[range] || 60;
       chartSeries = buildSeries(chartSeed || 0, n);
+      hideTip();
       renderChart();
+      updateChg();
+    }
+    // K线卡头：大字市值（紧凑格式）+ 区间涨跌幅（确定性演示值）
+    function compactUsdBig(v) {
+      v = v || 0;
+      if (v >= 1e9) return '$' + (v / 1e9).toFixed(1) + 'B';
+      if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
+      if (v >= 1e3) return '$' + (v / 1e3).toFixed(1) + 'K';
+      if (v >= 100) return '$' + v.toFixed(0);
+      if (v >= 1) return '$' + v.toFixed(2);
+      return '$' + v.toFixed(4);
+    }
+    function updateChg() {
+      if (!coin) return;
+      var el = document.getElementById('cdChg');
+      if (!el) return;
+      var seed = (coin.id || 'x') + ':' + range;
+      var h = 2166136261, i2;
+      for (i2 = 0; i2 < seed.length; i2++) { h ^= seed.charCodeAt(i2); h = Math.imul(h, 16777619) >>> 0; }
+      var d = ((h % 251) - 125) / 1000;   // ±0.125% 演示区间涨跌幅
+      var s = (d >= 0 ? '+' : '') + d.toFixed(2) + '% ' + (RANGE_NAME[range] || '1H');
+      el.textContent = '涨跌幅：' + s;
+      el.className = 'kh-sub num' + (d > 0 ? ' up' : d < 0 ? ' down' : '');
     }
 
     function renderHead() {
+      // 交易卡身份行：名称/代号/Paired（曲线状态由 renderCurve 维护）
       document.getElementById('cdName').textContent = coin.name;
       document.getElementById('cdSym').textContent = '$' + coin.symbol;
-      document.getElementById('cdAddr').textContent = coin.creatorAddr;
-      document.getElementById('cdAddr').onclick = function () {
-        copyText(coin.creatorAddr); Launch.toast('地址已复制', 'ok');
-      };
+      document.getElementById('cdPairTxt').textContent = coin.pair || 'ETH';
+      // 移动端吸顶币信息头：名称/$代号
+      var _mhN = document.getElementById('mhName');
+      var _mhS = document.getElementById('mhSym');
+      if (_mhN) _mhN.textContent = coin.name;
+      if (_mhS) _mhS.textContent = '$' + coin.symbol;
+      // K线卡头大字市值 + 区间涨跌幅
+      var mb = document.getElementById('cdMcapBig');
+      if (mb) mb.textContent = compactUsdBig(coin.marketCap || 0);
+      updateChg();
       // pons token-market-stats 四格：Price / Market cap / Price in X / Market
       document.getElementById('cdPrice').textContent = Launch.fmtPrice(coin.priceUsd);
       document.getElementById('cdMcap').textContent = Launch.fmtUsd(coin.marketCap || 0);
@@ -635,13 +781,6 @@ var holders = [];
       document.getElementById('kPairLab').textContent = 'Price in ' + pairForPx;
       document.getElementById('cdPairPx').textContent = ppx ? fmtPairPx((coin.priceUsd || 0) / ppx) : '—';
       document.getElementById('cdMkt').textContent = coin.graduated ? 'Uniswap v4' : 'Bonding curve';
-      document.getElementById('cdTags').innerHTML =
-        '<span class="tag">' + (coin.sourceType === 'ai' ? 'AI 叙事' : '短剧作品') + '</span>' +
-        (coin.isNew ? '<span class="tag tag-gold">NEW</span>' : '') +
-        (coin.graduated ? '<span class="tag tag-up">已毕业</span>' : '<span class="tag">curve</span>') +
-        (coin.creatorTaxPct ? '<span class="tag">Creator tax ' + coin.creatorTaxPct + '%</span>' : '') +
-        (coin.shareToHolders ? '<span class="tag tag-gold">费共享</span>' : '') +
-        (coin.social && (coin.social.x || coin.social.tg) ? '<span class="tag" style="cursor:pointer" onclick="openSocial()">↗ 社区</span>' : '');
       // About 卡（pons token-about-card 四区：左描述+Creator / 中 Supply / 右 Paired+地址）
       document.getElementById('abDesc').textContent = coin.tagline ||
         (coin.sourceTitle ? '关于「' + coin.sourceTitle + '」的链上故事，见证它从第一笔走向毕业。' : '一枚在 Story.fun 发射的叙事代币。');
@@ -673,14 +812,6 @@ var holders = [];
     function goSource() {
       if (coin.video) playStory();
       else Launch.toast('叙事预览暂不可用', 'warn');
-    }
-    function openSocial() {
-      if (!coin.social) return;
-      var s = coin.social;
-      var parts = [];
-      if (s.x) parts.push('x.com/' + s.x);
-      if (s.tg) parts.push('t.me/' + s.tg);
-      Launch.toast(parts.length ? ('社区: ' + parts.join(' · ')) : '该币暂未设置社区链接', parts.length ? 'ok' : 'warn');
     }
     function fakeLink() { if (Launch && Launch.toast) Launch.toast('原型演示链接', 'ok'); }
     var __divAmt = {};
@@ -734,7 +865,7 @@ var holders = [];
       var r = Launch.claim(id);
       if (r.ok) {
         var cq = r.qty != null ? (Launch.fmtQty(r.qty) + ' ' + (r.pair || 'ETH') + '（≈' + Launch.fmtUsd(r.usd) + '）') : Launch.fmtUsd(r.usd);
-        Launch.toast('已领取 ' + cq, 'ok'); renderHead(); renderGrad(); renderMeta();
+        Launch.toast('已领取 ' + cq, 'ok'); renderHead(); renderCurve(); renderMeta();
       }
       else Launch.toast(r.msg || '暂无可领取收益', 'warn');
     }
@@ -757,39 +888,45 @@ var holders = [];
       }
     });
 
-    function renderGrad() {
-      var band = document.getElementById('gradBand');
-      if (!band) return;
-      band.style.display = 'block';
-      if (coin.graduated) {
-        band.className = 'grad-band done';
-        band.innerHTML =
-          '<div class="gb-row"><span style="font-size:16px">🎓</span><span class="gb-title">已毕业</span>' +
-          '<span class="tag tag-up">流动性已上 Uniswap</span><span class="tag">永久锁定</span></div>' +
-          '<div class="gb-sub">持仓无需任何操作 · 本页可继续交易</div>' +
-          '<div class="grad-progress"><i style="width:100%"></i></div>';
+    // 交易卡 curve 毕业进度（pons v2-graduation：Bonding curve + % + 进度条 + raised note）
+    function renderCurve() {
+      var box = document.getElementById('cdGrad');
+      if (!box) return;
+      var wrap = document.getElementById('cdPhaseWrap');
+      var ph = document.getElementById('cdPhase');
+      if (!coin || coin.graduated) {
+        box.style.display = 'none';
+        if (wrap) wrap.style.display = '';
+        if (ph) { ph.textContent = 'Uniswap v4'; ph.className = 'phase up'; }
         return;
       }
-      var p = Math.min(100, Math.round(((coin.poolUsd || 0) / (coin.gradThresholdUsd || 13440)) * 100));
-      band.className = 'grad-band';
-      // 进度/毕业阈值始终按币的配对资产（quote）计价
+      box.style.display = 'grid';
+      if (wrap) wrap.style.display = 'none';
       var pair = coin.pair || 'ETH';
-      var pairPx = (window.Launch && Launch.assetPrice) ? Launch.assetPrice(pair) : null;
-      var sub;
-      if (pairPx) {
-        var nu = function (usd) { var v = usd / pairPx; return v >= 1000 ? (v / 1000).toFixed(1) + 'K' : Launch.fmtQty(v); };
-        sub = '已募 ' + nu(coin.poolUsd || 0) + ' / ' + nu(coin.gradThresholdUsd || 13440) + ' ' + esc(pair) + ' · 达阈值后 curve 售罄自动毕业';
+      var raisedU = coin.poolUsd || 0;
+      var thrU = coin.gradThresholdUsd || 13440;
+      var p = Math.min(100, Math.round((raisedU / (thrU || 1)) * 100));
+      document.getElementById('cdGradPct').textContent = p + '% to graduation';
+      document.getElementById('cdGradTrack').setAttribute('aria-valuenow', String(p));
+      document.getElementById('cdGradBar').style.width = p + '%';
+      // note 按配对资产计价（与 pons 口径一致）
+      var px = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 0) : 0;
+      var q = function (usd) {
+        var v = usd / (px || 1);
+        var s = v.toFixed(6).replace(/\.?0+$/, '');
+        return s || '0';
+      };
+      var note;
+      if (px > 0) {
+        note = q(raisedU) + ' of ' + q(thrU) + ' ' + pair + ' raised. At the threshold the curve closes and liquidity moves to a Uniswap v4 pool.';
       } else {
-        sub = '已募 ' + Launch.fmtUsd(coin.poolUsd || 0) + ' / ' + Launch.fmtUsd(coin.gradThresholdUsd || 13440) + ' · curve 售罄后自动毕业';
+        note = Launch.fmtUsd(raisedU) + ' of ' + Launch.fmtUsd(thrU) + ' raised. At the threshold the curve closes and liquidity moves to a Uniswap v4 pool.';
       }
-      band.innerHTML =
-        '<div class="gb-row"><span class="gb-title">距毕业</span><span class="tag" style="margin-left:auto" id="gbPct">' + p + '%</span></div>' +
-        '<div class="gb-sub num">' + sub + '</div>' +
-        '<div class="grad-progress"><i style="width:' + p + '%" id="gbBar"></i></div>';
+      document.getElementById('cdGradSub').textContent = note;
     }
 
     // ============ K线 ============
-    function renderChart() {
+    function renderChart(hl) {
       var canvas = document.getElementById('kChart');
       var dpr = window.devicePixelRatio || 1;
       var w = canvas.clientWidth || 640, h = canvas.clientHeight || 240;
@@ -802,28 +939,52 @@ var holders = [];
       // 毕业分割：毕业后模拟放大
       if (coin.graduated && series.length > 4) {
         var gi = Math.floor(series.length * 0.7);
-        for (var i = gi; i < series.length; i++) series[i] = Math.min(1, series[i] * 1.4);
+        for (var i0 = gi; i0 < series.length; i0++) series[i0] = Math.min(1, series[i0] * 1.4);
       }
       // 归一化
       var mn = Math.min.apply(null, series), mx = Math.max.apply(null, series);
       var span = (mx - mn) || 0.001;
-      var padL = 10, padR = 10, padT = 10, padB = 10;
+      var padL = 46, padR = 14, padT = 12, padB = 24;
       var iw = w - padL - padR, ih = h - padT - padB;
       var step = iw / (series.length - 1);
+      var mcap = coin.marketCap || 0;
+      var sLast = series[series.length - 1];
+      var dur = RANGE_MS[range] || 3600e3;
+      var dt = dur / (series.length - 1);
+      var now = Date.now();
+      var n = series.length;
+      var capAt = function (s) { return sLast > 0 ? mcap * (s / sLast) : mcap; };
 
-      // 网格
-      ctx.strokeStyle = '#F0F1F3'; ctx.lineWidth = 1;
+      // 水平网格 + Y 轴刻度（$市值）
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textBaseline = 'middle';
       for (var g = 0; g < 4; g++) {
         var gy = padT + (ih / 3) * g;
+        ctx.strokeStyle = '#F0F1F3'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(w - padR, gy); ctx.stroke();
+        ctx.fillStyle = '#98A2B3'; ctx.textAlign = 'right';
+        ctx.fillText(compactUsdBig(capAt(mn + (g / 3) * span)), padL - 7, gy);
+      }
+
+      // 竖直网格 + X 轴刻度（时间/日期）
+      var xFrac = [0, 1 / 3, 2 / 3, 1];
+      ctx.textBaseline = 'top';
+      for (var k = 0; k < xFrac.length; k++) {
+        var fr = xFrac[k];
+        var gx = padL + iw * fr;
+        ctx.strokeStyle = '#F6F7F9'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(gx, padT); ctx.lineTo(gx, h - padB); ctx.stroke();
+        ctx.fillStyle = '#98A2B3'; ctx.textAlign = 'center';
+        var idxT = Math.round(fr * (n - 1));
+        ctx.fillText(fmtAxisTime(now - (n - 1 - idxT) * dt, false), gx, h - padB + 5);
       }
 
       // 毕业分割
-      if (coin.graduated && series.length > 4) {
-        var gx = padL + step * Math.floor(series.length * 0.7);
+      if (coin.graduated && n > 4) {
+        var ggx = padL + step * Math.floor(n * 0.7);
         ctx.setLineDash([4, 4]);
         ctx.strokeStyle = '#0E9F6E'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(gx, padT); ctx.lineTo(gx, h - padB); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ggx, padT); ctx.lineTo(ggx, h - padB); ctx.stroke();
         ctx.setLineDash([]);
       }
 
@@ -833,7 +994,7 @@ var holders = [];
       grad.addColorStop(1, 'rgba(10,11,13,0)');
       ctx.beginPath();
       ctx.moveTo(padL, padT + ih - ((series[0] - mn) / span) * ih);
-      for (var i2 = 1; i2 < series.length; i2++) {
+      for (var i2 = 1; i2 < n; i2++) {
         ctx.lineTo(padL + step * i2, padT + ih - ((series[i2] - mn) / span) * ih);
       }
       ctx.lineTo(w - padR, h - padB); ctx.lineTo(padL, h - padB); ctx.closePath();
@@ -842,20 +1003,78 @@ var holders = [];
       // 折线
       ctx.beginPath();
       ctx.moveTo(padL, padT + ih - ((series[0] - mn) / span) * ih);
-      for (var i3 = 1; i3 < series.length; i3++) {
+      for (var i3 = 1; i3 < n; i3++) {
         ctx.lineTo(padL + step * i3, padT + ih - ((series[i3] - mn) / span) * ih);
       }
       ctx.strokeStyle = '#0A0B0D'; ctx.lineWidth = 2; ctx.stroke();
 
-      // 当前点
-      var lx = w - padR, ly = padT + ih - ((series[series.length - 1] - mn) / span) * ih;
+      // 存储本次绘制几何（hover 复用）
+      __cm = { mn: mn, span: span, padL: padL, padR: padR, padT: padT, padB: padB,
+               ih: ih, iw: iw, step: step, w: w, h: h, n: n, sLast: sLast,
+               mcap: mcap, vals: series.slice(), now: now, dt: dt };
+
+      // 末端当前点
+      var lx = w - padR, ly = padT + ih - ((series[n - 1] - mn) / span) * ih;
       ctx.beginPath(); ctx.arc(lx, ly, 3.5, 0, Math.PI * 2); ctx.fillStyle = '#0A0B0D'; ctx.fill();
       ctx.beginPath(); ctx.arc(lx, ly, 7, 0, Math.PI * 2); ctx.fillStyle = 'rgba(10,11,13,.15)'; ctx.fill();
 
-      document.getElementById('kLeft').textContent = coin.graduated ? '池内' : 'curve 阶段';
-      document.getElementById('kMid').textContent = coin.graduated ? '🎓 毕业点' : '价格随买入上升';
-      document.getElementById('kRight').textContent = '当前 $' + coin.priceUsd.toFixed(6);
+      // hover 十字竖线 + 采样点
+      if (typeof hl === 'number' && hl >= 0 && hl < n) {
+        var hx = padL + step * hl, hy = padT + ih - ((series[hl] - mn) / span) * ih;
+        ctx.strokeStyle = 'rgba(10,11,13,.28)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, h - padB); ctx.stroke();
+        ctx.beginPath(); ctx.arc(hx, hy, 4.5, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = '#0A0B0D';
+        ctx.beginPath(); ctx.arc(hx, hy, 4.5, 0, Math.PI * 2); ctx.stroke();
+      }
     }
+
+    // ============ K线 hover：十字线 + 信息卡 ============
+    function kHoverIdx(ev, box) {
+      if (!__cm) return -1;
+      var r = box.getBoundingClientRect();
+      var x = ev.clientX - r.left, y = ev.clientY - r.top;
+      if (x < __cm.padL - 3 || x > __cm.w - __cm.padR + 3 || y < __cm.padT - 3 || y > __cm.h - __cm.padB + 3) return -1;
+      var i = Math.round((x - __cm.padL) / __cm.step);
+      return (i >= 0 && i < __cm.n) ? i : -1;
+    }
+    function hideTip() {
+      var tip = document.getElementById('kTip');
+      if (tip) tip.style.display = 'none';
+    }
+    function showTip(i) {
+      var tip = document.getElementById('kTip');
+      if (!tip || !__cm || i < 0) return;
+      var s = __cm.vals[i];
+      var cap = __cm.sLast > 0 ? __cm.mcap * (s / __cm.sLast) : __cm.mcap;
+      var ts = __cm.now - (__cm.n - 1 - i) * __cm.dt;
+      document.getElementById('kTipVal').textContent = compactUsdBig(cap);
+      document.getElementById('kTipTime').textContent = fmtAxisTime(ts, true);
+      var x = __cm.padL + __cm.step * i;
+      var y = __cm.padT + __cm.ih - ((s - __cm.mn) / __cm.span) * __cm.ih;
+      var tw = 150;
+      var left = x + 14;
+      if (left + tw > __cm.w - 6) left = x - 14 - tw;
+      var top = y + 12;
+      if (top + 72 > __cm.h - 4) top = y - 72 - 12;
+      if (top < 4) top = 4;
+      tip.style.left = Math.max(6, left) + 'px';
+      tip.style.top = top + 'px';
+      tip.style.display = 'block';
+    }
+    (function bindKChartHover() {
+      var box = document.getElementById('kChartBox');
+      if (!box) return;
+      box.addEventListener('mousemove', function (ev) {
+        var i = kHoverIdx(ev, box);
+        renderChart(i >= 0 ? i : -1);
+        if (i >= 0) showTip(i); else hideTip();
+      });
+      box.addEventListener('mouseleave', function () {
+        hideTip();
+        renderChart();
+      });
+    })();
 
     // ============ 成交记录 ============
     function fakeTrades() {
@@ -894,8 +1113,6 @@ var holders = [];
     // v2（pons）：交易面板仅 Market（无 Limit/Orders/Heatmap）
     function ordShow() {
       if (!coin) return;
-      var band = document.getElementById('gradBand');
-      if (band) band.style.display = coin.graduated ? 'none' : 'block';
       var mk = document.getElementById('mktPanel');
       if (mk) mk.style.display = '';
     }
@@ -1095,13 +1312,13 @@ var holders = [];
           ' · <a class="faucet-mini" href="javascript:void(0)" onclick="faucetPay()" title="领取测试余额（$250 等值）">水龙头</a>';
         ptok.innerHTML = chipHtml(paySym);
         ptok.title = '选择支付资产（按配对资产计价结算）';
-        document.getElementById('outLabel').textContent = '预计获得';
+        document.getElementById('outLabel').textContent = 'Buy';
         document.getElementById('outToken').innerHTML = '<i>$</i> ' + esc(coin.symbol);
       } else {
         payBal.innerHTML = '持仓 <b class="num">' + (heldAmt >= 10000 ? (heldAmt / 1000).toFixed(1) + 'K' : Launch.fmtNum(Math.floor(heldAmt))) + '</b> ' + esc(coin.symbol);
         ptok.innerHTML = '<i>$</i> ' + esc(coin.symbol);
         ptok.title = '卖出数量（币）';
-        document.getElementById('outLabel').textContent = '预计获得 (' + pair + ')';
+        document.getElementById('outLabel').textContent = 'Buy';
         document.getElementById('outToken').innerHTML = chipHtml(pair);
       }
       document.getElementById('swapBtn').textContent = side === 'buy' ? ('买入 ' + coin.symbol) : ('卖出 ' + coin.symbol);
@@ -1303,7 +1520,7 @@ var holders = [];
 
     function refreshAllAfterTx() {
       renderHead();
-      renderGrad();
+      renderCurve();
       renderTx();
       renderChart();
       refreshSwap();
@@ -1344,19 +1561,6 @@ var holders = [];
           (h.me ? '<span class="holder-tag me">我</span>' : '') +
           '<span class="holder-pct num">' + h.pct + '%</span></div>';
       }).join('');
-    }
-
-    // ============ 关注 ============
-    function toggleWatch() {
-      if (!Launch.isLoggedIn()) { openLoginModal(); Launch.toast('登录后即可关注', 'warn'); return; }
-      var on = Launch.toggleWatch(coin.id);
-      document.getElementById('watchBtn').classList.toggle('on', on);
-      Launch.toast(on ? '已关注' : '已取消关注', 'ok');
-    }
-    function shareCoin() {
-      var url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'coin-detail.html?id=' + coin.id;
-      copyText(url);
-      Launch.toast('链接已复制', 'ok');
     }
 
     // ============ 事件绑定 ============
@@ -1475,6 +1679,26 @@ var holders = [];
       // 模拟活跃联动（档位在本地存储，与市场页共享；当前币优先被模拟）
       Launch.simFocus(coin.id);
       Launch.simSubscribe(onSimTick);
+      // 移动端交易底部弹层（≤820px）
+      var _mBar = document.getElementById('mTradeBar');
+      var _mClose = document.getElementById('mSheetClose');
+      var _mScrim = document.getElementById('mTradeScrim');
+      var setTradeOpen = function (open) {
+        document.body.classList.toggle('trade-open', !!open);
+        if (open && typeof refreshSwap === 'function') refreshSwap();
+      };
+      if (_mBar) _mBar.addEventListener('click', function () { setTradeOpen(true); });
+      if (_mClose) _mClose.addEventListener('click', function () { setTradeOpen(false); });
+      if (_mScrim) _mScrim.addEventListener('click', function () { setTradeOpen(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.body.classList.contains('trade-open')) setTradeOpen(false);
+      });
+      var _mq = window.matchMedia ? window.matchMedia('(min-width: 821px)') : null;
+      var _widen = function (m) { if (m.matches) setTradeOpen(false); };
+      if (_mq) {
+        if (_mq.addEventListener) _mq.addEventListener('change', _widen);
+        else if (_mq.addListener) _mq.addListener(_widen);
+      }
     };
   </script>
   <script src="load-desktop-header.js"></script>
