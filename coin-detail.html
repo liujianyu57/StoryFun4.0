@@ -639,7 +639,7 @@
         <div class="card-pad holder-pad" id="holdersPane" style="display:none">
           <div class="holder-top">
             <div class="ht-num num" id="holdersTotal">—</div>
-            <div class="ht-txt">持有者<br /><span style="font-size:11px" id="top10">—</span></div>
+            <div class="ht-txt">持有者</div>
           </div>
           <div id="holderList"></div>
         </div>
@@ -1741,14 +1741,7 @@ var holders = [];
         return { addr: names[i % names.length], pct: p, creator: i === 0 };
       });
       if (isCreatorMine) { holders[0].creator = true; holders[0].addr = 'Creator'; }
-      // “我”行跟随调试身份：默认按真实持仓；持有人演示态补占位行；创建者/路人态不显示
-      var myPct = 0, rRole = __demoRole();
-      if (rRole === 'holder') myPct = __demoHeldPct();
-      else if (!rRole) { var meHeld = Launch.USER.holdings[coin.id]; myPct = (meHeld && meHeld.amount > 0) ? Math.max(1, Math.round(meHeld.amount / 1e5)) : 0; }
-      if (myPct) holders.push({ addr: '我', pct: myPct, me: true });
-      var total = Math.min(99, holders.reduce(function (s, h) { return s + h.pct; }, 0));
       document.getElementById('holdersTotal').textContent = Launch.fmtNum(coin.holders || 0);
-      document.getElementById('top10').textContent = 'Top ' + holders.length + ' 持有 ' + total + '%';
       pgTotalHold = Math.max(1, Math.ceil(holders.length / PAGE_SIZE));
       pgHold = Math.max(1, Math.min(pgHold, pgTotalHold));
       var off = (pgHold - 1) * PAGE_SIZE;
@@ -1757,7 +1750,6 @@ var holders = [];
           '<span class="holder-rank">' + (off + i + 1) + '</span>' +
           '<span class="holder-addr">' + esc(h.addr) + '</span>' +
           (h.creator ? '<span class="holder-tag creator">Creator</span>' : '') +
-          (h.me ? '<span class="holder-tag me">我</span>' : '') +
           '<span class="holder-pct num">' + h.pct + '%</span></div>';
       }).join('');
       paintPager();
