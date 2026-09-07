@@ -102,8 +102,11 @@
 - 未登录：查看可读，点击“买入/卖出/下单/领取”等触发连接引导。
 - 金额侧单位：买入=支付资产数量；卖出=币数量；支付资产可切换（ETH/WETH/USDG/cbBTC/股票，自动折算），**计价与结算始终按本币配对资产**。
 - 面板双行标签恒定：输入侧 `Sell`、输出侧 `Buy`（pons 口径）；面板中部对调按钮在买/卖间切换（买入=付支付资产得币；卖出=付币得 {pair}）。输出金额**左对齐**，提交按钮**通栏宽**。
-- 滑点：默认 1%（面板不展示调整/明细行；Review 中显示 Max slippage）。
-- 所有成交先进入 **Review 弹窗**（You send / You receive / Min received / Market / Max slippage）→ Confirm 后执行。
+- 滑点：默认 1%（面板不展示调整/明细行；Review 中展示对应滑点行）。
+- 所有成交先进入 **Review 弹窗**，买/卖两套版式分别对齐 pons：
+  - **买入 Review buy**：字段 = You send / Minimum received / Maximum slippage / Network: Robinhood Chain (4663) / Route: 0x aggregator；主按钮 `Buy {SYM}` + 下方 `Cancel` 链接；
+  - **卖出 Review sell**：字段 = You send / You receive / Market / Max slippage；按钮 `Confirm sell`（绿）+ `Cancel` 并排。
+- 成交成功后弹出**结果卡**（pons：`{资产} received`）：Complete + 数量大字 + Amount / Value 行；`View transaction`（原型演示占位）、`Swap again`（关闭返回继续交易）；买币触发毕业时改走毕业庆祝动效，不弹结果卡。
 
 ### 5.2 按状态
 | 场景 | 可用交易形态 |

@@ -337,12 +337,23 @@
     .pv-row b { color: var(--text); font-weight: 600; }
     .pv-row .ok { color: #0E9F6E; font-weight: 600; }
 
-    .success-wrap { text-align: center; padding: 60px 0 30px; display: none; }
-    .success-ico { width: 72px; height: 72px; border-radius: 50%; background: var(--text); color: #fff; display: grid; place-items: center; margin: 0 auto 18px; font-size: 30px; animation: pop .4s ease; }
     @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .success-title { font-size: 20px; font-weight: 800; }
-    .success-desc { font-size: 13px; color: var(--text-2); margin: 8px 0 26px; }
-    .success-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    /* 发射成功弹窗（pons：SUN launched） */
+    .ls-backdrop { position: fixed; inset: 0; z-index: 2100; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(10, 11, 13, .36); }
+    .ls-backdrop.open { display: flex; }
+    .ls-card { width: 100%; max-width: 400px; max-height: calc(100vh - 40px); overflow-y: auto; background: #fff; border-radius: 26px; box-shadow: 0 24px 70px rgba(0, 0, 0, .22); padding: 30px 26px 14px; text-align: center; animation: pop .35s ease; }
+    .ls-check { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 16px; display: grid; place-items: center; background: #10B981; color: #fff; font-size: 26px; font-weight: 800; }
+    .ls-art { width: 128px; height: 128px; margin: 2px auto 16px; border-radius: 26px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); display: grid; place-items: center; font-size: 42px; font-weight: 800; color: var(--text-3); }
+    .ls-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ls-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .ls-name { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+    .ls-note { font-size: 12.5px; color: var(--text-2); margin-top: 12px; }
+    .ls-addr { margin: 12px auto 0; width: max-content; max-width: 100%; padding: 7px 14px; border-radius: 999px; background: rgba(10, 11, 13, .05); font-family: var(--mono); font-size: 12px; color: var(--text-2); cursor: pointer; }
+    .ls-actions { display: flex; gap: 10px; margin-top: 22px; }
+    .ls-actions .btn { flex: 1; height: 48px; }
+    .ls-links { display: flex; justify-content: center; gap: 20px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #F0F1F3; }
+    .ls-links a { font-size: 13px; color: var(--text-3); text-decoration: none; font-weight: 600; }
+    .ls-links a:hover { color: var(--text); }
     .hide { display: none; }
 
     @media (max-width: 1000px) {
@@ -354,6 +365,21 @@
       .story-src-row { flex-direction: column; }
       .ai-prompt-wrap { flex-direction: column; }
     }
+
+    /* Review launch（pons：两列参数 + Confirm/Cancel） */
+    .lr-head { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2px; }
+    .lr-rocket { width: 42px; height: 42px; border-radius: 14px; background: #fff; border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: grid; place-items: center; font-size: 20px; }
+    .lr-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .lr-rows { margin-top: 16px; border-top: 1px solid #F0F1F3; text-align: left; }
+    .lr-row { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; padding: 10px 0; border-bottom: 1px solid #F0F1F3; font-size: 13px; }
+    .lr-row span { color: var(--text-3); font-weight: 500; flex: none; }
+    .lr-row b { color: var(--text); font-weight: 600; text-align: right; min-width: 0; word-break: break-word; }
+    .lr-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .lr-actions button { flex: 1; height: 46px; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .lr-cancel { border: 1px solid var(--border); background: #fff; color: var(--text); }
+    .lr-cancel:hover { border-color: var(--border-strong); }
+    .lr-confirm { border: none; background: #0E9F6E; color: #fff; }
+    .lr-confirm:hover { opacity: .9; }
   </style>
 </head>
 <body>
@@ -557,17 +583,6 @@
           </div>
         </aside>
       </div>
-
-      <!-- 成功态 -->
-      <div class="success-wrap" id="successWrap">
-        <div class="success-ico">✓</div>
-        <div class="success-title">已上架</div>
-        <div class="success-desc">叙事已在市场发布，发射曲线已就绪。</div>
-        <div class="success-actions">
-          <button class="btn btn-primary btn-lg" onclick="location.href='launchpad.html'">查看市场</button>
-          <button class="btn btn-ghost btn-lg" onclick="location.href='coin-detail.html?id='+lastCoinId">查看我的币</button>
-        </div>
-      </div>
     </div>
   </main>
 
@@ -592,6 +607,39 @@
       <div class="picker-foot">
         <span class="picker-sum" id="pickerSum">未选择</span>
         <button class="btn btn-primary" id="pickerOk" onclick="confirmStoryPick()" disabled>关联</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 发射成功弹窗（pons：SUN launched） -->
+  <div class="ls-backdrop" id="successModal">
+    <div class="ls-card" role="dialog" aria-modal="true" aria-label="Launch success">
+      <div class="ls-check">✓</div>
+      <div class="ls-art" id="suArt"></div>
+      <div class="ls-title num" id="suTitle">—</div>
+      <div class="ls-name" id="suName">—</div>
+      <div class="ls-note" id="suFee">—</div>
+      <div class="ls-addr num" id="suAddr" onclick="copySuAddr()" title="复制地址">—</div>
+      <div class="ls-actions">
+        <button class="btn btn-primary btn-lg" onclick="location.href='coin-detail.html?id='+lastCoinId">Trade token</button>
+        <button class="btn btn-ghost btn-lg" onclick="txDemo()">Transaction</button>
+      </div>
+      <div class="ls-links">
+        <a href="javascript:void(0)" onclick="launchAnother()">Launch another</a>
+        <a href="launchpad.html">Back to explore</a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Review launch（pons：发射确认） -->
+  <div class="ls-backdrop" id="launchReviewModal">
+    <div class="ls-card lr-card">
+      <div class="lr-head"><span class="lr-rocket">🚀</span><span class="lr-title">Launch <b class="num" id="lrSym">—</b></span></div>
+      <div class="lr-rows" id="lrRows"></div>
+      <div class="lr-actions">
+        <button type="button" class="lr-cancel" id="lrCancel">Cancel</button>
+        <button type="button" class="lr-confirm" id="lrConfirm">Confirm</button>
       </div>
     </div>
   </div>
@@ -727,6 +775,7 @@
     var pkTab = 'drama';      // 弹层当前 Tab
     var pickerSel = null;     // 弹层内当前选中 {type,title,meta,cover,name,desc,video}
     var lastCoinId = null;
+    var _lastCreatedCoin = null;   // 最近创建的币（成功弹窗取地址用）
 
     var AI_COVERS = ['image/cover-zero-night.jpg','image/cover-pyramid.jpg','image/cover-survivor.jpg','image/cover-candle.jpg','image/cover-allin.jpg','image/hero-bg-blur.jpg'];
     var AI_VIDEOS = ['video/打斗视频.mp4','video/凤骨琉璃.mp4','video/我卸甲后天下大乱了.mp4','video/丞相府今日开饭.mp4'];
@@ -1325,34 +1374,138 @@
         return;
       }
 
+      // —— 组装 Review launch 快照 → 弹确认 ——
+      var walletVal = document.getElementById('pCreatorWallet').value.trim();
+      var taxVal = taxPct();
+      var shareChk = document.getElementById('shareToHolders').checked;
+      var gradTxt = (document.getElementById('sumGrad') || {}).textContent || '';
+      var plan = {
+        name: name, sym: sym, tag: tag, xv: xv, tgv: tgv,
+        dbQty: dbQty, pairSel: pairSel,
+        cover: uploadPreview || currentCover() || pickCover(),
+        video: (attached && attached.video) || '',
+        sourceTitle: attached ? attached.title : '',
+        creatorTaxPct: taxVal,
+        shareToHolders: shareChk,
+        creatorWalletRaw: walletVal,
+        snipeExempts: snipeList.slice(),
+        gradTxt: gradTxt
+      };
+      openLaunchReview(plan);
+    }
+
+    // ---- Review launch（pons：两列参数 + Confirm / Cancel） ----
+    var _pendingLaunch = null;
+    function lrRow(l, v) {
+      return '<div class="lr-row"><span>' + l + '</span><b class="num">' + v + '</b></div>';
+    }
+    function openLaunchReview(plan) {
+      _pendingLaunch = plan;
+      document.getElementById('lrSym').textContent = plan.sym;
+      var totalFee = 1 + ((plan.creatorTaxPct || 0) * 1);
+      var rows = [];
+      rows.push(lrRow('Token', esc(plan.name) + ' (' + esc(plan.sym) + ')'));
+      rows.push(lrRow('Paired with', esc(plan.pairSel)));
+      rows.push(lrRow('Launch fee', '0.0005 ETH'));
+      if (plan.gradTxt) rows.push(lrRow('Graduation', esc(plan.gradTxt)));
+      rows.push(lrRow('Trade fee', totalFee.toFixed(2) + '% (' + (plan.creatorTaxPct || 0).toFixed(2) + '% ' +
+        (plan.shareToHolders ? 'to holders' : 'to you') + ')'));
+      if (plan.dbQty > 0) {
+        rows.push(lrRow('Developer buy', fmtQty(plan.dbQty) + ' ' + esc(plan.pairSel) + ', in the launch transaction'));
+      }
+      rows.push(lrRow('Snipe exempt', plan.snipeExempts.length
+        ? plan.snipeExempts.length + ' declared wallet' + (plan.snipeExempts.length === 1 ? '' : 's')
+        : 'Your wallets only'));
+      var cAddr = plan.creatorWalletRaw || (window.Launch && Launch.walletText ? Launch.walletText() : '0x…');
+      rows.push(lrRow('Creator', esc(snipeAddrShort(cAddr))));
+      rows.push(lrRow('Creator fees', plan.shareToHolders
+        ? 'Shared with holders, two confirmations on-chain'
+        : 'To your wallet, creator tax ' + (plan.creatorTaxPct || 0).toFixed(2) + '%'));
+      document.getElementById('lrRows').innerHTML = rows.join('');
+      document.getElementById('launchReviewModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLaunchReview() {
+      var m = document.getElementById('launchReviewModal');
+      if (m) m.classList.remove('open');
+      document.body.style.overflow = '';
+      _pendingLaunch = null;
+    }
+    function execLaunch() {
+      var plan = _pendingLaunch;
+      if (!plan) return;
+      closeLaunchReview();
       var btn = document.getElementById('createBtn');
       btn.disabled = true; btn.textContent = tt('创建中…');
-      // cover：自定义上传图 > 已关联作品封面 > 默认素材
-      var cover = uploadPreview || currentCover() || pickCover();
-      var video = (attached && attached.video) || '';
-      var sourceTitle = attached ? attached.title : '';
-
-      setTimeout(function(){
+      setTimeout(function () {
         var coin = Launch.createCoin({
-          name:name, symbol:sym, tagline:tag,
-          cover:cover, video:video,
+          name: plan.name, symbol: plan.sym, tagline: plan.tag,
+          cover: plan.cover, video: plan.video,
           sourceType: 'work',
-          sourceTitle: sourceTitle,
-          pair: pairSel,
-          devBuyQty: dbQty,
-          devBuyPair: pairSel,
-          social:{ x: xv, tg: tgv },
-          creatorTaxPct: taxPct(),
-          shareToHolders:document.getElementById('shareToHolders').checked,
-          creatorWallet:document.getElementById('pCreatorWallet').value.trim(),
-          snipeExempts: snipeList.slice(),
+          sourceTitle: plan.sourceTitle,
+          pair: plan.pairSel,
+          devBuyQty: plan.dbQty,
+          devBuyPair: plan.pairSel,
+          social: { x: plan.xv, tg: plan.tgv },
+          creatorTaxPct: plan.creatorTaxPct,
+          shareToHolders: plan.shareToHolders,
+          creatorWallet: plan.creatorWalletRaw,
+          snipeExempts: plan.snipeExempts,
         });
         lastCoinId = coin.id;
+        _lastCreatedCoin = coin;
         document.getElementById('crForm').style.display = 'none';
-        document.getElementById('successWrap').style.display = 'block';
-        Launch.toast(tt('已创建并上架'),'ok');
-        window.scrollTo(0,0);
+        openSuccess(coin);
+        Launch.toast(tt('已创建并上架'), 'ok');
+        window.scrollTo(0, 0);
       }, 900);
+    }
+    (function bindLaunchReview() {
+      var m = document.getElementById('launchReviewModal');
+      var ok = document.getElementById('lrConfirm');
+      var c = document.getElementById('lrCancel');
+      if (ok) ok.addEventListener('click', execLaunch);
+      if (c) c.addEventListener('click', closeLaunchReview);
+      if (m) m.addEventListener('click', function (e) { if (e.target === m) closeLaunchReview(); });
+    })();
+
+    // ---- 发射成功弹窗（pons：SUN launched） ----
+    function short0x(a) {
+      a = a || '';
+      return a.length > 14 ? a.slice(0, 6) + '…' + a.slice(-4) : a;
+    }
+    function openSuccess(c) {
+      if (!c) return;
+      var art = document.getElementById('suArt');
+      art.innerHTML = c.cover
+        ? '<img src="' + esc(c.cover) + '" alt="">'
+        : esc((c.symbol || '?').charAt(0).toUpperCase());
+      document.getElementById('suTitle').textContent = (c.symbol || '').toUpperCase() + ' launched';
+      document.getElementById('suName').textContent = c.name || '';
+      document.getElementById('suFee').textContent = c.shareToHolders
+        ? 'Creator fees route to holders.'
+        : 'Creator fees route to your wallet.';
+      var addr = c.creatorWallet || c.creatorAddr || '0x…';
+      document.getElementById('suAddr').textContent = short0x(addr);
+      document.getElementById('successModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSuccess() {
+      var m = document.getElementById('successModal');
+      if (m) m.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function copySuAddr() {
+      var full = _lastCreatedCoin ? (_lastCreatedCoin.creatorWallet || _lastCreatedCoin.creatorAddr || '') : '';
+      if (navigator.clipboard && navigator.clipboard.writeText && full) navigator.clipboard.writeText(full).catch(function () {});
+      Launch.toast('地址已复制', 'ok');
+    }
+    function txDemo() {
+      Launch.toast('Transaction · 原型演示（无链上交易）', 'warn');
+    }
+    function launchAnother() {
+      closeSuccess();
+      location.reload();
     }
 
     // ---- 事件绑定 ----

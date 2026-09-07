@@ -59,7 +59,21 @@
                     '</div>' +
                 '</a>' +
                 '<nav class="sb-nav" id="sbNav">' +
-                    // —— 组 1：推荐 / 短剧 / 创作 ——
+                    // —— 组 1：市场 / 资产 / 数据 ——
+                    '<a href="launchpad.html" class="sb-nav-item" data-page="launchpad.html">' +
+                      '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 3v18M5 3l14 5-14 5M19 21l-1-6-4-2 4-2 1-6"/><path d="M5 3v6m0 6v6"/></svg>' +
+                      '<span class="sb-label">市场</span>' +
+                    '</a>' +
+                    '<a href="assets.html" class="sb-nav-item" data-page="assets.html">' +
+                      '<svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M2.5 10h19"/><path d="M16 14.5h2"/></svg>' +
+                      '<span class="sb-label">资产</span>' +
+                    '</a>' +
+                    '<a href="analytics.html" class="sb-nav-item" data-page="analytics.html">' +
+                      '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 20V14m5 6V9m6 11V4m5 16v-8"/></svg>' +
+                      '<span class="sb-label">数据</span>' +
+                    '</a>' +
+                    '<div class="sb-divider"></div>' +
+                    // —— 组 2：推荐 / 短剧 / 创作 / 我的 ——
                     '<a href="recommend.html" class="sb-nav-item" data-page="recommend.html">' +
                       '<svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>' +
                       '<span class="sb-label">推荐</span>' +
@@ -72,22 +86,6 @@
                       '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
                       '<span class="sb-label">创作</span>' +
                     '</a>' +
-                    '<div class="sb-divider"></div>' +
-                    // —— 组 2：市场 / 数据 / 资产 ——
-                    '<a href="launchpad.html" class="sb-nav-item" data-page="launchpad.html">' +
-                      '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 3v18M5 3l14 5-14 5M19 21l-1-6-4-2 4-2 1-6"/><path d="M5 3v6m0 6v6"/></svg>' +
-                      '<span class="sb-label">市场</span>' +
-                    '</a>' +
-                    '<a href="analytics.html" class="sb-nav-item" data-page="analytics.html">' +
-                      '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 20V14m5 6V9m6 11V4m5 16v-8"/></svg>' +
-                      '<span class="sb-label">数据</span>' +
-                    '</a>' +
-                    '<a href="assets.html" class="sb-nav-item" data-page="assets.html">' +
-                      '<svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M2.5 10h19"/><path d="M16 14.5h2"/></svg>' +
-                      '<span class="sb-label">资产</span>' +
-                    '</a>' +
-                    '<div class="sb-divider"></div>' +
-                    // —— 组 3：我的 ——
                     '<a href="profile-center.html" class="sb-nav-item" data-page="profile-center.html">' +
                       '<svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
                       '<span class="sb-label">我的</span>' +

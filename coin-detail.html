@@ -362,13 +362,32 @@
       border-bottom: 1px dashed rgba(10,11,13,.08); font-size: 13.5px; }
     .rv-row .rv-l { color: var(--text-2); font-weight: 600; flex: none; }
     .rv-row .rv-v { color: var(--text); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
-    .rv-min { font-size: 12px; color: var(--text-3); text-align: right; margin-top: 6px; }
     .review-actions { display: flex; gap: 10px; margin-top: 16px; }
     .review-actions button { flex: 1; height: 46px; border-radius: 999px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; }
     .rv-cancel { background: rgba(0,0,0,.06); color: var(--text); }
     .rv-cancel:hover { background: rgba(0,0,0,.11); }
     .rv-confirm { background: #0A0B0D; color: #fff; }
     .rv-confirm:hover { opacity: .9; }
+    /* sell Review：Confirm sell 绿 + Cancel（并排，pons Review sell） */
+    .rv-sell { background: #0E9F6E; color: #fff; }
+    .rv-sell:hover { opacity: .9; }
+    /* Review 主操作（pons：主按钮 + Cancel 链接） */
+    .rv-cta { display: flex; flex-direction: column; gap: 2px; margin-top: 18px; }
+    .rv-buy { width: 100%; height: 48px; border: none; border-radius: 999px; background: #0E9F6E; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .rv-buy:hover { opacity: .9; }
+    .rv-cancel-link { border: none; background: none; color: var(--text-2); font-size: 13.5px; font-weight: 600; cursor: pointer; }
+    .rv-cancel-link:hover { color: var(--text); }
+    .rv-cta .rv-cancel-link { margin-top: 10px; }
+    /* 成交成功“收到资产”（pons：PONS received） */
+    .done-card { text-align: center; }
+    .done-ico { width: 46px; height: 46px; border-radius: 50%; background: #10B981; color: #fff; display: grid; place-items: center; font-size: 22px; margin: 2px auto 12px; }
+    .done-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; background: rgba(16, 185, 129, .14); color: #0E9F6E; font-size: 12px; font-weight: 700; }
+    .done-title { font-size: 18px; font-weight: 800; margin-top: 6px; }
+    .done-amount { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; margin-top: 4px; }
+    .done-asset { font-size: 13px; color: var(--text-3); font-weight: 600; }
+    .done-rows { margin: 16px 0 2px; text-align: left; }
+    .done-card .rv-buy { margin-top: 16px; }
+    .done-card .rv-cancel-link { display: block; width: 100%; text-align: center; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -591,9 +610,13 @@
         <button type="button" id="rvClose" aria-label="关闭">✕</button>
       </div>
       <div id="rvBody"></div>
-      <div class="review-actions">
-        <button type="button" class="rv-cancel" id="rvCancel">Cancel</button>
-        <button type="button" class="rv-confirm" id="rvConfirm">Confirm buy</button>
+      <div class="rv-cta" id="rvFootBuy">
+        <button type="button" class="rv-buy" id="rvConfirmBuy">Buy</button>
+        <button type="button" class="rv-cancel-link" id="rvCancelBuy">Cancel</button>
+      </div>
+      <div class="review-actions" id="rvFootSell" style="display:none">
+        <button type="button" class="rv-cancel" id="rvCancelSell">Cancel</button>
+        <button type="button" class="rv-sell" id="rvConfirmSell">Confirm sell</button>
       </div>
     </div>
   </div>
@@ -607,6 +630,23 @@
         <button type="button" class="rv-cancel" onclick="closeTransfer()">Cancel</button>
         <button type="button" class="rv-confirm" onclick="confirmTransfer()">Transfer</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 成交成功：收到资产（pons：PONS received） -->
+  <div class="review-overlay" id="doneModal">
+    <div class="review-card done-card">
+      <div class="done-ico">✓</div>
+      <div class="done-chip">Complete</div>
+      <div class="done-title num" id="doneTitle">—</div>
+      <div class="done-amount num" id="doneAmt">—</div>
+      <div class="done-asset" id="doneAsset">—</div>
+      <div class="done-rows">
+        <div class="rv-row"><span class="rv-l">Amount</span><span class="rv-v num" id="doneRowAmt">—</span></div>
+        <div class="rv-row"><span class="rv-l">Value</span><span class="rv-v num" id="doneVal">—</span></div>
+      </div>
+      <button type="button" class="rv-buy" id="doneTx">View transaction</button>
+      <button type="button" class="rv-cancel-link" id="doneAgain">Swap again</button>
     </div>
   </div>
 
@@ -1462,11 +1502,26 @@ var holders = [];
       }
       var market = coin.graduated ? 'Uniswap v4 pool' : 'Bonding curve';
       document.getElementById('rvTitle').textContent = isBuy ? 'Review buy' : 'Review sell';
-      document.getElementById('rvBody').innerHTML =
-        rvRow('You send', sVal) + rvRow('You receive', rVal) +
-        '<div class="rv-min">Min received ' + min + '</div>' +
-        rvRow('Market', market) + rvRow('Max slippage', slipPct() + '%');
-      document.getElementById('rvConfirm').textContent = isBuy ? 'Confirm buy' : 'Confirm sell';
+      var fBuy = document.getElementById('rvFootBuy');
+      var fSell = document.getElementById('rvFootSell');
+      if (fBuy) fBuy.style.display = isBuy ? 'flex' : 'none';
+      if (fSell) fSell.style.display = isBuy ? 'none' : 'flex';
+      var cb = document.getElementById('rvConfirmBuy');
+      var cs = document.getElementById('rvConfirmSell');
+      if (cb) cb.textContent = 'Buy ' + sym;
+      if (cs) cs.textContent = 'Confirm sell';
+      // buy（pons Review buy）：You send / Minimum received / Maximum slippage / Network / Route
+      // sell（pons Review sell）：You send / You receive / Market / Max slippage
+      document.getElementById('rvBody').innerHTML = isBuy
+        ? rvRow('You send', sVal) +
+          rvRow('Minimum received', min) +
+          rvRow('Maximum slippage', slipPct().toFixed(2) + '%') +
+          rvRow('Network', 'Robinhood Chain (4663)') +
+          rvRow('Route', '0x aggregator')
+        : rvRow('You send', sVal) +
+          rvRow('You receive', rVal) +
+          rvRow('Market', market) +
+          rvRow('Max slippage', slipPct() + '%');
       document.getElementById('reviewModal').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -1489,6 +1544,8 @@ var holders = [];
           Launch.toast('已卖出 ' + fmtBig(r.coins) + ' ' + coin.symbol + ' · 收到 ' + Launch.fmtQty(r.proceedsQty) + ' ' + (r.pair || coin.pair), 'ok');
         }
         refreshAllAfterTx();
+        // 成交成功结果弹窗（pons：PONS received；毕业买不弹，走庆祝动效）
+        if (!(plan.side === 'buy' && r.graduated)) showDone(plan.side === 'buy', r);
       } else if (r && r.msg === 'need_login') {
         openLoginModal();
       } else if (r) {
@@ -1508,14 +1565,67 @@ var holders = [];
       openReview(side, inp, pv);
     }
     (function bindReview() {
-      var c = document.getElementById('rvCancel');
       var x = document.getElementById('rvClose');
       var m = document.getElementById('reviewModal');
-      var ok = document.getElementById('rvConfirm');
-      if (c) c.addEventListener('click', closeReview);
+      var cancels = ['rvCancelBuy', 'rvCancelSell'];
+      var oks = ['rvConfirmBuy', 'rvConfirmSell'];
+      cancels.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('click', closeReview);
+      });
+      oks.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('click', execReview);
+      });
       if (x) x.addEventListener('click', closeReview);
       if (m) m.addEventListener('click', function (e) { if (e.target === m) closeReview(); });
-      if (ok) ok.addEventListener('click', execReview);
+    })();
+
+    // ---- 成交成功“收到资产”结果弹窗 ----
+    function showDone(isBuy, r) {
+      var m = document.getElementById('doneModal');
+      if (!m) return;
+      var pair = coin.pair || 'ETH';
+      var sym = coin.symbol;
+      var qty, asset, usd;
+      if (isBuy) {
+        qty = r.coins || 0;
+        asset = sym;
+        usd = qty * (coin.priceUsd || 0);
+      } else {
+        qty = r.proceedsQty || 0;
+        asset = pair;
+        var px = (window.Launch && Launch.assetPrice) ? (Launch.assetPrice(pair) || 0) : 0;
+        usd = qty * px;
+      }
+      document.getElementById('doneTitle').textContent = asset + ' received';
+      document.getElementById('doneAmt').textContent = Launch.fmtQty(qty);
+      document.getElementById('doneAsset').textContent = asset;
+      document.getElementById('doneRowAmt').textContent = Launch.fmtQty(qty) + ' ' + asset;
+      document.getElementById('doneVal').textContent = Launch.fmtUsd(usd);
+      m.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDone() {
+      var m = document.getElementById('doneModal');
+      if (m) m.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function doneTxDemo() {
+      Launch.toast('View transaction · 原型演示（无链上交易）', 'warn');
+    }
+    function doneSwapAgain() {
+      closeDone();
+      var inp = document.getElementById('swapIn');
+      if (inp) inp.focus();
+    }
+    (function bindDone() {
+      var m = document.getElementById('doneModal');
+      var tx = document.getElementById('doneTx');
+      var ag = document.getElementById('doneAgain');
+      if (tx) tx.addEventListener('click', doneTxDemo);
+      if (ag) ag.addEventListener('click', doneSwapAgain);
+      if (m) m.addEventListener('click', function (e) { if (e.target === m) closeDone(); });
     })();
 
     function refreshAllAfterTx() {

@@ -47,7 +47,10 @@
  │         ├─ 创作者税（0–10%）
  │         └─ 狙击税豁免名单（默认 0，上限 32）
  ├─ ⑤ 实时摘要：发行费（ETH）+ gas 提示、路由/税率、狙击窗口、毕业阈值
- └─ 创建：链下 Review 总览（参数+发行费+gas 预估）→ 钱包签名 → 成功页（查看市场 / 查看我的币）
+ └─ 创建：点“创建并上架”→ **Review launch 确认弹窗**（pons：🚀 Launch {SYM} + 两列参数行 +
+     Confirm / Cancel，参数为提交瞬间快照）→ Confirm → 发射成功弹窗
+     （pons 形态：✓ + 币图 + `{SYM} launched` + 名称 + 费率去向 + 地址；
+     按钮 Trade token / Transaction；链接 Launch another / Back to explore）
 ```
 
 ---
@@ -143,7 +146,7 @@
 | 默认可提交 | 创建并上架 |
 | 进行中（等钱包/签名/上链） | 创建中…（禁用，防重复提交） |
 | 签名被拒 / 网络失败 | 恢复可提交并提示错误，保留已填内容 |
-| 成功后 | 成功页：查看市场 / 查看我的币 |
+| 成功后 | 发射成功弹窗（居中卡片）：✓ + 币图 + `{SYM} launched` + 名称 + 费率去向 + 地址；Trade token → 币详情；Transaction → 演示占位；Launch another → 重新发射；Back to explore → 市场页 |
 
 ---
 
@@ -200,7 +203,7 @@
 | **gas 不足** | 明确报错，不进入签名 |
 | **用户拒绝签名** | 恢复表单、不产生半成品 |
 | 创建中重复点击 | 按钮禁用防重 |
-| 成功 | 成功页：查看市场 / 查看我的币 |
+| 成功 | 发射成功弹窗：见 §3.7「成功后」 |
 
 ---
 
@@ -220,5 +223,6 @@
 - [ ] 高级设置：路由联动钱包输入显隐；税率钳制；豁免名单增删/上限/去重
 - [ ] 摘要实时更新且含 ETH（gas/发行费）提示
 - [ ] 钱包流程：连接/切链/gas/签名拒绝均可恢复，无半成品
-- [ ] 创建防重复；成功页两个返回入口可用
+- [ ] 创建防重复；Review launch 确认弹窗参数快照正确（Token/Paired/Launch fee/Graduation/Trade fee(含 to you/to holders)/Developer buy/Snipe exempt/Creator/Creator fees），Confirm 才执行、Cancel 返回可改
+- [ ] 发射成功弹窗各出口可用（Trade token → 详情 / Transaction → 演示占位 / Launch another → 重新发射 / Back to explore → 市场）
 - [ ] 中/英文错误提示均可达且不残留
