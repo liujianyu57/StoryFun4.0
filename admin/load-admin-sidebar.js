@@ -56,14 +56,10 @@
 
   // ── 构建导航链接 ──
   var navItems = [
-    { section: '数据后台' },
-    { href: 'admin-overview.html', emoji: '📊', label: '数据概况', match: 'overview' },
-    { section: '业务管理' },
-    { href: 'admin-content.html', emoji: '🎬', label: '内容数据', match: 'content' },
-    { href: 'admin-tokens.html', emoji: '🪙', label: '代币管理', match: 'tokens' },
-    { href: 'admin-users.html', emoji: '👥', label: '用户管理', match: 'users' },
+    { href: 'admin-users.html', emoji: '👥', label: '用户概览', match: 'users' },
     { href: 'admin-sources.html', emoji: '🌍', label: '用户来源', match: 'sources' },
-    { href: 'admin-features.html', emoji: '🧩', label: '功能数据', match: 'features' },
+    { href: 'admin-features.html', emoji: '🧩', label: '功能概览', match: 'features' },
+    { href: 'admin-overview.html', emoji: '📈', label: '代币概览', match: 'overview' },
   ];
 
 
@@ -85,7 +81,7 @@
   layout.className = 'admin-layout';
   layout.innerHTML =
     '<aside class="admin-sidebar" id="adminSidebar">' +
-      '<div class="admin-sidebar-brand"><a href="admin-overview.html">⚙️ <span>管理后台</span></a></div>' +
+      '<div class="admin-sidebar-brand"><a href="admin-overview.html">📊 <span>数据看板</span></a></div>' +
       '<a class="admin-sidebar-item exit" href="../index.html" style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:14px;margin-bottom:4px;">🎭 <span>返回用户端</span></a>' +
       '<nav class="admin-sidebar-nav">' + navHtml + '</nav>' +
       '<div class="admin-sidebar-footer"><div class="admin-sidebar-user">Story.fun Admin</div></div>' +

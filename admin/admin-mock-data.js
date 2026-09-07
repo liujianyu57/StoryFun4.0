@@ -560,6 +560,7 @@
     return s;
   };
   const userById = {}; users.forEach(u => userById[u.id] = u);
+  users.forEach(u => { u.isLauncher = (u.uid % 11 === 0); });
 
   // ───────────────────────── 8. 按对象挖矿（与日积分一致分摊） ─────────────────────────
   // 积分链路：NFT 按算力每小时产积分 → 按日/周累计；周结算 STORY = 周发放 × 对象积分 ÷ 全站积分
@@ -638,6 +639,7 @@
   // 近 30 日 发射 / 毕业 日序列（确定性演示，时间轴从 NOW 回推）
   const launchDaily = [];
   const gradDaily = [];
+  const volDaily = [];
   (function () {
     for (let k = 29; k >= 0; k--) {
       const ts = NOW - k * DAY;
@@ -648,6 +650,7 @@
       const gv = pos === 29 ? 3 : Math.max(1, Math.round(1.5 + Math.sin(pos * 0.55) * 2.2));
       launchDaily.push({ ts, label, value: lv });
       gradDaily.push({ ts, label, value: gv });
+      volDaily.push({ ts, label, value: Math.round(260000 + 480000 * Math.abs(Math.sin(pos * 0.7)) + 90000 * Math.sin(pos * 0.9) + (pos >= 24 ? (pos - 24) * 22000 : 0)) });
     }
   })();
 
@@ -658,7 +661,7 @@
     REGIONS, COUNTRIES, TOTAL_COUNTRY_W,
     users, nfts, works, features,
     tokens, protocol,
-    launchDaily, gradDaily,
+    launchDaily, gradDaily, volDaily,
     daily, weekly, months, workByDay,
     retentionByDay,
     IP_META, dailyPointsOfObj, nftMiningSeries,
