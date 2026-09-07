@@ -127,134 +127,83 @@
   }
 }
 
-/* ── 加号弹出菜单 Overlay ── */
+/* ── 加号弹出菜单 Overlay（浅色 iOS 观感） ── */
 .create-action-overlay {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(10, 11, 13, 0.36);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
 }
-
 .create-action-overlay.active {
   display: flex;
   align-items: flex-end;
   justify-content: center;
   opacity: 1;
 }
-
 .create-action-sheet {
   width: 100%;
-  max-width: 500px;
-  background: #1c1c1e;
-  border-radius: 16px 16px 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: 520px;
+  background: #FFFFFF;
+  border-radius: 22px 22px 0 0;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.1);
+  padding: 10px 18px calc(14px + env(safe-area-inset-bottom, 0px));
   transform: translateY(100%);
   transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 .create-action-overlay.active .create-action-sheet {
   transform: translateY(0);
 }
-
-.create-action-sheet-header {
-  text-align: center;
-  padding: 10px 0 6px;
+.create-action-sheet-grip {
+  width: 40px; height: 5px; border-radius: 3px; margin: 2px auto 2px;
+  background: rgba(10, 11, 13, 0.16);
 }
-
-.create-action-sheet-title {
-  font-family: "SF Pro", "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  text-transform: none;
-  letter-spacing: 0.02em;
-}
-
 .create-action-option {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 16px;
-  text-decoration: none;
-  color: #FFFFFF;
-  transition: background 0.15s ease;
+  display: flex; align-items: center; gap: 13px; padding: 15px 16px;
+  background: rgba(10, 11, 13, 0.045); border: 1px solid rgba(10, 11, 13, 0.06);
+  border-radius: 16px; text-decoration: none; color: #0A0B0D;
+  transition: background 0.15s ease, transform 0.1s ease;
   -webkit-tap-highlight-color: transparent;
 }
-
-.create-action-option:active {
-  background: rgba(255, 255, 255, 0.12);
+.create-action-option:active { background: rgba(10, 11, 13, 0.09); transform: scale(0.985); }
+.create-action-option.is-primary {
+  background: rgba(14, 159, 110, 0.09);
+  border-color: rgba(14, 159, 110, 0.24);
 }
-
 .create-action-option-icon {
-  font-size: 2rem;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 59, 48, 0.14);
-  border-radius: 12px;
-  flex-shrink: 0;
+  width: 46px; height: 46px; border-radius: 14px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(10, 11, 13, 0.05); color: #0A0B0D;
 }
-
-.create-action-option-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
+.create-action-option.is-primary .create-action-option-icon {
+  background: #0E9F6E; color: #fff;
 }
-
+.create-action-option-text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .create-action-option-label {
-  font-family: "SF Pro", "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #FFFFFF;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: #0A0B0D;
 }
-
+.create-action-option.is-primary .create-action-option-label { color: #0B7A4B; }
 .create-action-option-desc {
-  font-family: "SF Pro", "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 0.82rem;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+  font-size: 0.8rem; font-weight: 400; color: rgba(10, 11, 13, 0.5); line-height: 1.4;
 }
-
-.create-action-option svg {
-  flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.35);
-}
-
+.create-action-option > svg:last-child { flex: none; color: rgba(10, 11, 13, 0.3); }
 .create-action-cancel {
-  width: 100%;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 16px;
-  font-family: "SF Pro", "PingFang SC", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #FFFFFF;
-  cursor: pointer;
-  transition: background 0.15s ease;
+  width: 100%; padding: 15px 16px; background: rgba(10, 11, 13, 0.05);
+  border: none; border-radius: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem; font-weight: 600; color: #0A0B0D; cursor: pointer;
+  transition: background 0.15s ease; letter-spacing: -0.01em;
   -webkit-tap-highlight-color: transparent;
-  letter-spacing: -0.01em;
 }
-
-.create-action-cancel:active {
-  background: rgba(255, 255, 255, 0.12);
-}
+.create-action-cancel:active { background: rgba(10, 11, 13, 0.09); }
 `;
 
     const style = document.createElement('style');
@@ -444,7 +393,8 @@
   <!-- 加号弹出菜单 Overlay (fallback) -->
   <div class="create-action-overlay" id="createActionOverlay">
     <div class="create-action-sheet">
-      <a class="create-action-option" href="launch.html">
+      <div class="create-action-sheet-grip"></div>
+      <a class="create-action-option is-primary" href="launch.html">
         <span class="create-action-option-icon">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2l2.4 6.2L21 9.3l-5 4.9 1.2 6.8L12 17.8l-5.2 3.2L8 14.2l-5-4.9 6.6-1.1L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
