@@ -21,7 +21,7 @@
 
 - 页面对外文案为 **Dune 链上索引数据**（pons：Independent onchain reporting … Data is supplied by Dune from indexed onchain activity）；本地原型由演示引擎提供**确定性 mock**，结构与文案对齐 pons。
 - **24h 视图** = 最近一个**完整 UTC 日**（实现上取昨日），不是滚动 24 小时；对比行写 `+/-x.x% from prior day`。
-- **All time 视图** = 完整历史累计（Volume/Launches/Trades 由引擎汇总；Revenue / Creator earnings 在原型中标注 `Unavailable`）。
+- **All time 视图** = 完整历史累计（Volume / Launches / Unique token devs 按累计口径）。
 - 数据声明：页面不构成财务/链上承诺；图与数值为演示口径。
 
 ---
@@ -34,7 +34,7 @@
    副文案 Independent onchain reporting for pons markets on Robinhood Chain.
    副行（num） Dune updated {HH:MM}, latest complete day {M d} UTC
    右上：模式切换 pill（24h / All time）+ 外链按钮 View on Dune
-   指标区 an-metrics（3 格 = 24h；6 格 = All time）
+   指标区 an-metrics（两态均为 3 格：volume / launches / Unique token devs，按窗口切换）
    注脚：Data is supplied by Dune from indexed onchain activity. The 24h view
          uses the latest completed UTC day.
 2 Daily context 图卡（an-charts，两卡等宽自适应网格）
@@ -49,7 +49,7 @@
 
 | 项 | 24h | All time |
 |---|---|---|
-| 指标卡数 | 3 | 6 |
+| 指标卡数 | 3 | 3（同三卡、切窗口与标题） |
 | 趋势图 | 用引擎近 14 天趋势，截到最近完整日（昨天） | 60 天确定性序列（比例放大到累计量级） |
 | 高亮点 | 最近完整日 | 序列末点（最近一天） |
 | 图大字 | 最近完整日数值 | 累计数值 |
@@ -66,20 +66,17 @@
 |---|---|---|
 | 24h volume | `$` + 短格式 | `+x.x% from prior day` / `No prior-day baseline`（红跌/绿涨/灰无基线） |
 | 24h launches | K/M/B/T 短格式 | 同上（对比前一日发射数） |
-| 24h trades | K/M/B/T 短格式 | 同上（trades ≈ volume/60 演示换算） |
+| Unique token devs | 数字 | `Latest complete day UTC`（最近完整 UTC 日内新发射币的**去重创建者数**） |
 
-### 4.2 All time（6 格）
+### 4.2 All time（3 格）
 | 指标 | 值 | 脚注 |
 |---|---|---|
 | All-time volume | `$` 短格式 | Complete Dune history |
 | All-time launches | K/M/B/T | Complete Dune history |
-| All-time trades | K/M/B/T | Complete Dune history |
-| Protocol revenue | **Unavailable**（灰） | Lifetime total |
-| Creator earnings | **Unavailable**（灰） | Lifetime total |
-| Unique token devs | 数字 | Lifetime total（= 种子币 creator 地址去重数） |
+| Unique token devs | 数字 | Lifetime total（全历史去重创建者数） |
 
 - 数值格式：≥1000 用 `$` + K/M/B/T（2 位小数，如 `$1.20K`）；<1000 用 `$` + 千分位（最多 2 位小数）；纯个数用 K/M/B/T。
-- 网格：桌面 3 列（24h 一行；All time 两行，第二行带顶边框）；窄屏折为单列。
+- 网格：桌面 3 列单行（两态一致）；窄屏折为单列。
 
 ---
 
@@ -110,8 +107,8 @@
 - 引擎 `Launch.analytics(mode)`（`launch-coin.js`），基于种子币集合计算：
   - `totalVol`：24h 模式 = Σ 币 `volumeUsd × 0.2`（约 20%）；all 模式 = Σ 全量。
   - `trend` / `volTrend`：近 14 天确定性序列（发射数按日计数 + 正弦补形；交易量 = 总量/14 × 波形 × 近 3 日抬升），刷新稳定。
-  - `trades ≈ round(volume / 60)`（演示换算）。
-  - `launched = coins.length`；`Unique token devs` = 币 `creatorAddr` 去重数。
+
+  - `launched = coins.length`；页面按窗口统计 `Unique token devs` = 币 `creatorAddr` 去重数（24h 窗口 = 最近完整 UTC 日新发射币的创建者）。
   - 另有 `createdToday / graduatedToday / graduations / newCoins / recentTrades` 等字段供后续区块使用（当前页面未全部消费）。
 - All time 图卡：`seededSeries(60, …)` 确定性 60 点，标签回推 60 天 `M/D`。
 - 页面所有展示与 `USER` 无关，**无需登录**；仅依赖本地演示币种子。
@@ -134,9 +131,9 @@
 ## 9. 验收清单
 
 - [ ] 页面免登录可访问，初始 24h 视图
-- [ ] 24h / All time 切换：指标卡 3↔6、图与大字口径同步切换，pill 高亮正确
+- [ ] 24h / All time 切换：指标卡同为 3 张（volume/launches/devs）但标题、数值与窗口脚注同步切换，pill 高亮正确
 - [ ] 24h 指标脚注正确（`+x.x% from prior day` / No prior-day baseline，涨跌着色）
-- [ ] All time：Protocol revenue / Creator earnings 显示 Unavailable（灰）
+- [ ] Unique token devs 随 24h/All time 切换窗口（Latest complete day UTC ↔ Lifetime total）
 - [ ] 两张 Daily context 卡：大字、趋势图、最近完整日高亮、X 轴 ≤5 个 M/D 刻度正确
 - [ ] Dune updated 时间行与 View on Dune 外链（新标签页 + noopener）
 - [ ] 数值格式一致（K/M/B/T 大写、小数值千分位）

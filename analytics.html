@@ -181,28 +181,28 @@
         '<div class="d ' + (c.dc || 'na') + '">' + c.d + '</div>' +
       '</div>';
     }
-
     function renderMetrics() {
       var host = document.getElementById('statCards');
       if (!host) return;
+      // 去重创建者（可按时间窗口筛选）
+      function uniqueDevs(coinsArr) {
+        var seen = {}, n = 0;
+        (coinsArr || []).forEach(function (c) {
+          var k = c.creatorAddr || c.creator || '';
+          if (k && !seen[k]) { seen[k] = 1; n++; }
+        });
+        return n;
+      }
+      // 最近完整 UTC 日（昨日 00:00 UTC 起 24h）
+      var day0 = Math.floor(Date.now() / 86400000) * 86400000 - 86400000;
+      var day24 = day0 + 86400000;
       var cards = [];
       if (mode === 'all') {
         var all = Launch.analytics('all');
-        var allVol = all.totalVol || 0;
-        var allLau = all.launched || 0;
-        var allTrd = Math.max(0, Math.round(allVol / 60));
-        var seen = {}, devs = 0;
-        (Launch.coins || []).forEach(function (c) {
-          var kk = c.creatorAddr || c.creator || '';
-          if (kk && !seen[kk]) { seen[kk] = 1; devs++; }
-        });
         cards = [
-          { k: 'All-time volume', v: fmtUsdShort(allVol), d: 'Complete Dune history' },
-          { k: 'All-time launches', v: fmtK(allLau), d: 'Complete Dune history' },
-          { k: 'All-time trades', v: fmtK(allTrd), d: 'Complete Dune history' },
-          { k: 'Protocol revenue', v: 'Unavailable', na: true, d: 'Lifetime total' },
-          { k: 'Creator earnings', v: 'Unavailable', na: true, d: 'Lifetime total' },
-          { k: 'Unique token devs', v: fmtK(devs), d: 'Lifetime total' }
+          { k: 'All-time volume', v: fmtUsdShort(all.totalVol || 0), d: 'Complete Dune history' },
+          { k: 'All-time launches', v: fmtK(all.launched || 0), d: 'Complete Dune history' },
+          { k: 'Unique token devs', v: fmtK(uniqueDevs(Launch.coins || [])), d: 'Lifetime total' }
         ];
       } else {
         var a = Launch.analytics('24h');
@@ -213,13 +213,14 @@
         var volPre = preIdx >= 0 && volT[preIdx] ? volT[preIdx].value : null;
         var lauCur = lauT[curIdx] ? lauT[curIdx].value : 0;
         var lauPre = preIdx >= 0 && lauT[preIdx] ? lauT[preIdx].value : null;
-        var trdCur = Math.max(0, Math.round(volCur / 60));
-        var trdPre = volPre != null ? Math.max(0, Math.round(volPre / 60)) : null;
-        var vd = pctLine(volCur, volPre), ld = pctLine(lauCur, lauPre), td = pctLine(trdCur, trdPre);
+        var vd = pctLine(volCur, volPre), ld = pctLine(lauCur, lauPre);
+        var devsDay = (Launch.coins || []).filter(function (c) {
+          return c.launchedAt >= day0 && c.launchedAt < day24;
+        });
         cards = [
           { k: '24h volume', v: fmtUsdShort(volCur), d: vd.t, dc: vd.c },
           { k: '24h launches', v: fmtK(lauCur), d: ld.t, dc: ld.c },
-          { k: '24h trades', v: fmtK(trdCur), d: td.t, dc: td.c }
+          { k: 'Unique token devs', v: fmtK(uniqueDevs(devsDay)), d: 'Latest complete day UTC' }
         ];
       }
       host.innerHTML = cards.map(cellHtml).join('');

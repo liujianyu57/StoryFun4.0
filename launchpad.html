@@ -170,7 +170,6 @@
     .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
     .px-mcap-value { color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
     .px-mcap-label { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
-    .px-mcap-fdv { color: var(--text-3); font-size: 11px; font-weight: 500; }
 
     .px-grad { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 4px; }
     .px-grad-track { flex: auto; height: 4px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
@@ -294,7 +293,6 @@
     .sp-ticker { font-size: 11px; color: var(--text-3); font-weight: 700; }
     .sp-right { text-align: right; flex-shrink: 0; }
     .sp-mcap { font-size: 13px; font-weight: 700; color: var(--text); }
-    .sp-mcap .sp-fdv { font-size: 11px; font-weight: 500; color: var(--text-3); }
     .sp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
     .sp-arrow { color: var(--text-3); flex-shrink: 0; margin-left: 2px; }
     .sp-result:hover .sp-arrow { color: var(--text); transform: translateX(2px); }
@@ -590,10 +588,9 @@
         ? (c.launchedAt ? Launch.timeAgo(c.launchedAt) + (langIsEn() ? ' ago' : ' 前发行') : '—')
         : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + (langIsEn() ? ' ago' : ' 前') : '—');
       var addr = c.creatorAddr || '—';
-      // MC = 流通市值；有锁定(lockedPct>0)时 FDV 不同 → 显示 MC / FDV（pons 语义）
+      // v2 语义：卡片只展示 MC（市值）；MC/FDV 拆分为 v1 池口径，不做
       var mcLine = c.marketCap
-        ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>' +
-          (c.lockedPct > 0 ? '<span class="px-mcap-fdv num">/ ' + mcTxt(c.fdv || c.marketCap) + ' FDV</span>' : '')
+        ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>'
         : '<span class="px-mcap-label">—</span>';
       var hasVid = !!c.video;
       var vAttr = hasVid ? ' data-video="' + esc(c.video) + '"' : '';
@@ -622,7 +619,7 @@
                 : '') +
             '</span>' +
             '<small class="px-sym">$' + esc(c.symbol) +
-              (c.pair && c.pair !== 'ETH' ? ' <span class="px-pair">· ' + esc(c.pair) + '</span>' : '') +
+              (c.pair ? ' <span class="px-pair">· ' + esc(c.pair) + '</span>' : '') +
             '</small>' +
             '<span class="px-mcap">' + mcLine + '</span>' +
             mid +
@@ -862,7 +859,7 @@
           var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
           // desc：配对资产 · $SYM 市值/量 · 时间（pons 搜索结果不带徽章）
           var descParts = [];
-          if (c.pair && c.pair !== 'ETH') descParts.push(esc(c.pair));
+          if (c.pair) descParts.push(esc(c.pair));
           if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + (langIsEn() ? ' volume' : ' 成交量'));
           else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + (langIsEn() ? ' MC' : ' 市值'));
           if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + (langIsEn() ? ' ago' : ' 前') : (langIsEn() ? 'Graduated' : '已毕业'));
