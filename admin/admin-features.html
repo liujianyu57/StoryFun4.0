@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story.fun | 功能数据</title>
+  <link rel="stylesheet" href="admin-shared.css" />
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    /* 页面级少量样式：仅补充共享 CSS 未覆盖的细节 */
+    .func-card .unit { font-size: 0.78rem; font-weight: 500; color: var(--text-tertiary); padding-bottom: 7px; }
+    .func-card .den { font-size: 0.72rem; color: var(--text-tertiary); margin: 6px 0 2px; }
+    .modal-ov { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.7; margin: 0 0 14px; }
+    .modal-ov b { color: var(--text); font-weight: 700; }
+    .stage-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+    .stage-title::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+  </style>
+</head>
+<body>
+
+  <div id="admin-sidebar-placeholder"></div>
+
+  <div class="app-shell">
+
+    <div class="page-header">
+      <div>
+        <h1>🧩 功能数据</h1>
+        <div class="sub">以人为单位统计各功能参与情况 · 每项参与率 = 参与人数 ÷ 对应漏斗上级人群（注册为触达转化，见顶部卡片）</div>
+      </div>
+    </div>
+
+    <!-- ════════ 注册转化（触达转化口径，独立于参与率漏斗） ════════ -->
+    <div class="section-card">
+      <div class="card-title">注册（触达转化）
+        <span class="hint">注册是用户起点，没有"上级人群"；其转化率分母 = 站外触达：网站访问 / App 安装</span>
+        <span style="display:flex;gap:8px;align-items:center;">
+          <span class="seg" id="regSeg">
+            <button class="btn-sm-outline" data-k="7d" onclick="setRegPeriod('7d')">近 7 天</button>
+            <button class="btn-sm-outline active" data-k="30d" onclick="setRegPeriod('30d')">近 30 天</button>
+          </span>
+        </span>
+      </div>
+      <div class="mini-grid" style="margin-bottom:14px;">
+        <div class="mini-stat"><div class="l">期间注册用户</div><div class="v" id="regN"></div></div>
+        <div class="mini-stat"><div class="l">网站访问（UV）</div><div class="v" id="regV"></div></div>
+        <div class="mini-stat"><div class="l">App 安装</div><div class="v" id="regI"></div></div>
+        <div class="mini-stat"><div class="l">Web 注册转化率</div><div class="v" id="regVR"></div><div class="s">注册 ÷ 网站访问</div></div>
+        <div class="mini-stat"><div class="l">App 注册转化率</div><div class="v" id="regIR"></div><div class="s">注册 ÷ App 安装</div></div>
+      </div>
+      <div class="legend-inline" id="regLegend"></div>
+      <div id="chartReg" class="chart-sm" style="height:230px;"></div>
+    </div>
+
+    <!-- ════════ 功能卡片（点击看参与用户） ════════ -->
+    <div class="section-card">
+      <div class="card-title">功能参与人数 / 参与率
+        <span class="hint">共 8 项参与率统计 · 按 Web2 → Web3 顺序 · 每项参与率 = 参与人数 ÷ 对应漏斗上级人群（见卡片小字）· 点击卡片查看参与用户明细</span>
+      </div>
+      <div class="stage-title">🕸️ Web2 行为 <span style="font-weight:400;color:var(--text-tertiary);font-size:0.76rem;">内容消费与创作</span></div>
+      <div class="func-grid" id="gridWeb2"></div>
+      <div class="stage-title" style="margin-top:20px;">⛓️ Web3 行为 <span style="font-weight:400;color:var(--text-tertiary);font-size:0.76rem;">链上经济：IP 发行 / 资产购买</span></div>
+      <div class="func-grid" id="gridWeb3"></div>
+    </div>
+
+    <!-- ════════ 全部功能横向对比 ════════ -->
+    <div class="section-card">
+      <div class="card-title">全部功能横向对比
+        <span class="hint">注册为触达转化（见顶部卡片），不在此表 · 参与率分母见「分母口径」列</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="min-width:88px;">行为阶段</th>
+              <th style="min-width:140px;">功能名</th>
+              <th class="num">参与人数</th>
+              <th>参与率</th>
+              <th>分母口径</th>
+              <th class="num">总参与次数</th>
+              <th class="num">人均次数</th>
+              <th style="width:22%;">参与率条</th>
+            </tr>
+          </thead>
+          <tbody id="cmpBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════ 参与用户明细弹窗 ════════ -->
+    <div class="modal-overlay" id="featModal">
+      <div class="modal-box" style="max-width:760px;">
+        <div class="modal-header">
+          <h3><span id="fmIco"></span> <span id="fmName"></span> · 参与用户列表</h3>
+          <button class="modal-close" onclick="closeModal()" title="关闭">✕</button>
+        </div>
+        <div class="modal-ov" id="fmOv"></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="min-width:170px;">钱包地址</th>
+                <th class="num">参与次数</th>
+                <th class="num">首次参与时间</th>
+                <th class="num">最后参与时间</th>
+              </tr>
+            </thead>
+            <tbody id="fmBody"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="fmPg"></div>
+        <div class="modal-foot"><button class="btn-sm-outline" onclick="closeModal()">关 闭</button></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="load-admin-sidebar.js"></script>
+  <script src="admin-mock-data.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var M = window.SFMock;
+      var helpers = M.helpers;
+      var fmtTs = helpers.fmtTs, fmtNum = helpers.fmtNum, fmtMD = helpers.fmtMD, pct = helpers.pct;
+      var USER_COUNT = M.USER_COUNT;               // 800（参与率分母）
+      var MODAL_PAGE_SIZE = 15;
+      var FILLS = ['', 'teal', 'gold', 'purple'];  // 参与率条配色轮换
+
+      // 参与率分母（漏斗上级人群）。口径：
+      //   view → 注册用户；report/dislike → 观看用户；publish → 注册用户（创作者渗透）；
+      //   createNft → 创作者（发布过内容）；buyNft → 注册用户；buyEnergy/buyExp → 观看用户
+      //  watch/total 取自 features 实时值，保证 mock 调整后口径仍正确
+      function baseOf(f) {
+        var n, label;
+        if (f.id === 'view' || f.id === 'buyNft' || f.id === 'publish') { n = USER_COUNT; label = '注册用户'; }
+        else if (f.id === 'report' || f.id === 'dislike' || f.id === 'buyEnergy' || f.id === 'buyExp') { n = viewTotal(); label = '观看用户'; }
+        else if (f.id === 'createNft') { n = pubTotal(); label = '创作者（发布过内容）'; }
+        else { n = USER_COUNT; label = '注册用户'; }
+        return { n: n, label: label };
+      }
+      function viewTotal() {
+        var f = M.features.find(function (x) { return x.id === 'view'; });
+        return f ? (f.total || f.users.length) : USER_COUNT;
+      }
+      function pubTotal() {
+        var f = M.features.find(function (x) { return x.id === 'publish'; });
+        return f ? (f.total || f.users.length) : 0;
+      }
+
+      // ── 只读聚合：每功能 参与人数 / 总参与次数 / 参与率(对上级) / 人均次数（注册除外，注册为触达转化见顶部卡）
+      var rows = M.features.filter(function (x) { return x.id !== 'register'; }).map(function (f) {
+        var total = f.total || f.users.length;
+        var sumC = 0;
+        for (var i = 0; i < f.users.length; i++) sumC += f.users[i].c;
+        var base = baseOf(f);
+        return {
+          f: f,
+          total: total,
+          base: base,
+          sumC: sumC,
+          rate: pct(total, base.n),
+          rateNum: base.n ? total / base.n * 100 : 0,
+          per: total ? sumC / total : 0
+        };
+      });   // 保持 FEATURE_META 的 Web2 → Web3 顺序
+      var byId = {};
+      rows.forEach(function (r) { byId[r.f.id] = r; });
+
+      function fillCls(i) { return FILLS[i % FILLS.length]; }
+      function widthPct(total, base) { return Math.min(100, (total / (base || 1)) * 100).toFixed(1); }
+      function cardHtml(r, i, firstOfStage) {
+        var cls = fillCls(i);
+        var f = r.f;
+        return '<div class="func-card" onclick="openModal(\'' + f.id + '\')" title="点击查看参与用户">' +
+          '<div class="ico">' + f.icon + '</div>' +
+          '<div class="name">' + f.name +
+            '<span class="tag-pct' + (firstOfStage ? '' : ' plain') + '">' + r.rate + '</span></div>' +
+          '<div class="nums"><span class="cnt">' + fmtNum(r.total) + '</span><span class="unit">人参与</span></div>' +
+          '<div class="den">分母：' + r.base.label + ' ' + fmtNum(r.base.n) + '</div>' +
+          '<div class="ratio-track"><div class="fill' + (cls ? ' ' + cls : '') + '" style="width:' + widthPct(r.total, r.base.n) + '%;"></div></div>' +
+          '</div>';
+      }
+
+      // ── 功能卡片（Web2 / Web3 两组） ──
+      function renderCards() {
+        document.getElementById('gridWeb2').innerHTML = rows.filter(function (r) { return r.f.stage === 'web2'; })
+          .map(function (r, i) { return cardHtml(r, i, i === 0); }).join('');
+        document.getElementById('gridWeb3').innerHTML = rows.filter(function (r) { return r.f.stage === 'web3'; })
+          .map(function (r, i) { return cardHtml(r, i + 4, i === 0); }).join('');
+      }
+
+      // ── 全部功能横向对比表（Web2 → Web3 顺序 + 阶段列 + 分母口径列） ──
+      function renderCompare() {
+        document.getElementById('cmpBody').innerHTML = rows.map(function (r, i) {
+          var cls = fillCls(i);
+          var f = r.f;
+          var stageTag = f.stage === 'web2'
+            ? '<span class="status-tag gray">Web2</span>'
+            : '<span class="status-tag green">Web3</span>';
+          return '<tr>' +
+            '<td>' + stageTag + '</td>' +
+            '<td><strong>' + f.icon + ' ' + f.name + '</strong></td>' +
+            '<td class="num" style="font-weight:700;">' + fmtNum(r.total) + '</td>' +
+            '<td><span class="tag-pct plain">' + r.rate + '</span></td>' +
+            '<td class="weak" style="font-size:0.78rem;">' + r.base.label + '<br/>' + fmtNum(r.base.n) + ' 人</td>' +
+            '<td class="num">' + fmtNum(r.sumC) + '</td>' +
+            '<td class="num">' + r.per.toFixed(1) + '</td>' +
+            '<td><div class="ratio-track"><div class="fill' + (cls ? ' ' + cls : '') + '" style="width:' + widthPct(r.total, r.base.n) + '%;"></div></div></td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      // ── 参与用户明细弹窗 ──
+      var overlay = null;
+      var modalState = { fid: '', page: 1, list: [] };
+
+      function renderModal() {
+        var st = modalState;
+        var r = byId[st.fid];
+        var f = r.f;
+        document.getElementById('fmIco').textContent = f.icon;
+        document.getElementById('fmName').textContent = f.name;
+        document.getElementById('fmOv').innerHTML =
+          '参与人数 <b>' + fmtNum(r.total) + '</b> 人（对 ' + r.base.label + ' ' + fmtNum(r.base.n) + ' 人的参与率 <b>' + r.rate + '</b>）' +
+          ' · 总参与次数 <b>' + fmtNum(r.sumC) + '</b> 次' +
+          ' · 人均 <b>' + r.per.toFixed(1) + '</b> 次';
+
+        var body = document.getElementById('fmBody');
+        var pages = Math.max(1, Math.ceil(st.list.length / MODAL_PAGE_SIZE));
+        if (st.page > pages) st.page = pages;
+
+        if (!st.list.length) {
+          body.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:26px 0;color:var(--text-tertiary);">该功能暂无参与用户</td></tr>';
+          document.getElementById('fmPg').innerHTML = '';
+          return;
+        }
+
+        var start = (st.page - 1) * MODAL_PAGE_SIZE;
+        var pageData = st.list.slice(start, start + MODAL_PAGE_SIZE);
+        body.innerHTML = pageData.map(function (x) {
+          var u = M.util.userById[x.u];
+          var addr = u ? u.addr : '';
+          return '<tr>' +
+            '<td class="mono" title="' + addr + '">' + (addr ? addr.slice(0, 8) + '…' + addr.slice(-6) : '—') + '</td>' +
+            '<td class="num">' + x.c + '</td>' +
+            '<td class="num">' + fmtTs(x.f) + '</td>' +
+            '<td class="num">' + fmtTs(x.l) + '</td>' +
+            '</tr>';
+        }).join('');
+
+        document.getElementById('fmPg').innerHTML =
+          '<button ' + (st.page <= 1 ? 'disabled' : '') + ' onclick="fmGoto(' + (st.page - 1) + ')">← 上一页</button>' +
+          '<span class="page-info">第 ' + st.page + ' / ' + pages + ' 页 · 共 ' + st.list.length + ' 人（每页 ' + MODAL_PAGE_SIZE + ' 条）</span>' +
+          '<button ' + (st.page >= pages ? 'disabled' : '') + ' onclick="fmGoto(' + (st.page + 1) + ')">下一页 →</button>';
+      }
+
+      window.openModal = function (id) {
+        var r = byId[id];
+        if (!r) return;
+        modalState.fid = id;
+        modalState.page = 1;
+        // 参与用户按“最后参与时间”从近到远排列
+        modalState.list = r.f.users.slice().sort(function (a, b) { return b.l - a.l; });
+        renderModal();
+        overlay.classList.add('open');
+      };
+
+      window.closeModal = function () {
+        overlay.classList.remove('open');
+      };
+
+      window.fmGoto = function (p) {
+        modalState.page = p;
+        renderModal();
+      };
+
+      // ═══ 注册转化（触达转化：期间注册 ÷ 网站访问 / App 安装） ═══
+      var regDays = 30;   // 近 7 / 30 天
+      var chartReg = null;
+      window.setRegPeriod = function (k) {
+        regDays = k === '7d' ? 7 : 30;
+        document.querySelectorAll('#regSeg .btn-sm-outline').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-k') === k); });
+        renderReg();
+      };
+      function renderReg() {
+        var d = M.daily, from = M.DAYS - regDays;
+        var sum = function (k) {
+          var s = 0;
+          for (var i = from; i < M.DAYS; i++) s += d[i][k];
+          return s;
+        };
+        var regN = sum('newUsers'), visits = sum('visits'), installs = sum('installs');
+        document.getElementById('regN').textContent = fmtNum(regN);
+        document.getElementById('regV').textContent = fmtNum(visits);
+        document.getElementById('regI').textContent = fmtNum(installs);
+        document.getElementById('regVR').textContent = pct(regN, visits);
+        document.getElementById('regIR').textContent = pct(regN, installs);
+        document.getElementById('regLegend').textContent = '注册转化率按日走势（近 ' + regDays + ' 天 · Web 注册 = 当日注册 ÷ 当日网站访问，App 注册 = 当日注册 ÷ 当日安装）';
+
+        var labels = [], web = [], app = [];
+        for (var i = from; i < M.DAYS; i++) {
+          labels.push(fmtMD(d[i].ts));
+          web.push(+(d[i].newUsers / (d[i].visits || 1) * 100).toFixed(2));
+          app.push(+(d[i].newUsers / (d[i].installs || 1) * 100).toFixed(2));
+        }
+        if (!chartReg) chartReg = echarts.init(document.getElementById('chartReg'));
+        chartReg.setOption({
+          color: ['#00b388', '#7b5cf0'],
+          tooltip: { trigger: 'axis', confine: true, valueFormatter: function (v) { return v == null ? '—' : v.toFixed(2) + '%'; } },
+          legend: { top: 0, icon: 'roundRect', itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 11 }, data: [{ name: 'Web 注册转化率', itemStyle: { color: '#00b388' } }, { name: 'App 注册转化率', itemStyle: { color: '#7b5cf0' } }] },
+          grid: { left: 10, right: 10, top: 30, bottom: 4, containLabel: true },
+          xAxis: { type: 'category', data: labels, axisLine: { lineStyle: { color: '#deeaf7' } }, axisTick: { show: false }, axisLabel: { fontSize: 10, color: '#8b8d98', interval: Math.floor(regDays / 12) } },
+          yAxis: [
+            { type: 'value', name: 'Web', splitLine: { lineStyle: { color: '#eef3fa' } }, axisLabel: { fontSize: 10, color: '#8b8d98', formatter: '{value}%' } },
+            { type: 'value', name: 'App', splitLine: { show: false }, axisLabel: { fontSize: 10, color: '#8b8d98', formatter: '{value}%' } },
+          ],
+          series: [
+            { name: 'Web 注册转化率', type: 'line', smooth: true, showSymbol: false, data: web, itemStyle: { color: '#00b388' }, lineStyle: { width: 2 } },
+            { name: 'App 注册转化率', type: 'line', smooth: true, showSymbol: false, yAxisIndex: 1, data: app, itemStyle: { color: '#7b5cf0' }, lineStyle: { width: 2 } },
+          ],
+        }, true);
+      }
+      window.addEventListener('resize', function () { if (chartReg) chartReg.resize(); });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        overlay = document.getElementById('featModal');
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) closeModal();   // 遮罩点击关闭
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') closeModal();     // Esc 关闭
+        });
+        renderReg();
+        renderCards();
+        renderCompare();
+      });
+    })();
+  </script>
+</body>
+</html>

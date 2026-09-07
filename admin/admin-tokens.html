@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story.fun | 代币管理</title>
+  <link rel="stylesheet" href="admin-shared.css" />
+  <style>
+    /* 页面级微调 */
+    .data-table th.num, .data-table td.num { text-align: right; }
+    .tk-logo {
+      width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft);
+      color: var(--accent); display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex: none; margin-right: 10px; vertical-align: middle;
+    }
+    .tk-name b { display: inline-block; }
+    .tk-sym { display: block; font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.72rem; color: var(--text-tertiary); margin-top: 2px; }
+    .tk-creator b { display: block; font-weight: 600; font-size: 0.82rem; }
+    .tk-creator .mono { font-size: 0.7rem; color: var(--text-tertiary); margin-top: 2px; }
+    .prog { display: inline-flex; align-items: center; gap: 6px; min-width: 90px; }
+    .prog-track { flex: 1; height: 6px; border-radius: 6px; background: #eef2f8; overflow: hidden; }
+    .prog-fill { display: block; height: 100%; background: var(--accent); border-radius: 6px; }
+    .btn-mini {
+      padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary);
+    }
+    .btn-mini:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-mini.danger { color: var(--danger); }
+    .btn-mini.danger:hover { border-color: var(--danger); background: rgba(244,91,105,0.06); }
+    .btn-mini.ok { color: var(--accent); }
+    .btn-mini.ok:hover { border-color: var(--accent); background: var(--accent-soft); }
+    tr.is-banned td { opacity: .55; background: #fafbfc; }
+    .table-total { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .empty-state { padding: 40px 0; text-align: center; color: var(--text-tertiary); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <div id="admin-sidebar-placeholder"></div>
+
+  <div class="app-shell">
+    <div class="page-header">
+      <div>
+        <h1>🪙 代币管理</h1>
+        <div class="sub">发行曲线 / 毕业池 / 费路由 / 豁免名单管理 · <span style="color:var(--danger);font-weight:600;">独立演示数据（与主站不同步）</span></div>
+      </div>
+    </div>
+
+    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px;" id="tkSummary"></div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>搜索</label>
+        <input type="text" id="fSearch" placeholder="币名 / 代号 / 创建者…" style="width:220px;" oninput="renderTokens()" />
+      </div>
+      <div class="filter-group">
+        <label>状态</label>
+        <select id="fStatus" onchange="renderTokens()">
+          <option value="all">全部</option>
+          <option value="curve">进行中 curve</option>
+          <option value="graduated">已毕业</option>
+          <option value="banned">已下架</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>费路由</label>
+        <select id="fRoute" onchange="renderTokens()">
+          <option value="all">全部</option>
+          <option value="holders">holders（归持有人）</option>
+          <option value="wallet">wallet（归钱包）</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>&nbsp;</label>
+        <button type="button" class="btn-reset" onclick="resetFilter()">重置</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>币</th>
+            <th>配对</th>
+            <th>状态</th>
+            <th>curve 进度</th>
+            <th class="num">市值</th>
+            <th class="num">Creator tax</th>
+            <th>费路由</th>
+            <th class="num">豁免</th>
+            <th class="num">24h 量</th>
+            <th>创建者</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tkBody"></tbody>
+      </table>
+    </div>
+    <div class="table-total" id="tkTotal"></div>
+  </div>
+
+  <script src="load-admin-sidebar.js"></script>
+  <script src="admin-mock-data.js"></script>
+  <script>
+    // 下架/恢复状态：独立于主站的本地内存态
+    function readBans() {
+      try { return JSON.parse(localStorage.getItem('sf_admin_token_bans') || '{}'); } catch (e) { return {}; }
+    }
+    function toggleBan(id) {
+      var bans = readBans();
+      bans[id] = !bans[id];
+      try { localStorage.setItem('sf_admin_token_bans', JSON.stringify(bans)); } catch (e) {}
+      renderTokens();
+    }
+    function fmtMoney(n) {
+      n = Number(n) || 0;
+      if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+      if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+      if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+      return '$' + n.toFixed(0);
+    }
+    function shortSym(s) { return (s || '').toUpperCase(); }
+
+    function renderTokens() {
+      var bans = readBans();
+      var q = (document.getElementById('fSearch').value || '').trim().toLowerCase();
+      var st = document.getElementById('fStatus').value;
+      var rt = document.getElementById('fRoute').value;
+      var list = (window.SFMock && SFMock.tokens) || [];
+      var rows = list.filter(function (t) {
+        var banned = !!bans[t.id] || !!t.banned;
+        if (st === 'banned' && !banned) return false;
+        if (st !== 'all' && st !== 'banned' && (banned || t.status !== st)) return false;
+        if (rt !== 'all' && t.route !== rt) return false;
+        if (q) {
+          var hay = (t.name + ' ' + t.sym + ' ' + (t.creator || '') + ' ' + (t.creatorAddr || '')).toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      });
+      var body = document.getElementById('tkBody');
+      if (!rows.length) {
+        body.innerHTML = '<tr><td colspan="11"><div class="empty-state">没有匹配的代币</div></td></tr>';
+      } else {
+        body.innerHTML = rows.map(function (t) {
+          var banned = !!bans[t.id] || !!t.banned;
+          var stateHtml;
+          if (banned) stateHtml = '<span class="status-tag gray">已下架</span>';
+          else if (t.status === 'graduated') stateHtml = '<span class="status-tag green">已毕业</span>';
+          else stateHtml = '<span class="status-tag blue">curve</span>';
+          var prog = t.status === 'graduated'
+            ? '<span class="weak">—</span>'
+            : '<span class="prog"><span class="prog-track"><i class="prog-fill" style="width:' + Math.round((t.progress || 0) * 100) + '%"></i></span><span class="num">' + Math.round((t.progress || 0) * 100) + '%</span></span>';
+          var route = t.route === 'holders'
+            ? '<span class="status-tag blue">holders</span>'
+            : '<span class="status-tag purple">wallet</span>';
+          var op = banned
+            ? '<button class="btn-mini ok" onclick="toggleBan(\'' + t.id + '\')">恢复</button>'
+            : '<button class="btn-mini danger" onclick="toggleBan(\'' + t.id + '\')">下架</button>';
+          return '<tr class="' + (banned ? 'is-banned' : '') + '">' +
+            '<td><span class="tk-logo">' + shortSym(t.sym).charAt(0) + '</span><span class="tk-name"><b>' + t.name + '</b><span class="tk-sym">$' + shortSym(t.sym) + ' · ' + t.id + '</span></span></td>' +
+            '<td>' + t.pair + '</td>' +
+            '<td>' + stateHtml + '</td>' +
+            '<td>' + prog + '</td>' +
+            '<td class="num">' + fmtMoney(t.mc) + '</td>' +
+            '<td class="num">' + (Number(t.tax) ? Number(t.tax).toFixed(2) + '%' : '0%') + '</td>' +
+            '<td>' + route + '</td>' +
+            '<td class="num">' + (t.exempts || 0) + '</td>' +
+            '<td class="num">' + fmtMoney(t.vol24 || 0) + '</td>' +
+            '<td><span class="tk-creator"><b>' + t.creator + '</b><span class="mono">' + (t.creatorAddr || '') + '</span></span></td>' +
+            '<td>' + op + '</td>' +
+            '</tr>';
+        }).join('');
+      }
+      // 汇总
+      var bansNow = list.filter(function (t) { return !!bans[t.id] || !!t.banned; }).length;
+      var grad = list.filter(function (t) { return t.status === 'graduated' && !(bans[t.id] || t.banned); }).length;
+      var curve = list.filter(function (t) { return t.status !== 'graduated' && !(bans[t.id] || t.banned); }).length;
+      document.getElementById('tkTotal').innerHTML =
+        '<span>共 <b>' + rows.length + '</b> 条匹配 · 全部 <b>' + list.length + '</b>（进行中 ' + curve + ' · 已毕业 ' + grad + ' · 已下架 ' + bansNow + '）</span>' +
+        '<span class="weak">独立演示数据，操作仅影响本页状态</span>';
+    }
+    function resetFilter() {
+      document.getElementById('fSearch').value = '';
+      document.getElementById('fStatus').value = 'all';
+      document.getElementById('fRoute').value = 'all';
+      renderTokens();
+    }
+    // 顶部汇总卡
+    function renderSummary() {
+      var list = (window.SFMock && SFMock.tokens) || [];
+      var bans = readBans();
+      var cards = [
+        { l: '全部代币', v: list.length, s: '独立 mock 列表' },
+        { l: '进行中 curve', v: list.filter(function (t) { return t.status !== 'graduated' && !(bans[t.id] || t.banned); }).length, s: '未达毕业阈值' },
+        { l: '已毕业', v: list.filter(function (t) { return t.status === 'graduated' && !(bans[t.id] || t.banned); }).length, s: '流动性在池' },
+        { l: '已下架', v: list.filter(function (t) { return !!bans[t.id] || !!t.banned; }).length, s: '后台标记（本页内存态）' }
+      ];
+      document.getElementById('tkSummary').innerHTML = cards.map(function (c) {
+        return '<div class="stat-card"><div class="stat-label">' + c.l + '</div>' +
+          '<div class="stat-value">' + c.v + '</div><div class="stat-sub">' + c.s + '</div></div>';
+      }).join('');
+    }
+    renderSummary();
+    renderTokens();
+  </script>
+</body>
+</html>
