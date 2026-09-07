@@ -37,7 +37,7 @@
 
 ```
 1 顶部：仅「← 市场」返回（无独立头部身份区）
-2 About 卡：描述 / Creator（含 creator tax）/ Supply / Paired / 合约 / Explorer
+2 About 卡（分区排版）：左 = 描述 + Creator 胶囊（地址/creator tax）；右栏三张小卡 = Supply·Fixed at launch / Paired / Contract(可复制)；底部链接条 = Explorer / Twitter·Telegram（按创建参数有则显示）
 3 叙事（独立行卡）：一行「▶ 这个币的故事 + 一句话简介」，整卡位于 About 与费用卡之间，
    点击整卡即全屏播放（页面不铺大封面；无视频提示“该叙事暂无视频”）
 4 费用卡（仅未毕业展示，已毕业费用已交付至 Profile）：
@@ -72,7 +72,7 @@
 
 - 顶部仅保留「← 市场」返回（无独立头部身份区、无标签行、无关注/分享操作钮）。
 - 币身份作为**交易卡卡头身份行**展示（见 §2 第 5 项）：币图纯展示 + 名称/$代号 + `Paired {pair}`；未毕业时 `Bonding curve` 状态随下方 curve 毕业进度块呈现，已毕业时身份行显示 `Uniswap v4`。
-- 合约地址（可复制，Explorer 外链）位于 About 卡：Token 合约地址一行 + Creator（创建者地址，可复制）。
+- 合约地址（可复制）与 Creator（创建者地址，可复制）均在 About 卡内：Creator 为胶囊条；Token Contract 为右栏小卡；外链按钮统一放底部链接条。
 
 ---
 
@@ -162,6 +162,7 @@
 ## 7. 成交记录 / 持有者
 
 > 位置：通栏卡片（与页面等宽），位于交易×K线网格下方；K线右侧栏不内嵌本模块。
+> 分页：成交记录/持有者各按 **一页 10 条** 展示，卡片随内容自然增高（无固定高度内滚），单页多于 10 条时底部出现翻页条（‹ 上一页 / x / y / 下一页 ›）。
 
 | 页签 | 内容 |
 |---|---|
@@ -173,7 +174,7 @@
 ## 8. About 与叙事
 
 - 页面顺序：About 卡 → 叙事（独立卡）→ 费用卡（未毕业）→ 交易×K线网格 → 成交记录/持有者页签。
-- About 四区：描述、Creator（含 creator tax）、Supply、Paired + 合约地址 + Explorer（原型外链演示）。
+- About 版式：毕业/未毕业**同一套**（不随毕业切换燃烧/费用回馈卡）。分区排版 = 左（描述 + Creator 胶囊：mono 地址可复制 + creator tax）｜ 右栏（Supply·Fixed at launch / Paired / Contract 三张轻卡，Contract 等宽可复制）｜ 底部链接条（Explorer 原型外链演示 + Twitter/Telegram 按创建 handle 条件显示，跳 x.com / t.me）。≤860px 单列、链接条左对齐。
 - 叙事：独立**行卡**（非大封面）置于 About 与 Creator fees 之间——▶ 图标 + “这个币的故事” + 一句话简介（单行省略），点击整卡进入浮层（storyModal）全屏播放；About 与叙事均未登录可读。
 
 ---

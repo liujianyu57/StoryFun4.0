@@ -39,7 +39,7 @@
     realizedByCoin: {}         // coinId -> 已实现盈亏（USD）
   };
   var STORE_KEY = 'storyfun_launch_v1';
-  var SCHEMA_VERSION = 14;
+  var SCHEMA_VERSION = 15;
 
   // ============================================================
   //  配对资产（quote）：ETH + 股票代币
@@ -187,13 +187,15 @@
       id: 'c_cheng', name: '丞相府今日开饭', symbol: 'XIANG', tagline: '天下粮仓，开饭为敬。', lockedPct: 0.30,
       creator: '厨子老王', creatorAddr: '0x9F3c…aa12', cover: IMG.cheng, video: VID.cheng, sourceType: 'work', sourceTitle: '短剧《丞相府今日开饭》',
       priceUsd: 0.0021, holders: 5210, volumeUsd: 389000, launchedAt: D(120), graduated: true, gradAt: D(88),
-      poolUsd: 61200, change24h: 0.68, lastBuyAt: D(26), spark: [0.1, 0.2, 0.5, 0.45, 0.7, 0.85, 0.9, 1]
+      poolUsd: 61200, change24h: 0.68, lastBuyAt: D(26), spark: [0.1, 0.2, 0.5, 0.45, 0.7, 0.85, 0.9, 1],
+      social: { x: 'xiangfu_daily', tg: 'xiangfu_kitchen' }
     }),
     seedCoin({
       id: 'c_xie', name: '我卸甲后天下大乱了', symbol: 'XIEJIA', tagline: '卸甲归田，天下却需要我。', creatorHoldsPct: 38,
       creator: '慕容战', creatorAddr: '0x1D8a…b40e', cover: IMG.xie, video: VID.xie, sourceType: 'work', sourceTitle: '短剧《我卸甲后天下大乱了》',
       priceUsd: 0.0014, holders: 1976, volumeUsd: 156000, launchedAt: D(30), graduated: false, progress: 0.71,
-      poolUsd: 9660, change24h: -0.12, lastBuyAt: D(5), spark: [0.3, 0.5, 0.62, 0.55, 0.7, 0.66, 0.74, 0.71]
+      poolUsd: 9660, change24h: -0.12, lastBuyAt: D(5), spark: [0.3, 0.5, 0.62, 0.55, 0.7, 0.66, 0.74, 0.71],
+      social: { x: 'mofu_xiejia', tg: 'xiejia_warriors' }
     }),
     seedCoin({
       id: 'c_mooncat', name: '月球打碟猫', symbol: 'MOONCAT', tagline: '一只穿西装的猫，在月球打碟。', lockedPct: 0.12,
@@ -210,7 +212,8 @@
       creator: 'Sylvan', creatorAddr: '0xB20f…9e01', cover: IMG.candle, video: 'video/打斗视频.mp4', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.0001, holders: 1206, volumeUsd: 22000, launchedAt: D(10), graduated: false, progress: 0.28,
       poolUsd: 2210, change24h: 0.05, lastBuyAt: D(4), spark: [0.3, 0.35, 0.4, 0.38, 0.45],
-      pair: 'GLD'
+      pair: 'GLD',
+      social: { x: 'candle_crown', tg: '' }
     }),
     seedCoin({
       id: 'c_survivor', name: '末日幸存指南', symbol: 'SURVIVE', tagline: '天亮之前，先活过今晚。', lockedPct: 0.18, creatorHoldsPct: 29,
@@ -231,19 +234,22 @@
       id: 'c_names', name: '无名者档案', symbol: 'NAMES', tagline: '名字被夺走的人，自己写回自己的名字。', shareToHolders: true,
       creator: '白鹭', creatorAddr: '0x33A1…c8f0', cover: IMG.names, video: 'video/凤骨琉璃.mp4', sourceType: 'work', sourceTitle: '短剧《无名者档案》',
       priceUsd: 0.00055, holders: 1732, volumeUsd: 67100, launchedAt: D(66), graduated: true, gradAt: D(49),
-      poolUsd: 20300, change24h: 0.11, lastBuyAt: D(30), spark: [0.2, 0.3, 0.5, 0.55, 0.8, 0.75]
+      poolUsd: 20300, change24h: 0.11, lastBuyAt: D(30), spark: [0.2, 0.3, 0.5, 0.55, 0.8, 0.75],
+      social: { x: 'wuming_archives', tg: 'wuming_archives' }
     }),
     seedCoin({
       id: 'c_pyramid', name: '金字塔之梦', symbol: 'PYRAMID', tagline: '梦境深处，法老仍在等待。',
       creator: 'Ramesh', creatorAddr: '0xF90C…d2e8', cover: IMG.pyramid, video: 'video/我卸甲后天下大乱了.mp4', sourceType: 'ai', sourceTitle: 'AI 叙事 · 15s',
       priceUsd: 0.000078, holders: 501, volumeUsd: 8900, launchedAt: D(1), graduated: false, progress: 0.03,
-      poolUsd: 190, change24h: 0.15, isNew: true, lastBuyAt: D(0.4), spark: [0.4, 0.45]
+      poolUsd: 190, change24h: 0.15, isNew: true, lastBuyAt: D(0.4), spark: [0.4, 0.45],
+      social: { x: '', tg: 'pyramid_dreams' }
     }),
     seedCoin({
       id: 'c_hero', name: '孤胆英雄传', symbol: 'HERO', tagline: '无人记得的名字，撑起整座城。', shareToHolders: true,
       creator: '陈破晓', creatorAddr: '0x6E2b…a4d7', cover: IMG.hero, video: VID.fight, sourceType: 'work', sourceTitle: '短剧《孤胆英雄传》',
       priceUsd: 0.00041, holders: 958, volumeUsd: 24000, launchedAt: D(18), graduated: false, progress: 0.42,
-      poolUsd: 4800, change24h: -0.08, lastBuyAt: D(14), spark: [0.4, 0.6, 0.5, 0.55, 0.48, 0.45]
+      poolUsd: 4800, change24h: -0.08, lastBuyAt: D(14), spark: [0.4, 0.6, 0.5, 0.55, 0.48, 0.45],
+      social: { x: 'hero_liulang', tg: 'hero_liulang' }
     })
   ];
 
@@ -311,6 +317,14 @@
           video: (i0 % 4 === 3 ? '' : ['video/凤骨琉璃.mp4','video/丞相府今日开饭.mp4','video/打斗视频.mp4','video/我卸甲后天下大乱了.mp4'][i0 % 4]),
           sourceType: (i0 % 3 === 0 ? 'ai' : 'work'),
           sourceTitle: '', supply: K.totalSupply,
+          social: (function () {
+            var slug = (A + B).toLowerCase();
+            var sn = i0 % 5;
+            if (sn === 0 || sn === 1) return { x: slug.slice(0, 15), tg: slug.slice(0, 32) };
+            if (sn === 2) return { x: slug.slice(0, 15) };
+            if (sn === 3) return { tg: slug.slice(0, 32) };
+            return null;
+          })(),
           pair: pairOf('gen_' + i0),   // 确定性随机配对资产（含约 1/5 ETH）
           lockedPct: lockedPct,
           shareToHolders: shareToHolders,
