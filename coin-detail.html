@@ -1228,8 +1228,8 @@ var holders = [];
         return '<div class="tx-row">' +
           '<span class="tx-side ' + t.side + '">' + (t.side === 'buy' ? '买入' : '卖出') + '</span>' +
           '<span class="tx-who">' + esc(who) + '</span>' +
-          '<span class="tx-mid num">' + (t.amount != null ? t.amount.toFixed(4) + ' ETH' : '') + '</span>' +
-          '<span class="num" style="font-weight:600">$' + (t.amount ? t.amount.toFixed(4) : '') + '</span>' +
+          '<span class="tx-mid">' + (t.amount != null ? t.amount.toFixed(4) + ' ETH' : '') + '</span>' +
+          '<span style="font-weight:600">$' + (t.amount ? t.amount.toFixed(4) : '') + '</span>' +
           '<span class="tx-time">' + Launch.timeAgo(t.at || Date.now()) + '</span></div>';
       }).join('');
       paintPager();
