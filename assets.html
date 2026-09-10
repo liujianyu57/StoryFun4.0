@@ -196,6 +196,23 @@
     .pf-copy { border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-size: 11px; font-weight: 700; padding: 3px 10px; cursor: pointer; }
     .pf-copy:hover { color: var(--text); border-color: var(--text-3); }
 
+    /* 钱包条：ETH 余额（钱包资产，不计入 Portfolio 口径） */
+    .pf-wallet { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 16px;
+      padding: 14px 18px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); }
+    .pf-wallet-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .pf-wallet-coin { width: 26px; height: 26px; border-radius: 50%; background: #627EEA; color: #fff; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+    .pf-wallet-num { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+    .pf-wallet-acts { display: flex; gap: 8px; margin-left: auto; }
+    .pf-wallet-btn { height: 34px; padding: 0 16px; border-radius: 999px; white-space: nowrap;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 12.5px; font-weight: 700; }
+    .pf-wallet-btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
+    /* 占位入口：充值 / 提现暂未开放——禁用态，不可点击 */
+    .pf-wallet-btn:disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
+    @media (max-width: 560px) {
+      .pf-wallet-acts { margin-left: 0; width: 100%; }
+      .pf-wallet-btn { flex: 1; }
+    }
     /* Portfolio：上=余额块，下=通栏大图（参考 .profile-portfolio-overview 单列 grid） */
     .pf-portfolio { border-radius: 22px; padding: 22px 24px; display: grid; gap: 20px; background: var(--surface); border: 1px solid var(--border); }
     .pf-balance { display: grid; justify-items: start; gap: 4px; }
@@ -242,6 +259,32 @@
       </div>
     </div>
 
+    <!-- 钱包条：ETH 余额（钱包资产，不计入 Portfolio balance）+ 充值 / 提现占位入口 -->
+    <div class="pf-wallet" id="walletStrip">
+      <div class="pf-wallet-main">
+        <span class="pf-wallet-coin">Ξ</span>
+        <strong class="pf-wallet-num num" id="walletEth">—</strong>
+      </div>
+      <div class="pf-wallet-acts">
+        <button type="button" class="pf-wallet-btn primary" id="topupBtn" disabled title="充值功能暂未开放">充值</button>
+        <button type="button" class="pf-wallet-btn" id="withdrawBtn" disabled title="提现功能暂未开放">提现</button>
+      </div>
+    </div>
+
+    <!-- Holder dividends 横幅（pons：Holder dividends ready + Claim all） -->
+    <div class="fees-banner" id="divBanner" style="display:none">
+      <span class="fb-ic">◎</span>
+      <span class="fb-txt"><b>Holder dividends ready</b><small id="divDesc">—</small></span>
+      <button type="button" id="divClaim">Claim all holder dividends</button>
+    </div>
+
+    <!-- Creator fees 横幅（pons：有 claimable 才出现） -->
+    <div class="fees-banner" id="feesBanner" style="display:none">
+      <span class="fb-ic">◆</span>
+      <span class="fb-txt"><b>Creator fees</b><small id="fbDesc">—</small></span>
+      <button type="button" id="fbClaim">Claim fees</button>
+    </div>
+
     <!-- Portfolio：上余额块 + 下通栏大图 -->
     <div class="pf-portfolio" id="pfPortfolio">
       <div class="pf-balance">
@@ -260,20 +303,6 @@
         </div>
         <canvas class="pf-canvas" id="pfChart"></canvas>
       </div>
-    </div>
-
-    <!-- Holder dividends 横幅（pons：Holder dividends ready + Claim all） -->
-    <div class="fees-banner" id="divBanner" style="display:none">
-      <span class="fb-ic">◎</span>
-      <span class="fb-txt"><b>Holder dividends ready</b><small id="divDesc">—</small></span>
-      <button type="button" id="divClaim">Claim all holder dividends</button>
-    </div>
-
-    <!-- Creator fees 横幅（pons：有 claimable 才出现） -->
-    <div class="fees-banner" id="feesBanner" style="display:none">
-      <span class="fb-ic">◆</span>
-      <span class="fb-txt"><b>Creator fees</b><small id="fbDesc">—</small></span>
-      <button type="button" id="fbClaim">Claim fees</button>
     </div>
 
     <div class="as-tabs">
@@ -460,8 +489,35 @@
       var rl = { '1d': '1d', '7d': '7d', '30d': '30d' }[pnlRange] || '1d';
       document.getElementById('pfPnlHead').innerHTML = fmtSignedUsd(totalPnl) + '<span class="pf-pnl-rng">PnL · ' + rl + '</span>';
       drawPnl();
+      renderWallet();
     }
 
+    // ============================================================
+    //  钱包条：ETH 余额
+    //  口径：ETH 属钱包资产，与 Portfolio balance（Σ持仓市值）分开统计
+    // ============================================================
+    function ethBal() {
+      return (window.Launch && typeof Launch.balanceOf === 'function') ? Launch.balanceOf('ETH') : 0;
+    }
+    function fmtEth(q) {
+      return (window.Launch && typeof Launch.fmtQty === 'function' ? Launch.fmtQty(q) : String(q)) + ' ETH';
+    }
+    function renderWallet() {
+      var q = ethBal();
+      var el = document.getElementById('walletEth');
+      if (el) el.textContent = fmtEth(q);
+    }
+    function copyText(t, okMsg) {
+      if (!t) { Launch.toast('暂无可复制的地址', 'warn'); return; }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(function () { Launch.toast(okMsg, 'ok'); },
+            function () { Launch.toast('复制失败，请手动选择地址复制', 'warn'); });
+          return;
+        }
+      } catch (e) {}
+      Launch.toast('当前环境不支持自动复制，请手动选择地址复制', 'warn');
+    }
     // 持有人分红（与币详情页同口径的确定性演示值）
     function divClaimed(id) {
       try { var a = JSON.parse(localStorage.getItem('sf_div_claimed') || '[]'); return a.indexOf(id) !== -1; } catch (e) { return false; }
@@ -955,6 +1011,7 @@
       document.getElementById('needLogin').style.display = logged ? 'none' : 'block';
       document.getElementById('asBody').style.display = logged ? '' : 'none';
       document.getElementById('pfHero').style.display = logged ? '' : 'none';
+      document.getElementById('walletStrip').style.display = logged ? '' : 'none';
       document.getElementById('pfPortfolio').style.display = logged ? '' : 'none';
       if (!logged) {
         var fbN = document.getElementById('feesBanner');
@@ -984,11 +1041,7 @@
       window.addEventListener('resize', function () { drawPnl(); });
       // 复制地址
       document.getElementById('pfCopy').addEventListener('click', function () {
-        var a = document.getElementById('pfAddr').textContent;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(a).catch(function () {});
-        }
-        Launch.toast('地址已复制', 'ok');
+        copyText(document.getElementById('pfAddr').textContent, '地址已复制');
       });
       // Tab
       document.querySelectorAll('.as-tab').forEach(function (b) {
