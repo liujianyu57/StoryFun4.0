@@ -44,7 +44,17 @@
     .avatar-bg .avatar-letter { font-size: 26px; font-weight: 700; }
 
     .user-info-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-    .user-info-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .user-info-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    /* 「资产」入口：跳转我的资产页 */
+    .assets-entry { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; height: 36px; padding: 0 14px;
+      border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text);
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      transition: background .16s ease, border-color .16s ease, transform .12s ease; }
+    .assets-entry svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .assets-entry .chev { width: 13px; height: 13px; color: var(--text-muted); }
+    .assets-entry:hover { background: var(--border-light); border-color: var(--accent); }
+    .assets-entry:active { transform: scale(.97); }
+    .assets-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .user-info-texts { display: flex; flex-direction: column; gap: 4px; flex: 1; }
     .user-name { font-size: 20px; font-weight: 700; color: var(--text); }
     .user-bio { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
@@ -721,6 +731,11 @@
                   <div class="user-name" id="profileName">叙</div>
                   <div class="user-bio" id="profileBio">用短剧记录灵感，分享每一段故事。</div>
                 </div>
+                <a class="assets-entry" href="assets.html" title="我的资产">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                  资产
+                  <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+                </a>
               </div>
             </div>
           </div>
