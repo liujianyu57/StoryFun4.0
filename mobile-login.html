@@ -184,9 +184,22 @@
         </svg>
         使用邮箱登录
       </button>
+      <button class="login-btn" onclick="doLogin('google')">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>
+        使用 Google 登录
+      </button>
+      <button class="login-btn" onclick="doLogin('twitter')">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
+        使用 X 登录
+      </button>
+      <button class="login-btn" onclick="doLogin('wallet')">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/><circle cx="18" cy="12" r="2"/></svg>
+        连接钱包
+      </button>
     </div>
 
     <p class="login-tos">
+      登录即创建你的链上钱包 · 由 Privy 提供（模拟）<br />
       继续即表示同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a>
     </p>
   </div>
@@ -247,34 +260,12 @@
       }, 3000);
     }
 
+    // 四种入口统一走 auth.js 的 Privy 模拟流程；成功后由 auth-ready 监听跳转
     function doLogin(method) {
-      var overlay = document.getElementById('loadingOverlay');
-      overlay.classList.add('active');
-      var btns = document.querySelectorAll('.login-btn');
-      btns.forEach(function(b) { b.disabled = true; });
-
-      // 调用 auth.js 中的 mockLogin
-      if (typeof mockLogin === 'function') {
-        mockLogin(method);
-      } else {
-        // Fallback: 手动执行登录逻辑
-        if (typeof currentUser !== 'undefined') {
-          currentUser.isLoggedIn = true;
-          currentUser.authMethod = method;
-          if (typeof saveUserToStorage === 'function') {
-            saveUserToStorage(currentUser);
-          }
-        }
-        showToast('✅ 登录成功', '🎉');
-        document.dispatchEvent(new CustomEvent('auth-ready'));
-      }
-    }
-
-    // 在 mockLogin 完成后，通过定时检测 currentUser 状态来触发跳转
-    var _origMockLogin = window.mockLogin;
-    if (typeof _origMockLogin === 'function') {
-      // 不覆盖 mockLogin，而是监听 auth-ready 事件（已在上面注册监听）
-      // mockLogin 内部会 dispatch auth-ready 事件
+      if (method === 'email') { if (typeof openLoginModal === 'function') openLoginModal(); return; }
+      if (method === 'wallet') { if (typeof openWalletPicker === 'function') openWalletPicker(); return; }
+      if (typeof authSocial === 'function') { authSocial(method); return; }
+      showToast('登录方式不可用，请刷新重试', '💡');
     }
 
     // 如果 toast 覆盖了 showToast，处理兼容

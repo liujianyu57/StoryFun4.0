@@ -1,9 +1,9 @@
 // ============================================================
-//  Story.fun - 模拟登录/注册系统（纯内容社区版）
+//  Story.fun - Privy 模拟登录/注册系统（账号 + 内嵌钱包）
 // ============================================================
 
 // ============================================================
-//  用户数据（模拟登录）
+//  用户数据（演示账户模板；Privy 模拟登录后按账号派生内嵌钱包）
 // ============================================================
 const PRIVY_MOCK_USER = {
   id: 'user_storyfun_001',
@@ -12,8 +12,43 @@ const PRIVY_MOCK_USER = {
   email: 'demo@story.fun',
   avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
   isLoggedIn: false,
-  // 登录方式：'email' | null
+  // 登录方式：'email' | 'google' | 'twitter' | 'wallet' | null
   authMethod: null
+};
+
+// ============================================================
+//  内嵌钱包地址（单一来源）：同账号永远同一串，全站统一取用
+//  full = 40 位地址；masked = 0x1234…abcd
+// ============================================================
+function sfWalletAddress(seed) {
+  const str = 'storyfun:wallet:' + (seed || 'guest');
+  let h = 2166136261 >>> 0, hex = '';
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  for (let j = 0; j < 40; j++) { h = Math.imul(h ^ (h >>> 13), 2654435761) >>> 0; hex += '0123456789abcdef'.charAt(h & 15); }
+  return '0x' + hex;
+}
+function sfAccountSeed() {
+  if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) return currentUser.id;
+  return 'guest';
+}
+// 取地址一律经 window.currentWallet（避免依赖裸全局别名）
+function sfWalletRef() {
+  return (typeof window !== 'undefined' && window.currentWallet) ? window.currentWallet : null;
+}
+function sfWalletMasked() {
+  const w = sfWalletRef();
+  return (w && typeof w.masked === 'function') ? w.masked() : '0x…';
+}
+function sfWalletFull() {
+  const w = sfWalletRef();
+  return (w && typeof w.address === 'function') ? w.address() : '';
+}
+window.currentWallet = {
+  address: function () { return sfWalletAddress(sfAccountSeed()); },
+  masked: function () { const a = sfWalletAddress(sfAccountSeed()); return a.slice(0, 6) + '\u2026' + a.slice(-4); },
+  isConnected: function () {
+    return !!(typeof currentUser !== 'undefined' && currentUser && currentUser.isLoggedIn);
+  }
 };
 
 // ============================================================
@@ -43,7 +78,7 @@ function clearUserFromStorage() {
 }
 
 const storedUser = loadUserFromStorage();
-let currentUser = storedUser ? { ...PRIVY_MOCK_USER, ...storedUser } : { ...PRIVY_MOCK_USER, isLoggedIn: true };
+let currentUser = storedUser ? { ...PRIVY_MOCK_USER, ...storedUser } : { ...PRIVY_MOCK_USER, isLoggedIn: false };
 
 // ============================================================
 //  DOM 就绪后初始化
@@ -122,6 +157,53 @@ function injectAuthStyles() {
   .logout-confirm-actions .btn-cancel:active{background:rgba(0,0,0,.12)}
   .logout-confirm-actions .btn-confirm{background:#f45b69;color:#fff}
   .logout-confirm-actions .btn-confirm:active{background:#d94355}
+
+  /* ===== Privy 登录：邮箱两步 / 社交 / 钱包 / 签名 ===== */
+  .auth-field-label{display:block;font-size:12px;font-weight:600;color:#5e6f83;margin:2px 0 6px}
+  .auth-input{width:100%;height:48px;padding:0 16px;border-radius:14px;border:1px solid #e3e8ef;background:#fff;
+    color:#13202e;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;box-sizing:border-box}
+  .auth-input:focus{border-color:#0b1720;box-shadow:0 0 0 3px rgba(11,23,32,.06)}
+  .auth-input.num{font-family:var(--mono,ui-monospace,monospace);letter-spacing:.24em;font-variant-numeric:tabular-nums}
+  .auth-input::placeholder{color:#9aa7b4;letter-spacing:normal}
+  .auth-hint{font-size:12px;color:#8b98a6;margin:8px 0 2px}
+  .auth-hint b{color:#13202e;font-family:var(--mono,ui-monospace,monospace)}
+  .auth-err{display:none;color:#f45b69;font-size:12.5px;margin-top:8px}
+  .auth-err.show{display:block}
+  .auth-text-btn{display:block;width:100%;margin-top:10px;padding:10px;border:none;background:none;color:#5e6f83;
+    font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:underline}
+  .auth-text-btn:disabled{color:#b3bcc6;cursor:default;text-decoration:none}
+  .auth-social-btn + .auth-social-btn{margin-top:10px}
+  #authEmailStep1 .auth-social-btn,#authEmailStep2 .auth-social-btn{margin-top:14px}
+  .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0 14px;color:#9aa7b4;font-size:12px}
+  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:#eef2f4}
+  .auth-wallet-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;
+    border-radius:999px;border:1px solid #e3e8ef;background:#fff;color:#13202e;font-size:.95rem;font-weight:600;
+    cursor:pointer;font-family:inherit;transition:all .2s ease}
+  .auth-wallet-btn:hover{border-color:#0b1720;background:rgba(0,0,0,.03)}
+  .auth-modal-privy{text-align:center;font-size:11px;color:#9aa7b4;margin:14px 0 0}
+  .auth-wallet-item{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:14px 16px;
+    border-radius:14px;border:1px solid #e3e8ef;background:#fff;cursor:pointer;font-family:inherit;transition:all .15s}
+  .auth-wallet-item + .auth-wallet-item{margin-top:10px}
+  .auth-wallet-item:hover{border-color:#0b1720;background:rgba(0,0,0,.03)}
+  .auth-wallet-name{font-size:14.5px;font-weight:700;color:#13202e}
+  .auth-wallet-note{font-size:11.5px;color:#8b98a6}
+  .auth-sign-msg{background:#f7f8f9;border-radius:14px;padding:14px 16px}
+  .auth-sign-title{font-size:13.5px;font-weight:700;color:#13202e}
+  .auth-sign-body{font-size:12.5px;color:#5e6f83;line-height:1.6;margin-top:6px}
+  .auth-sign-addr{margin-top:10px;font-size:12.5px;color:#8b98a6}
+  .auth-sign-actions{display:flex;gap:10px;margin-top:16px}
+  .auth-sign-actions button{flex:1;height:46px;border-radius:999px;border:none;font-size:14px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:all .15s}
+  .auth-sign-reject{background:rgba(0,0,0,.06);color:#13202e}
+  .auth-sign-reject:hover{background:rgba(0,0,0,.12)}
+  .auth-sign-ok{background:#0b1720;color:#fff}
+  .auth-sign-ok:hover{opacity:.9}
+  .auth-sign-ok:disabled{opacity:.6;cursor:default}
+  .auth-dd-addr{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 2px;padding:8px 10px;
+    border-radius:10px;background:#f7f8f9}
+  .auth-dd-addr span{font-size:12.5px;color:#13202e;font-weight:600}
+  .auth-dd-addr button{border:none;background:none;color:#5e6f83;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  .auth-dd-addr button:hover{color:#0b1720}
   `;
 
   const style = document.createElement('style');
@@ -137,7 +219,9 @@ function renderAuthUI(container) {
   if (currentUser.isLoggedIn) {
     const isEmail = currentUser.authMethod === 'email';
     var displayName = currentUser.name || (isEmail ? currentUser.email : 'User');
-    var subLabel = isEmail ? (currentUser.email || '') : '';
+    var methodLabel = currentUser.authMethodLabel || (isEmail ? '邮箱登录' : '外部钱包');
+    var subLabel = methodLabel + (isEmail && currentUser.email ? ' · ' + currentUser.email : '');
+    var addrText = sfWalletMasked();
     container.innerHTML = `
       <div class="auth-user-menu">
         <div class="auth-avatar-trigger" onclick="toggleDropdown(event)">
@@ -152,6 +236,10 @@ function renderAuthUI(container) {
               <div class="auth-dropdown-main">${displayName}</div>
               <div class="auth-dropdown-sub">${subLabel}</div>
             </div>
+          </div>
+          <div class="auth-dd-addr">
+            <span class="num" title="钱包地址">${addrText}</span>
+            <button type="button" onclick="copyAuthAddress(event)">复制</button>
           </div>
 
           <div class="auth-dropdown-divider"></div>
@@ -185,10 +273,18 @@ function renderAuthUI(container) {
 }
 
 // ============================================================
-//  登录弹窗
+//  登录弹窗（Privy 模拟：邮箱验证码 / Google / X / 外部钱包）
 // ============================================================
+const AUTH_METHOD_LABEL = { email: '邮箱登录', google: 'Google', twitter: 'X (Twitter)', wallet: '外部钱包' };
+const AUTH_DEMO_CODE = '123456';
+const WALLET_OPTIONS = [
+  { id: 'metamask', name: 'MetaMask', note: '浏览器扩展' },
+  { id: 'walletconnect', name: 'WalletConnect', note: '扫码连接' },
+  { id: 'coinbase', name: 'Coinbase Wallet', note: '移动端 App' }
+];
+let authEmailPending = '';
+
 function openLoginModal() {
-  // 移除已存在的弹窗
   const existing = document.getElementById('authLoginModal');
   if (existing) existing.remove();
 
@@ -199,104 +295,251 @@ function openLoginModal() {
     <div class="auth-modal">
       <button class="auth-modal-close" onclick="closeLoginModal()">✕</button>
       <div class="auth-modal-header">
-        <div class="auth-modal-logo">AI</div>
+        <div class="auth-modal-logo">SF</div>
         <h2>欢迎来到 Story.fun</h2>
-        <p>登录你的账号，开启 AI 短剧之旅</p>
+        <p>登录即创建你的链上钱包</p>
       </div>
       <div class="auth-modal-body">
-        <button class="auth-social-btn auth-social-email" onclick="mockLogin('email')">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          使用邮箱登录
+        <div id="authEmailStep1">
+          <label class="auth-field-label" for="authEmailInput">邮箱地址</label>
+          <input class="auth-input" id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com" />
+          <button class="auth-social-btn auth-social-email" id="authSendBtn" onclick="authSendCode()">发送验证码</button>
+        </div>
+        <div id="authEmailStep2" style="display:none">
+          <label class="auth-field-label" for="authCodeInput">验证码</label>
+          <input class="auth-input num" id="authCodeInput" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位验证码" />
+          <div class="auth-hint">演示环境：验证码固定为 <b>${AUTH_DEMO_CODE}</b></div>
+          <button class="auth-social-btn auth-social-email" id="authVerifyBtn" onclick="authVerifyCode()">验证并登录</button>
+          <button class="auth-text-btn" id="authResendBtn" onclick="authResendCode()">重新发送验证码</button>
+        </div>
+        <div class="auth-err" id="authEmailErr"></div>
+        <div class="auth-divider"><span>或使用其他方式</span></div>
+        <button class="auth-social-btn" id="authGoogleBtn" onclick="authSocial('google')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>
+          使用 Google 登录
         </button>
-        <p class="auth-modal-tos">
-          继续即表示同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a>
-        </p>
+        <button class="auth-social-btn" id="authTwitterBtn" onclick="authSocial('twitter')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4l16 16M20 4L4 20"/></svg>
+          使用 X 登录
+        </button>
+        <div class="auth-divider"><span>或使用钱包连接</span></div>
+        <button class="auth-wallet-btn" onclick="openWalletPicker()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/><circle cx="18" cy="12" r="2"/></svg>
+          连接钱包
+        </button>
+        <p class="auth-modal-tos">继续即表示同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a></p>
+        <p class="auth-modal-privy">由 Privy 提供（模拟）</p>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
-  // 触发动画
-  requestAnimationFrame(() => {
-    modal.classList.add('active');
-  });
+  requestAnimationFrame(() => { modal.classList.add('active'); });
   document.body.style.overflow = 'hidden';
+  const inp = document.getElementById('authEmailInput');
+  if (inp) setTimeout(() => { try { inp.focus(); } catch (e) {} }, 150);
 }
 
 function closeLoginModal() {
+  clearInterval(window._authCodeTimer);
   const modal = document.getElementById('authLoginModal');
   if (modal) {
     modal.classList.remove('active');
-    setTimeout(() => {
-      modal.remove();
-      document.body.style.overflow = '';
-    }, 300);
+    setTimeout(() => { modal.remove(); document.body.style.overflow = ''; }, 300);
   }
 }
 
-// ============================================================
-//  模拟钱包直连（替代登录弹窗；无 Privy）
-// ============================================================
-function simulateWalletConnect() {
-  currentUser.isLoggedIn = true;
-  currentUser.authMethod = 'wallet';
-  currentUser.name = '故事玩家';
-  currentUser.avatar = PRIVY_MOCK_USER.avatar;
-  saveUserToStorage(currentUser);
-  const containers = document.querySelectorAll('.auth-container');
-  containers.forEach(container => { renderAuthUI(container); });
-  closeLoginModal();
-  if (typeof showToast === 'function') showToast('✅ 已连接模拟钱包', '🔗');
-  document.dispatchEvent(new CustomEvent('auth-ready'));
+// ---- 邮箱两步：邮箱 → 验证码 ----
+function authSetErr(msg) {
+  const el = document.getElementById('authEmailErr');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.classList.toggle('show', !!msg);
 }
 
-// ============================================================
-//  模拟登录
-// ============================================================
-function mockLogin(method) {
-  const methodNames = {
-    google: 'Google',
-    twitter: 'X (Twitter)',
-    email: '邮箱'
+function authSendCode() {
+  const inp = document.getElementById('authEmailInput');
+  const v = ((inp && inp.value) || '').trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { authSetErr('请输入有效的邮箱地址'); return; }
+  authSetErr('');
+  authEmailPending = v;
+  const s1 = document.getElementById('authEmailStep1');
+  const s2 = document.getElementById('authEmailStep2');
+  if (s1) s1.style.display = 'none';
+  if (s2) s2.style.display = '';
+  const c = document.getElementById('authCodeInput');
+  if (c) { c.value = ''; try { c.focus(); } catch (e) {} }
+  authStartCountdown();
+  showToast('验证码已发送（演示：' + AUTH_DEMO_CODE + '）', '📧');
+}
+
+function authStartCountdown() {
+  const btn = document.getElementById('authResendBtn');
+  if (!btn) return;
+  let left = 60;
+  clearInterval(window._authCodeTimer);
+  const paint = () => {
+    btn.disabled = left > 0;
+    btn.textContent = left > 0 ? ('重新发送（' + left + 's）') : '重新发送验证码';
   };
+  paint();
+  window._authCodeTimer = setInterval(() => {
+    left -= 1;
+    if (left <= 0) { left = 0; clearInterval(window._authCodeTimer); }
+    paint();
+  }, 1000);
+}
 
-  // 显示加载状态
+function authResendCode() {
+  const btn = document.getElementById('authResendBtn');
+  if (btn && btn.disabled) return;
+  authStartCountdown();
+  showToast('验证码已重新发送（演示：' + AUTH_DEMO_CODE + '）', '📧');
+}
+
+function authVerifyCode() {
+  const el = document.getElementById('authCodeInput');
+  const v = ((el && el.value) || '').trim();
+  if (!/^\d{6}$/.test(v)) { authSetErr('请输入 6 位数字验证码'); return; }
+  if (v !== AUTH_DEMO_CODE) { authSetErr('验证码不正确，请重新输入'); return; }
+  authSetErr('');
+  authBusyAll(true);
+  setTimeout(() => { authBusyAll(false); finishLogin('email', { email: authEmailPending }); }, 700);
+}
+
+function authBusyAll(on) {
   const modal = document.getElementById('authLoginModal');
-  if (modal) {
-    const btns = modal.querySelectorAll('button');
-    btns.forEach(b => b.disabled = true);
-  }
+  if (!modal) return;
+  modal.querySelectorAll('button').forEach((b) => {
+    if (b.id === 'authResendBtn') return;   // 倒计时自行管理
+    b.disabled = !!on;
+  });
+}
 
+// ---- 社交登录（Google / X）：一步完成 ----
+function authSocial(method) {
+  authSetErr('');
+  authBusyAll(true);
+  setTimeout(() => { authBusyAll(false); finishLogin(method); }, 800);
+}
+
+// ---- 外部钱包：选择钱包 → 签名确认（可拒绝） ----
+function openWalletPicker() {
+  closeWalletPicker();
+  const el = document.createElement('div');
+  el.className = 'auth-modal-overlay';
+  el.id = 'authWalletModal';
+  el.innerHTML = `
+    <div class="auth-modal">
+      <button class="auth-modal-close" onclick="closeWalletPicker()">✕</button>
+      <div class="auth-modal-header">
+        <div class="auth-modal-logo">🔗</div>
+        <h2>连接钱包</h2>
+        <p>选择一个钱包完成连接</p>
+      </div>
+      <div class="auth-modal-body">
+        ${WALLET_OPTIONS.map((w) => `<button class="auth-wallet-item" onclick="openWalletSign('${w.id}')"><span class="auth-wallet-name">${w.name}</span><span class="auth-wallet-note">${w.note}</span></button>`).join('')}
+      </div>
+      <div class="auth-modal-privy">由 Privy 提供（模拟）</div>
+    </div>
+  `;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => { el.classList.add('active'); });
+}
+
+function closeWalletPicker() {
+  const el = document.getElementById('authWalletModal');
+  if (el) { el.classList.remove('active'); setTimeout(() => el.remove(), 250); }
+}
+
+function openWalletSign(walletId) {
+  const w = WALLET_OPTIONS.filter((x) => x.id === walletId)[0] || WALLET_OPTIONS[0];
+  closeWalletPicker();
+  window._authSignWallet = w;
+  const el = document.createElement('div');
+  el.className = 'auth-modal-overlay';
+  el.id = 'authSignModal';
+  el.innerHTML = `
+    <div class="auth-modal">
+      <div class="auth-modal-header">
+        <div class="auth-modal-logo">✍️</div>
+        <h2>签名确认</h2>
+        <p>${w.name} 请求你签名以连接 Story.fun</p>
+      </div>
+      <div class="auth-modal-body">
+        <div class="auth-sign-msg">
+          <div class="auth-sign-title">Story.fun 想要连接你的钱包</div>
+          <div class="auth-sign-body">此操作仅用于身份验证，不会产生链上交易，也不收取费用。</div>
+          <div class="auth-sign-addr num">${sfWalletMasked()}</div>
+        </div>
+        <div class="auth-sign-actions">
+          <button class="auth-sign-reject" onclick="authSignResult(false)">拒绝</button>
+          <button class="auth-sign-ok" id="authSignOkBtn" onclick="authSignResult(true)">签名并连接</button>
+        </div>
+      </div>
+      <div class="auth-modal-privy">由 Privy 提供（模拟）</div>
+    </div>
+  `;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => { el.classList.add('active'); });
+}
+
+function closeWalletSign() {
+  const el = document.getElementById('authSignModal');
+  if (el) { el.classList.remove('active'); setTimeout(() => el.remove(), 250); }
+}
+
+function authSignResult(ok) {
+  if (!ok) { closeWalletSign(); showToast('已取消钱包连接', '🚫'); return; }
+  const btn = document.getElementById('authSignOkBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '等待钱包确认…'; }
   setTimeout(() => {
-    // 登录成功
-    currentUser.isLoggedIn = true;
-    // 记录登录方式
-    currentUser.authMethod = method;
-    currentUser.name = '故事玩家';
-    currentUser.avatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
-    // 邮箱登录：带出示例邮箱（可按需替换）
-    if (method === 'email') {
-      currentUser.email = currentUser.email || 'user@example.com';
-    }
+    const w = window._authSignWallet || WALLET_OPTIONS[0];
+    closeWalletSign();
+    finishLogin('wallet', { walletName: w.name });
+  }, 900);
+}
 
-    // 保存登录态到 localStorage
-    saveUserToStorage(currentUser);
+// ---- 统一登录出口：写登录态 → 重渲染 → toast → auth-ready ----
+function finishLogin(method, opts) {
+  opts = opts || {};
+  currentUser.isLoggedIn = true;
+  currentUser.authMethod = method;
+  currentUser.authMethodLabel = AUTH_METHOD_LABEL[method] || 'Privy';
+  if (!currentUser.name) currentUser.name = '故事玩家';
+  if (!currentUser.avatar) currentUser.avatar = PRIVY_MOCK_USER.avatar;
+  if (method === 'email') currentUser.email = opts.email || currentUser.email || 'user@example.com';
+  if (opts.walletName) currentUser.walletName = opts.walletName;
+  saveUserToStorage(currentUser);
 
-    // 关闭弹窗
-    closeLoginModal();
+  closeLoginModal();
+  closeWalletPicker();
+  closeWalletSign();
+  refreshAccountSurfaces();
 
-    // 重新渲染所有 auth-container
-    const containers = document.querySelectorAll('.auth-container');
-    containers.forEach(container => {
-      renderAuthUI(container);
-    });
+  const addr = sfWalletMasked();
+  const msg = method === 'wallet'
+    ? ('已连接 ' + (opts.walletName || '外部钱包') + ' · ' + addr)
+    : ('已通过' + (AUTH_METHOD_LABEL[method] || 'Privy') + '登录 · 已创建内嵌钱包 ' + addr);
+  showToast('✅ ' + msg, '🎉');
+  document.dispatchEvent(new CustomEvent('auth-ready', { bubbles: true }));
+}
 
-    // 显示成功提示
-    showToast(`✅ 已通过 ${methodNames[method] || '邮箱'} 登录成功`, '🎉');
+// 登录 / 退出后刷新所有账户面（含只监听 window 的顶栏账户胶囊）
+function refreshAccountSurfaces() {
+  document.querySelectorAll('.auth-container').forEach(function (c) { renderAuthUI(c); });
+  if (typeof window.refreshDhEth === 'function') {
+    try { window.refreshDhEth(); } catch (e) {}
+  }
+}
 
-    // 触发 auth-ready 事件，通知其他页面更新
-    document.dispatchEvent(new CustomEvent('auth-ready'));
-  }, 800);
+// ---- 兼容旧调用 ----
+function simulateWalletConnect() { openWalletPicker(); }
+
+function mockLogin(method) {
+  if (method === 'email') { openLoginModal(); return; }
+  if (method === 'wallet') { openWalletPicker(); return; }
+  authSocial(method);
 }
 
 // ============================================================
@@ -344,10 +587,9 @@ function doLogout() {
   currentUser.authMethod = null;
   clearUserFromStorage();
   closeDropdown();
-  var containers = document.querySelectorAll(".auth-container");
-  containers.forEach(function(container){ renderAuthUI(container); });
+  refreshAccountSurfaces();
   showToast('👋 已退出登录', '👋');
-  document.dispatchEvent(new CustomEvent('auth-ready'));
+  document.dispatchEvent(new CustomEvent('auth-ready', { bubbles: true }));
 }
 
 function handleLogout() {
@@ -383,6 +625,25 @@ document.addEventListener('click', function(e){
     }
   }
 });
+
+// ============================================================
+//  复制钱包地址（全站唯一地址来源）
+// ============================================================
+function copyAuthAddress(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const a = sfWalletFull();
+  if (!a) { showToast('暂无可复制的钱包地址', '💡'); return; }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(a).then(
+        () => showToast('钱包地址已复制', '📋'),
+        () => showToast('复制失败，请手动选择地址', '💡')
+      );
+      return;
+    }
+  } catch (err) {}
+  showToast('当前环境不支持自动复制，请手动选择地址', '💡');
+}
 
 // ============================================================
 //  个人中心
@@ -448,9 +709,3 @@ if (document.readyState === 'loading') {
   initAuth();
 }
 
-// ============================================================
-//  模拟钱包直连：任何“登录”入口不再弹 Privy/邮箱，直接连接模拟钱包
-// ============================================================
-window.openLoginModal = function () {
-  if (!currentUser || !currentUser.isLoggedIn) simulateWalletConnect();
-};

@@ -450,11 +450,11 @@
     // ── 账户区：头像 + 脱敏地址（模拟钱包直连；无 Privy 登录） ──
     var DH_FALLBACK_AVATAR = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
     function dhIsConnected() {
+        if (window.currentWallet && typeof window.currentWallet.isConnected === 'function') return window.currentWallet.isConnected();
         try {
             var saved = JSON.parse(localStorage.getItem('storyfun_user') || 'null');
-            if (saved && saved.isLoggedIn === false) return false;
-        } catch (e) {}
-        return true;   // 默认已连接模拟钱包
+            return !!(saved && saved.isLoggedIn);
+        } catch (e) { return false; }
     }
     function dhMaskAddr(seed) {
         var h = 2166136261, i = 0;
@@ -468,6 +468,7 @@
         return DH_FALLBACK_AVATAR;
     }
     function dhWalletText() {
+        if (window.currentWallet && typeof window.currentWallet.masked === 'function') return window.currentWallet.masked();
         if (typeof window.Launch !== 'undefined' && Launch && Launch.walletText) return Launch.walletText();
         if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) return dhMaskAddr(currentUser.id);
         return '0xBD7e…bf0A';
@@ -482,7 +483,7 @@
         var dropAddr = document.getElementById('dhAcctDropAddr');
         if (!connected) {
             if (pillAv) pillAv.style.display = 'none';
-            if (pillAddr) { pillAddr.textContent = '连接钱包'; pillAddr.classList.add('is-null'); }
+            if (pillAddr) { pillAddr.textContent = '登录 / 注册'; pillAddr.classList.add('is-null'); }
             if (dropAv) dropAv.src = av;
             if (dropAddr) dropAddr.textContent = '—';
             return;
@@ -507,8 +508,7 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (!dhIsConnected()) {
-                    if (typeof window.simulateWalletConnect === 'function') window.simulateWalletConnect();
-                    fillDhEth();
+                    if (typeof window.openLoginModal === 'function') window.openLoginModal();
                     return;
                 }
                 w.classList.toggle('open');
@@ -517,16 +517,21 @@
             if (t.id === 'dhAcctCopy') {
                 e.preventDefault();
                 e.stopPropagation();
-                var addr = dhWalletText();
+                var addr = (window.currentWallet && typeof window.currentWallet.address === 'function') ? window.currentWallet.address() : dhWalletText();
                 if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).catch(function () {});
-                if (typeof showToast === 'function') showToast('地址已复制', '⧉');
+                if (typeof showToast === 'function') showToast('钱包地址已复制', '⧉');
                 return;
             }
             if (t.id === 'dhDisconnect') {
                 e.preventDefault();
                 e.stopPropagation();
-                try { localStorage.setItem('storyfun_user', JSON.stringify({ isLoggedIn: false, authMethod: null })); } catch (err) {}
-                setTimeout(function () { location.reload(); }, 120);
+                w.classList.remove('open');
+                if (typeof window.doLogout === 'function') {
+                    window.doLogout();          // 同步内存态 + 清存档 + 重渲染顶栏（无需整页刷新）
+                } else {
+                    try { localStorage.setItem('storyfun_user', JSON.stringify({ isLoggedIn: false, authMethod: null })); } catch (err) {}
+                    setTimeout(function () { location.reload(); }, 120);
+                }
                 return;
             }
             if (!t.closest('.dh-acct-wrap')) w.classList.remove('open');
