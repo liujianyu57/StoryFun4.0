@@ -1066,22 +1066,9 @@
     // ---- 配对资产（pons 同款自绘下拉：触发按钮 + 浮层选项） ----
     var pairSel = 'ETH';
     // 资产名称（与 pons 页面一致；选项行右侧展示）
-    var PAIR_NAMES = {
-      ETH: 'Ether', AAPL: 'Apple', AMD: 'Advanced Micro Devices', AMZN: 'Amazon',
-      BB: 'BlackBerry', COIN: 'Coinbase', COST: 'Costco', CRCL: 'Circle Internet Group',
-      DELL: 'Dell Technologies', DJT: 'Trump Media & Technology Group', FIG: 'Figma',
-      GLD: 'SPDR Gold Shares', GME: 'GameStop', GOOGL: 'Alphabet Class A',
-      HIMS: 'Hims & Hers Health', JNJ: 'Johnson & Johnson', LLY: 'Eli Lilly',
-      LULU: 'Lululemon Athletica', META: 'Meta Platforms', MRNA: 'Moderna',
-      MRVL: 'Marvell Technology', MSFT: 'Microsoft', MSTR: 'Strategy',
-      MU: 'Micron Technology', NVDA: 'NVIDIA', PFE: 'Pfizer', PLTR: 'Palantir Technologies',
-      QQQ: 'Invesco QQQ', RBLX: 'Roblox', RDDT: 'Reddit', RIVN: 'Rivian Automotive',
-      SKHY: 'SK hynix', SNAP: 'Snap', SNDK: 'SanDisk', SPCX: 'SpaceX Class A',
-      SPY: 'SPDR S&P 500 ETF', TSLA: 'Tesla', TSM: 'Taiwan Semiconductor Manufacturing',
-      TTWO: 'Take-Two Interactive', USO: 'United States Oil Fund', WYFI: 'WhiteFiber',
-      WETH: 'Wrapped Ether', USDG: 'USD Global', cbBTC: 'Coinbase Wrapped BTC'
-    };
-    function pairName(p) { return PAIR_NAMES[p] || p; }
+
+    // 资产全称统一取引擎（Launch.assetName），避免与资产面板各写一份
+    function pairName(p) { return (window.Launch && Launch.assetName) ? Launch.assetName(p) : p; }
     function pairIcoTxt(p) { return p === 'ETH' || p === 'WETH' ? 'Ξ' : p === 'cbBTC' ? '₿' : p === 'USDG' ? '$' : String(p).charAt(0); }
     function pairIcoCls(p) { return p === 'ETH' || p === 'WETH' ? 'eth' : p === 'USDG' || p === 'cbBTC' ? 'eth' : 'stk'; }
     function pairOptionHTML(p) {

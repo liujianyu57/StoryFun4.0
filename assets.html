@@ -25,10 +25,12 @@
     .as-stat.total .s span.up { color: #3BE08A; }
     .as-stat.total .s span.down { color: #FF7B8A; }
 
-    .as-tabs { display: flex; gap: 4px; margin: 24px 0 16px; border-bottom: 1px solid var(--border); }
+    .as-tabs { display: flex; gap: 4px; margin: 22px 0 14px; border-bottom: 1px solid var(--border);
+      overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .as-tab {
       border: none; background: none; padding: 10px 14px; font-size: 14px; font-weight: 600;
       color: var(--text-2); border-bottom: 2px solid transparent; margin-bottom: -1px;
+      cursor: pointer; white-space: nowrap; font-family: inherit;
     }
     .as-tab.on { color: var(--text); border-bottom-color: var(--accent); }
     .as-tab .cnt { font-size: 11px; color: var(--text-3); margin-left: 5px; }
@@ -162,19 +164,16 @@
 
     /* ===== Profile 骨架（参考 pons Profile） ===== */
     /* Creator fees 横幅 + 演示状态按钮（pons：有 claimable 才显示） */
-    .fees-banner { display: flex; align-items: center; gap: 12px; padding: 13px 16px; margin: 16px 0 14px;
-      background: #FFFBEB; border: 1px solid #F2E0A4; border-radius: 16px; }
+    .fees-banner { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 12px 0 14px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
     .fees-banner .fb-ic { width: 34px; height: 34px; border-radius: 50%; background: #0A0B0D; color: #fff;
       display: grid; place-items: center; font-size: 13px; flex: none; }
     .fees-banner .fb-txt { flex: 1; min-width: 0; }
-    .fees-banner .fb-txt b { display: block; font-size: 14px; font-weight: 800; }
-    .fees-banner .fb-txt small { display: block; font-size: 11.5px; color: #8a6d1a; margin-top: 2px; font-variant-numeric: tabular-nums; }
-    #fbClaim { border: none; border-radius: 999px; background: #0A0B0D; color: #fff; font-size: 13px;
-      font-weight: 700; padding: 9px 18px; cursor: pointer; flex: none; }
-    #fbClaim:hover { opacity: .9; }
-    #divClaim { border: none; border-radius: 999px; background: #0A0B0D; color: #fff; font-size: 13px;
-      font-weight: 700; padding: 9px 18px; cursor: pointer; flex: none; }
-    #divClaim:hover { opacity: .9; }
+    .fees-banner .fb-txt b { display: block; font-size: 13.5px; font-weight: 700; }
+    .fees-banner .fb-txt small { display: block; font-size: 11.5px; color: var(--text-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .fees-banner button { border: none; border-radius: 999px; background: var(--text); color: #fff; flex: none;
+      font-size: 12.5px; font-weight: 700; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
+    .fees-banner button:hover { opacity: .9; }
     .pos-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
     .fee-demo-btn { border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
       padding: 6px 12px; font-size: 11px; font-weight: 600; color: var(--text-2); cursor: pointer; white-space: nowrap; }
@@ -186,43 +185,169 @@
       border-radius: 999px; padding: 6px 14px; }
     .pf-visit b { font-weight: 700; }
     .pf-visit a { color: var(--text); font-weight: 700; text-decoration: underline; margin-left: 4px; }
-    .pf-hero { display: flex; align-items: center; gap: 16px; margin: 8px 0 20px; flex-wrap: wrap; }
+    .pf-hero { display: flex; flex-direction: column; gap: 16px; margin: 8px 0 16px; padding: 18px 20px 20px;
+      border-radius: 22px; background: var(--surface); border: 1px solid var(--border); }
     .pf-id { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    /* 身份行右侧：跳转到个人内容主页 */
+    .pf-id-link { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
+      padding: 6px 10px; border-radius: 10px; font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em;
+      color: var(--text-2); text-decoration: none; transition: background .15s ease, color .15s ease; }
+    .pf-id-link svg { width: 13px; height: 13px; }
+    .pf-id-link:hover { background: var(--accent-soft); color: var(--text); }
+    .pf-id-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .pf-avatar { width: 54px; height: 54px; border-radius: 50%; overflow: hidden; background: var(--text); color: #fff; display: grid; place-items: center; font-size: 20px; font-weight: 800; flex-shrink: 0; }
     .pf-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .pf-addr-row { display: flex; align-items: center; gap: 10px; min-width: 0; margin-top: 0; }
     .pf-addr { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text);
       word-break: break-all; overflow-wrap: anywhere; line-height: 1.45; letter-spacing: .01em; }
-    .pf-copy { border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-size: 11px; font-weight: 700; padding: 3px 10px; cursor: pointer; }
+    .pf-copy { border: 1px solid var(--border); border-radius: 999px; background: var(--surface-2); color: var(--text-2); font-size: 11px; font-weight: 700; padding: 3px 10px; cursor: pointer; font-family: inherit; }
     .pf-copy:hover { color: var(--text); border-color: var(--text-3); }
+    /* 地址复制：图标按钮（与身份行同一行，更紧凑） */
+    .pf-copy.ic { display: inline-grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 9px; flex-shrink: 0; }
+    .pf-copy.ic svg { width: 15px; height: 15px; display: block; }
 
     /* 钱包条：ETH 余额（钱包资产，不计入 Portfolio 口径） */
-    .pf-wallet { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 16px;
-      padding: 14px 18px; border-radius: 18px; background: var(--surface); border: 1px solid var(--border); }
-    .pf-wallet-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .pf-wallet-coin { width: 26px; height: 26px; border-radius: 50%; background: #627EEA; color: #fff; flex-shrink: 0;
+    .pf-wallet { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px;
+      padding-top: 16px; border-top: 1px dashed var(--border); }
+    .pf-wallet-main { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0;
+      padding: 2px 10px 2px 0; border: none; background: none; cursor: pointer; font-family: inherit; color: inherit;
+      text-align: left; border-radius: 12px; }
+    .pf-wallet-main:hover .pf-wallet-fig { opacity: .72; }
+    .pf-wallet-label { font-size: 12px; font-weight: 600; color: var(--text-3); }
+    .pf-wallet-fig { display: flex; align-items: baseline; gap: 10px; min-width: 0; transition: opacity .15s; }
+    .pf-wallet-num { font-size: 40px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; }
+    .pf-wallet-go { color: var(--text-3); flex-shrink: 0; align-self: center; }
+    .pf-wallet-coin { width: 22px; height: 22px; border-radius: 50%; background: #627EEA; color: #fff; flex-shrink: 0;
       display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
-    .pf-wallet-num { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
-    .pf-wallet-acts { display: flex; gap: 8px; margin-left: auto; }
-    .pf-wallet-btn { height: 34px; padding: 0 16px; border-radius: 999px; white-space: nowrap;
-      border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 12.5px; font-weight: 700; }
-    .pf-wallet-btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
-    /* 占位入口：充值 / 提现暂未开放——禁用态，不可点击 */
-    .pf-wallet-btn:disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
+    .pf-wallet-acts { display: flex; gap: 8px; }
+    .pf-wallet-btn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 18px;
+      border-radius: 999px; white-space: nowrap; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: background .16s ease, color .16s ease, border-color .16s ease,
+      box-shadow .16s ease, transform .12s ease; }
+    .pf-wallet-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .pf-wallet-btn:hover { border-color: var(--text-3); background: var(--surface-2); }
+    .pf-wallet-btn:active { transform: scale(.97); }
+    .pf-wallet-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .pf-wallet-btn.primary { background: var(--text); color: #fff; border-color: var(--text);
+      box-shadow: 0 1px 2px rgba(10, 11, 13, .16); }
+    .pf-wallet-btn.primary:hover { background: #1B1D21; border-color: #1B1D21; box-shadow: 0 6px 18px rgba(10, 11, 13, .22); }
+    /* 钱包资产面板：桌面居中面板，移动端全屏底部抽屉（自带隐藏态，避免首屏闪现） */
+    .ap-overlay { position: fixed; inset: 0; z-index: 2400; display: flex; align-items: center; justify-content: center;
+      padding: 24px; background: rgba(10, 11, 13, .32); opacity: 0; visibility: hidden;
+      transition: opacity .25s ease, visibility .25s ease; }
+    .ap-overlay.active { opacity: 1; visibility: visible; }
+    .ap-panel { width: 100%; max-width: 560px; max-height: min(80vh, 720px); background: var(--surface);
+      border-radius: 20px; padding: 18px 20px 8px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+      transform: translateY(10px) scale(.98); transition: transform .25s ease; }
+    .ap-overlay.active .ap-panel { transform: none; }
+    .ap-grip { display: none; }
+    .ap-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border); }
+    .ap-label { font-size: 12px; font-weight: 600; color: var(--text-3); }
+    .ap-total { display: flex; align-items: baseline; gap: 10px; margin-top: 3px; }
+    .ap-total strong { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+    .ap-head-acts { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .ap-head-btns { display: flex; gap: 8px; margin-top: 12px; }
+    .ap-head-btn { display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 16px;
+      border-radius: 999px; white-space: nowrap; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+      transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .12s ease; }
+    .ap-head-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .ap-head-btn:hover { border-color: var(--text-3); background: var(--surface-2); }
+    .ap-head-btn:active { transform: scale(.97); }
+    .ap-head-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .ap-head-btn.primary { background: var(--text); color: #fff; border-color: var(--text);
+      box-shadow: 0 1px 2px rgba(10, 11, 13, .16); }
+    .ap-head-btn.primary:hover { background: #1B1D21; border-color: #1B1D21; box-shadow: 0 6px 18px rgba(10, 11, 13, .22); }
+    .ap-close { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-2);
+      color: var(--text-2); cursor: pointer; font-size: 13px; line-height: 1; }
+    .ap-close:hover { color: var(--text); border-color: var(--border-strong); }
+    .ap-opt { display: flex; align-items: center; gap: 9px; padding: 10px 2px 8px; font-size: 12.5px;
+      color: var(--text-2); cursor: pointer; user-select: none; flex-shrink: 0; }
+    .ap-opt input { width: 16px; height: 16px; accent-color: var(--text); cursor: pointer; flex-shrink: 0; }
+    .ap-opt:hover { color: var(--text); }
+    .ap-body { overflow-y: auto; padding: 2px 0 12px; -webkit-overflow-scrolling: touch; }
+    .ap-group { font-size: 11.5px; font-weight: 700; color: var(--text-3); padding: 12px 2px 6px; }
+    .ap-row { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--border); }
+    .ap-row:last-child { border-bottom: none; }
+    .ap-ic { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--text);
+      display: grid; place-items: center; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+    .ap-main { flex: 1; min-width: 0; }
+    .ap-code { display: block; font-size: 14px; font-weight: 700; }
+    .ap-name { display: block; font-size: 11.5px; color: var(--text-3); margin-top: 2px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; }
+    .ap-bal { text-align: right; flex-shrink: 0; min-width: 96px; }
+    .ap-bal b { display: block; font-size: 13.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .ap-bal span { display: block; font-size: 11.5px; color: var(--text-3); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    @media (max-width: 768px) {
+      .ap-overlay { padding: 0; align-items: flex-end; }
+      .ap-panel { max-width: none; max-height: 88vh; border-radius: 20px 20px 0 0; padding: 10px 16px 0; }
+      .ap-grip { display: block; width: 36px; height: 4px; border-radius: 999px; background: var(--border-strong); margin: 4px auto 10px; }
+      .ap-body { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+      .ap-bal { min-width: 80px; }
+      .ap-head-btns { width: 100%; }
+      .ap-head-btn { flex: 1; }
+    }
+
+    /* 充值 / 提现面板：自带弹层基础样式与隐藏态（不依赖运行期注入，避免首屏闪现）
+       显示类统一用 .active，与 auth.js / 其它页面的 auth-modal-overlay 约定一致 */
+    #depositModal, #withdrawModal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center;
+      justify-content: center; padding: 24px; background: rgba(15, 23, 42, .4);
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+      opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s ease; }
+    #depositModal.active, #withdrawModal.active { opacity: 1; visibility: visible; }
+    #depositModal .auth-modal, #withdrawModal .auth-modal { width: 100%; max-width: 420px; background: #fff;
+      border-radius: 20px; padding: 22px; box-shadow: 0 20px 60px rgba(27, 45, 71, .2);
+      transform: scale(.96) translateY(8px); transition: transform .3s ease; }
+    #depositModal.active .auth-modal, #withdrawModal.active .auth-modal { transform: none; }
+    .dp-qr { display: grid; place-items: center; margin: 4px 0 14px; }
+    .dp-qr-frame { width: 168px; height: 168px; border-radius: 16px; border: 1px solid var(--border);
+      background: var(--surface-2); padding: 10px; box-sizing: border-box; display: grid; place-items: center; }
+    .dp-qr-frame svg { width: 100%; height: 100%; display: block; }
+    .dp-qr-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+    .dp-asset { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; margin: 0 0 14px;
+      border: 1px solid var(--border); border-radius: 14px; background: var(--surface); cursor: pointer;
+      font-family: inherit; text-align: left; color: inherit; }
+    .dp-asset:hover { border-color: var(--border-strong); }
+    .dp-asset .ap-ic { width: 32px; height: 32px; }
+    .dp-asset-switch { font-size: 11.5px; font-weight: 700; color: var(--text-3); flex-shrink: 0; }
+    .dp-addr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin: 0 0 14px;
+      border: 1px dashed var(--border-strong); border-radius: 14px; background: var(--surface-2); }
+    .dp-addr code { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px; word-break: break-all; line-height: 1.5; }
+    .wm-field { display: grid; gap: 6px; margin-top: 12px; }
+    .wm-field label { font-size: 12px; font-weight: 600; color: var(--text-3); }
+    .wm-amt-row { display: flex; gap: 8px; align-items: center; }
+    .wm-amt-row .input { flex: 1; min-width: 0; }
+    .wm-max { height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text-2); font-family: inherit; font-size: 12px; font-weight: 700;
+      cursor: pointer; flex-shrink: 0; }
+    .wm-max:hover { color: var(--text); border-color: var(--border-strong); }
+    .wm-err { display: none; color: var(--down); font-size: 12px; margin-top: 6px; }
+    .wm-err.show { display: block; }
+    .wm-review { display: grid; gap: 7px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
+    .wm-row { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--text-2); }
+    .wm-row b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+
     @media (max-width: 560px) {
-      .pf-wallet-acts { margin-left: 0; width: 100%; }
+      .pf-hero { padding: 16px; }
+      .pf-wallet { flex-direction: column; align-items: stretch; gap: 14px; }
+      .pf-wallet-num { font-size: 34px; }
+      .pf-wallet-acts { width: 100%; }
       .pf-wallet-btn { flex: 1; }
     }
+
     /* Portfolio：上=余额块，下=通栏大图（参考 .profile-portfolio-overview 单列 grid） */
     .pf-portfolio { border-radius: 22px; padding: 22px 24px; display: grid; gap: 20px; background: var(--surface); border: 1px solid var(--border); }
     .pf-balance { display: grid; justify-items: start; gap: 4px; }
     .pf-bal-label { font-size: 12px; color: var(--text-3); }
     .pf-bal-num { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
-    .pf-bal-sub { font-size: 12.5px; color: var(--text-2); }
-    .pf-chart { display: flex; flex-direction: column; gap: 10px; min-height: 320px; }
-    .pf-chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    .pf-chart-price { font-size: 20px; font-weight: 800; }
+    .pf-bal-sub { font-size: 12.5px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+    .pf-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .pf-top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
     .pf-chart-price .pf-pnl-rng { font-size: 12px; font-weight: 600; color: var(--text-3); margin-left: 8px; }
+    .pf-chart { display: block; }
+    .pf-chart-price { font-size: 16px; font-weight: 800; }
     .pf-ranges { display: flex; gap: 4px; }
     .pf-ranges button { height: 28px; padding: 0 12px; border-radius: 999px; border: none; background: none; color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; }
     .pf-ranges button.on { background: var(--accent-soft); color: var(--text); }
@@ -247,27 +372,146 @@
   <main class="launch-shell">
     <!-- 身份 hero -->
     <div class="pf-visit" id="pfVisitBar" style="display:none"><b>访客视图</b>· 演示数据 · <a href="assets.html">返回我的资产</a></div>
-    <div class="pf-hero" id="pfHero">
+    <div class="pf-hero" id="pfHero" style="display:none">
       <div class="pf-id">
         <div class="pf-avatar" id="pfAvatar">—</div>
         <div style="min-width:0">
           <div class="pf-addr-row">
             <span class="pf-addr num" id="pfAddr">—</span>
-            <button type="button" class="pf-copy" id="pfCopy">复制</button>
+            <button type="button" class="pf-copy ic" id="pfCopy" title="复制地址" aria-label="复制地址">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="2"/><path d="M12 6h.5A1.5 1.5 0 0 1 14 7.5v5A1.5 1.5 0 0 1 12.5 14h-5A1.5 1.5 0 0 1 6 12.5V12"/></svg>
+            </button>
+          </div>
+        </div>
+        <a class="pf-id-link" id="pfProfileLink" href="profile-center.html" title="个人主页">
+          Profile
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+      <!-- 钱包：Σ 计价资产余额（大数字）+ 充值 / 提现（不计入 Portfolio 口径） -->
+      <div class="pf-wallet" id="walletStrip">
+        <button type="button" class="pf-wallet-main" id="walletEntry" aria-haspopup="dialog" aria-label="查看钱包资产">
+          <span class="pf-wallet-label">Balance</span>
+          <span class="pf-wallet-fig">
+            <strong class="pf-wallet-num num" id="walletTotal">—</strong>
+            <svg class="pf-wallet-go" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </span>
+        </button>
+        <div class="pf-wallet-acts">
+          <button type="button" class="pf-wallet-btn primary" id="topupBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v10"/><path d="M8 9.5l4 3.5 4-3.5"/><path d="M4 16.5V18a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1.5"/></svg><span>充值</span></button>
+          <button type="button" class="pf-wallet-btn" id="withdrawBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"/><path d="M8 14.5l4-3.5 4 3.5"/><path d="M4 7.5V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1.5"/></svg><span>提现</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 钱包资产面板：桌面居中面板 / 移动端全屏抽屉（分组 + 市值降序 + 每行充值/提现/领取） -->
+    <div class="ap-overlay" id="assetPanel" onclick="if(event.target===this)closeAssetPanel()">
+      <div class="ap-panel" role="dialog" aria-modal="true" aria-label="钱包资产">
+        <div class="ap-grip"></div>
+        <div class="ap-head">
+          <div class="ap-head-main">
+            <span class="ap-label">Balance</span>
+            <div class="ap-total"><strong class="num" id="apTotal">—</strong></div>
+            <div class="ap-head-btns">
+              <button type="button" class="ap-head-btn primary" id="apTopup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v10"/><path d="M8 9.5l4 3.5 4-3.5"/><path d="M4 16.5V18a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1.5"/></svg><span>充值</span></button>
+              <button type="button" class="ap-head-btn" id="apWithdraw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"/><path d="M8 14.5l4-3.5 4 3.5"/><path d="M4 7.5V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1.5"/></svg><span>提现</span></button>
+            </div>
+          </div>
+          <div class="ap-head-acts">
+            <button type="button" class="ap-close" onclick="closeAssetPanel()" aria-label="关闭">✕</button>
+          </div>
+        </div>
+        <!-- 列表选项：默认隐藏 $1 以下资产（灰尘余额） -->
+        <label class="ap-opt" for="apHideDust">
+          <input type="checkbox" id="apHideDust" checked />
+          <span>隐藏 $1 以下资产</span>
+        </label>
+        <div class="ap-body" id="apBody"></div>
+      </div>
+    </div>
+
+    <!-- 充值：接收 ETH（收款地址 + 二维码 + 网络/到账说明） -->
+    <div class="auth-modal-overlay" id="depositModal" onclick="if(event.target===this)closeDeposit()">
+      <div class="auth-modal">
+        <button class="auth-modal-close" onclick="closeDeposit()">✕</button>
+        <div class="auth-modal-header">
+          <div class="auth-modal-logo">↓</div>
+          <h2>充值</h2>
+          <p>转入下方地址即可，到账后用于交易与网络费</p>
+        </div>
+        <div class="auth-modal-body">
+          <button type="button" class="dp-asset" id="depAssetBtn">
+            <span class="ap-ic" id="depIcon">Ξ</span>
+            <span class="ap-main"><span class="ap-code" id="depAsset">ETH</span><span class="ap-name" id="depAssetName">以太坊（原生）</span></span>
+            <span class="dp-asset-switch">切换资产</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+          <div class="dp-qr">
+            <div class="dp-qr-frame" aria-hidden="true">
+              <svg viewBox="0 0 29 29" shape-rendering="crispEdges">
+                <rect width="29" height="29" fill="#fff"/>
+                <g fill="#0A0B0D">
+                  <path d="M0 0h7v7H0zM1 1v5h5V1zM22 0h7v7h-7zM23 1v5h5V1zM0 22h7v7H0zM1 23v5h5v-5zM9 0h1v1H9zM11 0h1v2h-1zM13 1h2v1h-2zM9 2h2v1H9zM12 3h1v2h-1zM14 3h1v1h-1zM9 5h1v1H9zM11 5h2v1h-2zM14 5h2v1h-2zM0 9h1v1H0zM2 9h2v1H2zM5 9h2v1H5zM0 11h2v1H0zM3 11h1v2H3zM5 12h2v1H5zM1 13h1v1H1zM0 14h1v1H0zM4 14h2v1H4zM22 9h1v1h-1zM24 9h2v1h-2zM27 9h2v1h-2zM23 11h2v1h-2zM26 11h1v2h-1zM22 12h1v1h-1zM24 13h2v1h-2zM27 14h2v1h-2zM9 22h1v1H9zM11 22h2v1h-2zM14 22h1v2h-1zM9 24h2v1H9zM12 24h1v1h-1zM9 26h1v1H9zM11 26h2v1h-2zM14 26h2v1h-2zM22 22h1v1h-1zM24 22h2v1h-2zM27 22h2v1h-2zM23 24h2v1h-2zM26 24h1v1h-1zM22 26h1v1h-1zM24 26h2v1h-2z"/>
+                </g>
+              </svg>
+            </div>
+            <div class="dp-qr-note">二维码示意（演示占位）</div>
+          </div>
+          <div class="dp-addr"><code id="depAddr">—</code></div>
+          <div class="dp-addr" id="depContractRow" style="display:none">
+            <code id="depContract">—</code>
+            <button type="button" class="pf-copy" id="depCopyContract">复制合约</button>
+          </div>
+          <div class="auth-sign-msg">
+            <div class="auth-sign-body" style="margin-top:0" id="depNote">仅支持 Robinhood Chain 上的 ETH，使用其它网络转入将无法找回；到账以链上确认为准。</div>
+          </div>
+          <div class="auth-sign-actions">
+            <button class="auth-sign-reject" onclick="closeDeposit()">关闭</button>
+            <button class="auth-sign-ok" id="depCopy">复制地址</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 钱包条：ETH 余额（钱包资产，不计入 Portfolio balance）+ 充值 / 提现占位入口 -->
-    <div class="pf-wallet" id="walletStrip">
-      <div class="pf-wallet-main">
-        <span class="pf-wallet-coin">Ξ</span>
-        <strong class="pf-wallet-num num" id="walletEth">—</strong>
-      </div>
-      <div class="pf-wallet-acts">
-        <button type="button" class="pf-wallet-btn primary" id="topupBtn" disabled title="充值功能暂未开放">充值</button>
-        <button type="button" class="pf-wallet-btn" id="withdrawBtn" disabled title="提现功能暂未开放">提现</button>
+    <!-- 提现：转到外部钱包（校验 + 签名确认 + 上链状态） -->
+    <div class="auth-modal-overlay" id="withdrawModal" onclick="if(event.target===this)closeWithdraw()">
+      <div class="auth-modal">
+        <button class="auth-modal-close" onclick="closeWithdraw()">✕</button>
+        <div class="auth-modal-header">
+          <div class="auth-modal-logo">↑</div>
+          <h2>提现</h2>
+          <p>发起链上转账，需在钱包中签名确认</p>
+        </div>
+        <div class="auth-modal-body">
+          <button type="button" class="dp-asset" id="wdAssetBtn">
+            <span class="ap-ic" id="wdIcon">Ξ</span>
+            <span class="ap-main"><span class="ap-code" id="wdAsset">ETH</span><span class="ap-name" id="wdAssetName">以太坊（原生）</span></span>
+            <span class="dp-asset-switch">切换资产</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+          <div class="wm-field">
+            <label for="wdAddr">目标地址</label>
+            <input class="input" id="wdAddr" placeholder="0x 开头的 40 位地址" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="wm-field">
+            <label for="wdAmt">金额（ETH）</label>
+            <div class="wm-amt-row">
+              <input class="input" id="wdAmt" type="number" min="0" step="any" placeholder="0.0" />
+              <button type="button" class="wm-max" id="wdMax">MAX</button>
+            </div>
+          </div>
+          <div class="wm-err" id="wdErr"></div>
+          <div class="wm-review">
+            <div class="wm-row"><span>可用余额</span><b id="wdAvail">—</b></div>
+            <div class="wm-row"><span>网络费（预估）</span><b id="wdFee">—</b></div>
+            <div class="wm-row"><span>到账数量</span><b id="wdRecv">—</b></div>
+            <div class="wm-row"><span>ETH 余额（付 gas）</span><b id="wdGas">—</b></div>
+          </div>
+          <div class="auth-sign-actions">
+            <button class="auth-sign-reject" onclick="closeWithdraw()">取消</button>
+            <button class="auth-sign-ok" id="wdSubmit" disabled>确认提现</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -286,30 +530,30 @@
     </div>
 
     <!-- Portfolio：上余额块 + 下通栏大图 -->
-    <div class="pf-portfolio" id="pfPortfolio">
-      <div class="pf-balance">
-        <span class="pf-bal-label">Portfolio balance</span>
-        <strong class="pf-bal-num num" id="pfBal">—</strong>
-        <small class="pf-bal-sub" id="pfBalSub">—</small>
-      </div>
-      <div class="pf-chart">
-        <div class="pf-chart-head">
-          <p class="pf-chart-price num" id="pfPnlHead">$0<span class="pf-pnl-rng">PnL · 1d</span></p>
+    <div class="pf-portfolio" id="pfPortfolio" style="display:none">
+      <div class="pf-top">
+        <div class="pf-balance">
+          <span class="pf-bal-label">Portfolio</span>
+          <strong class="pf-bal-num num" id="pfBal">—</strong>
+          <small class="pf-bal-sub" id="pfBalSub">—</small>
+        </div>
+        <div class="pf-top-right">
           <div class="pf-ranges" id="pfRanges">
             <button type="button" class="on" data-r="1d">1D</button>
             <button type="button" data-r="7d">7D</button>
             <button type="button" data-r="30d">30D</button>
           </div>
+          <p class="pf-chart-price num" id="pfPnlHead">$0</p>
         </div>
-        <canvas class="pf-canvas" id="pfChart"></canvas>
       </div>
+      <canvas class="pf-canvas" id="pfChart"></canvas>
     </div>
 
     <div class="as-tabs">
-      <button class="as-tab on" data-t="hold">Positions</button>
-      <button class="as-tab" data-t="closed">History</button>
-      <button class="as-tab" data-t="tx">Activity</button>
-      <button class="as-tab" data-t="made">Launches</button>
+      <button class="as-tab on" data-t="hold">Positions<span class="cnt" id="tabCntHold"></span></button>
+      <button class="as-tab" data-t="closed">History<span class="cnt" id="tabCntClosed"></span></button>
+      <button class="as-tab" data-t="tx">Activity<span class="cnt" id="tabCntTx"></span></button>
+      <button class="as-tab" data-t="made">Launches<span class="cnt" id="tabCntMade"></span></button>
     </div>
 
     <div id="asContent">
@@ -464,6 +708,8 @@
       var bar = document.getElementById('pfVisitBar');
       if (bar) bar.style.display = visitorAddr ? '' : 'none';
       function fullAddr() {
+        // 单一地址来源：auth.js 的 currentWallet（同账号全站同一串）
+        if (window.currentWallet && typeof window.currentWallet.address === 'function') return window.currentWallet.address();
         var uid = (window.Launch && Launch.USER && Launch.USER.id) ? Launch.USER.id : 'demo';
         var seedStr = 'user:' + uid, h = 2166136261, i2;
         for (i2 = 0; i2 < seedStr.length; i2++) { h ^= seedStr.charCodeAt(i2); h = Math.imul(h, 16777619) >>> 0; }
@@ -480,7 +726,12 @@
       } else {
         av.textContent = '?';
       }
-      document.getElementById('pfAddr').textContent = displayAddr;
+      var plink = document.getElementById('pfProfileLink');
+      if (plink) plink.style.display = visitorAddr ? 'none' : '';
+      var addrEl = document.getElementById('pfAddr');
+      addrEl.textContent = displayAddr.slice(0, 6) + '…' + displayAddr.slice(-4);
+      addrEl.dataset.full = displayAddr;
+      addrEl.title = displayAddr;
       // Portfolio
       document.getElementById('pfBal').textContent = Launch.fmtUsd(totalValUsd);
       // pons：Across N open pons position(s)
@@ -494,7 +745,7 @@
 
     // ============================================================
     //  钱包条：ETH 余额
-    //  口径：ETH 属钱包资产，与 Portfolio balance（Σ持仓市值）分开统计
+    //  口径：钱包资产与 Portfolio（Σ持仓市值）分开统计
     // ============================================================
     function ethBal() {
       return (window.Launch && typeof Launch.balanceOf === 'function') ? Launch.balanceOf('ETH') : 0;
@@ -502,11 +753,324 @@
     function fmtEth(q) {
       return (window.Launch && typeof Launch.fmtQty === 'function' ? Launch.fmtQty(q) : String(q)) + ' ETH';
     }
-    function renderWallet() {
-      var q = ethBal();
-      var el = document.getElementById('walletEth');
-      if (el) el.textContent = fmtEth(q);
+    function assetBal(sym) {
+      return (window.Launch && typeof Launch.balanceOf === 'function') ? Launch.balanceOf(sym) : 0;
     }
+    function fmtAsset(sym, q) {
+      var n = (window.Launch && typeof Launch.fmtQty === 'function') ? Launch.fmtQty(q) : String(q);
+      return n + ' ' + sym;
+    }
+    function assetUsd(sym, q) {
+      if (!window.Launch || !Launch.assetPrice) return 0;
+      var px = Launch.assetPrice(sym);
+      return px ? (q || 0) * px : 0;
+    }
+    // 钱包条 / 资产面板：Σ 计价资产 USD + 资产数（多资产口径，与 Portfolio 持仓市值分开）
+    function renderWallet() {
+      var sum = (window.Launch && typeof Launch.walletSummary === 'function')
+        ? Launch.walletSummary() : { totalUsd: 0, heldCount: 0, allCount: 0 };
+      var usdTxt = (window.Launch && Launch.fmtUsd) ? Launch.fmtUsd(sum.totalUsd) : '$0';
+      var el = document.getElementById('walletTotal');
+      if (el) el.textContent = usdTxt;
+      var apT = document.getElementById('apTotal');
+      if (apT) apT.textContent = usdTxt;
+    }
+    function walletAddr() {
+      var el = document.getElementById('pfAddr');
+      return (el && (el.dataset.full || el.textContent)) || '';
+    }
+    function isDebug() {
+      try {
+        if ((window.location.search || '').indexOf('debug=1') !== -1) return true;
+        return localStorage.getItem('sf_debug') === '1';
+      } catch (e) { return false; }
+    }
+    function syncTabCounts() {
+      var set = function (id, n) { var el = document.getElementById(id); if (el) el.textContent = n ? String(n) : ''; };
+      set('tabCntHold', myHoldings().length);
+      set('tabCntClosed', (Launch.USER.closed || []).length);
+      set('tabCntTx', (Launch.USER.tx || []).length);
+      set('tabCntMade', myCreated().length);
+    }
+
+    // ============================================================
+    //  钱包资产面板（桌面居中面板 / 移动端全屏抽屉）
+    //  分组：加密资产 / 股票；组内按 USD 市值降序；默认隐藏 $1 以下资产
+    // ============================================================
+    var AP_DUST_USD = 1;         // 灰尘阈值：美元估值低于该值的资产默认隐藏
+    var apHideDust = true;       // 「隐藏 $1 以下资产」勾选状态（默认勾选）
+    function apGroups() {
+      if (window.Launch && typeof Launch.quoteGroups === 'function') return Launch.quoteGroups();
+      return [{ g: '加密资产', rows: ['ETH'] }];
+    }
+    function apSortedRows() {
+      var out = [];
+      apGroups().forEach(function (grp) {
+        var rows = grp.rows.map(function (sym) {
+          var q = assetBal(sym);
+          return { sym: sym, qty: q, usd: assetUsd(sym, q) };
+        }).filter(function (r) {
+          return apHideDust ? r.usd >= AP_DUST_USD : true;
+        }).sort(function (a, b) { return b.usd - a.usd; });
+        if (rows.length) out.push({ g: grp.g, rows: rows });
+      });
+      return out;
+    }
+    function apRowHtml(r) {
+      var icon = (window.Launch && Launch.assetIcon) ? Launch.assetIcon(r.sym) : '$';
+      var name = (window.Launch && Launch.assetName) ? Launch.assetName(r.sym) : r.sym;
+      return '<div class="ap-row" data-sym="' + esc(r.sym) + '">' +
+        '<span class="ap-ic">' + icon + '</span>' +
+        '<span class="ap-main"><span class="ap-code">' + esc(r.sym) + '</span><span class="ap-name">' + esc(name) + '</span></span>' +
+        '<span class="ap-bal"><b class="num">' + Launch.fmtQty(r.qty) + '</b><span class="num">≈ ' + Launch.fmtUsd(r.usd) + '</span></span>' +
+      '</div>';
+    }
+    function renderAssetPanel() {
+      var host = document.getElementById('apBody');
+      if (!host) return;
+      var groups = apSortedRows();
+      if (!groups.length) {
+        host.innerHTML = '<div class="empty" style="padding:40px 12px"><div class="empty-title">没有可显示的资产</div>' +
+          '<div class="empty-desc">' + (apHideDust ? '已隐藏 $1 以下的资产，取消勾选可查看全部' : '当前钱包暂无计价资产') + '</div></div>';
+        return;
+      }
+      host.innerHTML = groups.map(function (grp) {
+        return '<div class="ap-group">' + esc(grp.g) + '</div>' + grp.rows.map(apRowHtml).join('');
+      }).join('');
+    }
+    function openAssetPanel() {
+      if (!walletGuard()) return;
+      renderWallet();
+      renderAssetPanel();
+      document.getElementById('assetPanel').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeAssetPanel() {
+      document.getElementById('assetPanel').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    // 弹层关闭后：若资产面板仍开着，继续保持页面不滚动
+    function restoreScroll() {
+      var p = document.getElementById('assetPanel');
+      document.body.style.overflow = (p && p.classList.contains('active')) ? 'hidden' : '';
+    }
+
+    // ============================================================
+    //  充值 / 提现（任意计价资产；提现含签名确认与两段上链状态）
+    //  gas 固定以 ETH 计价：非 ETH 资产提现需校验 ETH 余额
+    // ============================================================
+    var WD_GAS_RESERVE = 0.002;              // 提现需预留的网络费（ETH）
+    var depSym = 'ETH';                      // 充值当前资产
+    var wdSym = 'ETH';                       // 提现当前资产
+    function walletGuard() {
+      if (visitorAddr) { Launch.toast('访客视图不可操作', 'warn'); return false; }
+      if (!Launch.isLoggedIn()) {
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return false;
+      }
+      return true;
+    }
+    // ---- 资产选择器（充提弹层内切换资产） ----
+    function openAssetPicker(target, cb) {
+      var el = document.getElementById('assetPicker');
+      if (el) el.remove();
+      window._apPickCb = cb;
+      var host = document.createElement('div');
+      host.className = 'ap-overlay';
+      host.id = 'assetPicker';
+      host.style.zIndex = 2600;
+      host.innerHTML = '<div class="ap-panel" style="max-width:420px;max-height:70vh">' +
+        '<div class="ap-head"><div class="ap-head-main"><span class="ap-label">选择资产</span></div>' +
+        '<button type="button" class="ap-close" id="apPickClose" aria-label="关闭">✕</button></div>' +
+        '<div class="ap-body" id="apPickBody"></div></div>';
+      document.body.appendChild(host);
+      var body = host.querySelector('#apPickBody');
+      apGroups().forEach(function (grp) {
+        var rows = grp.rows.map(function (sym) {
+          var q = assetBal(sym);
+          var icon = (window.Launch && Launch.assetIcon) ? Launch.assetIcon(sym) : '$';
+          return '<div class="ap-row" data-pick="' + esc(sym) + '" style="cursor:pointer">' +
+            '<span class="ap-ic">' + icon + '</span>' +
+            '<span class="ap-main"><span class="ap-code">' + esc(sym) + '</span>' +
+            '<span class="ap-name">' + esc((window.Launch && Launch.assetName) ? Launch.assetName(sym) : sym) + '</span></span>' +
+            '<span class="ap-bal"><b class="num">' + Launch.fmtQty(q) + '</b><span class="num">≈ ' + Launch.fmtUsd(assetUsd(sym, q)) + '</span></span>' +
+          '</div>';
+        }).join('');
+        body.insertAdjacentHTML('beforeend', '<div class="ap-group">' + esc(grp.g) + '</div>' + rows);
+      });
+      body.addEventListener('click', function (e) {
+        var row = e.target.closest ? e.target.closest('[data-pick]') : null;
+        if (!row) return;
+        var sym = row.getAttribute('data-pick');
+        closeAssetPicker();
+        if (typeof window._apPickCb === 'function') window._apPickCb(sym);
+      });
+      host.querySelector('#apPickClose').addEventListener('click', closeAssetPicker);
+      host.addEventListener('click', function (e) { if (e.target === host) closeAssetPicker(); });
+      requestAnimationFrame(function () { host.classList.add('active'); });
+    }
+    function closeAssetPicker() {
+      var el = document.getElementById('assetPicker');
+      if (el) { el.classList.remove('active'); setTimeout(function () { el.remove(); }, 200); }
+    }
+
+    // ---- 充值（接收资产） ----
+    function depRender() {
+      var sym = depSym;
+      var native = (sym === 'ETH');
+      var contract = (window.Launch && Launch.assetContract) ? Launch.assetContract(sym) : '';
+      document.getElementById('depAsset').textContent = sym;
+      document.getElementById('depAssetName').textContent = (window.Launch && Launch.assetName) ? Launch.assetName(sym) : sym;
+      document.getElementById('depIcon').textContent = (window.Launch && Launch.assetIcon) ? Launch.assetIcon(sym) : '$';
+      var conRow = document.getElementById('depContractRow');
+      if (conRow) conRow.style.display = (!native && contract) ? '' : 'none';
+      if (!native && contract) document.getElementById('depContract').textContent = contract;
+      document.getElementById('depAddr').textContent = walletAddr() || '—';
+      document.getElementById('depNote').textContent = native
+        ? '仅支持 Robinhood Chain 上的 ETH，使用其它网络转入将无法找回；到账以链上确认为准。'
+        : '仅支持 Robinhood Chain 上的 ' + sym + '（上方合约地址），转入其它网络或其它代币将无法找回；到账以链上确认为准。';
+    }
+    function openDeposit(sym) {
+      if (!walletGuard()) return;
+      depSym = sym || depSym || 'ETH';
+      depRender();
+      document.getElementById('depositModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDeposit() {
+      document.getElementById('depositModal').classList.remove('active');
+      restoreScroll();
+    }
+    // ---- 提现（转到外部地址） ----
+    function wdErr(msg) {
+      var e = document.getElementById('wdErr');
+      if (!e) return;
+      e.textContent = msg || '';
+      e.classList.toggle('show', !!msg);
+    }
+    function wdValid() {
+      var addr = (document.getElementById('wdAddr').value || '').trim();
+      var raw = document.getElementById('wdAmt').value;
+      var amt = parseFloat(raw);
+      var bal = assetBal(wdSym);
+      var own = (walletAddr() || '').toLowerCase();
+      if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) return { ok: false, msg: addr ? '请输入完整的 0x 地址（40 位十六进制）' : '' };
+      if (/^0x0{40}$/i.test(addr)) return { ok: false, msg: '不能提现到零地址' };
+      if (addr.toLowerCase() === own) return { ok: false, msg: '不能提现到当前钱包地址' };
+      if (!(amt > 0)) return { ok: false, msg: raw ? '请输入大于 0 的金额' : '' };
+      // 网络费（gas）固定消耗 ETH：非 ETH 资产也需持有足够 ETH
+      var gasOk = ethBal() >= WD_GAS_RESERVE;
+      if (!gasOk) return { ok: false, msg: 'ETH 余额不足，需预留网络费约 ' + WD_GAS_RESERVE + ' ETH' };
+      var limit = (wdSym === 'ETH') ? (bal - WD_GAS_RESERVE) : bal;
+      if (amt > limit) {
+        return { ok: false, msg: (wdSym === 'ETH')
+          ? ('超出可用余额，需预留网络费约 ' + WD_GAS_RESERVE + ' ETH')
+          : ('超出 ' + wdSym + ' 可用余额') };
+      }
+      return { ok: true, addr: addr, amt: amt };
+    }
+    var wdBusy = false;
+    function syncWd() {
+      var r = wdValid();
+      var raw = parseFloat(document.getElementById('wdAmt').value);
+      document.getElementById('wdAsset').textContent = wdSym;
+      document.getElementById('wdAssetName').textContent = (window.Launch && Launch.assetName) ? Launch.assetName(wdSym) : wdSym;
+      document.getElementById('wdIcon').textContent = (window.Launch && Launch.assetIcon) ? Launch.assetIcon(wdSym) : '$';
+      document.getElementById('wdAvail').textContent = fmtAsset(wdSym, assetBal(wdSym));
+      document.getElementById('wdFee').textContent = '≈ ' + fmtEth(WD_GAS_RESERVE) + '（ETH）';
+      document.getElementById('wdRecv').textContent = fmtAsset(wdSym, raw > 0 ? raw : 0);
+      var gas = document.getElementById('wdGas');
+      if (gas) gas.textContent = fmtEth(ethBal());
+      wdErr(r.ok ? '' : r.msg);
+      document.getElementById('wdSubmit').disabled = !r.ok || wdBusy;
+    }
+    function openWithdraw(sym) {
+      if (!walletGuard()) return;
+      wdSym = sym || wdSym || 'ETH';
+      document.getElementById('wdAddr').value = '';
+      document.getElementById('wdAmt').value = '';
+      wdBusy = false;
+      syncWd();
+      document.getElementById('withdrawModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+      var a = document.getElementById('wdAddr');
+      if (a && a.focus) { try { a.focus(); } catch (e) {} }
+    }
+    function closeWithdraw() {
+      if (wdBusy) return;
+      document.getElementById('withdrawModal').classList.remove('active');
+      restoreScroll();
+      wdErr('');
+    }
+    function submitWd() {
+      if (wdBusy) return;
+      var r = wdValid();
+      if (!r.ok) { wdErr(r.msg || '请检查填写内容'); syncWd(); return; }
+      wdBusy = true;
+      document.getElementById('wdSubmit').disabled = true;
+      openWdSign(r);
+    }
+    function openWdSign(r) {
+      var el = document.createElement('div');
+      el.className = 'auth-modal-overlay';
+      el.id = 'wdSignModal';
+      window._wdPending = r;
+      el.innerHTML = ''
+        + '<div class="auth-modal">'
+        +   '<div class="auth-modal-header">'
+        +     '<div class="auth-modal-logo">✍️</div>'
+        +     '<h2>签名确认</h2>'
+        +     '<p>内嵌钱包请求你签名这笔转账</p>'
+        +   '</div>'
+        +   '<div class="auth-modal-body">'
+        +     '<div class="auth-sign-msg">'
+        +       '<div class="auth-sign-title">转出 ' + fmtAsset(wdSym, r.amt) + '</div>'
+        +       '<div class="auth-sign-body">目标地址<br><span class="num" style="word-break:break-all">' + esc(r.addr) + '</span></div>'
+        +       '<div class="auth-sign-body">网络费预估 ≈ ' + fmtEth(WD_GAS_RESERVE) + '（以 ETH 支付，实际以链上为准）</div>'
+        +     '</div>'
+        +     '<div class="auth-sign-actions">'
+        +       '<button class="auth-sign-reject" onclick="wdSignResult(false)">拒绝</button>'
+        +       '<button class="auth-sign-ok" id="wdSignOk">签名并提交</button>'
+        +     '</div>'
+        +   '</div>'
+        +   '<div class="auth-modal-privy">由 Privy 提供（模拟）</div>'
+        + '</div>';
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.classList.add('active'); });
+    }
+    function closeWdSign() {
+      var el = document.getElementById('wdSignModal');
+      if (el) { el.classList.remove('active'); setTimeout(function () { el.remove(); }, 250); }
+    }
+    function wdSignResult(ok) {
+      if (!ok) {
+        closeWdSign();
+        wdBusy = false;
+        syncWd();
+        Launch.toast('已取消提现', 'warn');
+        return;
+      }
+      var btn = document.getElementById('wdSignOk');
+      if (btn) { btn.disabled = true; btn.textContent = '签名中…'; }
+      setTimeout(function () {
+        if (btn) btn.textContent = '上链中…';
+        setTimeout(function () {
+          var r = window._wdPending;
+          if (!r) { closeWdSign(); wdBusy = false; return; }
+          Launch.credit(wdSym, -r.amt);
+          if (Launch.persist) Launch.persist();
+          closeWdSign();
+          wdBusy = false;
+          document.getElementById('withdrawModal').classList.remove('active');
+          restoreScroll();
+          renderWallet();
+          renderAssetPanel();
+          renderSummary();
+          Launch.toast('提现已提交：' + fmtAsset(wdSym, r.amt), 'ok');
+        }, 1000);
+      }, 900);
+    }
+
     function copyText(t, okMsg) {
       if (!t) { Launch.toast('暂无可复制的地址', 'warn'); return; }
       try {
@@ -662,7 +1226,7 @@
       var head = '<div class="pos-head pos-head-row"><div>' +
         '<div class="pos-title">Open positions</div>' +
         '<div class="pos-sub">Entry, current market cap, value, and PnL.</div></div>' +
-        '<button type="button" class="fee-demo-btn" onclick="cycleDivDemo()" title="切换持有人分红演示状态">' + divDemoLabel() + '</button></div>';
+        (isDebug() ? '<button type="button" class="fee-demo-btn" onclick="cycleDivDemo()" title="切换持有人分红演示状态">' + divDemoLabel() + '</button>' : '') + '</div>';
       host.innerHTML = head + '<div class="pos-scroll"><div class="pos-list">' + rows + '</div></div>';
       syncDivBanner();
     }
@@ -870,7 +1434,7 @@
       var head = '<div class="pos-head pos-head-row"><div>' +
         '<div class="pos-title">Launches</div>' +
         '<div class="pos-sub">Tokens you launched on Robinhood Chain.</div></div>' +
-        '<button type="button" class="fee-demo-btn" onclick="cycleFeeDemo()" title="切换 Launches 领取状态演示（自动/待领取/已领取/无收益）">' + demoFeeLabel() + '</button></div>';
+        (isDebug() ? '<button type="button" class="fee-demo-btn" onclick="cycleFeeDemo()" title="切换 Launches 领取状态演示（自动/待领取/已领取/无收益）">' + demoFeeLabel() + '</button>' : '') + '</div>';
       if (!made.length) {
         host.innerHTML = head + '<div class="empty"><div class="empty-icon">✦</div>' +
           '<div class="empty-title">No launches yet.</div>' +
@@ -1027,6 +1591,7 @@
       else if (tab === 'tx') renderTx();
       syncFeesBanner();
       syncDivBanner();
+      syncTabCounts();
     }
 
     window.onLaunchShellReady = function () {
@@ -1041,8 +1606,44 @@
       window.addEventListener('resize', function () { drawPnl(); });
       // 复制地址
       document.getElementById('pfCopy').addEventListener('click', function () {
-        copyText(document.getElementById('pfAddr').textContent, '地址已复制');
+        copyText(walletAddr(), '地址已复制');
       });
+      // 钱包入口：桌面钱包条总额 / 移动端胶囊 → 资产面板
+      document.getElementById('walletEntry').addEventListener('click', openAssetPanel);
+      document.getElementById('apTopup').addEventListener('click', function () { openDeposit('ETH'); });
+      document.getElementById('apWithdraw').addEventListener('click', function () { openWithdraw('ETH'); });
+      // 列表选项：隐藏 $1 以下资产（默认勾选）
+      document.getElementById('apHideDust').addEventListener('change', function () {
+        apHideDust = !!this.checked;
+        renderWallet();
+        renderAssetPanel();
+      });
+      // 钱包条行内充提：默认 ETH，弹层内可切换资产
+      document.getElementById('topupBtn').addEventListener('click', function () { openDeposit('ETH'); });
+      document.getElementById('withdrawBtn').addEventListener('click', function () { openWithdraw('ETH'); });
+      document.getElementById('depAssetBtn').addEventListener('click', function () {
+        openAssetPicker('deposit', function (sym) { depSym = sym; depRender(); });
+      });
+      document.getElementById('wdAssetBtn').addEventListener('click', function () {
+        openAssetPicker('withdraw', function (sym) { wdSym = sym; syncWd(); });
+      });
+      document.getElementById('depCopy').addEventListener('click', function () {
+        copyText(walletAddr(), '收款地址已复制');
+      });
+      document.getElementById('depCopyContract').addEventListener('click', function () {
+        var c = (window.Launch && Launch.assetContract) ? Launch.assetContract(depSym) : '';
+        copyText(c, '合约地址已复制');
+      });
+      ['wdAddr', 'wdAmt'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', syncWd);
+      });
+      document.getElementById('wdMax').addEventListener('click', function () {
+        var reserve = (wdSym === 'ETH') ? WD_GAS_RESERVE : 0;
+        var max = Math.max(0, assetBal(wdSym) - reserve);
+        document.getElementById('wdAmt').value = String(Math.round(max * 1e6) / 1e6);
+        syncWd();
+      });
+      document.getElementById('wdSubmit').addEventListener('click', submitWd);
       // Tab
       document.querySelectorAll('.as-tab').forEach(function (b) {
         b.addEventListener('click', function () {

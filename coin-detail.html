@@ -1224,7 +1224,7 @@ var holders = [];
         return;
       }
       list.innerHTML = all.slice((pgTx - 1) * PAGE_SIZE, pgTx * PAGE_SIZE).map(function (t) {
-        var who = t.who || (Launch.USER.id === 'u_demo' ? '0x7A2b…3fD8' : '我');
+        var who = t.who || (Launch.walletText ? Launch.walletText() : '我');
         return '<div class="tx-row">' +
           '<span class="tx-side ' + t.side + '">' + (t.side === 'buy' ? '买入' : '卖出') + '</span>' +
           '<span class="tx-who">' + esc(who) + '</span>' +

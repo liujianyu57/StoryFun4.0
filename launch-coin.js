@@ -374,9 +374,70 @@
   //  演示钱包：各计价/支付资产余额（开发者预买/水龙头/交易用）
   //  ETH 双字段锁定：USER.eth（旧 UI 读取）== balances.ETH（权威）
   // ============================================================
-  var DEFAULT_CREDIT_USD = 500; // 每个资产初始给等值 500 美元（ETH 例外：沿用旧 2.5 ETH）
+  var DEFAULT_CREDIT_USD = 500; // 兜底额度（ETH 例外：沿用旧 2.5 ETH）
+  // 差异化演示额度：按符号确定性分档（各资产金额不同、均非零），避免列表里 44 行金额一模一样
+  var SEED_USD_BUCKETS = [30, 75, 160, 320, 560, 880];
+  // 演示用灰尘余额：固定 8 个资产（不含 ETH）给 $1 以下余额，便于走查「隐藏 $1 以下资产」
+  var SEED_DUST_COUNT = 8;
+  var SEED_DUST_USD = [0.18, 0.32, 0.45, 0.58, 0.66, 0.74, 0.83, 0.95];
+  var SEED_DUST_SET = (function () {
+    var syms = ALL_ASSETS.filter(function (x) { return x !== 'ETH'; });
+    syms.sort(function (a, b) { return hashStr('dust:' + a) - hashStr('dust:' + b); });
+    var set = {};
+    for (var i = 0; i < Math.min(SEED_DUST_COUNT, syms.length); i++) {
+      set[syms[i]] = SEED_DUST_USD[i % SEED_DUST_USD.length];
+    }
+    return set;
+  })();
+  function seedUsd(sym) {
+    if (SEED_DUST_SET[sym] != null) return SEED_DUST_SET[sym];
+    return SEED_USD_BUCKETS[hashStr('seed:' + sym) % SEED_USD_BUCKETS.length];
+  }
   var FAUCET_USD = 250;         // 每次领取等值 250 美元
   function assetPrice(sym) { return (sym && ASSET_PRICES[sym] != null) ? ASSET_PRICES[sym] : null; }
+  // 计价资产分组（钱包面板用：加密 4 种 + 股票 40 种）
+  function quoteGroups() {
+    return [
+      { g: '加密资产', rows: ['ETH', 'WETH', 'USDG', 'cbBTC'] },
+      { g: '股票', rows: PAIR_STOCKS.slice() }
+    ];
+  }
+  // 资产友好名称（股票用代码本身）
+  // 计价资产全称（单一来源：资产面板 / 创建页配对下拉共用；与创建页原表一致）
+  var ASSET_NAMES = {
+      ETH: 'Ether', AAPL: 'Apple', AMD: 'Advanced Micro Devices', AMZN: 'Amazon',
+      BB: 'BlackBerry', COIN: 'Coinbase', COST: 'Costco', CRCL: 'Circle Internet Group',
+      DELL: 'Dell Technologies', DJT: 'Trump Media & Technology Group', FIG: 'Figma',
+      GLD: 'SPDR Gold Shares', GME: 'GameStop', GOOGL: 'Alphabet Class A',
+      HIMS: 'Hims & Hers Health', JNJ: 'Johnson & Johnson', LLY: 'Eli Lilly',
+      LULU: 'Lululemon Athletica', META: 'Meta Platforms', MRNA: 'Moderna',
+      MRVL: 'Marvell Technology', MSFT: 'Microsoft', MSTR: 'Strategy',
+      MU: 'Micron Technology', NVDA: 'NVIDIA', PFE: 'Pfizer', PLTR: 'Palantir Technologies',
+      QQQ: 'Invesco QQQ', RBLX: 'Roblox', RDDT: 'Reddit', RIVN: 'Rivian Automotive',
+      SKHY: 'SK hynix', SNAP: 'Snap', SNDK: 'SanDisk', SPCX: 'SpaceX Class A',
+      SPY: 'SPDR S&P 500 ETF', TSLA: 'Tesla', TSM: 'Taiwan Semiconductor Manufacturing',
+      TTWO: 'Take-Two Interactive', USO: 'United States Oil Fund', WYFI: 'WhiteFiber',
+      WETH: 'Wrapped Ether', USDG: 'USD Global', cbBTC: 'Coinbase Wrapped BTC'
+      };
+  function assetName(sym) { return ASSET_NAMES[sym] || sym; }
+  // 合约地址：原生 ETH 无合约（返回空），其余给确定性演示地址
+  function assetContract(sym) {
+    if (!sym || sym === 'ETH') return '';
+    var h1 = hashStr('contract:' + sym), hex = '';
+    for (var i = 0; i < 40; i++) { h1 = (Math.imul(h1 ^ (h1 >>> 11), 2654435761) >>> 0); hex += '0123456789abcdef'.charAt(h1 & 15); }
+    return '0x' + hex;
+  }
+  // 钱包总览：Σ 计价资产 USD、非零资产数、全部资产数
+  function walletSummary() {
+    ensureBalances();
+    var total = 0, held = 0;
+    ALL_ASSETS.forEach(function (sym) {
+      var q = USER.balances[sym] || 0;
+      var px = assetPrice(sym);
+      if (q > 0 && px) { total += q * px; held += 1; }
+    });
+    return { totalUsd: total, heldCount: held, allCount: ALL_ASSETS.length };
+  }
   function ensureBalances() {
     if (!USER.balances) USER.balances = {};
     // 旧档迁移：首见 ETH 时沿用旧 USER.eth（默认 2.5），避免余额跳水；
@@ -387,7 +448,7 @@
       var s = ALL_ASSETS[i];
       if (USER.balances[s] == null) {
         var px = assetPrice(s);
-        USER.balances[s] = px ? DEFAULT_CREDIT_USD / px : 0;
+        USER.balances[s] = px ? seedUsd(s) / px : 0;
       }
     }
     USER.eth = USER.balances.ETH; // ETH 锁定镜像
@@ -602,7 +663,7 @@
     c.fdv = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + net;
     c.lastBuyAt = Date.now();
-    c.buyerAddr = walletFrom(USER.id);
+    c.buyerAddr = userWalletAddr();
     c.holders = (c.holders || 1) + Math.floor(Math.random() * 2);
     if (typeof c.spark === 'undefined') c.spark = [];
     c.spark.push(c.progress);
@@ -740,7 +801,7 @@
     c.marketCap = c.priceUsd * (c.circulating || c.supply);
     c.fdv = c.priceUsd * c.supply;
     c.volumeUsd = (c.volumeUsd || 0) + net;
-    if (side === 'buy') { c.lastBuyAt = Date.now(); c.buyerAddr = walletFrom(USER.id); }
+    if (side === 'buy') { c.lastBuyAt = Date.now(); c.buyerAddr = userWalletAddr(); }
     c.holders = (c.holders || 1) + Math.floor(Math.random() * 2);
     if (typeof c.spark === 'undefined') c.spark = [];
     c.spark.push(1);
@@ -909,8 +970,18 @@
     if (typeof currentUser !== 'undefined' && currentUser && currentUser.name) return currentUser.name;
     return '创作者';
   }
-  // 当前用户钱包（确定性脱敏地址：同一账户永远同一串，形如 0x7A2b…3fD8）
+  // 当前用户钱包全量地址：统一取 auth.js 的单一地址来源，兜底用本地派生
+  function userWalletAddr() {
+    if (typeof window !== 'undefined' && window.currentWallet && typeof window.currentWallet.address === 'function') {
+      return window.currentWallet.address();
+    }
+    return walletFrom('user:' + (USER && USER.id ? USER.id : 'demo'));
+  }
+  // 当前用户钱包（脱敏地址）：统一取 auth.js 的单一地址来源，兜底用本地派生
   function walletText() {
+    if (typeof window !== 'undefined' && window.currentWallet && typeof window.currentWallet.masked === 'function') {
+      return window.currentWallet.masked();
+    }
     return walletFrom('user:' + (USER && USER.id ? USER.id : 'demo'));
   }
   function isLoggedIn() {
@@ -1161,6 +1232,10 @@
     credit: credit,
     usdOfQty: usdOfQty, qtyOfUsd: qtyOfUsd,
     assetIcon: assetIcon,
+    quoteGroups: quoteGroups,
+    assetName: assetName,
+    assetContract: assetContract,
+    walletSummary: walletSummary,
     payAssets: payAssets,
     fmtQty: fmtQty,
     preview: preview,
