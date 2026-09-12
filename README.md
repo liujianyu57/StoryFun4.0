@@ -35,7 +35,6 @@
 | 页面 | 说明 |
 |---|---|
 | `profile-center.html` | 个人中心（桌面/移动通用版） |
-| `profile-center-ios.html` | 个人中心（iOS 风格版） |
 | `user-profile-visitor.html` | 访客视角的他人主页 |
 | `watch-history.html` | 观看历史 |
 | `notifications.html` | 通知中心（互动类） |
