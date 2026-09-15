@@ -427,6 +427,13 @@
     for (var i = 0; i < 40; i++) { h1 = (Math.imul(h1 ^ (h1 >>> 11), 2654435761) >>> 0); hex += '0123456789abcdef'.charAt(h1 & 15); }
     return '0x' + hex;
   }
+  // 币合约地址（全量 40 位）：按币 id 确定性生成，行情搜索与详情页共用同一来源
+  function coinContract(id) {
+    var seed = 'token:' + (id || 'x'), h = 2166136261 >>> 0, hex = '';
+    for (var i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    for (var j = 0; j < 40; j++) { h = Math.imul(h ^ (h >>> 13), 2654435761) >>> 0; hex += '0123456789abcdef'.charAt(h & 15); }
+    return '0x' + hex;
+  }
   // 钱包总览：Σ 计价资产 USD、非零资产数、全部资产数
   function walletSummary() {
     ensureBalances();
@@ -1236,6 +1243,7 @@
     assetName: assetName,
     assetContract: assetContract,
     walletSummary: walletSummary,
+    coinContract: coinContract,
     payAssets: payAssets,
     fmtQty: fmtQty,
     preview: preview,

@@ -491,7 +491,7 @@
         </div>
         <div class="ab-bd ab-bd-contract">
           <span class="ab-bd-label">Contract</span>
-          <span class="ab-token-addr mono num" id="abTokenAddr" onclick="copyText(this.textContent)" title="复制合约地址">—</span>
+          <span class="ab-token-addr mono num" id="abTokenAddr" onclick="copyText(this.dataset.full || this.textContent)" title="复制合约地址（全量）">—</span>
         </div>
       </div>
       <div class="ab-foot">
@@ -893,12 +893,11 @@ var holders = [];
       if (foot) foot.innerHTML = footHtml;
       // Token 合约地址：确定性假地址（区别于 Creator 地址）
       (function () {
-        var seed = 'token:' + (coin.id || 'x');
-        var h = 2166136261, i;
-        for (i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
-        var hex = ('00000000' + (h >>> 0).toString(16)).slice(-8);
-        document.getElementById('abTokenAddr').textContent =
-          '0x' + hex.slice(0, 2).toUpperCase() + hex.slice(2, 4) + '…' + hex.slice(4, 6) + hex.slice(6, 8).toUpperCase();
+        var el = document.getElementById('abTokenAddr');
+        var full = (window.Launch && Launch.coinContract) ? Launch.coinContract(coin.id) : '';
+        if (!full) { el.textContent = '—'; return; }
+        el.dataset.full = full;                       // 展示脱敏、复制与搜索用全量（口径统一）
+        el.textContent = full.slice(0, 6) + '…' + full.slice(-4);
       })();
       // 叙事文案
       document.getElementById('storyDesc').textContent = '这里是视频本身的描述';
