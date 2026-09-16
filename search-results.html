@@ -30,6 +30,12 @@ body{padding-bottom:50px;padding-bottom:calc(50px + env(safe-area-inset-bottom,0
 .tab-item.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 .tab-count{font-size:11px;color:var(--text-muted);margin-left:3px}
 .tab-item.active .tab-count{color:var(--accent)}
+/* 代币页签：复用市场页卡片（launch-card.js） */
+.token-grid-wrap{padding:2px 0 8px}
+.px-load-more{display:block;margin:20px auto 6px;padding:11px 30px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+.px-load-more:hover{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.16)}
+.px-load-more:active{transform:scale(.98)}
+.token-sum{font-size:12.5px;color:var(--text-muted);margin:2px 0 12px;overflow-wrap:anywhere}
 
 /* Results container */
 .results{padding:12px 16px}
@@ -108,16 +114,17 @@ body{padding-bottom:50px;padding-bottom:calc(50px + env(safe-area-inset-bottom,0
       </button>
       <div class="search-field">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input id="searchInput" type="text" placeholder="搜索..." />
+        <input id="searchInput" type="text" placeholder="搜索有趣的内容" />
         <button class="search-clear" id="searchClear">✕</button>
       </div>
     </div>
   </div>
 
   <div class="tab-bar" id="tabBar">
-    <button class="tab-item active" data-tab="drama">短剧</button>
-    <button class="tab-item" data-tab="video">视频</button>
-    <button class="tab-item" data-tab="user">用户</button>
+    <button class="tab-item active" data-tab="token">代币<span class="tab-count" id="cntToken"></span></button>
+    <button class="tab-item" data-tab="drama">短剧<span class="tab-count" id="cntDrama"></span></button>
+    <button class="tab-item" data-tab="video">视频<span class="tab-count" id="cntVideo"></span></button>
+    <button class="tab-item" data-tab="user">用户<span class="tab-count" id="cntUser"></span></button>
   </div>
 
   <div class="results" id="results"></div>
@@ -127,6 +134,8 @@ body{padding-bottom:50px;padding-bottom:calc(50px + env(safe-area-inset-bottom,0
   </div>
 </div>
 
+<script src="launch-coin.js"></script>
+<script src="launch-card.js"></script>
 <script src="drama-card.js"></script>
 <script>
 var DATA = [
@@ -153,13 +162,33 @@ var searchClear = document.getElementById('searchClear');
 var resultsEl = document.getElementById('results');
 var emptyState = document.getElementById('emptyState');
 var emptyText = document.getElementById('emptyText');
-var currentTab = 'drama';
+var currentTab = 'token';
+var TABS = ['token', 'drama', 'video', 'user'];
+var TOKEN_PAGE = 24;      /* 代币页签每批条数（默认榜单与搜索结果一致） */
+var tokenShown = TOKEN_PAGE;
+var lastQuery = null;
 
-/* Get query from URL */
+/* Get query from URL（?q= 关键词，?tab= 当前页签） */
 var params = new URLSearchParams(location.search);
 var query = params.get('q') || '';
+var urlTab = params.get('tab');
+if (TABS.indexOf(urlTab) !== -1) currentTab = urlTab;
+syncTabUI();
 searchInput.value = query;
 if (query) searchClear.classList.add('show');
+
+/* 页签高亮 + URL 同步（不新增历史记录） */
+function syncTabUI() {
+  document.querySelectorAll('.tab-item').forEach(function(b){
+    b.classList.toggle('active', b.dataset.tab === currentTab);
+  });
+  var url = window.location.pathname;
+  var parts = [];
+  if (query) parts.push('q=' + encodeURIComponent(query));
+  if (currentTab !== 'token') parts.push('tab=' + currentTab);
+  if (parts.length) url += '?' + parts.join('&');
+  try { history.replaceState(null, '', url); } catch (e) {}
+}
 
 /* Match helper */
 function match(str, q) {
@@ -212,8 +241,29 @@ function searchVideos(q) {
       });
     }
 
-    function buildWorksModeLink(worksList, clickedIndex) {
-      var items = worksList.map(function(it) {
+/* ── 代币（数据来自发射台引擎，命中口径与市场页筛选一致）── */
+function tokenHaystack(c) {
+  var contract = (window.Launch && Launch.coinContract) ? Launch.coinContract(c.id) : '';
+  return [c.name, c.symbol, c.pair, c.creatorAddr, c.id, contract].join(' ').toLowerCase();
+}
+
+function searchTokens(q) {
+  var coins = (window.Launch && Launch.coins) ? Launch.coins.slice() : [];
+  if (q) {
+    /* 允许 $TICKER 写法（等价 TICKER） */
+    var k = q.toLowerCase().replace(/^\$/, '');
+    coins = coins.filter(function(c){ return tokenHaystack(c).indexOf(k) !== -1; });
+  }
+  /* 默认榜单与搜索结果统一按市值降序 */
+  coins.sort(function(a, b){ return (b.marketCap || 0) - (a.marketCap || 0); });
+  return coins;
+}
+
+/* 卡内联 onclick 依赖：进入币详情 / 该地址资产档案 */
+function openCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
+function goAddr(addr) { location.href = 'assets.html?address=' + encodeURIComponent(addr); }
+
+    function buildWorksModeLink(worksList, clickedIndex) {      var items = worksList.map(function(it) {
         return {
           type: it.type || 'video',
           title: it.title || '',
@@ -262,20 +312,27 @@ function searchUsers(q) {
 /* Render based on tab */
 function renderTab(tab) {
   currentTab = tab;
+  /* 关键词变化：代币分页回到第一批 */
+  if (query !== lastQuery) { tokenShown = TOKEN_PAGE; lastQuery = query; }
   var html = '';
   var dramaResults = searchDramas(query);
   var userResults = searchUsers(query);
+  var tokenResults = searchTokens(query);
 
-  if (tab === 'all') {
-    dramaResults.forEach(function(d){
-      html += '<div class="result-card" data-id="'+d.id+'" data-type="drama"><img class="rc-cover" src="'+d.cover+'" alt="'+d.title+'"><div class="rc-info"><div class="rc-title">'+d.title+'</div><div class="rc-meta"><span class="rc-tag">'+d.cat+'</span><span class="rc-rating"><span class="star">★</span> '+d.rt+'</span><span class="rc-ep">'+d.ep+'</span></div><div class="rc-desc">'+d.desc+'</div></div></div>';
-    });
-    userResults.forEach(function(u){
-      html += '<div class="user-card" data-name="'+u.name+'" data-type="user"><img class="uc-avatar" src="'+u.avatar+'" alt="'+u.name+'"><div class="uc-info"><div class="uc-name">'+u.name+'</div><div class="uc-bio">'+u.bio+'</div><div class="uc-stats"><span><strong>'+u.followers+'</strong> 粉丝</span><span><strong>'+u.dramas+'</strong> 短剧</span><span><strong>'+u.likes+'</strong> 获赞</span></div></div><button class="uc-follow-btn" onclick="event.stopPropagation();toggleFollow(this)">关注</button></div>';
-    });
-    if (!dramaResults.length && !userResults.length) {
+  if (tab === 'token') {
+    var slice = tokenResults.slice(0, tokenShown);
+    html = '<div class="token-grid-wrap">' +
+      '<div class="token-sum">' + (query
+        ? '「' + escHtml(query) + '」共 ' + tokenResults.length + ' 个代币'
+        : '全部代币 ' + tokenResults.length + ' 个 · 按市值排序') + '</div>' +
+      '<ul class="px-grid">' + LaunchCard.grid(slice) + '</ul>' +
+      (tokenResults.length > slice.length
+        ? '<button type="button" class="px-load-more" id="pxLoadMore">加载更多（剩余 ' + (tokenResults.length - slice.length) + '）</button>'
+        : '') +
+    '</div>';
+    if (!tokenResults.length) {
       emptyState.classList.add('show');
-      emptyText.textContent = '未找到 "'+query+'" 的相关结果';
+      emptyText.textContent = query ? '未找到 "' + query + '" 的相关代币' : '暂无代币';
     } else {
       emptyState.classList.remove('show');
     }
@@ -330,6 +387,33 @@ function renderTab(tab) {
 
   resultsEl.innerHTML = html;
   bindResultClicks();
+
+  /* 代币页签：hover 播视频 + 加载更多 + 页签数量 */
+  if (tab === 'token') {
+    LaunchCard.bindVideos(resultsEl);
+    var more = document.getElementById('pxLoadMore');
+    if (more) more.addEventListener('click', function () {
+      tokenShown += TOKEN_PAGE;
+      renderTab('token');
+    });
+  }
+  updateTabCounts(tokenResults.length, dramaResults.length, searchVideos(query).length, userResults.length);
+}
+
+/* 文本插入 HTML 前的转义（关键词来自用户输入） */
+function escHtml(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+/* 页签数量徽标 */
+function updateTabCounts(nToken, nDrama, nVideo, nUser) {
+  var map = { cntToken: nToken, cntDrama: nDrama, cntVideo: nVideo, cntUser: nUser };
+  Object.keys(map).forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.textContent = map[id];
+  });
 }
 
 function bindResultClicks() {
@@ -371,9 +455,9 @@ function showToast(msg) {
 /* Tab switch */
 document.querySelectorAll('.tab-item').forEach(function(btn){
   btn.addEventListener('click', function(){
-    document.querySelectorAll('.tab-item').forEach(function(b){ b.classList.remove('active'); });
-    this.classList.add('active');
-    renderTab(this.dataset.tab);
+    currentTab = this.dataset.tab;
+    syncTabUI();
+    renderTab(currentTab);
   });
 });
 
@@ -387,23 +471,21 @@ searchClear.addEventListener('click', function(){
   searchInput.value = '';
   searchClear.classList.remove('show');
   query = '';
-  history.replaceState(null, '', window.location.pathname);
+  lastQuery = null;
   renderTab(currentTab);
   searchInput.focus();
 });
 searchInput.addEventListener('keydown', function(e){
   if (e.key === 'Enter') {
     e.preventDefault();
-    var q = this.value.trim();
-    query = q;
-    var newUrl = window.location.pathname + (q ? '?q=' + encodeURIComponent(q) : '');
-    history.replaceState(null, '', newUrl);
+    query = this.value.trim();
+    lastQuery = null;
     renderTab(currentTab);
   }
 });
 
-/* Init */
-renderTab('drama');
+/* Init：默认「代币」页签 */
+renderTab(currentTab);
 </script>
 <script src="load-desktop-header.js?v=3"></script>
   <script src="load-sidebar.js"></script>

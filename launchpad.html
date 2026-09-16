@@ -10,9 +10,8 @@
        Explore — 结构对齐 pons（Graduated 上 / Explore 下）
        配色沿用本产品浅色设计系统
        ============================================================ */
-    .px-shell { padding: 18px 0 90px; }
-    /* 页面标题行：搜索输入框（英文占位文案）+ 「创建」 */
-    .px-head { display: flex; align-items: center; gap: 10px; margin: 8px 0 22px; flex-wrap: wrap; }
+    /* 页面无自有标题/搜索/创建入口：搜索与创建统一在桌面顶栏（发布菜单）与移动「+」面板 */
+    .px-shell { padding: 28px 0 90px; }
     /* 语言切换：调试用，悬浮在页面最右侧（桌面右中、移动右下） */
     .px-lang-float {
       position: fixed; right: 14px; top: 50%; transform: translateY(-50%); z-index: 1200;
@@ -24,34 +23,6 @@
     }
     .px-lang-float:hover { opacity: 1; color: var(--text); border-color: var(--text-3); }
     .px-lang-float:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; opacity: 1; }
-
-    /* 搜索：flex 撑满一行的大 pill（pons toolbar 规格） */
-    /* 搜索输入框：输入框样式的按钮（撑满标题行剩余宽度，点击打开筛选浮层；pons toolbar 同款形态） */
-    .px-search-box {
-      flex: 1; min-width: 0;
-      display: inline-flex; align-items: center; gap: 10px;
-      height: 40px; padding: 0 16px;
-      border-radius: 999px; cursor: pointer; text-align: left;
-      border: 1px solid transparent; background: var(--surface); color: var(--text-2);
-      box-shadow: var(--shadow-sm); font-family: inherit;
-      transition: background .15s, color .15s, border-color .15s;
-    }
-    .px-search-box:hover { background: var(--accent-soft); color: var(--text); }
-    .px-search-box:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .px-search-box .px-search-ico { color: var(--text-2); flex-shrink: 0; }
-    .px-search-copy { font-size: 13.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    /* Create：白底细边框次级按钮（pons 工具栏同款层级） */
-    .px-create-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      height: 44px; padding: 0 18px;
-      border-radius: 999px; font-size: 13px; font-weight: 600;
-      border: 1px solid var(--border); background: var(--surface); color: var(--text);
-      box-shadow: var(--shadow-sm); text-decoration: none; flex-shrink: 0;
-      transition: background .15s, border-color .15s;
-    }
-    .px-create-btn:hover { background: var(--accent-soft); border-color: transparent; color: var(--text); }
-    .px-create-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     /* ---- Section ---- */
     .px-section { margin-bottom: 34px; }
@@ -65,130 +36,6 @@
     /* Explore 筛选行（pons: Recent buys | Newest | Oldest | Market cap | Volume · All|24h|7d） */
     .px-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
-    /* ---- Grid / Card（pons 规格：minmax 168 + gap 12，全宽方形封面竖卡） ---- */
-    .px-grid {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px; margin: 0; padding: 0; list-style: none;
-    }
-    .px-card {
-      display: grid; grid-template-rows: auto 1fr; gap: 12px;
-      padding: 14px; border-radius: 22px; cursor: pointer; text-decoration: none;
-      background: var(--surface); border: 1px solid var(--border);
-      color: inherit; position: relative;
-      transition: transform .16s ease, background .16s ease, border-color .16s ease;
-    }
-    .px-card:hover { transform: translateY(-2px); border-color: var(--border-strong); background: var(--surface-2); z-index: 5; }
-    .px-media { position: relative; }
-    .px-logo {
-      position: relative; display: block; aspect-ratio: 16 / 9; width: 100%; border-radius: 16px;
-      background: var(--surface-2); border: 1px solid var(--border);
-      overflow: hidden;
-    }
-    .px-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .px-generic { position: absolute; inset: 0; display: grid; place-items: center;
-      background: linear-gradient(135deg, #f2f3f6 0%, #e6e9ee 100%);
-      color: rgba(10,11,13,.07); font-weight: 800; font-size: 64px; letter-spacing: -.04em; }
-    .px-generic b { font-weight: 800; }
-    .px-token { position: absolute; left: 12px; bottom: 12px; width: 46px; height: 46px; z-index: 2;
-      border-radius: 14px; overflow: hidden; border: 2px solid rgba(255,255,255,.95);
-      background: var(--surface-2); box-shadow: 0 2px 10px rgba(0,0,0,.16);
-      display: grid; place-items: center; font-weight: 800; font-size: 17px; color: var(--text-3); }
-    .px-token img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .px-hover-play { position: absolute; right: 10px; bottom: 10px; z-index: 2; width: 26px; height: 26px;
-      border-radius: 50%; background: rgba(10,11,13,.55); color: #fff; display: grid; place-items: center;
-      font-size: 9px; font-style: normal; pointer-events: none; border: .5px solid rgba(255,255,255,.35); }
-    .px-hover-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
-    .px-badges {
-      position: absolute; top: 8px; left: 8px; right: 8px; z-index: 1;
-      display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
-    }
-    .px-badge {
-      font-size: 10px; font-weight: 600; letter-spacing: .02em; line-height: 1.2;
-      padding: 4px 8px; border-radius: 999px;
-    }
-    .px-badge.grad { background: rgba(14,159,110,.9); color: #fff; }
-    .px-badge.og { background: rgba(10,11,13,.82); color: #fff; }
-    .px-badge.warn { background: rgba(246,70,93,.9); color: #fff; }
-    .px-badge.new { background: rgba(10,11,13,.82); color: #fff; }
-    /* 创建者持仓警示（pons creator-warn-badge）：黄色三角，hover 提示 */
-    .px-warn-badge {
-      width: 20px; height: 20px; border-radius: 999px; flex-shrink: 0;
-      display: inline-flex; align-items: center; justify-content: center;
-      background: #eab308; color: #1c1917; cursor: help; position: relative; line-height: 1;
-      box-shadow: 0 1px 4px rgba(0,0,0,.12);
-    }
-    .px-warn-badge:hover::after {
-      content: attr(data-tip);
-      position: absolute; z-index: 30;
-      left: 50%; transform: translateX(-50%);
-      top: calc(100% + 8px);
-      width: max-content; max-width: min(220px, 60vw);
-      background: #1c1c1c; color: #fff; border-radius: 10px;
-      padding: 7px 10px; font-size: 11px; line-height: 1.45; font-weight: 500;
-      box-shadow: 0 12px 30px rgba(0,0,0,.3); letter-spacing: 0;
-    }
-    .px-warn-badge:hover::before {
-      content: ''; position: absolute; z-index: 30;
-      left: 50%; margin-left: -4px;
-      top: calc(100% + 3px);
-      width: 8px; height: 8px; background: #1c1c1c; transform: rotate(45deg);
-    }
-
-    .px-card-body { display: grid; gap: 3px; min-width: 0; padding: 0 2px 2px; }
-    .px-card-body strong, .px-card-body>small {
-      display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      max-width: 100%;
-    }
-    .px-name-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
-    .px-name { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; color: var(--text); }
-    /* 收益共享徽章（pons community-badge）：创作者收益归持有者 */
-    .px-share-badge {
-      width: 18px; height: 18px; border-radius: 999px; flex-shrink: 0;
-      display: inline-flex; align-items: center; justify-content: center;
-      background: #facc15; color: #1c1917; cursor: help; position: relative; line-height: 1;
-    }
-    .px-share-badge:hover::after {
-      content: attr(data-tip);
-      position: absolute; z-index: 30;
-      left: 50%; transform: translateX(-50%);
-      bottom: calc(100% + 8px);
-      width: max-content; max-width: min(200px, 60vw);
-      background: #1c1c1c; color: #fff; border-radius: 10px;
-      padding: 7px 10px; font-size: 11px; line-height: 1.45; font-weight: 500;
-      box-shadow: 0 12px 30px rgba(0,0,0,.3); letter-spacing: 0;
-    }
-    .px-share-badge:hover::before {
-      content: ''; position: absolute; z-index: 30;
-      left: 50%; margin-left: -4px;
-      bottom: calc(100% + 4px);
-      width: 8px; height: 8px; background: #1c1c1c; transform: rotate(45deg);
-    }
-    .px-sym { color: var(--text-2); font-size: 12px; font-weight: 600; }
-    .px-sym .px-pair { font-style: normal; color: var(--text-3); font-weight: 600; font-size: 11px; }
-    .px-mcap { display: flex; align-items: baseline; gap: 5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
-    .px-mcap-value { color: var(--text); font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
-    .px-mcap-label { color: var(--text-3); font-size: 11px; font-weight: 600; letter-spacing: .03em; }
-
-    .px-grad { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 4px; }
-    .px-grad-track { flex: auto; height: 4px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
-    .px-grad-fill { display: block; height: 100%; border-radius: inherit; background: var(--text); }
-    .px-grad-pct { flex: none; font-size: 11px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
-
-    .px-meta {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      margin-top: 4px; font-size: 11px; color: var(--text-3);
-      font-variant-numeric: tabular-nums;
-    }
-    .px-deployer {
-      color: inherit; font: inherit; background: none; border: 0; padding: 0;
-      cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      font-family: var(--mono);
-    }
-    .px-deployer:hover { color: var(--text); }
-    .px-time { color: var(--text-3); flex-shrink: 0; }
-
-    .px-empty { text-align: center; padding: 40px 12px; color: var(--text-3); }
-    .px-empty b { color: var(--text-2); font-weight: 600; }
 
     /* pons page-control 分页器 */
     .px-pager { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 22px; }
@@ -212,116 +59,10 @@
     .px-pager-dots { color: var(--text-3); cursor: default; }
 
 
-    /* ============================================================
-       筛选浮层（关键词 + 排序 + 币龄 + 配对；入口为工具栏「筛选」按钮）
-       ============================================================ */
-    .spotlight-backdrop {
-      position: fixed; inset: 0; z-index: 200; background: rgba(10,11,13,.4);
-      backdrop-filter: blur(3px); display: none;
-    }
-    .spotlight-backdrop.open { display: block; }
-    .spotlight-panel {
-      position: absolute; top: 9vh; left: 50%; transform: translateX(-50%);
-      width: min(660px, calc(100vw - 28px)); max-height: 78vh; overflow: hidden;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
-      box-shadow: 0 24px 64px rgba(10,11,13,.22);
-      display: flex; flex-direction: column;
-    }
-    .spotlight-input-row {
-      display: flex; align-items: center; gap: 10px;
-      padding: 15px 18px; border-bottom: 1px solid var(--border);
-    }
-    .spotlight-input {
-      flex: 1; border: none; outline: none; background: transparent;
-      font-size: 15px; color: var(--text); font-weight: 500;
-    }
-    .spotlight-esc-hint { font-size: 11px; color: var(--text-3); border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; }
 
-    .spotlight-filters { padding: 12px 18px 6px; display: flex; flex-direction: column; gap: 9px; }
-    .sp-fg { display: flex; align-items: flex-start; gap: 12px; }
-    .sp-label {
-      font-size: 11px; color: var(--text-3); font-weight: 600;
-      width: 56px; flex: 0 0 56px; flex-shrink: 0; padding-top: 8px; line-height: 1.2;
-    }
-    .sp-pills { display: inline-flex; flex-wrap: wrap; gap: 4px; flex: 1; min-width: 0; }
-    .sp-pills button {
-      height: 26px; padding: 0 11px; border-radius: 999px; border: 1px solid transparent;
-      background: var(--accent-soft); color: var(--text-2);
-      font-size: 12px; font-weight: 600; cursor: pointer; transition: all .14s;
-    }
-    .sp-pills button:hover { border-color: var(--border-strong); color: var(--text); }
-    .sp-pills button.on { background: var(--accent); color: #fff; }
-    .sp-quotes button { font-variant-numeric: tabular-nums; }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    .spotlight-clear {
-      width: 28px; height: 28px; border-radius: 9px; display: inline-flex; align-items: center;
-      justify-content: center; border: none; background: none; color: var(--text-3); cursor: pointer; flex-shrink: 0;
-    }
-    .spotlight-clear:hover { background: var(--accent-soft); color: var(--text); }
-
-    .spotlight-results { overflow-y: auto; padding: 6px 8px 4px; flex: 1; min-height: 120px; }
-    .sp-result {
-      display: flex; align-items: center; gap: 12px; width: 100%;
-      padding: 8px 10px; border-radius: 12px; border: none; background: none; cursor: pointer; text-align: left;
-    }
-    .sp-result:hover { background: var(--accent-soft); }
-    .sp-logo {
-      width: 36px; height: 36px; border-radius: 12px; overflow: hidden; flex-shrink: 0;
-      background: var(--surface-2); border: 1px solid var(--border);
-      display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--text-2);
-    }
-    .sp-logo img { width: 100%; height: 100%; object-fit: cover; }
-    .sp-copy { flex: 1; min-width: 0; }
-    .sp-title-row { display: flex; align-items: baseline; gap: 8px; }
-    .sp-name { font-weight: 700; font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .sp-ticker { font-size: 11px; color: var(--text-3); font-weight: 700; }
-    .sp-right { text-align: right; flex-shrink: 0; }
-    .sp-mcap { font-size: 13px; font-weight: 700; color: var(--text); }
-    .sp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-    .sp-arrow { color: var(--text-3); flex-shrink: 0; margin-left: 2px; }
-    .sp-result:hover .sp-arrow { color: var(--text); transform: translateX(2px); }
-    .sp-empty { text-align: center; padding: 28px 10px; color: var(--text-3); font-size: 13px; }
-
-    .sp-footer {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 9px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
-    }
-    .sp-count { font-size: 11.5px; color: var(--text-3); }
-    .sp-page-actions { display: inline-flex; align-items: center; gap: 8px; }
-    .sp-page-btn {
-      width: 26px; height: 26px; border-radius: 9px; display: inline-flex; align-items: center;
-      justify-content: center; border: 1px solid var(--border); background: var(--surface);
-      color: var(--text-2); cursor: pointer; font-size: 14px;
-    }
-    .sp-page-btn:hover:not(:disabled) { border-color: var(--border-strong); color: var(--text); }
-    .sp-page-btn:disabled { opacity: .35; cursor: default; }
-    .sp-page-num { font-size: 12px; color: var(--text-2); min-width: 34px; text-align: center; }
-
-    @media (max-width: 1060px) {
-      .px-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
     @media (max-width: 768px) {
-      .px-head { gap: 8px; }
       /* 移动端：悬浮在右下角、底导上方 */
       .px-lang-float { top: auto; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); transform: none; right: 12px; }
-    }
-    @media (max-width: 640px) {
-      .px-grid { grid-template-columns: repeat(2, 1fr); }
-      .sp-label { width: auto; }
-    }
-    @media (max-width: 420px) {
-      /* 窄屏手机仍保持两列（pons Explore 移动规格） */
-      .px-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .px-card { padding: 8px; border-radius: 16px; }
-      .px-logo { border-radius: 12px; }
     }
   </style>
 </head>
@@ -329,18 +70,6 @@
   <div id="launch-header-host"></div>
 
   <main class="launch-shell px-shell">
-    <!-- 页面标题行：搜索输入框 / 创建 -->
-    <div class="px-head">
-      <button class="px-search-box" id="pxSearchBox" type="button" aria-haspopup="dialog">
-        <svg class="px-search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
-        <span class="px-search-copy">Search name, ticker, or contract address</span>
-      </button>
-      <a class="px-create-btn" href="launch.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        创建
-      </a>
-    </div>
-
     <!-- Section 1: Graduated（已毕业） -->
     <section class="px-section" id="secGrad" aria-label="已毕业">
       <div class="px-section-head">
@@ -383,7 +112,7 @@
         </div>
       </div>
       <ul class="px-grid" id="exploreGrid"></ul>
-      <div class="px-empty" id="exploreEmpty" style="display:none"><b>暂无符合条件的代币</b><br>换个排序或筛选试试</div>
+      <div class="px-empty" id="exploreEmpty" style="display:none"><b>暂无符合条件的代币</b><br>换个排序或时间窗试试</div>
       <nav class="px-pager" id="expPager" aria-label="进行中代币分页"></nav>
     </section>
   </main>
@@ -391,61 +120,9 @@
   <!-- 语言切换：调试按钮，悬浮在页面最右侧（不参与页面布局） -->
   <button type="button" class="px-lang-float" id="langBtn" onclick="toggleLang()" title="切换中英文（调试）" aria-label="切换中英文">EN</button>
 
-  <!-- ================= 筛选浮层（关键词 + 排序 + 币龄 + 配对） ================= -->
-  <div class="spotlight-backdrop" id="spotlight">
-    <div class="spotlight-panel" role="dialog" aria-modal="true" aria-label="筛选代币">
-      <div class="spotlight-input-row">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-3)"><path d="M17 17L21 21"/><path d="M19 11A8 8 0 1 1 3 11a8 8 0 0 1 16 0Z"/></svg>
-        <input class="spotlight-input" id="spInput" placeholder="搜索名称 / 代号 / 合约地址" autocomplete="off" spellcheck="false" />
-        <span class="spotlight-esc-hint" id="spEscHint">Esc</span>
-        <button class="spotlight-clear" id="spClear" type="button" aria-label="Close search" style="display:none">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-
-      <div class="spotlight-filters">
-        <div class="sp-fg">
-          <span class="sp-label">排序</span>
-          <div class="sp-pills" id="spSortSeg">
-            <button data-s="recent" class="on">最近买入</button>
-            <button data-s="newest">最新</button>
-            <button data-s="oldest">最早</button>
-            <button data-s="marketcap">市值</button>
-            <button data-s="volume">成交量</button>
-          </div>
-        </div>
-        <div class="sp-fg">
-          <span class="sp-label" id="spTimeLabel">币龄</span>
-          <div class="sp-pills" id="spTimeSeg">
-            <button data-t="all" class="on">全部</button>
-            <button data-t="24h">24h</button>
-            <button data-t="7d">7d</button>
-          </div>
-        </div>
-        <div class="sp-fg">
-          <span class="sp-label">配对</span>
-          <div class="sp-pills sp-quotes" id="spPairSeg">
-            <button data-p="all" class="on">全部</button>
-            <button data-p="Stocks">股票</button>
-            <!-- 股票代币按钮由 JS 依据 Launch.pairStocks 注入，与币数据一一对应 -->
-          </div>
-        </div>
-      </div>
-
-      <div class="spotlight-results" id="spResults" role="listbox" aria-label="Token results"></div>
-      <footer class="sp-footer" id="spFooter" style="display:none">
-        <span class="sp-count num" id="spCount">1 to 24 of 0</span>
-        <div class="sp-page-actions">
-          <button class="sp-page-btn" id="spPrev" type="button" disabled>‹</button>
-          <span class="sp-page-num num" id="spPageNum">1</span>
-          <button class="sp-page-btn" id="spNext" type="button">›</button>
-        </div>
-      </footer>
-    </div>
-  </div>
-
   <script src="auth.js"></script>
   <script src="launch-coin.js"></script>
+  <script src="launch-card.js"></script>
   <script src="launch-shell.js"></script>
   <script>
     // ============================================================
@@ -458,25 +135,17 @@
       '已毕业': 'Graduated', '进行中': 'Explore',
       '最近买入': 'Recent buys', '最新': 'Newest', '最早': 'Oldest',
       '市值': 'Market cap', '成交量': 'Volume',
-      '排序': 'Sort by', '币龄': 'Age', '窗口': 'Window', '配对': 'Pair',
-      '全部': 'All', '股票': 'Stocks', '创建': 'Create',
-      '筛选': 'Filter',
+      '全部': 'All',
       '已越过毕业阈值的代币，流动性已上池并永久锁定。': 'Tokens that passed the graduation threshold; liquidity is pooled and locked forever.',
       '仍在向毕业攀登的代币 · 曲线售罄后自动上池。': 'Tokens still climbing to graduation; when the curve sells out, liquidity goes to the pool.',
       '暂无已毕业代币': 'No graduated tokens yet',
       '暂无符合条件的代币': 'No tokens match your filters',
-      '换个排序或筛选试试': 'Try a different sort or filter',
+      '换个排序或时间窗试试': 'Try a different sort or time window',
       '已毕业代币分页': 'Graduated token pages',
       '进行中代币分页': 'Explore token pages',
-      '搜索名称 / 代号 / 合约地址': 'Search name, ticker, or contract address',
-      '本币名与代号首次发行': "First launch of this name & ticker",
       '发行者': 'Deployer',
-      '创作者收益归该币持有者': "Creator rewards go to this token's holders.",
-      '创作者收益归该币的持有者领取': "Creator rewards go to this token's holders.",
       '已毕业代币': 'Graduated token',
-      '上一页': 'Previous page', '下一页': 'Next page',
-      '关闭搜索': 'Close search', '清空搜索': 'Clear search',
-      '第 ': 'Page '
+      '上一页': 'Previous page', '下一页': 'Next page'
     };
     function tt(zh) {
       if (!langIsEn() || zh == null) return zh;
@@ -508,154 +177,11 @@
       if (bt) bt.textContent = '中文';
     }
     // ============================================================
-    //  Explore —— pons 结构：Graduated 区块 + Explore 区块 + 筛选浮层
+    //  Explore —— pons 结构：Graduated 区块 + Explore 区块
+    //  卡片渲染由共享模块 launch-card.js 提供（市场页与搜索结果页同款）
     // ============================================================
     var state = { sort: 'recent', time: 'all', gradPage: 1, expPage: 1 };
-    var spState = { sort: 'recent', time: 'all', q: '', pair: 'all' };
 
-    function esc(s) {
-      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
-    }
-    function mcTxt(u) { return Launch.fmtUsd(u).replace(/\.0(K|M)$/, '$1'); }
-    function pctText(p) {
-      if (p == null) return '—';
-      var v = (p * 100).toFixed(2);
-      return v.replace(/\.?0+$/, '') + '%';
-    }
-    function warnTip(c) {
-      var p = Math.round(c.creatorHoldsPct);
-      return langIsEn()
-        ? 'Creator holds ' + p + '% of the token — creator holdings are high, watch for sell pressure'
-        : '创建者持仓 ' + p + '% —— 谨防抛压';
-    }
-
-    // ---- 占位风控/徽章元数据（原型：确定性生成，无链上数据） ----
-    function metaOf(c) {
-      if (c._meta) return c._meta;
-      var h = 0, s = c.id || 'x';
-      for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-      var m = {
-        og: (h % 10) < 3,               // 30% 视为首发名
-        official: (h % 10) < 2,          // 20% 视为官方
-        warn: (h % 10) < 1,              // 10% 触发创建者持有>20% 警示
-        burnPct: Math.round((h % 1000) / 100) / 10  // 0–9.9% 假 burn
-      };
-      c._meta = m;
-      return m;
-    }
-
-    // ============================================================
-    //  卡片（pons 结构：头像 + 徽章 + 名 + $TICKER + MC + 进度% + deployer + ago）
-    // ============================================================
-    function cardHTML(c) {
-      var grad = !!c.graduated;
-      var warn = (c.creatorHoldsPct || 0) > 20;
-      // 徽章（用户实测 pons）：已毕业卡=Graduated；Explore 活跃卡=OG → !（V2 排除）
-      var badge = '';
-      if (grad) {
-        badge += '<span class="px-badge grad">' + (langIsEn() ? 'Graduated' : '已毕业') + '</span>';
-      } else {
-        if (c.isOriginal) badge += '<span class="px-badge og" title="' + tt('本币名与代号首次发行') + '">OG</span>';
-        if (warn) badge += '<span class="px-warn-badge" role="img" data-tip="' + warnTip(c) + '">' +
-          '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" color="currentColor" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path d="M13.9248 21H10.0752C5.44476 21 3.12955 21 2.27636 19.4939C1.42317 17.9879 2.60736 15.9914 4.97574 11.9985L6.90057 8.75333C9.17559 4.91778 10.3131 3 12 3C13.6869 3 14.8244 4.91777 17.0994 8.75332L19.0243 11.9985C21.3926 15.9914 22.5768 17.9879 21.7236 19.4939C20.8704 21 18.5552 21 13.9248 21Z"/><path d="M12 9V13"/><path d="M12.125 16.75H12M12.25 16.75C12.25 16.8881 12.1381 17 12 17C11.8619 17 11.75 16.8881 11.75 16.75C11.75 16.6119 11.8619 16.5 12 16.5C12.1381 16.5 12.25 16.6119 12.25 16.75Z"/></svg>' +
-          '</span>';
-      }
-      var logo = c.cover
-        ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />'
-        : (c.symbol || '?').charAt(0);
-      var mid = grad ? '' :
-        '<div class="px-grad">' +
-          '<div class="px-grad-track"><i class="px-grad-fill" style="width:' + Math.min(100, Math.max(0, (c.progress || 0) * 100)).toFixed(2) + '%"></i></div>' +
-          '<span class="px-grad-pct">' + pctText(c.progress) + '</span>' +
-        '</div>';
-      var ago = grad
-        ? (c.launchedAt ? Launch.timeAgo(c.launchedAt) + (langIsEn() ? ' ago' : ' 前发行') : '—')
-        : (c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + (langIsEn() ? ' ago' : ' 前') : '—');
-      var addr = c.creatorAddr || '—';
-      // v2 语义：卡片只展示 MC（市值）；MC/FDV 拆分为 v1 池口径，不做
-      var mcLine = c.marketCap
-        ? '<span class="px-mcap-value num">' + mcTxt(c.marketCap) + '</span><span class="px-mcap-label">MC</span>'
-        : '<span class="px-mcap-label">—</span>';
-      var hasVid = !!c.video;
-      var vAttr = hasVid ? ' data-video="' + esc(c.video) + '"' : '';
-      var vHint = hasVid ? '<i class="px-hover-play" aria-hidden="true">▶</i>' : '';
-      // 大图：有视频=视频封面(poster)；无视频=固定通用底图
-      var stageIn = hasVid
-        ? (c.cover ? '<img class="px-poster" src="' + esc(c.cover) + '" alt="" loading="lazy">' : '<span class="px-generic"><b>$' + esc(c.symbol) + '</b></span>')
-        : '<span class="px-generic"><b>$' + esc(c.symbol) + '</b></span>';
-      // 左下角固定币图（cover 圆角标，无 cover 用首字）
-      var tok = c.cover
-        ? '<span class="px-token"><img src="' + esc(c.cover) + '" alt="" loading="lazy"></span>'
-        : '<span class="px-token">' + esc((c.symbol || '?').charAt(0).toUpperCase()) + '</span>';
-      return '' +
-        '<li class="px-grid-item"><a class="px-card" data-id="' + esc(c.id) + '" onclick="openCoin(\'' + esc(c.id) + '\')">' +
-          '<span class="px-media">' +
-            '<span class="px-logo"' + vAttr + '>' + stageIn + tok + vHint + '</span>' +
-            '<span class="px-badges">' + badge + '</span>' +
-          '</span>' +
-          '<span class="px-card-body">' +
-            '<span class="px-name-row">' +
-              '<strong class="px-name">' + esc(c.name) + '</strong>' +
-              (c.shareToHolders
-                ? '<span class="px-share-badge" role="img" title="' + tt('创作者收益归该币持有者') + '" data-tip="' + tt('创作者收益归该币的持有者领取') + '">' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" color="currentColor" stroke-width="1.75" stroke="currentColor" aria-hidden="true"><path d="M15.5 11C15.5 9.067 13.933 7.5 12 7.5C10.067 7.5 8.5 9.067 8.5 11C8.5 12.933 10.067 14.5 12 14.5C13.933 14.5 15.5 12.933 15.5 11Z"/><path d="M15.4827 11.3499C15.8047 11.4475 16.1462 11.5 16.5 11.5C18.433 11.5 20 9.933 20 8C20 6.067 18.433 4.5 16.5 4.5C14.6851 4.5 13.1928 5.8814 13.0173 7.65013"/><path d="M10.9827 7.65013C10.8072 5.8814 9.31492 4.5 7.5 4.5C5.567 4.5 4 6.067 4 8C4 9.933 5.567 11.5 7.5 11.5C7.8538 11.5 8.1953 11.4475 8.5173 11.3499"/><path d="M12 14.5V20.5M8.5 17.5H15.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-                  '</span>'
-                : '') +
-            '</span>' +
-            '<small class="px-sym">$' + esc(c.symbol) +
-              (c.pair ? ' <span class="px-pair">· ' + esc(c.pair) + '</span>' : '') +
-            '</small>' +
-            '<span class="px-mcap">' + mcLine + '</span>' +
-            mid +
-            '<span class="px-meta">' +
-              '<button class="px-deployer" title="' + tt('查看该地址档案') + '" onclick="event.stopPropagation();goAddr(\'' + esc(addr) + '\')">' + esc(addr) + '</button>' +
-              '<time class="px-time">' + ago + '</time>' +
-            '</span>' +
-          '</span>' +
-        '</a></li>';
-    }
-
-    // hover 播放关联视频（仅精确指针设备；离开即停）
-    var PX_VIDEO_OK = (function () {
-      try { return window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { return true; }
-    })();
-    function pxVidRemove(logo) {
-      if (!logo || !logo.__pv) return;
-      try { logo.__pv.pause(); } catch (e) {}
-      try { if (logo.__pv.parentNode) logo.__pv.parentNode.removeChild(logo.__pv); } catch (e) {}
-      logo.__pv = null;
-    }
-    function pxVidEnter(e) {
-      var logo = e.currentTarget;
-      if (!logo || logo.__pv) return;
-      var src = logo.getAttribute('data-video');
-      if (!src) return;
-      var v = document.createElement('video');
-      v.className = 'px-hover-video';
-      v.src = src;
-      v.muted = true;
-      v.loop = true;
-      v.playsInline = true;
-      v.setAttribute('playsinline', '');
-      v.setAttribute('preload', 'metadata');
-      v.addEventListener('error', function () { pxVidRemove(logo); });
-      logo.appendChild(v);
-      logo.__pv = v;
-      var p = v.play();
-      if (p && p.catch) p.catch(function () { pxVidRemove(logo); });
-    }
-    function pxVidLeave(e) { pxVidRemove(e.currentTarget); }
-    function bindPxVideos(root) {
-      if (!PX_VIDEO_OK || !root) return;
-      Array.prototype.forEach.call(root.querySelectorAll('.px-logo[data-video]'), function (logo) {
-        if (logo.__pxBound) return;
-        logo.__pxBound = true;
-        logo.addEventListener('mouseenter', pxVidEnter);
-        logo.addEventListener('mouseleave', pxVidLeave);
-      });
-    }
     function gradCoins() {
       return (Launch.coins || []).filter(function (c) { return c.graduated; })
         .sort(function (a, b) { return (b.gradAt || 0) - (a.gradAt || 0); });
@@ -691,8 +217,8 @@
       if (state.gradPage < 1) state.gradPage = 1;
       var slice = list.slice((state.gradPage - 1) * per, state.gradPage * per);
       document.getElementById('gradCount').textContent = Launch.fmtNum(list.length);
-      grid.innerHTML = slice.map(cardHTML).join('');
-      bindPxVideos(grid);
+      grid.innerHTML = LaunchCard.grid(slice);
+      LaunchCard.bindVideos(grid);
       empty.style.display = list.length ? 'none' : 'block';
       renderPager('gradPager', state.gradPage, pages, function (p) { state.gradPage = p; renderGrad(); });
     }
@@ -708,8 +234,8 @@
       document.getElementById('expCount').textContent = langIsEn()
         ? Launch.fmtNum(list.length) + ' launched'
         : '已发射 ' + Launch.fmtNum(list.length);
-      grid.innerHTML = slice.map(cardHTML).join('');
-      bindPxVideos(grid);
+      grid.innerHTML = LaunchCard.grid(slice);
+      LaunchCard.bindVideos(grid);
       empty.style.display = list.length ? 'none' : 'block';
       renderPager('expPager', state.expPage, pages, function (p) { state.expPage = p; renderExplore(); });
     }
@@ -751,205 +277,12 @@
 
     function openCoin(id) { location.href = 'coin-detail.html?id=' + encodeURIComponent(id); }
     function goAddr(a) { location.href = 'assets.html?address=' + encodeURIComponent(a); }
-    function copyAddr(a) {
-      if (!a) return;
-      if (navigator.clipboard) navigator.clipboard.writeText(a).catch(function () {});
-      Launch.toast('地址已复制', 'ok');
-    }
-
-    // ============================================================
-    //  筛选浮层
-    // ============================================================
-    function spotlightOpen() {
-      document.getElementById('spotlight').classList.add('open');
-      document.getElementById('spInput').value = '';
-      spState.q = '';
-      spPage = 1;
-      resetSpFilters();
-      renderSpotlight();
-      var clear = document.getElementById('spClear');
-      if (clear) { clear.style.display = 'none'; clear.setAttribute('aria-label', tt('关闭搜索')); }
-      var hint = document.getElementById('spEscHint');
-      if (hint) hint.style.display = '';
-      setTimeout(function () { document.getElementById('spInput').focus(); }, 40);
-    }
-    function spotlightClose() {
-      document.getElementById('spotlight').classList.remove('open');
-    }
-    function resetSpFilters() {
-      spState = { sort: 'recent', time: 'all', q: '', pair: 'all' };
-      syncSeg('#spSortSeg button', 'recent', 's');
-      syncSeg('#spTimeSeg button', 'all', 't');
-      var tl = document.getElementById('spTimeLabel');
-      if (tl) tl.textContent = langIsEn() ? 'Age' : '币龄';
-      syncSeg('#spPairSeg button', 'all', 'p');
-    }
-    function syncSeg(sel, val, attr) {
-      document.querySelectorAll(sel).forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-' + attr) === val); });
-    }
-    // 弹窗当前成交量窗口值：volume 排序 + 时间窗 = 看哪个窗口的量（pons Window 语义）
-    function spVolField(c) {
-      if (spState.sort !== 'volume') return c.volumeUsd || 0;
-      if (spState.time === '24h') return c.vol24hUsd || 0;
-      if (spState.time === '7d') return c.vol7dUsd || 0;
-      return c.volumeUsd || 0;
-    }
-    function spotlightCandidates() {
-      var q = (spState.q || '').toLowerCase();
-      // 时间窗仅非 volume 排序时做"币龄"过滤（Age 语义）；
-      // sort=volume 时它是成交量窗口（Window 语义），由 spVolField 承担
-      var cutoff = (spState.sort !== 'volume') &&
-        (spState.time === '24h' ? Date.now() - 86400000
-          : spState.time === '7d' ? Date.now() - 7 * 86400000 : 0);
-      var list = (Launch.coins || []).filter(function (c) {
-        if (q) {
-          var tokenAddr = (window.Launch && Launch.coinContract) ? Launch.coinContract(c.id) : '';
-          var hay = (c.name + ' ' + c.symbol + ' ' + c.creatorAddr + ' ' + c.buyerAddr + ' ' + c.id + ' ' + tokenAddr).toLowerCase();
-          if (hay.indexOf(q) === -1) return false;
-        }
-        // Pair 筛选：All=全部；Stocks=非 ETH 配对；其余=精确配对资产
-        var cPair = c.pair || 'ETH';
-        if (spState.pair === 'Stocks') { if (cPair === 'ETH') return false; }
-        else if (spState.pair !== 'all' && cPair !== spState.pair) return false;
-        // volume 窗口语义：该窗口无量则不出现在结果
-        if (spState.sort === 'volume' && spState.time !== 'all' && !spVolField(c)) return false;
-        if (cutoff) {
-          var ref = c.graduated ? (c.gradAt || c.launchedAt) : (c.lastBuyAt || c.launchedAt);
-          if (!ref || ref < cutoff) return false;
-        }
-        return true;
-      });
-      list.sort(function (a, b) {
-        if (spState.sort === 'newest') return b.launchedAt - a.launchedAt;
-        if (spState.sort === 'oldest') return a.launchedAt - b.launchedAt;
-        if (spState.sort === 'marketcap') return b.marketCap - a.marketCap;
-        if (spState.sort === 'volume') return spVolField(b) - spVolField(a);
-        return (b.lastBuyAt || 0) - (a.lastBuyAt || 0);
-      });
-      return list;
-    }
-    var spPage = 1;
-    var SP_PER = 24;
-    function renderSpotlight() {
-      var all = spotlightCandidates();
-      var total = all.length;
-      var pages = Math.max(1, Math.ceil(total / SP_PER));
-      if (spPage > pages) spPage = pages;
-      if (spPage < 1) spPage = 1;
-      var list = all.slice((spPage - 1) * SP_PER, spPage * SP_PER);
-      var host = document.getElementById('spResults');
-      if (!list.length) {
-        host.innerHTML = '<div class="sp-empty">' +
-          (spState.q ? (langIsEn() ? 'No matching tokens' : '没有匹配的代币') : (langIsEn() ? 'No launches yet' : '暂无发射记录')) + '</div>';
-      } else {
-        host.innerHTML = list.map(function (c) {
-          var logo = c.cover ? '<img src="' + esc(c.cover) + '" alt="" loading="lazy" />' : (c.symbol || '?').charAt(0);
-          // desc：配对资产 · $SYM 市值/量 · 时间（pons 搜索结果不带徽章）
-          var descParts = [];
-          if (c.pair) descParts.push(esc(c.pair));
-          if (spState.sort === 'volume' && spVolField(c)) descParts.push(mcTxt(spVolField(c)) + (langIsEn() ? ' volume' : ' 成交量'));
-          else if (c.marketCap) descParts.push(mcTxt(c.marketCap) + (langIsEn() ? ' MC' : ' 市值'));
-          if (c.graduated) descParts.push(c.gradAt ? Launch.timeAgo(c.gradAt) + (langIsEn() ? ' ago' : ' 前') : (langIsEn() ? 'Graduated' : '已毕业'));
-          else descParts.push(c.lastBuyAt ? Launch.timeAgo(c.lastBuyAt) + (langIsEn() ? ' ago' : ' 前') : '');
-          return '<button class="sp-result" onclick="openCoin(\'' + esc(c.id) + '\')">' +
-            '<span class="sp-logo">' + logo + '</span>' +
-            '<span class="sp-copy">' +
-              '<span class="sp-title-row"><span class="sp-name">' + esc(c.name) + '</span>' +
-                '<span class="sp-ticker">$' + esc(c.symbol) + '</span></span>' +
-              '<span class="sp-sub num">' + descParts.join(' · ') + '</span>' +
-            '</span>' +
-            '<span class="sp-arrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>' +
-          '</button>';
-        }).join('');
-      }
-      // footer 计数/分页
-      var footer = document.getElementById('spFooter');
-      var from = total ? (spPage - 1) * SP_PER + 1 : 0;
-      var to = Math.min(spPage * SP_PER, total);
-      document.getElementById('spCount').textContent = total
-        ? (langIsEn()
-            ? Launch.fmtNum(from) + ' to ' + Launch.fmtNum(to) + ' of ' + Launch.fmtNum(total)
-            : Launch.fmtNum(from) + '–' + Launch.fmtNum(to) + '，共 ' + Launch.fmtNum(total))
-        : (langIsEn() ? 'No results' : '无结果');
-      var denom = Math.ceil(total / SP_PER) || 1;
-      document.getElementById('spPageNum').textContent = (total ? spPage : 0) + ' / ' + (total ? denom : '');
-      var prev = document.getElementById('spPrev');
-      var next = document.getElementById('spNext');
-      prev.disabled = spPage <= 1;
-      next.disabled = spPage >= pages;
-      footer.style.display = total ? 'flex' : 'none';
-      window._spTotal = total;
-    }
-
 
     // ============================================================
     //  交互绑定
     // ============================================================
     window.onLaunchShellReady = function () {
       render();
-
-      // Pair 股票代币按钮：从引擎同一列表注入（与币数据一一对应）
-      if (Launch.pairStocks) {
-        var pairSeg = document.getElementById('spPairSeg');
-        Launch.pairStocks.forEach(function (t) {
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.setAttribute('data-p', t);
-          b.textContent = t;
-          pairSeg.appendChild(b);
-        });
-      }
-
-      // 筛选（关键词 + 排序 + 币龄 + 配对）；无快捷键，Esc 关闭
-      document.getElementById('pxSearchBox').addEventListener('click', spotlightOpen);
-      document.getElementById('spotlight').addEventListener('click', function (e) { if (e.target === this) spotlightClose(); });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') spotlightClose();
-      });
-      document.getElementById('spInput').addEventListener('input', function (e) {
-        spState.q = e.target.value.trim();
-        spPage = 1;
-        var clear = document.getElementById('spClear');
-        clear.style.display = spState.q ? 'inline-flex' : 'none';
-        clear.setAttribute('aria-label', spState.q ? tt('清空搜索') : tt('关闭搜索'));
-        document.getElementById('spEscHint').style.display = spState.q ? 'none' : '';
-        renderSpotlight();
-      });
-
-      // 弹层筛选
-      var segClick = function (segId, stateKey, attr, onSet) {
-        document.getElementById(segId).addEventListener('click', function (e) {
-          var b = e.target.closest('button[data-' + attr + ']');
-          if (!b) return;
-          document.querySelectorAll('#' + segId + ' button').forEach(function (x) { x.classList.remove('on'); });
-          b.classList.add('on');
-          spState[stateKey] = b.getAttribute('data-' + attr);
-          spPage = 1;
-          if (onSet) onSet();
-          renderSpotlight();
-        });
-      };
-      segClick('spSortSeg', 'sort', 's', function () {
-        // pons：选中 Volume 时该组标签 Age → Window，其余为 Age
-        document.getElementById('spTimeLabel').textContent = langIsEn() ? (spState.sort === 'volume' ? 'Window' : 'Age') : (spState.sort === 'volume' ? '窗口' : '币龄');
-      });
-      segClick('spTimeSeg', 'time', 't');
-      segClick('spPairSeg', 'pair', 'p');
-      // 清空按钮：有内容清空，无内容关闭
-      document.getElementById('spClear').addEventListener('click', function () {
-        var inp = document.getElementById('spInput');
-        if (inp.value) {
-          inp.value = ''; spState.q = '';
-          this.style.display = 'none';
-          this.setAttribute('aria-label', tt('关闭搜索'));
-          document.getElementById('spEscHint').style.display = '';
-          renderSpotlight();
-          inp.focus();
-        } else spotlightClose();
-      });
-      // 弹窗分页
-      document.getElementById('spPrev').addEventListener('click', function () { spPage = Math.max(1, spPage - 1); renderSpotlight(); });
-      document.getElementById('spNext').addEventListener('click', function () { spPage = spPage + 1; renderSpotlight(); });
 
       // Explore 工具栏（页面级）
       document.getElementById('sortSeg').addEventListener('click', function (e) {

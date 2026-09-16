@@ -39,15 +39,21 @@
             '.desktop-header .dh-notify-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#ff2d55;border:1.5px solid #fff}',
             '.desktop-header .dh-launch-link{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;border:1px solid var(--border,#e5e7eb);color:#13202e;font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap}',
             '.desktop-header .dh-launch-link:hover{background:rgba(0,0,0,.05)}',
-            '.desktop-header .dh-publish-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 16px;border-radius:999px;border:none;background:#000000;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0}',
+            '.desktop-header .dh-publish-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border-radius:999px;border:none;background:#000000;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0}',
             '.desktop-header .dh-publish-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0, 0, 0,.3)}',
-            '.desktop-header .dh-publish-btn svg{width:16px;height:16px}',
-            '.dh-publish-wrap{position:relative;flex-shrink:0}',
-            '.dh-publish-dropdown{position:absolute;top:calc(100% + 8px);right:0;min-width:150px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.1);padding:4px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .22s ease;z-index:300}',
-            '.dh-publish-wrap:hover .dh-publish-dropdown{opacity:1;visibility:visible;transform:translateY(0)}',
+            '.desktop-header .dh-publish-btn svg{width:15px;height:15px}',
+            '.desktop-header .dh-publish-btn .dh-publish-caret{width:11px;height:11px;opacity:.8;transition:transform .2s ease}',
+            /* hover 展开：透明桥接区避免鼠标从按钮移入菜单时收起 */
+            '.dh-publish-wrap{position:relative;flex-shrink:0;z-index:420}',
+            '.dh-publish-wrap::after{content:"";position:absolute;left:0;right:0;top:100%;height:8px}',
+            '.dh-publish-dropdown{position:absolute;top:calc(100% + 8px);right:0;min-width:168px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.1);padding:4px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .22s ease;z-index:300}',
+            '.dh-publish-wrap:hover .dh-publish-dropdown,.dh-publish-wrap:focus-within .dh-publish-dropdown{opacity:1;visibility:visible;transform:translateY(0)}',
+            '.dh-publish-wrap:hover .dh-publish-caret,.dh-publish-wrap:focus-within .dh-publish-caret{transform:rotate(180deg)}',
             '.dh-publish-item{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;color:#1C1C1E;text-decoration:none;font-size:13px;font-weight:600;transition:background .15s;white-space:nowrap}',
             '.dh-publish-item:hover{background:rgba(0,0,0,.04)}',
             '.dh-publish-item svg{width:16px;height:16px;flex-shrink:0;color:#8E8E93}',
+            '.dh-publish-item.is-primary{color:#000}',
+            '.dh-publish-item.is-primary svg{color:#000;stroke-width:1.6}',
             '.desktop-header .dh-avatar{width:34px;height:34px;border-radius:50%;object-fit:contain;cursor:pointer;border:1.5px solid rgba(0,0,0,.08);flex-shrink:0;transition:border-color .15s}',
             '.desktop-header .dh-avatar:hover{border-color:#000000}',
             '.desktop-header .dh-login-btn{padding:6px 16px;border-radius:999px;border:1px solid #000000;background:none;color:#000000;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;transition:all .15s}',
@@ -176,6 +182,24 @@
                         '</div>' +
                     '</div>' +
                 '</div>' +
+                // ── 发布（hover 展开：发射代币 / 发布短剧 / 发布视频）──
+                '<div class="dh-publish-wrap">' +
+                  '<button type="button" class="dh-publish-btn">' +
+                    '发布' +
+                    '<svg class="dh-publish-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+                  '</button>' +
+                  '<div class="dh-publish-dropdown">' +
+                    '<a class="dh-publish-item is-primary" href="launch.html">' +
+                      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2l2.4 6.2L21 9.3l-5 4.9 1.2 6.8L12 17.8l-5.2 3.2L8 14.2l-5-4.9 6.6-1.1L12 2z"/></svg>发射代币' +
+                    '</a>' +
+                    '<a class="dh-publish-item" href="publish.html">' +
+                      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="3"/><path d="M2 6h12M6 14V6"/></svg>发布短剧' +
+                    '</a>' +
+                    '<a class="dh-publish-item" href="publish-video.html">' +
+                      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><polygon points="7,5.5 7,10.5 11.5,8" fill="currentColor"/></svg>发布视频' +
+                    '</a>' +
+                  '</div>' +
+                '</div>' +
                 '<div class="dh-acct-wrap" id="dhAcct">' +
                     '<button type="button" class="dh-acct-pill" id="dhAcctPill">' +
                       '<img class="dh-acct-avatar" id="dhAcctAvatar" alt="" />' +
@@ -192,7 +216,7 @@
                       '<button type="button" class="dh-acct-item" id="dhDisconnect">Disconnect</button>' +
                     '</div>' +
                   '</div>' +
-                
+
             '</div>';
     }
 
@@ -302,31 +326,11 @@
         }
     });
 
-    // 增强已有 header：给发布按钮和通知按钮添加下拉菜单
+    // 增强已有 header：给通知按钮添加下拉菜单
+    // （发布按钮已由 buildHeaderHTML 直接输出，见 buildHeaderHTML 里的 dh-publish-wrap）
     function enhanceExistingHeader() {
         var header = document.getElementById('desktopHeader');
         if (!header) return false;
-
-        // --- Publish button wrap ---
-        var pubBtn = header.querySelector('.dh-publish-btn');
-        if (pubBtn && !(pubBtn.parentNode && pubBtn.parentNode.classList.contains('dh-publish-wrap'))) {
-            var wrap = document.createElement('div');
-            wrap.className = 'dh-publish-wrap';
-
-            var dropdown = document.createElement('div');
-            dropdown.className = 'dh-publish-dropdown';
-            dropdown.innerHTML =
-                '<a class="dh-publish-item" href="publish.html">' +
-                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="3"/><path d="M2 6h12M6 14V6"/></svg>发布短剧' +
-                '</a>' +
-                '<a class="dh-publish-item" href="publish-video.html">' +
-                    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="3" width="13" height="10" rx="2"/><polygon points="7,5.5 7,10.5 11.5,8" fill="currentColor"/></svg>发布视频' +
-                '</a>';
-
-            pubBtn.parentNode.insertBefore(wrap, pubBtn);
-            wrap.appendChild(pubBtn);
-            wrap.appendChild(dropdown);
-        }
 
         // --- Notify button wrap ---
         var notifyBtn = header.querySelector('.dh-icon-btn[title="通知"]');

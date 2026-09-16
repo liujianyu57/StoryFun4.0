@@ -38,7 +38,7 @@
 | `user-profile-visitor.html` | 访客视角的他人主页 |
 | `watch-history.html` | 观看历史 |
 | `notifications.html` | 通知中心（互动类） |
-| `search.html` / `search-results.html` | 搜索（短剧 + 用户） |
+| `search.html` / `search-results.html` | 搜索（结果页四页签：代币（默认）+ 短剧 + 视频 + 用户） |
 | `mobile-login.html` | 登录页 |
 | `settings.html` | 设置 |
 | `notify-settings.html` | 通知设置 |
@@ -49,9 +49,10 @@
 |---|---|
 | `auth.js` | 登录/用户状态（全站共用，邮箱模拟登录） |
 | `load-sidebar.js` | 侧边栏导航（桌面端） |
-| `load-desktop-header.js` | 顶部导航（桌面端：搜索/通知/发布/头像） |
+| `load-desktop-header.js` | 顶部导航（桌面端：搜索 · 通知 · 「发布」hover 菜单 · 账户；菜单 → 发射代币/发布短剧/发布视频） |
 | `load-bottom-nav.js` + `bottom-nav.html` | 底部导航（H5 手机端） |
 | `drama-card.js` | 短剧卡片渲染组件 |
+| `launch-card.js` | 币卡片渲染组件（市场页与搜索结果页「代币」页签共用，含卡片样式与 hover 播视频） |
 | `cm-panel.js` / `cm-panel.css` | 评论面板（评论区、弹幕等） |
 | `search.js` | 全局搜索逻辑 |
 | `notify-settings.js` | 通知设置弹窗逻辑 |
@@ -63,7 +64,7 @@
 
 | 页面 | 说明 |
 |---|---|
-| `launchpad.html` | 市场总览 · 浏览未毕业/已毕业的叙事币 |
+| `launchpad.html` | 市场总览 · 浏览未毕业/已毕业的叙事币（无自有搜索/创建入口，统一走顶栏全局搜索与「发布」菜单） |
 | `launch.html` | 创建 · 用 AI 生成或我的作品做叙事，三步发币 |
 | `coin-detail.html` | 交易 · curve/池 两阶段 K 线、Swap、持有者、聊天 |
 | `assets.html` | 我的资产 · 持仓/创建的币/交易历史/AI 叙事 |
