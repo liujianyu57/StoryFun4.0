@@ -16,6 +16,7 @@
     if (name.indexOf('admin-users') !== -1) return 'users';
     if (name.indexOf('admin-sources') !== -1) return 'sources';
     if (name.indexOf('admin-features') !== -1) return 'features';
+    if (name.indexOf('admin-version-filter') !== -1) return 'version-filter';
     return 'other';
   })();
 
@@ -60,6 +61,8 @@
     { href: 'admin-sources.html', emoji: '🌍', label: '用户来源', match: 'sources' },
     { href: 'admin-features.html', emoji: '🧩', label: '功能概览', match: 'features' },
     { href: 'admin-overview.html', emoji: '📈', label: '代币概览', match: 'overview' },
+    { section: '内容运营' },
+    { href: 'admin-version-filter.html', emoji: '🚫', label: '版本内容过滤', match: 'version-filter' },
   ];
 
 
