@@ -50,6 +50,12 @@
     }
     .icon-btn:hover { background: var(--accent-soft); color: var(--accent); }
     .icon-btn.danger:hover { background: rgba(244, 91, 105, 0.10); color: var(--danger); }
+    /* Banner 星标 */
+    .icon-btn.star { font-size: 0.95rem; color: #c7d2de; }
+    .icon-btn.star:hover { background: rgba(245, 176, 66, 0.14); color: var(--gold); }
+    .icon-btn.star.on { color: var(--gold); }
+    .icon-btn.star.on:hover { background: rgba(244, 91, 105, 0.10); color: var(--danger); }
+    .icon-btn.star.dim { opacity: 0.45; }
 
     /* ── ID 清单 ── */
     .list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
@@ -59,6 +65,9 @@
       border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 0.75rem; font-weight: 700;
     }
     .cnt.zero { background: #f0f4fa; color: var(--text-tertiary); }
+    .cnt.banner { background: rgba(245, 176, 66, 0.14); color: #b8801f; }
+    .cnt.banner.full { background: rgba(244, 91, 105, 0.12); color: var(--danger); }
+    .title-badges { display: inline-flex; align-items: center; gap: 6px; }
     .id-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .tf {
       width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: 8px;
@@ -79,10 +88,13 @@
     .id-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 1px solid var(--border-light); }
     .id-row:last-child { border-bottom: none; }
     .id-row:hover { background: #f8fbfe; }
+    .id-row.is-banner { background: rgba(245, 176, 66, 0.11); }
+    .id-row.is-banner:hover { background: rgba(245, 176, 66, 0.18); }
     .id-code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.79rem; font-weight: 600; flex-shrink: 0; }
     .id-name { flex: 1; min-width: 0; font-size: 0.81rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .id-name.none { color: var(--text-tertiary); }
     .id-list .empty-state { padding: 40px 16px; }
+    .id-hint { margin-top: 10px; font-size: 0.76rem; color: var(--text-tertiary); line-height: 1.6; }
     .warn-text { color: #d4942a; font-weight: 600; }
 
     /* ── 弹窗内表单 ── */
@@ -131,13 +143,17 @@
 
     <div class="list-grid">
       <div class="section-card">
-        <div class="card-title">短剧 ID 白名单<span class="cnt" id="dramaCnt">0</span></div>
+        <div class="card-title">短剧 ID 白名单<span class="title-badges">
+            <span class="cnt banner" id="bannerCnt">Banner 0/5</span>
+            <span class="cnt" id="dramaCnt">0</span>
+          </span></div>
         <div class="id-tools">
           <textarea class="tf id-paste" id="dramaPaste" rows="2" placeholder="粘贴多个 ID，支持换行 / 逗号 / 空格分隔"></textarea>
           <button class="btn-sm" onclick="addIds('drama')">＋ 添加</button>
         </div>
         <input class="tf id-search" id="dramaSearch" type="text" placeholder="🔍 搜索 ID 或短剧名称" oninput="renderIds('drama')" />
         <div class="id-list" id="dramaList"></div>
+        <div class="id-hint">★ 标记的短剧作为 App 推荐页 Banner 展示，最多 5 个；仅在白名单生效的版本可见</div>
       </div>
 
       <div class="section-card">
@@ -199,6 +215,7 @@
 
       var LABEL = { drama: '短剧', video: '短视频' };
       var ID_RE = /^[A-Za-z0-9_-]{1,24}$/;
+      var BANNER_MAX = 5;   // 短剧白名单里最多挑 5 个作为 Banner
       // 两端发布节奏不同，版本池按平台分开（真实系统里来自各自发版记录）
       var PLATFORMS = [
         { key: 'ios', name: 'iOS', emoji: '🍎' },
@@ -223,12 +240,18 @@
           { p: 'android', v: '1.4.2', on: false }
         ],
         dramas: [
-          'D10023', 'D10045', 'D10067', 'D10088', 'D10102', 'D10135', 'D10158',
-          'D10177', 'D10196', 'D10214', 'D10233', 'D10251', 'D10270', 'D10288'
+          { id: 'D10023', banner: true },
+          { id: 'D10045', banner: true },
+          { id: 'D10067', banner: true },
+          { id: 'D10088' }, { id: 'D10102' }, { id: 'D10135' }, { id: 'D10158' },
+          { id: 'D10177' }, { id: 'D10196' }, { id: 'D10214' }, { id: 'D10233' },
+          { id: 'D10251' }, { id: 'D10270' }, { id: 'D10288' }
         ],
         videos: [
-          'V20345', 'V20346', 'V20388', 'V20401', 'V20417', 'V20433', 'V20452', 'V20468',
-          'V20471', 'V20490', 'V20503', 'V20518', 'V20536', 'V20544', 'V20561', 'V20579'
+          { id: 'V20345' }, { id: 'V20346' }, { id: 'V20388' }, { id: 'V20401' },
+          { id: 'V20417' }, { id: 'V20433' }, { id: 'V20452' }, { id: 'V20468' },
+          { id: 'V20471' }, { id: 'V20490' }, { id: 'V20503' }, { id: 'V20518' },
+          { id: 'V20536' }, { id: 'V20544' }, { id: 'V20561' }, { id: 'V20579' }
         ]
       };
 
@@ -450,12 +473,26 @@
       }
 
       // ── ID 清单 ──
+      function bannerCount() {
+        return state.dramas.filter(function (it) { return it.banner; }).length;
+      }
+      function indexOfId(list, id) {
+        for (var i = 0; i < list.length; i++) { if (list[i].id === id) return i; }
+        return -1;
+      }
+
       function renderIds(kind) {
         var list = listOf(kind);
         var box = $(kind + 'List');
         var cnt = $(kind + 'Cnt');
         cnt.textContent = list.length;
         cnt.classList.toggle('zero', !list.length);
+
+        if (kind === 'drama') {
+          var bc = $('bannerCnt');
+          bc.textContent = 'Banner ' + bannerCount() + '/' + BANNER_MAX;
+          bc.classList.toggle('full', bannerCount() >= BANNER_MAX);
+        }
 
         if (!list.length) {
           var onCnt = enabledCount();
@@ -468,9 +505,9 @@
         }
 
         var q = ($(kind + 'Search').value || '').trim().toLowerCase();
-        var shown = list.filter(function (id) {
+        var shown = list.filter(function (it) {
           if (!q) return true;
-          return id.toLowerCase().indexOf(q) !== -1 || nameOf(kind, id).toLowerCase().indexOf(q) !== -1;
+          return it.id.toLowerCase().indexOf(q) !== -1 || nameOf(kind, it.id).toLowerCase().indexOf(q) !== -1;
         });
 
         if (!shown.length) {
@@ -478,14 +515,36 @@
           return;
         }
 
-        box.innerHTML = shown.map(function (id) {
-          var name = nameOf(kind, id);
-          return '<div class="id-row">' +
+        var full = bannerCount() >= BANNER_MAX;
+        box.innerHTML = shown.map(function (it) {
+          var id = it.id, name = nameOf(kind, id);
+          var star = '';
+          if (kind === 'drama') {
+            star = '<button class="icon-btn star' + (it.banner ? ' on' : (full ? ' dim' : '')) + '" title="' +
+              (it.banner ? '取消 Banner 标记' : (full ? 'Banner 已达上限 ' + BANNER_MAX + ' 个，请先取消一个' : '设为 Banner'))
+              + '" onclick="toggleBanner(\'' + esc(id) + '\')">' + (it.banner ? '★' : '☆') + '</button>';
+          }
+          return '<div class="id-row' + (it.banner ? ' is-banner' : '') + '">' +
             '<span class="id-code">' + esc(id) + '</span>' +
             '<span class="id-name" title="' + esc(name) + '">' + esc(name) + '</span>' +
+            star +
             '<button class="icon-btn danger" title="移出白名单（移出后生效版本将看不到该内容）" onclick="askDeleteId(\'' + kind + '\',\'' + esc(id) + '\')">✕</button>' +
           '</div>';
         }).join('');
+      }
+
+      // 白名单里最多挑 5 个短剧作为 App Banner
+      function toggleBanner(id) {
+        var list = state.dramas;
+        var idx = indexOfId(list, id);
+        if (idx < 0) return;
+        var it = list[idx];
+        if (!it.banner && bannerCount() >= BANNER_MAX) {
+          showToast('Banner 最多 ' + BANNER_MAX + ' 个，请先取消一个再设置');
+          return;
+        }
+        it.banner = !it.banner;
+        renderIds('drama');
       }
 
       function addIds(kind) {
@@ -495,7 +554,7 @@
         if (!parts.length) { showToast('请先粘贴或输入要加入白名单的' + LABEL[kind] + ' ID'); return; }
 
         var seen = {};
-        list.forEach(function (id) { seen[id] = true; });
+        list.forEach(function (it) { seen[it.id] = true; });
 
         var added = 0, dup = 0, bad = 0, fresh = [];
         parts.forEach(function (p) {
@@ -503,12 +562,12 @@
           if (!ID_RE.test(id)) { bad++; return; }
           if (seen[id]) { dup++; return; }
           seen[id] = true;
-          fresh.push(id);
+          fresh.push({ id: id });
           added++;
         });
 
         if (added) {
-          fresh.forEach(function (id) { list.push(id); });
+          fresh.forEach(function (it) { list.push(it); });
           box.value = '';
           renderIds(kind);
         }
@@ -522,15 +581,17 @@
 
       function askDeleteId(kind, id) {
         var list = listOf(kind);
-        var idx = list.indexOf(id);
+        var idx = indexOfId(list, id);
         if (idx < 0) return;
+        var wasBanner = !!list[idx].banner;
         var on = enabledCount();
         var impact = on
           ? '当前 <b>' + on + '</b> 个生效版本将立即不再展示该' + LABEL[kind] + '。'
           : '当前没有生效版本，删除后无实际影响。';
+        var bannerLine = wasBanner ? '该短剧已设为 <b>Banner</b>，标记将一并移除。' : '';
         openConfirm('移出' + LABEL[kind] + '白名单',
           '<div class="cf-warn"><span>⚠</span><span><b>' + esc(nameOf(kind, id)) + '</b>（' + esc(id) + '）' +
-          '将从白名单中移除。' + impact + '重新加入需要再次粘贴该 ID。</span></div>', '移出', function () {
+          '将从白名单中移除。' + impact + bannerLine + '重新加入需要再次粘贴该 ID。</span></div>', '移出', function () {
             list.splice(idx, 1);
             renderIds(kind);
             closeModal('modalConfirm');
@@ -572,6 +633,7 @@
       window.toggleVersion = toggleVersion;
       window.removeVersion = removeVersion;
       window.addIds = addIds;
+      window.toggleBanner = toggleBanner;
       window.askDeleteId = askDeleteId;
       window.closeModal = closeModal;
 
