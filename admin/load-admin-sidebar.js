@@ -62,7 +62,7 @@
     { href: 'admin-features.html', emoji: '🧩', label: '功能概览', match: 'features' },
     { href: 'admin-overview.html', emoji: '📈', label: '代币概览', match: 'overview' },
     { section: '内容运营' },
-    { href: 'admin-version-filter.html', emoji: '🚫', label: '版本内容过滤', match: 'version-filter' },
+    { href: 'admin-version-filter.html', emoji: '📋', label: '版本内容过滤', match: 'version-filter' },
   ];
 
 

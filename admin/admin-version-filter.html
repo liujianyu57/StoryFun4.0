@@ -21,8 +21,14 @@
     .ver-card.off .ver-no { color: var(--text-tertiary); }
     .ver-state { font-size: 0.75rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
     .ver-card.off .ver-state { color: var(--text-tertiary); }
-    .ver-summary { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-tertiary); }
-    .ver-summary b { color: var(--text); }
+    /* ── 版本分组（iOS / Android 各自一份列表） ── */
+    .ver-group + .ver-group { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border-light); }
+    .grp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; flex-wrap: wrap; }
+    .grp-name { font-size: 0.92rem; font-weight: 700; }
+    .grp-cnt { font-size: 0.78rem; color: var(--text-tertiary); }
+    .grp-cnt b { color: var(--text); }
+    .grp-head .btn-sm-outline { margin-left: auto; }
+    .ver-group .empty-state { padding: 26px 0; }
 
     /* ── 开关 ── */
     .switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; margin-left: auto; cursor: pointer; }
@@ -77,6 +83,7 @@
     .id-name { flex: 1; min-width: 0; font-size: 0.81rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .id-name.none { color: var(--text-tertiary); }
     .id-list .empty-state { padding: 40px 16px; }
+    .warn-text { color: #d4942a; font-weight: 600; }
 
     /* ── 弹窗内表单 ── */
     .fld { margin-bottom: 14px; }
@@ -112,21 +119,19 @@
   <div class="app-shell">
     <div class="page-header">
       <div>
-        <h1>🚫 版本内容过滤</h1>
-        <div class="sub">维护一份全局内容黑名单，按 APP 版本开关控制是否生效，作用于推荐、短剧、搜索、Banner 接口</div>
+        <h1>📋 版本内容过滤</h1>
+        <div class="sub">维护一份全局内容白名单，按 APP 版本开关控制是否生效；生效版本只展示白名单内的内容（推荐、短剧、搜索、Banner 接口）</div>
       </div>
-      <button class="btn-sm" onclick="openAddVersion()">＋ 新增版本</button>
     </div>
 
     <div class="section-card">
       <div class="card-title">版本过滤开关</div>
-      <div class="ver-grid" id="verGrid"></div>
-      <div class="ver-summary" id="verSummary"></div>
+      <div id="verGroups"></div>
     </div>
 
     <div class="list-grid">
       <div class="section-card">
-        <div class="card-title">短剧 ID 黑名单<span class="cnt" id="dramaCnt">0</span></div>
+        <div class="card-title">短剧 ID 白名单<span class="cnt" id="dramaCnt">0</span></div>
         <div class="id-tools">
           <textarea class="tf id-paste" id="dramaPaste" rows="2" placeholder="粘贴多个 ID，支持换行 / 逗号 / 空格分隔"></textarea>
           <button class="btn-sm" onclick="addIds('drama')">＋ 添加</button>
@@ -136,7 +141,7 @@
       </div>
 
       <div class="section-card">
-        <div class="card-title">短视频 ID 黑名单<span class="cnt" id="videoCnt">0</span></div>
+        <div class="card-title">短视频 ID 白名单<span class="cnt" id="videoCnt">0</span></div>
         <div class="id-tools">
           <textarea class="tf id-paste" id="videoPaste" rows="2" placeholder="粘贴多个 ID，支持换行 / 逗号 / 空格分隔"></textarea>
           <button class="btn-sm" onclick="addIds('video')">＋ 添加</button>
@@ -155,7 +160,7 @@
   <div class="modal-overlay" id="modalAddVersion">
     <div class="modal-box" style="max-width: 460px;">
       <div class="modal-header">
-        <h3>新增版本</h3>
+        <h3 id="addVerTitle">新增版本</h3>
         <button class="modal-close" onclick="closeModal('modalAddVersion')">✕</button>
       </div>
       <div class="fld">
@@ -163,7 +168,7 @@
         <select class="tf" id="newVer" onchange="clearVerErr()"></select>
         <div class="err" id="verErr"></div>
       </div>
-      <div class="fld-hint">ⓘ 过滤默认开启，新版本将自动屏蔽当前清单中的 <b id="tipDrama">0</b> 个短剧、<b id="tipVideo">0</b> 个短视频</div>
+      <div class="fld-hint">ⓘ 白名单默认开启，新版本将只展示白名单内的 <b id="tipDrama">0</b> 个短剧、<b id="tipVideo">0</b> 个短视频</div>
       <div class="modal-foot">
         <button class="btn-sm-outline" onclick="closeModal('modalAddVersion')">取消</button>
         <button class="btn-sm" id="verCreateBtn" onclick="submitAddVersion()">创建</button>
@@ -194,21 +199,28 @@
 
       var LABEL = { drama: '短剧', video: '短视频' };
       var ID_RE = /^[A-Za-z0-9_-]{1,24}$/;
-      // 已发布版本池（真实系统里来自发版记录）
-      // 新增版本时从这里下拉选择；删除某个版本后，它会重新出现在下拉里，可随时加回
-      var VERSION_POOL = [
-        '1.0.0', '1.1.0', '1.2.0', '1.3.0', '1.4.0',
-        '1.4.1', '1.5.0', '1.5.1', '1.6.0', '1.7.0', '2.0.0'
+      // 两端发布节奏不同，版本池按平台分开（真实系统里来自各自发版记录）
+      var PLATFORMS = [
+        { key: 'ios', name: 'iOS', emoji: '🍎' },
+        { key: 'android', name: 'Android', emoji: '🤖' }
       ];
+      var VERSION_POOL = {
+        ios: ['1.0.0', '1.1.0', '1.2.0', '1.3.0', '1.4.0', '1.4.1', '1.5.0', '1.5.1', '1.6.0', '2.0.0'],
+        android: ['1.0.0', '1.1.0', '1.2.0', '1.3.0', '1.4.0', '1.4.2', '1.5.0', '1.5.2', '1.6.0', '2.0.0']
+      };
+      var addPlatform = PLATFORMS[0].key;
 
       // ── 演示数据（内存态，刷新即还原） ──
       var state = {
         versions: [
-          { v: '1.0.0', on: false },
-          { v: '1.1.0', on: false },
-          { v: '1.2.0', on: false },
-          { v: '1.3.0', on: false },
-          { v: '1.4.0', on: true }
+          { p: 'ios', v: '1.2.0', on: false },
+          { p: 'ios', v: '1.3.0', on: false },
+          { p: 'ios', v: '1.4.0', on: true },
+          { p: 'ios', v: '1.4.1', on: false },
+          { p: 'android', v: '1.2.0', on: false },
+          { p: 'android', v: '1.3.0', on: false },
+          { p: 'android', v: '1.4.0', on: true },
+          { p: 'android', v: '1.4.2', on: false }
         ],
         dramas: [
           'D10023', 'D10045', 'D10067', 'D10088', 'D10102', 'D10135', 'D10158',
@@ -221,7 +233,7 @@
       };
 
       // ── 演示用内容库 ──
-      // 真实系统里：黑名单只存 ID，短剧名称 / 短视频描述由内容服务按 ID 查询后回显
+      // 真实系统里：白名单只存 ID，短剧名称 / 短视频描述由内容服务按 ID 查询后回显
       var CONTENT = {
         drama: {
           D10023: '总裁的替身新娘',
@@ -306,54 +318,85 @@
       // ── 版本号倒序比较器（版本列表与新增版本下拉共用） ──
       function verCmpDesc(a, b) { return b.localeCompare(a, undefined, { numeric: true }); }
       function verDesc(a, b) { return verCmpDesc(a.v, b.v); }
+      function platOf(key) {
+        for (var i = 0; i < PLATFORMS.length; i++) { if (PLATFORMS[i].key === key) return PLATFORMS[i]; }
+        return { key: key, name: key, emoji: '' };
+      }
+      function versionsOf(p) {
+        return state.versions.filter(function (x) { return x.p === p; }).sort(verDesc);
+      }
+      function findVersion(p, v) {
+        for (var i = 0; i < state.versions.length; i++) {
+          if (state.versions[i].p === p && state.versions[i].v === v) return state.versions[i];
+        }
+        return null;
+      }
 
+      // ── 版本过滤开关：iOS / Android 两份独立列表，各自增删开关 ──
       function renderVersions() {
         state.versions.sort(verDesc);
-        var grid = $('verGrid');
-        if (!state.versions.length) {
-          grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="big">📦</div>还没有任何版本<br>点右上角「＋ 新增版本」开始配置</div>';
-        } else {
-          grid.innerHTML = state.versions.map(function (it, i) {
-            return '<div class="ver-card' + (it.on ? '' : ' off') + '">' +
-              '<span class="ver-no">' + esc(it.v) + '</span>' +
-              '<label class="switch" title="' + (it.on ? '点击停用该版本过滤' : '点击启用该版本过滤') + '">' +
-                '<input type="checkbox"' + (it.on ? ' checked' : '') + ' onchange="toggleVersion(' + i + ', this.checked)">' +
-                '<span class="track"></span>' +
-              '</label>' +
-              '<span class="ver-state">' + (it.on ? '生效' : '已停用') + '</span>' +
-              '<button class="icon-btn danger" title="删除版本（可随时重新添加）" onclick="removeVersion(\'' + esc(it.v) + '\')">✕</button>' +
-            '</div>';
-          }).join('');
-        }
-        renderVerSummary();
+        $('verGroups').innerHTML = PLATFORMS.map(function (pf) {
+          var list = versionsOf(pf.key);
+          var body = list.length
+            ? '<div class="ver-grid">' + list.map(function (it) {
+                return '<div class="ver-card' + (it.on ? '' : ' off') + '">' +
+                  '<span class="ver-no">' + esc(it.v) + '</span>' +
+                  '<label class="switch" title="' + (it.on ? '点击关闭该版本白名单（关闭后不受限制，展示全部内容）' : '点击开启该版本白名单（开启后只展示白名单内的内容）') + '">' +
+                    '<input type="checkbox"' + (it.on ? ' checked' : '') +
+                      ' onchange="toggleVersion(\'' + pf.key + '\',\'' + esc(it.v) + '\', this.checked, this)">' +
+                    '<span class="track"></span>' +
+                  '</label>' +
+                  '<span class="ver-state">' + (it.on ? '生效' : '已停用') + '</span>' +
+                  '<button class="icon-btn danger" title="删除版本（可随时重新添加）" ' +
+                    'onclick="removeVersion(\'' + pf.key + '\',\'' + esc(it.v) + '\')">✕</button>' +
+                '</div>';
+              }).join('') + '</div>'
+            : '<div class="empty-state">还没有配置 ' + pf.name + ' 版本<br>点上方「＋ 新增版本」开始配置</div>';
+
+          return '<div class="ver-group">' +
+            '<div class="grp-head">' +
+              '<span class="grp-name">' + pf.emoji + ' ' + pf.name + '</span>' +
+              '<span class="grp-cnt" id="verCnt-' + pf.key + '"></span>' +
+              '<button class="btn-sm-outline" onclick="openAddVersion(\'' + pf.key + '\')">＋ 新增版本</button>' +
+            '</div>' + body +
+          '</div>';
+        }).join('');
+        renderVerCounts();
         renderVerOptions();
       }
 
-      function renderVerSummary() {
-        var on = enabledCount();
-        $('verSummary').innerHTML = '共 <b>' + state.versions.length + '</b> 个版本 · 过滤生效 <b>' +
-          on + '</b> · 已停用 <b>' + (state.versions.length - on) + '</b>';
+      function renderVerCounts() {
+        PLATFORMS.forEach(function (pf) {
+          var list = versionsOf(pf.key);
+          var on = list.filter(function (x) { return x.on; }).length;
+          var el = $('verCnt-' + pf.key);
+          if (el) {
+            el.innerHTML = list.length
+              ? list.length + ' 个版本 · 生效 <b>' + on + '</b> · 停用 <b>' + (list.length - on) + '</b>'
+              : '';
+          }
+        });
       }
 
-      function toggleVersion(i, checked) {
-        var it = state.versions[i];
+      function toggleVersion(p, v, checked, input) {
+        var it = findVersion(p, v);
         if (!it) return;
         it.on = !!checked;
-        var card = document.querySelectorAll('#verGrid .ver-card')[i];
+        var card = input && input.closest ? input.closest('.ver-card') : null;
         if (card) {
           card.classList.toggle('off', !it.on);
           card.querySelector('.ver-state').textContent = it.on ? '生效' : '已停用';
           var sw = card.querySelector('.switch');
-          if (sw) sw.title = it.on ? '点击停用该版本过滤' : '点击启用该版本过滤';
+          if (sw) sw.title = it.on ? '点击关闭该版本白名单（关闭后不受限制，展示全部内容）' : '点击开启该版本白名单（开启后只展示白名单内的内容）';
         }
-        renderVerSummary();
+        renderVerCounts();
       }
 
-      // ── 新增版本（版本号从下拉选择） ──
+      // ── 新增版本：平台由入口决定，版本号从该平台的版本池下拉选择 ──
       function renderVerOptions() {
         var used = {};
-        state.versions.forEach(function (v) { used[v.v.toLowerCase()] = true; });
-        var free = VERSION_POOL.filter(function (v) { return !used[v.toLowerCase()]; }).sort(verCmpDesc);
+        versionsOf(addPlatform).forEach(function (x) { used[x.v.toLowerCase()] = true; });
+        var free = VERSION_POOL[addPlatform].filter(function (v) { return !used[v.toLowerCase()]; }).sort(verCmpDesc);
         var sel = $('newVer');
         sel.innerHTML = free.length
           ? '<option value="">请选择版本号</option>' + free.map(function (v) {
@@ -373,7 +416,9 @@
 
       function clearVerErr() { $('verErr').classList.remove('show'); }
 
-      function openAddVersion() {
+      function openAddVersion(platform) {
+        if (platform) addPlatform = platform;
+        $('addVerTitle').textContent = '新增 ' + platOf(addPlatform).name + ' 版本';
         clearVerErr();
         $('tipDrama').textContent = state.dramas.length;
         $('tipVideo').textContent = state.videos.length;
@@ -385,24 +430,23 @@
 
       function submitAddVersion() {
         var v = ($('newVer').value || '').trim();
-        if (!v) return showVerErr($('newVer').disabled ? '候选版本号已全部添加' : '请先选择版本号');
-        var dup = state.versions.some(function (x) { return x.v.toLowerCase() === v.toLowerCase(); });
-        if (dup) return showVerErr('版本号 ' + v + ' 已存在');
-        state.versions.push({ v: v, on: true });
+        if (!v) return showVerErr($('newVer').disabled ? '该平台的版本号已全部添加' : '请先选择版本号');
+        if (findVersion(addPlatform, v)) return showVerErr('该平台下版本号 ' + v + ' 已存在');
+        state.versions.push({ p: addPlatform, v: v, on: true });
         renderVersions();
         closeModal('modalAddVersion');
       }
 
-      // 删除版本不做二次确认：黑名单是全局共享的，版本上只有开关，
+      // 删除版本不做二次确认：白名单是全局共享的，版本上只有开关，
       // 加回来只是「新增版本 → 选号 → 创建」，成本极低
-      function removeVersion(v) {
-        var i = -1;
-        for (var k = 0; k < state.versions.length; k++) {
-          if (state.versions[k].v === v) { i = k; break; }
+      function removeVersion(p, v) {
+        for (var i = 0; i < state.versions.length; i++) {
+          if (state.versions[i].p === p && state.versions[i].v === v) {
+            state.versions.splice(i, 1);
+            renderVersions();
+            return;
+          }
         }
-        if (i < 0) return;
-        state.versions.splice(i, 1);
-        renderVersions();
       }
 
       // ── ID 清单 ──
@@ -414,8 +458,12 @@
         cnt.classList.toggle('zero', !list.length);
 
         if (!list.length) {
-          box.innerHTML = '<div class="empty-state"><div class="big">📭</div>' + LABEL[kind] +
-            ' ID 黑名单为空<br>粘贴 ID 后点「添加」，名称自动回显，所有开启过滤的版本立即生效</div>';
+          var onCnt = enabledCount();
+          box.innerHTML = '<div class="empty-state"><div class="big">📭</div>' + LABEL[kind] + ' ID 白名单为空<br>' +
+            (onCnt
+              ? '<span class="warn-text">当前 ' + onCnt + ' 个生效版本将看不到任何' + LABEL[kind] + '</span>'
+              : '当前没有生效版本，暂无影响') +
+            '<br>粘贴 ID 后点「添加」，名称自动回显</div>';
           return;
         }
 
@@ -435,7 +483,7 @@
           return '<div class="id-row">' +
             '<span class="id-code">' + esc(id) + '</span>' +
             '<span class="id-name" title="' + esc(name) + '">' + esc(name) + '</span>' +
-            '<button class="icon-btn danger" title="移出黑名单" onclick="askDeleteId(\'' + kind + '\',\'' + esc(id) + '\')">✕</button>' +
+            '<button class="icon-btn danger" title="移出白名单（移出后生效版本将看不到该内容）" onclick="askDeleteId(\'' + kind + '\',\'' + esc(id) + '\')">✕</button>' +
           '</div>';
         }).join('');
       }
@@ -444,7 +492,7 @@
         var box = $(kind + 'Paste');
         var list = listOf(kind);
         var parts = (box.value || '').split(/[\s,，、;；]+/).filter(function (s) { return s.length; });
-        if (!parts.length) { showToast('请先粘贴或输入要过滤的' + LABEL[kind] + ' ID'); return; }
+        if (!parts.length) { showToast('请先粘贴或输入要加入白名单的' + LABEL[kind] + ' ID'); return; }
 
         var seen = {};
         list.forEach(function (id) { seen[id] = true; });
@@ -478,11 +526,11 @@
         if (idx < 0) return;
         var on = enabledCount();
         var impact = on
-          ? '当前 <b>' + on + '</b> 个开启过滤的版本将立即不再屏蔽该' + LABEL[kind] + '。'
-          : '当前没有开启过滤的版本，删除后无实际影响。';
-        openConfirm('移出' + LABEL[kind] + '黑名单',
+          ? '当前 <b>' + on + '</b> 个生效版本将立即不再展示该' + LABEL[kind] + '。'
+          : '当前没有生效版本，删除后无实际影响。';
+        openConfirm('移出' + LABEL[kind] + '白名单',
           '<div class="cf-warn"><span>⚠</span><span><b>' + esc(nameOf(kind, id)) + '</b>（' + esc(id) + '）' +
-          '将从黑名单中移除。' + impact + '重新加入需要再次粘贴该 ID。</span></div>', '移出', function () {
+          '将从白名单中移除。' + impact + '重新加入需要再次粘贴该 ID。</span></div>', '移出', function () {
             list.splice(idx, 1);
             renderIds(kind);
             closeModal('modalConfirm');
