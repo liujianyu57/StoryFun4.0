@@ -75,12 +75,6 @@
       outline: none; transition: border-color 0.15s; font-family: inherit;
     }
     .tf:focus { border-color: var(--accent); }
-    select.tf {
-      appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 32px;
-      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%235e6f83' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 11px center;
-    }
-    select.tf:disabled { background-color: #f4f7fb; color: var(--text-tertiary); cursor: default; }
     textarea.tf { resize: none; line-height: 1.5; }
     .id-paste { flex: 1; }
     .id-search { margin-bottom: 10px; }
@@ -180,14 +174,14 @@
         <button class="modal-close" onclick="closeModal('modalAddVersion')">✕</button>
       </div>
       <div class="fld">
-        <label>版本号 *</label>
-        <select class="tf" id="newVer" onchange="clearVerErr()"></select>
+        <label>Build 号 *</label>
+        <input class="tf" id="newVer" type="text" inputmode="numeric" maxlength="8" placeholder="请输入 Build 号，如 123" oninput="clearVerErr()" />
         <div class="err" id="verErr"></div>
       </div>
       <div class="fld-hint">ⓘ 白名单默认开启，新版本将只展示白名单内的 <b id="tipDrama">0</b> 个短剧、<b id="tipVideo">0</b> 个短视频</div>
       <div class="modal-foot">
         <button class="btn-sm-outline" onclick="closeModal('modalAddVersion')">取消</button>
-        <button class="btn-sm" id="verCreateBtn" onclick="submitAddVersion()">创建</button>
+        <button class="btn-sm" onclick="submitAddVersion()">创建</button>
       </div>
     </div>
   </div>
@@ -216,28 +210,25 @@
       var LABEL = { drama: '短剧', video: '短视频' };
       var ID_RE = /^[A-Za-z0-9_-]{1,24}$/;
       var BANNER_MAX = 5;   // 短剧白名单里最多挑 5 个作为 Banner
-      // 两端发布节奏不同，版本池按平台分开（真实系统里来自各自发版记录）
+      var BUILD_RE = /^\d{1,8}$/;   // Build 号：纯数字，如 123
+      // 两端发布节奏不同，版本按平台各自维护
       var PLATFORMS = [
         { key: 'ios', name: 'iOS', emoji: '🍎' },
         { key: 'android', name: 'Android', emoji: '🤖' }
       ];
-      var VERSION_POOL = {
-        ios: ['1.0.0', '1.1.0', '1.2.0', '1.3.0', '1.4.0', '1.4.1', '1.5.0', '1.5.1', '1.6.0', '2.0.0'],
-        android: ['1.0.0', '1.1.0', '1.2.0', '1.3.0', '1.4.0', '1.4.2', '1.5.0', '1.5.2', '1.6.0', '2.0.0']
-      };
       var addPlatform = PLATFORMS[0].key;
 
       // ── 演示数据（内存态，刷新即还原） ──
       var state = {
         versions: [
-          { p: 'ios', v: '1.2.0', on: false },
-          { p: 'ios', v: '1.3.0', on: false },
-          { p: 'ios', v: '1.4.0', on: true },
-          { p: 'ios', v: '1.4.1', on: false },
-          { p: 'android', v: '1.2.0', on: false },
-          { p: 'android', v: '1.3.0', on: false },
-          { p: 'android', v: '1.4.0', on: true },
-          { p: 'android', v: '1.4.2', on: false }
+          { p: 'ios', v: '120', on: false },
+          { p: 'ios', v: '121', on: false },
+          { p: 'ios', v: '122', on: false },
+          { p: 'ios', v: '123', on: true },
+          { p: 'android', v: '118', on: false },
+          { p: 'android', v: '119', on: false },
+          { p: 'android', v: '120', on: false },
+          { p: 'android', v: '121', on: true }
         ],
         dramas: [
           { id: 'D10023', banner: true },
@@ -338,8 +329,8 @@
       function openModal(id) { $(id).classList.add('open'); }
       function closeModal(id) { $(id).classList.remove('open'); }
 
-      // ── 版本号倒序比较器（版本列表与新增版本下拉共用） ──
-      function verCmpDesc(a, b) { return b.localeCompare(a, undefined, { numeric: true }); }
+      // ── Build 号倒序比较器（纯数字，按数值比大小） ──
+      function verCmpDesc(a, b) { return Number(b) - Number(a); }
       function verDesc(a, b) { return verCmpDesc(a.v, b.v); }
       function platOf(key) {
         for (var i = 0; i < PLATFORMS.length; i++) { if (PLATFORMS[i].key === key) return PLATFORMS[i]; }
@@ -385,7 +376,6 @@
           '</div>';
         }).join('');
         renderVerCounts();
-        renderVerOptions();
       }
 
       function renderVerCounts() {
@@ -415,26 +405,12 @@
         renderVerCounts();
       }
 
-      // ── 新增版本：平台由入口决定，版本号从该平台的版本池下拉选择 ──
-      function renderVerOptions() {
-        var used = {};
-        versionsOf(addPlatform).forEach(function (x) { used[x.v.toLowerCase()] = true; });
-        var free = VERSION_POOL[addPlatform].filter(function (v) { return !used[v.toLowerCase()]; }).sort(verCmpDesc);
-        var sel = $('newVer');
-        sel.innerHTML = free.length
-          ? '<option value="">请选择版本号</option>' + free.map(function (v) {
-              return '<option value="' + v + '">' + v + '</option>';
-            }).join('')
-          : '<option value="">暂无可选版本号</option>';
-        sel.disabled = !free.length;
-        $('verCreateBtn').disabled = !free.length;
-      }
-
+      // ── 新增版本：平台由入口决定，Build 号手动输入 ──
       function showVerErr(msg) {
         var el = $('verErr');
         el.textContent = msg;
         el.classList.add('show');
-        if (!$('newVer').disabled) $('newVer').focus();
+        $('newVer').focus();
       }
 
       function clearVerErr() { $('verErr').classList.remove('show'); }
@@ -445,16 +421,16 @@
         clearVerErr();
         $('tipDrama').textContent = state.dramas.length;
         $('tipVideo').textContent = state.videos.length;
-        renderVerOptions();
         $('newVer').value = '';
         openModal('modalAddVersion');
-        if (!$('newVer').disabled) $('newVer').focus();
+        $('newVer').focus();
       }
 
       function submitAddVersion() {
         var v = ($('newVer').value || '').trim();
-        if (!v) return showVerErr($('newVer').disabled ? '该平台的版本号已全部添加' : '请先选择版本号');
-        if (findVersion(addPlatform, v)) return showVerErr('该平台下版本号 ' + v + ' 已存在');
+        if (!v) return showVerErr('请输入 Build 号');
+        if (!BUILD_RE.test(v)) return showVerErr('Build 号只支持数字，如 123');
+        if (findVersion(addPlatform, v)) return showVerErr('该平台下 Build ' + v + ' 已存在');
         state.versions.push({ p: addPlatform, v: v, on: true });
         renderVersions();
         closeModal('modalAddVersion');
@@ -621,7 +597,6 @@
           return;
         }
         if (e.key !== 'Enter') return;
-        if (e.target && e.target.tagName === 'SELECT') return;   // 交给下拉自己处理
         if ($('modalAddVersion').classList.contains('open')) { e.preventDefault(); submitAddVersion(); }
       });
 
